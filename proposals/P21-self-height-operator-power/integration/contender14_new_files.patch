@@ -1,0 +1,427 @@
+diff --git a/BusyLean/Contender14.lean b/BusyLean/Contender14.lean
+new file mode 100644
+index 0000000..2534735
+--- /dev/null
++++ b/BusyLean/Contender14.lean
+@@ -0,0 +1,72 @@
++import BusyLean.MetaReflection
++import BusyLean.Autonomous
++import BusyLean.Contender13
++
++/-!
++# Contender 14: self-height operator power over dynamic-kind System F-omega
++
++Contender 13 performs one reflection over dynamic-kind System F-omega.  This
++successor first turns that reflection into a progressive transformer on
++countable oracle families, then applies the repository's whole operator-stage
++construction repeatedly.
++
++The fixed schedule `tree14` places another 42-level autonomous closure above
++Contender 12's schedule.  At input `n`, the number of operator-stage rounds is
++`family13 n + 1`, and the final transformer is evaluated at `family13 n`.
++Thus the previous construction controls both the seed and the height of a
++qualitatively stronger construction, without mentioning the constant for
++Contender 13.
++
++All definitions are structural and executable.  Do not evaluate
++`contender_14`.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Dynamic-kind reflection lifted from one unary oracle to a countable oracle
++family.  The packed oracle is seen by object-language programs; the prefix
++maximum makes every visible family coordinate an explicit lower bound. -/
++def reflect14 (fs : W.Family) (n : Nat) : Nat :=
++  n + 1 +
++    BigNumber.maxN
++      (W.prefixMax (fun i => fs i n) n)
++      (Fd.reflectFd (packFamily fs) n)
++
++/-- One family-aware dynamic-kind reflection step, as a transformer. -/
++def fdTransformer : Transformer := fun fs _ n => reflect14 fs n
++
++/-- A schedule strictly more elaborate than Contender 12's schedule: another
++42-level autonomous closure is stacked above `tree12`.  This is syntax for a
++well-founded tree, not a claim about quotient-level ordinal identities. -/
++def tree14 : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper 42 (Autonomous.encode tree12))
++
++/-- Iterate the complete operator-stage construction along a fixed schedule.
++Each successor level treats the preceding transformer as its new base step. -/
++def operatorPower (tree : WTree Nat) (base : Transformer) :
++    Nat → Transformer
++  | 0 => base
++  | k + 1 => operatorStage (operatorPower tree base k) tree
++
++/-- Contender 13's construction as a function of its input.  In particular,
++`family13 42` is definitionally the previous contender, but that constant is
++not used here. -/
++def family13 (n : Nat) : Nat := F13 (F13 n)
++
++/-- The self-height dynamic-kind operator power.
++
++At input `n`, perform `family13 n + 1` complete operator stages, seed every
++oracle coordinate with `family13`, and evaluate at the previous-family value
++`family13 n`. -/
++def F14 (n : Nat) : Nat :=
++  operatorPower tree14 fdTransformer (family13 n + 1)
++    (fun _ => family13) (family13 n) (family13 n)
++
++/-- **Contender 14.** Never evaluate it. -/
++def contender_14 : Nat := F14 (F14 42)
++
++end BusyLean
+diff --git a/BusyLean/Comparison14.lean b/BusyLean/Comparison14.lean
+new file mode 100644
+index 0000000..a4b0461
+--- /dev/null
++++ b/BusyLean/Comparison14.lean
+@@ -0,0 +1,181 @@
++import BusyLean.Contender14
++import BusyLean.Comparison13
++import BusyLean.MetaReflectionFacts
++
++/-! # Contender 14: comparison and structural-margin theorems -/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-! ## The family-aware dynamic-kind reflection step -/
++
++/-- Anything bounded by the explicit maximum is strictly below `reflect14`. -/
++theorem lt_reflect14 {fs : W.Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN
++      (W.prefixMax (fun i => fs i n) n)
++      (Fd.reflectFd (packFamily fs) n)) :
++    m < reflect14 fs n := by
++  show m < n + 1 + _
++  have hM : ∀ M : Nat, M + 1 ≤ n + 1 + M := fun M => by
++    rw [Nat.add_comm M 1]
++    exact Nat.add_le_add_right (Nat.le_add_left 1 n) M
++  exact Nat.lt_of_le_of_lt h
++    (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (hM _))
++
++/-- Every family coordinate visible at the current input is strictly below the
++new reflection step. -/
++theorem oracle_lt_reflect14 (fs : W.Family) {i n : Nat}
++    (hi : i ≤ n) : fs i n < reflect14 fs n :=
++  lt_reflect14
++    (Nat.le_trans
++      (W.le_prefixMax (fun j => fs j n) hi)
++      (BigNumber.le_maxN_left _ _))
++
++/-- The underlying unary dynamic-kind reflection is itself strictly below the
++family-aware reflection step. -/
++theorem packed_reflection_lt_reflect14 (fs : W.Family) (n : Nat) :
++    Fd.reflectFd (packFamily fs) n < reflect14 fs n :=
++  lt_reflect14 (BigNumber.le_maxN_right _ _)
++
++/-- Every accepted dynamic-kind program at the current budget is strictly
++below the family-aware reflection step. -/
++theorem fvalue_lt_reflect14 (fs : W.Family) {n : Nat} {t : Fd.CTm}
++    (ht : t ∈ Fd.ctmsUpTo n) :
++    Fd.fvalue (packFamily fs) n t < reflect14 fs n :=
++  Nat.lt_trans
++    (Fd.fvalue_lt_reflectFd (packFamily fs) ht)
++    (packed_reflection_lt_reflect14 fs n)
++
++/-- The numerical input is strictly below every family-aware reflection step. -/
++theorem input_lt_reflect14 (fs : W.Family) (n : Nat) :
++    n < reflect14 fs n :=
++  Nat.lt_of_lt_of_le (Nat.lt_succ_self n) (Nat.le_add_right _ _)
++
++/-- The base dynamic-kind transformer is progressive. -/
++theorem fdTransformer_progressive : Progressive fdTransformer := by
++  intro seed i o n hi
++  exact oracle_lt_reflect14 seed hi
++
++/-! ## Generic operator-power lemmas -/
++
++/-- Progressivity is preserved by every finite operator power. -/
++theorem operatorPower_progressive (tree : WTree Nat)
++    {base : Transformer} (hbase : Progressive base) :
++    ∀ k, Progressive (operatorPower tree base k)
++  | 0 => hbase
++  | k + 1 =>
++      operatorStage_progressive
++        (operatorPower tree base k)
++        (operatorPower_progressive tree hbase k)
++        tree
++
++/-- A progressive transformer is strictly below one complete operator stage,
++at every visible input coordinate.  The proof follows coordinate zero through
++one child at every node; no monotonicity in the oracle is assumed. -/
++theorem transformer_lt_operatorStage (base : Transformer)
++    (hbase : Progressive base) (seed : Family) :
++    ∀ (a : WTree Nat) (i o n : Nat), i ≤ n →
++      base seed i n < operatorStage base a seed o n
++  | .leaf, i, o, n, hi =>
++      transformer_lt_lift_at (op := base) hbase seed
++        (i := i) (o := o) (n := n) hi
++  | .node f, i, o, n, hi =>
++      Nat.lt_trans
++        (transformer_lt_operatorStage base hbase seed
++          (f 0) i 0 n hi)
++        (operatorStage_child_lt base hbase seed f
++          (i := 0) (o := o) (n := n) (Nat.zero_le n))
++
++/-- Consecutive operator powers form a strict chain. -/
++theorem operatorPower_step_lt (tree : WTree Nat)
++    (base : Transformer) (hbase : Progressive base) (seed : Family)
++    (k i o n : Nat) (hi : i ≤ n) :
++    operatorPower tree base k seed i n <
++      operatorPower tree base (k + 1) seed o n :=
++  transformer_lt_operatorStage
++    (operatorPower tree base k)
++    (operatorPower_progressive tree hbase k)
++    seed tree i o n hi
++
++/-- Every positive operator power strictly exceeds the original base
++transformer. -/
++theorem transformer_lt_operatorPower (tree : WTree Nat)
++    (base : Transformer) (hbase : Progressive base) (seed : Family) :
++    ∀ (k i o n : Nat), i ≤ n →
++      base seed i n < operatorPower tree base (k + 1) seed o n
++  | 0, i, o, n, hi =>
++      transformer_lt_operatorStage base hbase seed tree i o n hi
++  | k + 1, i, o, n, hi =>
++      Nat.lt_trans
++        (transformer_lt_operatorPower tree base hbase seed
++          k i 0 n hi)
++        (transformer_lt_operatorStage
++          (operatorPower tree base (k + 1))
++          (operatorPower_progressive tree hbase (k + 1))
++          seed tree 0 o n (Nat.zero_le n))
++
++/-! ## The diagonal family and the required comparison -/
++
++/-- Contender 13's family strictly exceeds its input. -/
++theorem input_lt_family13 (n : Nat) : n < family13 n :=
++  Nat.lt_trans
++    (Fd.input_lt_reflectFd family12 n)
++    (Fd.input_lt_reflectFd family12 (F13 n))
++
++/-- The previous family, evaluated once more at its own value, is still below
++`F14`.  This is the direct progressivity margin of the final transformer. -/
++theorem family13_twice_lt_F14 (n : Nat) :
++    family13 (family13 n) < F14 n := by
++  change family13 (family13 n) <
++    operatorPower tree14 fdTransformer (family13 n + 1)
++      (fun _ => family13) (family13 n) (family13 n)
++  exact
++    (operatorPower_progressive tree14 fdTransformer_progressive
++      (family13 n + 1))
++      (fun _ => family13) 0 (family13 n) (family13 n)
++      (Nat.zero_le (family13 n))
++
++/-- The base family-aware reflection step at the diagonal budget lies below the
++whole positive operator power. -/
++theorem reflect14_lt_F14 (n : Nat) :
++    reflect14 (fun _ => family13) (family13 n) < F14 n := by
++  change fdTransformer (fun _ => family13) 0 (family13 n) <
++    operatorPower tree14 fdTransformer (family13 n + 1)
++      (fun _ => family13) (family13 n) (family13 n)
++  exact transformer_lt_operatorPower
++    tree14 fdTransformer fdTransformer_progressive
++    (fun _ => family13) (family13 n) 0
++    (family13 n) (family13 n) (Nat.zero_le (family13 n))
++
++/-- At every input, `F14` strictly exceeds Contender 13's complete family. -/
++theorem family13_lt_F14 (n : Nat) : family13 n < F14 n :=
++  Nat.lt_trans
++    (input_lt_family13 (family13 n))
++    (family13_twice_lt_F14 n)
++
++/-- The final diagonal strictly exceeds its own numerical input. -/
++theorem input_lt_F14 (n : Nat) : n < F14 n :=
++  Nat.lt_trans (input_lt_family13 n) (family13_lt_F14 n)
++
++/-- Every accepted dynamic-kind program at the diagonal budget, using the
++packed constant family `family13`, is below `F14 n`. -/
++theorem fvalue_lt_F14 {n : Nat} {t : Fd.CTm}
++    (ht : t ∈ Fd.ctmsUpTo (family13 n)) :
++    Fd.fvalue (packFamily (fun _ => family13)) (family13 n) t < F14 n :=
++  Nat.lt_trans
++    (fvalue_lt_reflect14 (fun _ => family13) ht)
++    (reflect14_lt_F14 n)
++
++/-- **The required comparison:** Contender 13 is strictly smaller than
++Contender 14. -/
++theorem contender_13_lt_contender_14 : contender_13 < contender_14 := by
++  change family13 42 < F14 (F14 42)
++  exact Nat.lt_trans (family13_lt_F14 42) (input_lt_F14 (F14 42))
++
++/-- All earlier accepted contenders are therefore also below Contender 14. -/
++theorem contender_12_lt_contender_14 : contender_12 < contender_14 :=
++  Nat.lt_trans contender_12_lt_contender_13 contender_13_lt_contender_14
++
++end BusyLean
+diff --git a/test/Audit14.lean b/test/Audit14.lean
+new file mode 100644
+index 0000000..f8ffb04
+--- /dev/null
++++ b/test/Audit14.lean
+@@ -0,0 +1,58 @@
++import BusyLean.Comparison14
++import Lean
++
++/-!
++# Contender 14 audit
++
++Run with `lake env lean test/Audit14.lean` after copying the two source modules
++into the BusyLean repository.  It checks axioms and verifies that the new
++number's definition does not depend on any earlier contender constant.
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through declaration types and values. -/
++def constClosure14 (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant belongs to the transitive closure of `root`. -/
++elab "#assert_not_in_closure14 " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := constClosure14 env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then
++      throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all forbidden names"
++
++#print axioms BusyLean.contender_14
++#print axioms BusyLean.contender_13_lt_contender_14
++#print axioms BusyLean.family13_lt_F14
++#print axioms BusyLean.family13_twice_lt_F14
++#print axioms BusyLean.fvalue_lt_F14
++#print axioms BusyLean.operatorPower_progressive
++#print axioms BusyLean.operatorPower_step_lt
++
++#assert_not_in_closure14 BusyLean.contender_14 :
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_13_lt_contender_14
++#check @BusyLean.fvalue_lt_F14
++#check @BusyLean.operatorPower_step_lt
+diff --git a/scripts/check14.py b/scripts/check14.py
+new file mode 100755
+index 0000000..8b2f0db
+--- /dev/null
++++ b/scripts/check14.py
+@@ -0,0 +1,92 @@
++#!/usr/bin/env python3
++"""Clean-build and audit the Contender 14 overlay.
++
++Copy BusyLean/Contender14.lean, BusyLean/Comparison14.lean and
++ test/Audit14.lean into a checkout of BusyLean, then run from the repository
++root:
++
++    python3 scripts/check14.py
++"""
++from __future__ import annotations
++
++import re
++import shutil
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++BUILD_DIRS = [
++    ROOT / ".lake" / "build",
++    ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build",
++]
++PERMITTED = {"propext", "Quot.sound"}
++PREVIOUS = "BusyLean.Comparison13"
++CURRENT_DEF = "BusyLean.Contender14"
++CURRENT_PROOF = "BusyLean.Comparison14"
++DEFINITION_BUDGET = 15.0
++PROOF_BUDGET = 60.0
++LAKE = shutil.which("lake")
++
++
++def run(args: list[str]) -> subprocess.CompletedProcess[str]:
++    if LAKE is None:
++        raise SystemExit(
++            "FAIL: `lake` was not found. Install the repository-pinned "
++            "Lean toolchain before running this audit."
++        )
++    return subprocess.run(
++        [LAKE, *args], cwd=ROOT, capture_output=True, text=True, check=False
++    )
++
++
++def timed_build(label: str, targets: list[str], budget: float | None) -> float:
++    start = time.monotonic()
++    result = run(["build", *targets])
++    elapsed = time.monotonic() - start
++    if result.returncode != 0:
++        print(result.stdout, result.stderr)
++        raise SystemExit(f"FAIL: {label} build failed")
++    suffix = f"budget {budget:.0f} s" if budget else "accepted earlier"
++    print(f"{label}: {elapsed:.2f} s ({suffix})")
++    if budget is not None and elapsed > budget:
++        raise SystemExit(f"FAIL: {label} exceeded its budget")
++    return elapsed
++
++
++def main() -> None:
++    for directory in BUILD_DIRS:
++        shutil.rmtree(directory, ignore_errors=True)
++
++    total = timed_build("previous contender", [PREVIOUS], None)
++    total += timed_build("definitions", [CURRENT_DEF], DEFINITION_BUDGET)
++    total += timed_build("proofs", [CURRENT_PROOF], PROOF_BUDGET)
++    print(f"total clean build: {total:.2f} s")
++
++    audit = run(["env", "lean", "test/Audit14.lean"])
++    output = audit.stdout + audit.stderr
++    print(output)
++    if audit.returncode != 0:
++        raise SystemExit("FAIL: audit did not run cleanly")
++
++    reports = re.findall(
++        r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)",
++        output,
++    )
++    bad = [
++        (name, axioms)
++        for name, axioms in reports
++        if axioms
++        and set(a.strip() for a in axioms.split(",")) - PERMITTED
++    ]
++    if not reports or bad:
++        raise SystemExit(f"FAIL: forbidden axioms or no reports: {bad}")
++    print(
++        f"PASS: {len(reports)} declarations audited; "
++        f"axioms within {sorted(PERMITTED)}"
++    )
++
++
++if __name__ == "__main__":
++    main()

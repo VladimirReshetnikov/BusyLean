@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/VladimirReshetnikov/BusyLean",
+  "branch": "main",
+  "commit": "0cd13c0c2607b4fcb461090a95f356e538c0fc5b",
+  "tree": "7104b5c7459539e72bd6ba99da10e2105bee26a5",
+  "retrieved_utc": "2026-10-13T04:49:11Z",
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "incumbent": {
+    "name": "contender_13",
+    "definition_module": "BusyLean/Contender13.lean",
+    "comparison_module": "BusyLean/Comparison13.lean",
+    "construction": "F13 (F13 42)"
+  },
+  "upstream_modules_used": [
+    "BusyLean/Contender13.lean",
+    "BusyLean/Comparison13.lean",
+    "BusyLean/Contender12.lean",
+    "BusyLean/MetaReflection.lean",
+    "BusyLean/MetaReflectionFacts.lean",
+    "BusyLean/Autonomous.lean",
+    "BusyLean/Contender9.lean"
+  ],
+  "proposal": {
+    "name": "contender_14",
+    "definition_module": "BusyLean/Contender14.lean",
+    "comparison_module": "BusyLean/Comparison14.lean",
+    "construction": "F14 (F14 42)",
+    "formal_target": "contender_13 < contender_14"
+  }
+}
