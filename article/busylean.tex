@@ -73,6 +73,8 @@ operators, a kind $\mathtt{dyn}$ interpreted as $\sum_k\mathrm{Sem}(k)$, with
 level-1 kind variables that range over it. Contender~14 climbs a ladder of
 such universes: at input $n$ it reflects over the language with $n$ stacked
 universes, all normalized by one theorem that is parametric in the universe.
+A fourth batch of proposals contributes a rank hierarchy of transformer lifts,
+which Contender~15 applies to the ladder.
 \end{abstract}
 
 \tableofcontents
@@ -700,6 +702,61 @@ standalone inversion lemmas cut that module from 5.8\,s to 3.2\,s. The
 definitions now check in about 10\,s.
 
 %======================================================================
+\section{A fourth batch of proposals, and Contender 15}
+
+\subsection{Four proposals over Contender 13}
+Four more proposals (P17--P20) arrived while Contender~14 was being built.
+All of them target Contender~13. All keep its language, dynamic-kind
+F$_\omega$, and make its reflection \emph{family-aware}: programs receive a
+packed countable oracle family, and a prefix maximum over the visible
+coordinates makes the transformer progressive without any monotonicity.
+Three compile as submitted (P17, P19, and P20, whose package says Lean was
+never run). P18 fails at a single proof step. A \lean{simpa} misses the
+definitional equality
+$\mathtt{operatorStage}\,b\,\mathtt{leaf}=\mathtt{liftTransformer}\,b$, and
+replacing it with \lean{exact} repairs it. All audits pass with
+\lean{propext} and \lean{Quot.sound}.
+
+Writing $\tau$ for the autonomous schedule above \lean{tree12}, P18 and P19
+stack operator stages into towers of height $\mathtt{family13}\,n$ or $n+1$,
+about $|F_d|\cdot\tau^\omega$. P17 and P20 independently found something
+stronger, a \emph{rank hierarchy of transformer lifts}:
+\[
+\mathrm{lift}_0 = \mathtt{liftTransformer},\qquad
+\mathrm{lift}_{k+1}(b) = \mathrm{stage}_{\mathrm{lift}_k}\bigl(\mathrm{lift}_k(b),\ \sigma\bigr),
+\]
+where $\mathrm{stage}_L(b,\sigma)$ traverses the schedule $\sigma$, applying
+the lift $L$ at every node. Rank $k+1$ uses the whole rank-$k$ operator at
+every node, so each rank roughly exponentiates the index. Diagonalized at rank
+$\mathtt{family13}\,n+1$, this gives about $|F_d|\cdot\varepsilon(\tau)$. It
+strictly generalizes Contender~12's single operator stage. All four exceed
+Contender~13 (each proves it), but by the base-language heuristic all four lie
+below the ladder of Contender~14.
+
+\subsection{Contender 15}
+The two routes compose. The lift hierarchy is generic over transformers, so it
+can be applied to the ladder's reflection instead of F$_d$'s. Contender~15
+adopts P17's modules unchanged, with attribution, and defines:
+\begin{lstlisting}
+def reflectFLFamily (fs : Family) (n : ℕ) : ℕ :=
+  n + 1 + maxN (prefixMax (fun i => fs i n) n)
+    (maximum (FL.fvalue n (packFamily fs) n) (FL.ladderUpTo n))
+def family14 (n : ℕ) : ℕ := F14 (F14 n)     -- family14 42 = contender_14
+def schedule15 (n : ℕ) := realize (hyper (family14 n + 42) (encode tree12))
+def F15 (n : ℕ) : ℕ :=
+  diagonalLift (schedule15 n) (family14 n + 1) flFamilyTransformer
+    (fun _ => family14) n n
+def contender_15 : ℕ := F15 (F15 42)
+\end{lstlisting}
+Every proof follows an explicit occurrence: of the seed in the prefix
+maximum, of a child at coordinate~0 of a splice, or of rank~$k$ inside
+rank~$k+1$. Proved: \lean{contender\_14\_lt\_\allowbreak contender\_15},
+\lean{family14\_lt\_F15} at every input, and \lean{fvalue\_lt\_F15} (every
+level-$n$ ladder program of depth $\le n$ is exceeded). The definitions check
+in 2.9\,s and the proofs in 3.1\,s. Informally the size is about
+$|\mathrm{FL}_n|\cdot\varepsilon(\tau)$, diagonalized over the ladder level~$n$.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Levels inside the language.} Contender~14 fixes the level per
@@ -733,6 +790,7 @@ Contender & idea & informal size\\
 12 (Lean) & 10, operator-level reflection (P6, P7 ideas) & exponential index over 11\\
 13 (Lean) & dynamic kind: a universe of operators & uniform orders $\omega+n$\\
 14 (Lean) & ladder of universes, level $n$ at input $n$ & orders $\omega\cdot n$, diagonalized\\
+15 (Lean) & 14 with P17's rank hierarchy of lifts & $|\mathrm{FL}_n|\cdot\varepsilon(\tau)$\\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -9,7 +9,39 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 14
+## Current contender: Contender 15
+
+```lean
+def family14 (n : Nat) : Nat := F14 (F14 n)                  -- Contender 14 = family14 42
+def F15 (n : Nat) : Nat :=                                   -- BusyLean/Contender15.lean
+  diagonalLift (schedule15 n) (family14 n + 1) flFamilyTransformer (fun _ => family14) n n
+def contender_15 : Nat := F15 (F15 42)
+
+theorem contender_14_lt_contender_15 : contender_14 < contender_15   -- BusyLean/Comparison15.lean
+```
+
+Contender 15 applies the strongest amplifier received so far to the strongest
+language here.
+
+* **Language:** the ladder of universes of Contender 14. `reflectFLFamily fs n`
+  exceeds every visible coordinate of an oracle family and every level-`n`
+  ladder program of depth `≤ n`; the programs see the whole family through a
+  packed oracle.
+* **Amplifier:** proposal P17's rank hierarchy of transformer lifts
+  ([`HyperReflection.lean`](BusyLean/HyperReflection.lean), adopted
+  unchanged; P20 found the same idea). Rank `k+1` traverses a schedule using
+  rank `k` as the lift at every node. The schedule is
+  `family14 n + 42` hyper-closures above `tree12`, and the rank is
+  `family14 n + 1`.
+
+| Theorem | Statement |
+|---|---|
+| `contender_14_lt_contender_15` | Contender 14 < Contender 15 |
+| `family14_lt_F15` | Contender 14's family is beaten at every input |
+| `fvalue_lt_F15` | every level-`n` ladder program of depth ≤ `n` is below `F15 n` |
+| `diagonalLift_strictlyInflationary` | every rank strictly exceeds its base, with no monotonicity |
+
+## Contender 14
 
 ```lean
 def family13 (n : Nat) : Nat := F13 (F13 n)               -- Contender 13 = family13 42
@@ -326,9 +358,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 14's definition modules take
-about 10 s and its proofs about 2 s; the full clean build of all contenders
-takes about 40 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 15's definition modules take
+about 3 s and its proofs about 3 s; the full clean build of all contenders
+takes about 48 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -358,9 +390,11 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender13.lean`](BusyLean/Contender13.lean), [`Comparison13.lean`](BusyLean/Comparison13.lean) | Contender 13 definitions and theorems |
 | [`BusyLean/SystemFL/`](BusyLean/SystemFL) | the ladder language, parametric in its atoms: syntax, typing, candidates over a `Universe` (SN), sound checker, the ladder of universes |
 | [`BusyLean/Contender14.lean`](BusyLean/Contender14.lean), [`Comparison14.lean`](BusyLean/Comparison14.lean) | Contender 14 definitions and theorems |
+| [`BusyLean/HyperReflection.lean`](BusyLean/HyperReflection.lean), [`HyperReflectionFacts.lean`](BusyLean/HyperReflectionFacts.lean) | rank hierarchy of transformer lifts (adopted from P17) |
+| [`BusyLean/Contender15.lean`](BusyLean/Contender15.lean), [`Comparison15.lean`](BusyLean/Comparison15.lean) | Contender 15 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
-| [`proposals/`](proposals) | the sixteen reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`proposals/`](proposals) | the twenty reviewed proposals and [the review](proposals/REVIEW.md) |
 | [`incoming/`](incoming) | drop zone for new proposal archives ([how they are processed](incoming/README.md)) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
 
@@ -379,8 +413,9 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 12 | Lean | this repository | operator-level reflection (from P6) along notations above the index (from P7), over kind-polymorphic Fω |
 | 13 | Lean | this repository | dynamic-kind Fω: a predicative universe of operators, with two levels of kind variables |
 | 14 | Lean | this repository | a ladder of such universes, one SN proof for all levels; input `n` uses level `n` |
+| 15 | Lean | this repository | P17's rank hierarchy of transformer lifts over family-aware ladder reflection |
 
-Proposals P1–P16 (three batches) were reviewed, rebuilt and ranked; see
+Proposals P1–P20 (four batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).
