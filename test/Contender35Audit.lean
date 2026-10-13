@@ -48,8 +48,8 @@ elab "#assert_not_in_closure35 " root:ident " : " bad:ident* : command => do
 #check BusyLean.family34_lt_F35
 #check BusyLean.osvalue_lt_F35
 
-/-- Rule 5: the new definition uses the predecessor's family, never an earlier
-contender constant itself. -/
+-- Rule 5: the new definition uses the predecessor's family, never an earlier
+-- contender constant itself.
 #assert_not_in_closure35 BusyLean.contender_35 :
   BusyLean.contender_34 BusyLean.contender_33 BusyLean.contender_32
   BusyLean.contender_31 BusyLean.contender_30 BusyLean.contender_29
