@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+lean/.lake/
+article/*.aux
+article/*.log
+article/*.out
+article/*.toc

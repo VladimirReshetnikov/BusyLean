@@ -1,0 +1,14 @@
+{
+  "status": "compiled_and_rendered",
+  "engine": "pdfTeX 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian)",
+  "pages": 16,
+  "build_passes": 3,
+  "overfull_box_warnings": 0,
+  "underfull_box_warnings": 1,
+  "undefined_reference_warnings": 0,
+  "missing_glyph_warnings": 0,
+  "renderer": "pdftoppm / Poppler",
+  "inspection": "All 16 pages inspected in a contact sheet; title and type-table pages inspected at full size. Iteration superscripts checked after correcting a TeX macro-name collision.",
+  "fonts": "Embedded subsets; no standalone font files included.",
+  "note": "PDF compilation validates document production, not Lean code or mathematical correctness."
+}

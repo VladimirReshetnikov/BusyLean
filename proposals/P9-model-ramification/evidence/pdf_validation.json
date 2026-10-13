@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "pages": 23,
+  "pdf_sha256": "c5ce5cea9b6d922d1a0629e9dbc6375023863ad4f80a6fe6d011e30540b3945e",
+  "tex_sha256": "917197efd72dd884e1ab3c0db8554cbf05c02e19846f07684997ef3058305a96",
+  "pdflatex_passes": 3,
+  "unresolved_references_or_citations": false,
+  "overfull_boxes": 0,
+  "off_page_text_spans": [],
+  "renderer": "pdftoppm (Poppler)",
+  "rendered_pages": 23,
+  "visual_inspection": "All 23 final pages inspected in contact sheets; cover, contents, quantitative proof and code inspected at higher resolution.",
+  "visual_findings": "No observed clipped text, overlap, broken mathematical glyphs, or obscured tables.",
+  "scope": "PDF production and layout only; new Lean kernel validation remains not_run."
+}

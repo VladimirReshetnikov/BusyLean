@@ -1,0 +1,44 @@
+PDF: /mnt/data/busylean_contender7_autonomous_reflection/article/contender7_autonomous_reflection.pdf
+Pages: 14
+Encrypted: False
+Page sizes (pt, rounded):
+  - 612 x 792 (14 page(s))
+Metadata:
+  /Author: OpenAI research assistant for Vladimir Reshetnikov
+  /CreationDate: D:20261013024920Z
+  /Creator: LaTeX with hyperref
+  /Keywords: 
+  /ModDate: D:20261013024920Z
+  /PTEX.Fullbanner: This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) kpathsea version 6.4.0/dev
+  /Producer: pdfTeX-1.40.26
+  /Subject: 
+  /Title: BusyLean Contender 7: Autonomous Critical-Point Reflection
+  /Trapped: /False
+Outline items: 39
+Form fields: 0
+Attachments: 0
+Annotations: 48
+
+Fonts (pdffonts, first 25 lines):
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+QCWBWB+LMRoman12-Bold                Type 1            Custom           yes yes yes    177  0
+OQXCZS+LMRoman12-Regular             Type 1            Custom           yes yes yes    178  0
+EEKEZR+LMRoman10-Bold                Type 1            Custom           yes yes yes    179  0
+OYJZYB+LMRoman10-Regular             Type 1            Custom           yes yes yes    180  0
+BETQLB+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    181  0
+TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    182  0
+EQQOGK+LMRoman10-Italic              Type 1            Custom           yes yes yes    183  0
+CBVNYI+LMMono10-Regular              Type 1            Custom           yes yes yes    184  0
+OYJZYB+LMRoman10-Regular             Type 1            Custom           yes yes yes    185  0
+OMLUNS+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    225  0
+QUHNQV+LMSans10-Regular              Type 1            Custom           yes yes yes    251  0
+NEQKOG+LMRoman8-Regular              Type 1            Custom           yes yes yes    252  0
+GMIALK+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    253  0
+NMKTFO+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    259  0
+QJSRJL+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    260  0
+WXIOAU+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    261  0
+YRSJVJ+LMSans8-Regular               Type 1            Custom           yes yes yes    262  0
+OYJZYB+LMRoman10-Regular             Type 1            Custom           yes yes yes    329  0
+CADPFO+LMMono10-Italic               Type 1            Custom           yes yes yes    340  0
+RGCFHB+LMRoman6-Regular              Type 1            Custom           yes yes yes    365  0

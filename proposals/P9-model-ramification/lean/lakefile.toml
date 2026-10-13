@@ -1,0 +1,13 @@
+name = "busylean7"
+version = "0.1.0"
+defaultTargets = ["BusyLean7"]
+
+[[lean_lib]]
+name = "BigNumber"
+
+[[lean_lib]]
+name = "BusyLean"
+roots = ["BusyLean.Contender6"]
+
+[[lean_lib]]
+name = "BusyLean7"

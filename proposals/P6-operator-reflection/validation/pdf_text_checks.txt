@@ -1,0 +1,8 @@
+PASS: extracted text contains required markers
+1:Contender 7: Autonomous Operator Reflection in Lean
+18:contender_6 < contender_7.
+26:final kernel compilation and timing remain a required integration check rather than a claimed result.
+529:contender_6 < contender_7 :=
+944:calibration ‘lambda^lambda‘. This calibration is heuristic; the strict
+1142:theorem contender_6_lt_contender_7 : contender_6 < contender_7 :=
+1149:theorem p5_lt_contender_7 : BigNumber.contender_6 < contender_7 :=

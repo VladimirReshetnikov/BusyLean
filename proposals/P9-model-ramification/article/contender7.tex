@@ -1,0 +1,1325 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,stmaryrd}
+\usepackage{booktabs,longtable,array}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=MidnightBlue,citecolor=MidnightBlue,urlcolor=MidnightBlue,
+ pdftitle={Beyond BusyLean's Contender 6: Autonomous Model Ramification},
+ pdfauthor={Research proposal prepared for Vladimir Reshetnikov},
+ pdfsubject={Computable large numbers, model ramification, Lean 4, exact domination}}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Beyond BusyLean's Contender 6}
+\fancyhead[R]{\small Research proposal}
+\fancyfoot[C]{\thepage}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{1.3em}
+\setcounter{tocdepth}{1}
+\emergencystretch=2em
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\N}{\mathbb N}
+\newcommand{\W}{\mathcal W}
+\newcommand{\Fam}{\mathcal F}
+\newcommand{\Mod}{\mathcal M}
+\newcommand{\Tree}{\mathsf{Tree}}
+\newcommand{\Eval}{\operatorname{eval}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Next}{\operatorname{Next}}
+\newcommand{\MJoin}{\operatorname{Join}}
+\newcommand{\Ram}{\operatorname{Ram}}
+\newcommand{\Val}{\operatorname{C}}
+\newcommand{\idx}{\operatorname{I}}
+\newcommand{\td}{\operatorname{treeOf}}
+\newcommand{\ps}{\mathsf p}
+\newcommand{\FF}{\operatorname{F}}
+\newcommand{\Iter}[2]{#1^{[#2]}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\src}[1]{\texttt{\detokenize{#1}}}
+\newtcolorbox{statusbox}{colback=gray!5,colframe=gray!55,boxrule=0.5pt,
+ left=9pt,right=9pt,top=7pt,bottom=7pt,breakable}
+\lstdefinestyle{lean}{basicstyle=\ttfamily\footnotesize,columns=fullflexible,
+ keepspaces=true,breaklines=true,showstringspaces=false,
+ commentstyle=\color{gray},keywordstyle=\color{MidnightBlue},
+ morekeywords={def,theorem,structure,where,namespace,end,import,abbrev,fun,match,with,
+ let,in,by,exact,have,inductive,termination_by,structural},
+ morecomment=[l]{--},morecomment=[s]{/-}{-/},
+ literate={→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {≤}{{$\le$}}1 {≥}{{$\ge$}}1
+ {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1
+ {ℕ}{{$\N$}}1 {¬}{{$\neg$}}1 {∈}{{$\in$}}1 {×}{{$\times$}}1 {α}{{$\alpha$}}1}
+\lstset{style=lean}
+
+\begin{document}
+\begin{center}
+{\Large\bfseries Beyond BusyLean's Contender 6}\\[6pt]
+{\large Autonomous Model Ramification and a\par
+46-fold Tower-Feedback Separation}\\[12pt]
+Research proposal prepared for Vladimir Reshetnikov\\
+October 12, 2026
+\end{center}
+
+\begin{abstract}
+We propose a closed, computable Lean definition that strengthens the current
+BusyLean contender by changing what the object language can interpret, not
+merely by enlarging its numerical argument. A fixed seven-slot interface makes
+lower reflection operators, forest recursors, and program-generated tree
+schedules available to higher interpretations. The interface closes under all
+finite model ramifications, and is then ramified structurally along a tree
+produced by the strengthened language itself. A depth-11 program provides a
+uniform comparison certificate, valid for every external oracle. If $C_6$ is
+the adopted contender at the pinned repository revision, and
+$\Theta(x)=(y\mapsto 2^y)^{[x+1]}(x+1)$, the construction satisfies
+\[
+                    \boxed{\Iter{\Theta}{46}(C_6)<C_7.}
+\]
+We also prove an interpretation-relative cofinality theorem for model
+ramification along definable trees, and a diagonal non-majorization theorem.
+These results require no assigned proof-theoretic ordinal. The package
+contains detailed mathematical proofs, new Lean definitions and 84 theorem
+scripts, exact baseline source copies, and a guarded reference interpreter.
+The new Lean sources have not been compiler-checked in this environment;
+1,830 finite reference-model assertions passed, but kernel certification,
+axiom closure, and contest build-time compliance remain unverified.
+\end{abstract}
+
+\begin{statusbox}
+\textbf{Validation boundary.} This is a mathematical research proposal with an
+unverified Lean formalization, not an already certified contest submission.
+No Lean compiler was available during preparation, and retrieval attempts did
+not supply one. The recorded Lean status is \code{not\_run}. There are no
+intentional proof placeholders in the new sources, but elaboration or proof
+repairs may still be necessary. Neither contender has been evaluated.
+\end{statusbox}
+
+\noindent\textbf{Pinned baseline.} All comparisons refer to BusyLean commit\\
+\hspace*{1em}\code{86b360648163f0249eab79539438b6a83dfe8215}.\\
+\textbf{Target toolchain.} Lean 4.34.0; bundled Lean libraries only; no Mathlib.
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{The result and its intended scope}
+\label{sec:result}
+
+Let $\Iter f0(x)=x$ and $\Iter f{k+1}(x)=f(\Iter fk(x))$. Throughout this article,
+square brackets on an exponent denote \emph{function iteration}; they never
+denote ordinary exponentiation. Define
+\begin{equation}\label{eq:theta}
+ E(x)=2^x,\qquad \Theta(x)=\Iter E{x+1}(x+1).
+\end{equation}
+Thus $\Theta(0)=2$, $\Theta(1)=16$, and $\Theta(2)=2^{256}$.
+For general $x$, the input determines both the initial exponent and the number
+of exponentiation steps. In particular, $\Theta(C_6)$ is already much more
+than an exponential or a fixed-height tower in $C_6$.
+
+\begin{theorem}[Main numerical separation]\label{thm:main}
+The construction in Section~\ref{sec:models} defines a natural number $C_7$
+using total interpretation and structural recursion. With $C_6$ the adopted
+BusyLean number at the pinned revision,
+\[
+                  \Iter\Theta{46}(C_6)<C_7.
+\]
+Consequently $C_6<C_7$.
+\end{theorem}
+
+The proof is the specialization at $n=42$ of the stronger uniform statement
+\begin{equation}\label{eq:uniform-main}
+ \forall n\ge 11,\qquad
+ \Iter\Theta{n+4}\bigl(\FF_6(n)\bigr)<\Val(M_{\mathrm{final}},n),
+\end{equation}
+where $\FF_6$ is the repository's \code{BusyLean.finalFamily}. The value
+$46=42+4$ is an explicitly proved conservative lower bound. It is not an
+estimate of the entire growth strength of the construction.
+
+The principal advance is structural. The repository's adopted construction
+runs a fixed reflection mechanism along a program-generated tree. The new
+construction makes the mechanism itself available to subsequent interpreters,
+retains complete families of lower mechanisms, and performs
+\emph{model-valued} recursion along a generated tree. This changes the
+operations that a short program can call. The numerical certificate in
+Theorem~\ref{thm:main} is a transparent way to verify a large gap without
+assigning ordinals to these operations.
+
+There is no claim of an absolutely largest computable number, of an optimal
+use of the contest time budget, or of a newly established proof-theoretic
+ordinal. The direct scalar comparison is with the adopted $C_6$. The
+repository's established $C_5<C_6$ and proposal-P5 comparison yield further
+corollaries once the new comparison is kernel-checked and linked against the
+full repository \cite{repo-comparison}. Exact comparisons with the separate P1--P4 proposal
+constants are \emph{not} established here. Their heuristic ranking is not a
+substitute for such proofs.
+
+\section{What is being extended}
+\label{sec:baseline}
+
+\subsection{The current repository, not an earlier proposed contender}
+
+The pinned root README and source identify the adopted number as
+\begin{equation}\label{eq:old}
+ C_6=\FF_6(42),\qquad
+ \FF_6(n)=S_{\mathrm{old}}(\ps,I_{\mathrm{old}},n).
+\end{equation}
+Here $S_{\mathrm{old}}$ is forest reflection over the finite-type W-language,
+$\ps$ is P5's proposed number as a family in its input, and
+$I_{\mathrm{old}}$ joins the W-trees denoted by closed programs of that
+language. These are the actual adopted definitions, not the earlier P5
+constant also called \code{contender\_6} in its own namespace
+\cite{repo-readme,repo-c6,repo-reflection,p5-defs}.
+
+The inherited seed has type $\Fam=\N\to\N\to\N$ and is
+\[
+ \ps(i,n)=\code{BigNumber.iterate}\;
+           \code{BigNumber.diagonal}\;n\;n.
+\]
+It ignores its first argument. The full definition is retained byte-for-byte
+in the vendored baseline; it includes P5's seed guard over the old numerical
+maximum. We do not claim to have eliminated that inherited dependence.
+
+The old reflector is
+\begin{equation}\label{eq:old-reflection}
+ R_{\mathrm{old}}(f,n)=n+1+
+ \max\left\{\max_{i\le n}f(i,n),\
+      \max_{t\in\mathcal T_n}\Eval_{\mathrm{old},f}(t)\right\},
+\end{equation}
+where $\mathcal T_n$ is the repository's finite raw-term enumeration. We use
+$\max\varnothing=0$ for numerical maxima throughout. At a
+leaf, the old forest uses this reflector with the seed; at a node, it uses the
+family of child stages. Our new forest has the same outer recursive shape,
+but a strengthened interpretation in its finite maximum.
+
+\subsection{Contest obligations and what remains outstanding}
+
+The repository rules demand a closed computable natural, a formal strict
+comparison, no prohibited computational shortcuts or axioms, and clean-build
+budgets of 15 seconds for definitions and 60 seconds for proofs. They prohibit
+using the previous named contender as a shortcut and allow only
+\code{propext} and \code{Quot.sound} among axioms. The pinned toolchain is
+Lean 4.34.0 \cite{repo-readme,lean-release}.
+
+The proposed definition never names \code{BusyLean.contender\_6},
+\code{BusyLean.finalFamily}, or \code{BigNumber.contender\_6}. It deliberately
+reuses their generic constituents: the older reflector, forest operator,
+index, and P5 seed family. A short program can reconstruct the old final
+family from those constituents, and this is exactly the comparison witness.
+Thus the proposal offers syntactic non-use of the old scalar together with a
+substantial general extension; it does \emph{not} pretend to be semantically
+independent of the old construction.
+
+The mathematical comparison is proved below. The supplied Lean proof scripts
+are a concrete formalization attempt, not a certified result. Until the clean
+build, axiom audit, and dependency audit run successfully, the formal-proof
+and timing obligations remain open engineering checks for this submission.
+No elapsed build times are inferred from the size of the sources.
+
+\subsection{Reproducible baseline}
+
+Three baseline files suffice for the standalone proposed definitions. They
+were reconstructed from the pinned GitHub contents and checked against their
+Git blob identifiers:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Vendored path & Bytes\\
+\midrule
+\src{lean/BigNumber/Definitions.lean} & 6,834\\
+\src{lean/BusyLean/Reflection.lean} & 2,841\\
+\src{lean/BusyLean/Contender6.lean} & 2,033\\
+\bottomrule
+\end{tabular}
+\end{center}
+The first file comes from P5's \src{lean/BigNumber/Definitions.lean}; the other
+two come from the root BusyLean library. Their exact hashes are recorded in
+\src{evidence/vendor_hashes.json}. No upstream compiled binaries or downloaded
+font files are included.
+
+\section{The unchanged object language}
+\label{sec:language}
+
+\subsection{Types, trees, and total interpretation}
+
+The finite type codes satisfy
+\[
+ A,B ::= \mathsf{nat}\mid A\to B\mid\mathsf{wt}(A).
+\]
+Their denotations are natural numbers, function spaces, and the inductive
+W-types
+\[
+ W(A)=\mathsf{leaf}\mid\mathsf{node}(A\to W(A)).
+\]
+Write $\W=W(\N)$. Raw terms have variables, typed abstractions, application,
+zero, successor, natural recursion, and the leaf, node, and structural
+recursion operations at all coded W-types. The existing interpreter is total
+on raw syntax. It returns a type-tagged value and uses the original coercive
+casts, including defaults for mismatches \cite{p5-defs}.
+
+This last detail matters. We have not silently replaced the raw interpreter
+with a different intrinsically typed language. In the numerical maximum,
+non-numerical results score zero, exactly as in the existing approach. For the
+particular comparison programs we prove that every application is correctly
+typed, so the fallback behavior is never used in the successful computation.
+
+A W-node's infinitely many children are represented by a function, not an
+infinite list that must first be evaluated. Structural recursion on such a
+node receives recursively defined functions on its children. The closed
+construction only makes finitely many demands in any terminating natural
+computation. The governing justification is the accepted structural recursion,
+not an empirical observation that a few small runs finish.
+
+\subsection{Levels, not de Bruijn indices}
+
+The repository's variable lookup uses \emph{oldest-first levels}. An
+abstraction prepends a new binding to the environment list, while level zero
+continues to refer to the oldest binding. Consequently, adding local binders
+does not change the level of a designated global interface variable.
+The new seven-slot environment exploits this convention.
+
+One must distinguish the list order from the level order: the environment
+list is written newest first. Reversing that list incorrectly would make the
+comparison program call entirely different values. The semantic proof and
+reference interpreter explicitly test the intended convention.
+
+\subsection{A symbolic rank bound for the enormous enumerations}
+
+Let $\mathcal A_n$ and $\mathcal T_n$ denote the unchanged type and term lists
+\code{allTypes n} and \code{allTerms n}. They are finite recursive lists. At
+successor depth, the type list contains $\mathsf{nat}$, arrows between types
+in the preceding list, and their W-types. The term list contains variables
+with levels below the preceding depth, applications of preceding terms,
+abstractions using preceding type annotations and bodies, and the primitive
+recursors with preceding annotations.
+
+Define type ranks by
+\[
+ \rank_A(\mathsf{nat})=1,\;
+ \rank_A(A\to B)=1+\max(\rank_A(A),\rank_A(B)),\;
+ \rank_A(\mathsf{wt}(A))=1+\rank_A(A).
+\]
+Term ranks are
+\begin{align*}
+ \rank(\mathsf{var}\,i)&=i+2,\\
+ \rank(\mathsf{zero})=\rank(\mathsf{succ})&=1,\\
+ \rank(\mathsf{app}(t,u))&=1+\max(\rank(t),\rank(u)),\\
+ \rank(\mathsf{lam}(A,B,t))&=
+   1+\max\{\rank_A(A),\rank_A(B),\rank(t)\},\\
+ \rank(\mathsf{natrec}(A))&=1+\rank_A(A).
+\end{align*}
+The same one-plus-annotation rule applies to W-leaf and W-node constants;
+W-recursion has rank one plus the maximum of its two annotation ranks.
+
+\begin{lemma}[Enumeration inclusion]\label{lem:enumeration}
+If $\rank_A(A)\le n$, then $A\in\mathcal A_n$. If $\rank(t)\le n$, then
+$t\in\mathcal T_n$.
+\end{lemma}
+\begin{proof}
+Use structural induction on the type or term, uniformly in the upper bound
+$n$. The zero-depth cases are impossible because all ranks are positive. In
+an application of rank at most $n+1$, both subterms have rank at most $n$;
+the induction hypotheses put them in $\mathcal T_n$, and the product-list
+membership lemma puts the application in $\mathcal T_{n+1}$. The abstraction
+case additionally uses the type induction hypotheses. The variable inequality
+$i+2\le n+1$ gives $i<n$, exactly the membership condition in the variable
+prefix used for $\mathcal T_{n+1}$. Primitive terms follow from the singleton
+and annotation-mapping parts of the enumerator. These arguments prove the
+claim at every larger depth without expanding any particular large list.
+\end{proof}
+
+This is the route used in \src{Enumeration.lean}. Checking the proposed
+comparison need not enumerate $\mathcal T_{42}$ or compute its length. The
+small-depth reference counts in Section~\ref{sec:validation} are tests of the
+implementation, not the method of proving the depth-42 membership fact.
+
+\section{A fixed interface for changing interpretations}
+\label{sec:interface}
+
+\subsection{The model record}
+
+A model is a triple of total operations
+\begin{equation}\label{eq:model}
+ M=(\rho_M,\sigma_M,\tau_M),
+ \quad\begin{cases}
+ \rho_M:\N\to\Fam\to\N\to\N,\\
+ \sigma_M:\N\to\Fam\to\W\to\N\to\N,\\
+ \tau_M:\N\to\W.
+ \end{cases}
+\end{equation}
+The selector argument chooses a lower model. The fields represent its
+reflection operation, forest recursion, and generated schedule, respectively.
+A general model need not satisfy any coherence property for the elementary
+finite-maximum lemmas. The constructors below supply coherent triples for
+which the selected fields all come from the same lower interpretation.
+
+The interface has a fixed finite type signature. This is important: simply
+appending a new global constant at every iteration would make certificate
+addresses and their ranks grow with the iteration count. Here the address
+stays fixed and a numerical selector chooses the lower interpretation.
+That selector is itself computed by a term of the object language.
+
+\subsection{Seven stable global levels}
+
+For a model $M$, external oracle $f:\Fam$, and input $n$, interpretation uses
+the following oldest-first global levels:
+\begin{center}
+\begin{tabular}{@{}cll@{}}
+\toprule
+Level & Value & Object-language type\\
+\midrule
+0 & External oracle $f$ & $\N\to\N\to\N$\\
+1 & Input $n$ & $\N$\\
+2 & Inherited seed $\ps$ & $\N\to\N\to\N$\\
+3 & Lower reflectors $\rho_M$ & $\N\to\Fam\to\N\to\N$\\
+4 & Lower forests $\sigma_M$ & $\N\to\Fam\to\W\to\N\to\N$\\
+5 & Lower schedules $\tau_M$ & $\N\to\W$\\
+6 & Tower feedback $\Theta$ & $\N\to\N$\\
+\bottomrule
+\end{tabular}
+\end{center}
+All displayed types are abbreviations for finite type codes of the unchanged
+language. The model record itself is a host-level organizing device; the
+object language sees only these individually typed fields.
+
+Write $\Eval_M(f,n,t)$ for the numerical score of the old raw interpreter
+in this environment. The strengthened reflection operator is
+\begin{equation}\label{eq:R}
+ R_M(f,n)=n+1+
+ \max\left\{\max_{i\le n} f(i,n),
+              \max_{t\in\mathcal T_n}\Eval_M(f,n,t)\right\}.
+\end{equation}
+The forest operator is defined by structural recursion:
+\begin{equation}\label{eq:S}
+ \begin{split}
+ S_M(g,\mathsf{leaf},n)&=R_M(g,n),\\
+ S_M(g,\mathsf{node}(a),n)&=
+       R_M\bigl(i\mapsto (m\mapsto S_M(g,a(i),m)),n\bigr).
+ \end{split}
+\end{equation}
+The child is callable at an arbitrary dynamically computed numerical input;
+we have not replaced the child family by a pointwise maximum.
+
+\subsection{Generating schedules at all independent inputs}
+
+Let $0_{\Fam}$ be the zero external oracle. Define
+\[
+ \td(M,m,t)=\operatorname{cast}_{\W}
+     \bigl(\operatorname{interpret}(\operatorname{env}(M,0_{\Fam},m),t)\bigr).
+\]
+The cast includes the original default behavior when the resulting type is
+not $\W$. Now set
+\begin{equation}\label{eq:index}
+ \idx(M)=\mathsf{node}\left(d\mapsto
+  \mathsf{node}\left(m\mapsto
+   \mathsf{node}\left(i\mapsto
+       \td(M,m,\operatorname{nthD}(\mathcal T_d,i,\mathsf{zero}))
+             \right)\right)\right).
+\end{equation}
+The three independent indices are syntax depth $d$, numerical parameter $m$,
+and position $i$ in the finite term list. In particular, the construction
+includes a program evaluated at any fixed input, not merely at an input
+equal to its enumeration depth or position.
+
+This is a definition by total function application and W-node construction.
+It does not search over arbitrary programs for a proof of termination or
+well-foundedness. Every denoted tree is already in the inductive type.
+
+The number associated with a model and an input is
+\begin{equation}\label{eq:value}
+                 \Val(M,n)=S_M(\ps,\idx(M),n).
+\end{equation}
+The final contender will be one instance of this uniform construction.
+
+\section{The depth-11 uniform certificate}
+\label{sec:certificate}
+
+\subsection{The certificate program}
+
+For a selector term $s$, write the left-associated application
+\begin{equation}\label{eq:call}
+ \operatorname{call}(s)=
+       \bigl(((v_4\ s)\ v_2)\ (v_5\ s)\bigr)\ v_1,
+ \qquad
+ A(s)=v_6\ \operatorname{call}(s),
+\end{equation}
+where $v_j$ denotes the variable at level $j$. Informally, the program selects
+a lower forest, gives it the inherited seed and matching lower schedule,
+evaluates at the current input, and applies tower feedback to the result.
+
+\begin{lemma}[Exact rank]\label{lem:rank11}
+For every selector $s$,
+\[
+ \rank(A(s))=\max\{11,\rank(s)+5\}.
+\]
+In particular, $\rank(A(\mathsf{zero}))=
+\rank(A(v_1))=11$.
+\end{lemma}
+\begin{proof}
+Let $r=\rank(s)$. The variable ranks of $v_4,v_5,v_6,v_2,v_1$ are
+$6,7,8,4,3$. The first application $v_4\ s$ has rank
+$\max(7,r+1)$; applying to $v_2$ gives $\max(8,r+2)$.
+The other branch $v_5\ s$ has rank $\max(8,r+1)$, so the next application
+has rank $\max(9,r+3)$. Applying to $v_1$ gives
+$\max(10,r+4)$, and the final application of $v_6$ gives
+$\max(11,r+5)$. Finally, zero has rank 1 and $v_1$ has rank 3.
+\end{proof}
+
+Thus a single small syntax tree certifies a comparison for all models and all
+$n\ge11$. Its rank does not grow with the complexity of the model stored in
+the environment.
+
+\subsection{Why casts must be justified}
+
+A correctly tagged application still uses the repository's \code{castValue}
+function. At W-types, a self-cast traverses the tree with an identity branch
+map, so it should not be dismissed as a purely definitional identity.
+
+\begin{lemma}[Self-casts]\label{lem:casts}
+For every finite type code $A$ and every $x\in\llbracket A\rrbracket$,
+$\operatorname{castValue}(A,x)=x$.
+\end{lemma}
+\begin{proof}
+First prove that the Boolean type equality test recognizes $A=A$, by type
+induction. For every $w\in W(B)$, prove
+$\operatorname{wmap}(\operatorname{id},w)=w$ by W-induction. The leaf case is
+immediate. At a node, the induction hypotheses identify the child functions
+pointwise; function extensionality identifies the functions themselves, and
+congruence identifies the nodes.
+
+Now induct on $A$ to show that the pair of casts from $A$ to itself is
+$(\operatorname{id},\operatorname{id})$. The natural case is immediate. In
+an arrow case, the recursively supplied domain and codomain casts are
+identities, so both composite functions are identities. In a W-case, apply
+the identity branch-map result. The desired statement is the first component
+of this pair identity applied to $x$.
+\end{proof}
+
+The proposed Lean proof uses ordinary function extensionality, which is within
+the repository's allowed axiom framework. Its actual transitive axiom set is
+still a pending compiler audit. No equality of different tree notations or
+ordinal representations is needed.
+
+\begin{lemma}[Certificate semantics]\label{lem:certificate}
+Suppose $s$ evaluates to the natural $k$ in the model environment. Then
+\begin{equation}\label{eq:cert-eval}
+ \Eval_M(f,n,A(s))=
+     \Theta\bigl(\sigma_M(k,\ps,\tau_M(k),n)\bigr).
+\end{equation}
+For $s=\mathsf{zero}$ or $s=v_1$, this value is independent of the external
+oracle $f$, with $k=0$ or $k=n$, respectively.
+\end{lemma}
+\begin{proof}
+The level lookup gives exactly the values listed in Section~\ref{sec:interface}.
+Every application in \eqref{eq:call} matches its declared domain and codomain.
+Lemma~\ref{lem:casts} therefore removes the inserted self-casts. Applying the
+selected forest to the seed, the selected schedule, and the input yields
+$\sigma_M(k,\ps,\tau_M(k),n)$. Level 6 then applies $\Theta$. Neither zero
+nor the input variable consults level 0, and no other part of this certificate
+consults that level.
+\end{proof}
+
+\subsection{Lifting a witness through every forest}
+
+\begin{lemma}[Strict reflection bounds]\label{lem:bounds}
+For every model $M$, family $f$, and input $n$:
+\begin{align*}
+ n&<R_M(f,n),\\
+ i\le n&\Longrightarrow f(i,n)<R_M(f,n),\\
+ t\in\mathcal T_n&\Longrightarrow
+             \Eval_M(f,n,t)<R_M(f,n).
+\end{align*}
+\end{lemma}
+\begin{proof}
+Every indicated value, except the already separately handled $n$, is at most
+the maximum in \eqref{eq:R}. The positive summand $n+1$ makes the inequality
+strict. Also $R_M(f,n)\ge n+1$ because its maximum is nonnegative.
+The prefix and list maximum bounds are elementary inductions on the natural
+prefix length and list membership.
+\end{proof}
+
+\begin{theorem}[Oracle-uniform witness lifting]\label{thm:lifting}
+Fix $M,n,t$ with $t\in\mathcal T_n$. If a natural $b$ satisfies
+\[
+                 \forall f:\Fam,\quad\Eval_M(f,n,t)=b,
+\]
+then for every seed $g$ and every tree $a\in\W$,
+\[
+                         b<S_M(g,a,n).
+\]
+\end{theorem}
+\begin{proof}
+Split into the leaf and node cases of $a$. At a leaf, use
+Lemma~\ref{lem:bounds} with $f=g$. At a node, use the same lemma with
+$f(i,m)=S_M(g,a(i),m)$. The hypothesis explicitly quantifies over this family,
+so the value is still $b$. No induction hypothesis or comparison between the
+different oracles is required.
+\end{proof}
+
+Combining the preceding results yields, for every $M$ and $n\ge11$,
+\begin{align}
+ \Theta\bigl(\sigma_M(0,\ps,\tau_M(0),n)\bigr)&<\Val(M,n),
+       \label{eq:zero-margin}\\
+ \Theta\bigl(\sigma_M(n,\ps,\tau_M(n),n)\bigr)&<\Val(M,n).
+       \label{eq:input-margin}
+\end{align}
+These two inequalities drive the entire numerical proof.
+
+\begin{remark}[No oracle-monotonicity shortcut]
+An object program can test whether an oracle result is zero; thus increasing
+an oracle pointwise can decrease that program's output. This observation
+alone does \emph{not} prove that the maximum defining $R_M$ is nonmonotone,
+since a maximum can behave differently from an individual member. It does
+show why pointwise comparison of oracle families cannot simply be pushed
+through an arbitrary program. Our proofs make no such inference about either
+programs or reflectors. They use a fixed oracle-independent witness instead.
+\end{remark}
+
+\section{Autonomous model ramification}
+\label{sec:models}
+
+\subsection{One step and all finite steps}
+
+Define the successor model by exposing the current model's operations:
+\begin{equation}\label{eq:next}
+ \begin{split}
+ \rho_{\Next(M)}(k)&=R_M,\\
+ \sigma_{\Next(M)}(k)&=S_M,\\
+ \tau_{\Next(M)}(k)&=\idx(M).
+ \end{split}
+\end{equation}
+The selector is ignored at this one-step interface. Let
+\[
+ M^{(0)}=M,\qquad M^{(k+1)}=\Next(M^{(k)}).
+\]
+The closure under all finite steps, denoted $\Omega(M)$, has fields
+\begin{equation}\label{eq:omega}
+ \rho_{\Omega(M)}(k)=R_{M^{(k)}},\quad
+ \sigma_{\Omega(M)}(k)=S_{M^{(k)}},\quad
+ \tau_{\Omega(M)}(k)=\idx(M^{(k)}).
+\end{equation}
+The notation $\Omega$ is a convenient name for this operator. It is
+\emph{not} an asserted ordinal notation or an identification with a set-theoretic
+ordinal. The defining recursion for $M^{(k)}$ is ordinary natural recursion.
+
+A program can calculate a selector $k$ much larger than its own input or
+syntax depth. The specific lower bound will only need selectors zero and
+$n$, but the full operator retains more computational capability.
+
+\subsection{Retaining a base and every child}
+
+For a base model $B$ and a family $i\mapsto M_i$, let
+$J=\MJoin(B,(M_i)_i)$ expose the operations of $B$ at selector zero and of
+$M_i$ at selector $i+1$:
+\begin{equation}\label{eq:join}
+ \begin{array}{lll}
+ \rho_J(0)=R_B,&\sigma_J(0)=S_B,&\tau_J(0)=\idx(B),\\
+ \rho_J(i+1)=R_{M_i},&\sigma_J(i+1)=S_{M_i},&
+                         \tau_J(i+1)=\idx(M_i).
+ \end{array}
+\end{equation}
+The base is retained even when there are children. This explicit zero slot is
+what makes the uniform base lower bound independent of which schedule is
+used. Each child is retained as a full interpreter interface, rather than as
+one numerical output.
+
+Define ramification by structural recursion on $a\in\W$:
+\begin{equation}\label{eq:ramify}
+ \begin{split}
+ \Ram(B,\mathsf{leaf})&=\Omega(B),\\
+ \Ram(B,\mathsf{node}(a))&=
+    \Omega\!\left(\MJoin\bigl(B,(\Ram(B,a(i)))_i\bigr)\right).
+ \end{split}
+\end{equation}
+Thus every node collects all the recursively constructed child models and
+closes the resulting interface under all finite further steps. This recursion
+has values in the fixed host type \code{Model}. It does not quantify over all
+host-level definitions and does not require an internal truth predicate.
+
+\subsection{The closed final model}
+
+The initial model $M_0$ exposes the existing components:
+\begin{equation}\label{eq:base}
+ \rho_{M_0}(k)=R_{\mathrm{old}},\qquad
+ \sigma_{M_0}(k)=S_{\mathrm{old}},\qquad
+ \tau_{M_0}(k)=I_{\mathrm{old}}.
+\end{equation}
+The closed schedule and final model are
+\begin{equation}\label{eq:final}
+ \begin{aligned}
+ M_\omega&=\Omega(M_0),\\
+ a_*&=\idx(M_\omega),\\
+ M_*&=\Ram(M_\omega,a_*),\\
+ M_{\mathrm{final}}&=\Omega(M_*),\\
+ C_7&=\Val(M_{\mathrm{final}},42).
+ \end{aligned}
+\end{equation}
+The defining dependency graph has the forward order
+\[
+ M_0\ \longrightarrow\ M_\omega\ \longrightarrow\ a_*
+ \ \longrightarrow\ M_*\ \longrightarrow\ M_{\mathrm{final}}
+ \ \longrightarrow\ C_7.
+\]
+The schedule is generated by an \emph{already defined lower} model. The
+ramified model does not occur in the definition of its own schedule. The term
+``autonomous'' refers to the language-generated choice of schedule, not to a
+circular equation for a universal self-interpreter.
+
+\section{The complete quantitative proof}
+\label{sec:quantitative}
+
+\subsection{Elementary facts about tower feedback}
+
+\begin{lemma}\label{lem:theta-properties}
+The function $\Theta$ is monotone on $\N$, and $x<\Theta(x)$ for every $x$.
+Every iterate $\Iter\Theta k$ is monotone and inflationary.
+\end{lemma}
+\begin{proof}
+First, $2^x>x$ for every natural $x$. At zero this is $1>0$; the successor
+step follows from $2^{x+1}=2\cdot2^x$ and $2^x\ge x+1$.
+The function $E(x)=2^x$ is monotone. Its iterates are therefore monotone in
+the starting value by induction, and inflationary because each individual
+step is inflationary. They are also monotone in the iteration count.
+
+If $x\le y$, apply these two monotonicity facts to the initial values
+$x+1\le y+1$ and counts $x+1\le y+1$ to obtain
+$\Theta(x)\le\Theta(y)$. Furthermore, the initial value $x+1$ is preserved or
+increased by its $x+1$ iterations, so $x<x+1\le\Theta(x)$.
+Induction gives monotonicity and inflationarity of every $\Theta$ iterate.
+\end{proof}
+
+For clarity, none of the comparison arguments below requires strict
+monotonicity of $\Theta$. Ordinary monotonicity plus the strict inequalities
+from reflection suffices.
+
+\subsection{Successor, finite, and omega bounds}
+
+\begin{proposition}[Model amplification]\label{prop:amplification}
+For every model $M$ and $n\ge11$,
+\begin{align}
+ \Theta(\Val(M,n))&<\Val(\Next(M),n),\label{eq:next-bound}\\
+ \Iter\Theta k(\Val(M,n))&\le\Val(M^{(k)},n)
+          &&(k\in\N),\label{eq:finite-bound}\\
+ \Theta(\Val(M^{(n)},n))&<\Val(\Omega(M),n),\label{eq:omega-diag}\\
+ \Iter\Theta{n+1}(\Val(M,n))&<\Val(\Omega(M),n),\label{eq:omega-bound}\\
+ \Theta(\Val(M,n))&<\Val(\Omega(M),n).\label{eq:omega-base}
+\end{align}
+\end{proposition}
+\begin{proof}
+Use the zero-selector certificate \eqref{eq:zero-margin} in the model
+$\Next(M)$. By its field definitions, the selected forest and schedule are
+$S_M$ and $\idx(M)$, so this is exactly \eqref{eq:next-bound}.
+
+For \eqref{eq:finite-bound}, induct on $k$. The base case is equality. Given
+the bound at $k$, monotonicity of $\Theta$ gives
+\[
+ \Iter\Theta{k+1}(\Val(M,n))
+ \le\Theta(\Val(M^{(k)},n))
+ <\Val(M^{(k+1)},n).
+\]
+Dropping strictness proves the desired successor inequality.
+
+Use the input-selector certificate \eqref{eq:input-margin} in $\Omega(M)$.
+Its selector $n$ exposes $M^{(n)}$, giving \eqref{eq:omega-diag}. Applying
+$\Theta$ to \eqref{eq:finite-bound} with $k=n$ and composing proves
+\eqref{eq:omega-bound}. Finally, using the zero-selector certificate instead
+exposes $M^{(0)}=M$ and proves \eqref{eq:omega-base} directly.
+\end{proof}
+
+\begin{proposition}[Preservation through joins and ramification]
+\label{prop:ram-base}
+For every base $B$, every child family $(M_i)$, every tree $a$, and $n\ge11$,
+\begin{align}
+ \Theta(\Val(B,n))&<\Val(\MJoin(B,(M_i)),n),\label{eq:join-base}\\
+ \Theta(\Val(B,n))&<\Val(\Ram(B,a),n).\label{eq:ram-base}
+\end{align}
+\end{proposition}
+\begin{proof}
+The zero slot of the join contains precisely $S_B$ and $\idx(B)$. Thus
+\eqref{eq:join-base} is another instance of the zero-selector certificate.
+For \eqref{eq:ram-base}, split into the tree's two constructors. At a leaf,
+use \eqref{eq:omega-base}. At a node, write
+$J=\MJoin(B,(\Ram(B,a(i)))_i)$. Then
+\[
+ \Theta(\Val(B,n))<\Val(J,n)
+       <\Theta(\Val(J,n))<\Val(\Omega(J),n).
+\]
+The first inequality is the join bound, the middle one is
+Lemma~\ref{lem:theta-properties}, and the last is the omega base bound. The
+rightmost value is the required ramification value. No inductive comparison
+of the children is needed for this particular lower bound.
+\end{proof}
+
+\subsection{From the old family to the final model}
+
+By the fields of $M_0$, the zero-selector certificate reconstructs the old
+family exactly. For every $n\ge11$,
+\begin{equation}\label{eq:base-bound}
+                     \Theta(\FF_6(n))<\Val(M_0,n).
+\end{equation}
+This is an equality-of-computation comparison, not an ordinal estimate.
+
+\begin{theorem}[Uniform separation]\label{thm:uniform}
+For every natural $n\ge11$,
+\begin{align}
+ \Iter\Theta{n+2}(\FF_6(n))&<\Val(M_\omega,n),\label{eq:initial-final}\\
+ \Iter\Theta{n+3}(\FF_6(n))&<\Val(M_*,n),\label{eq:ram-final}\\
+ \Iter\Theta{n+4}(\FF_6(n))&<\Val(M_{\mathrm{final}},n).
+ \label{eq:final-final}
+\end{align}
+\end{theorem}
+\begin{proof}
+Apply the monotone function $\Iter\Theta{n+1}$ to the non-strict consequence of
+\eqref{eq:base-bound}, then use \eqref{eq:omega-bound}:
+\[
+ \Iter\Theta{n+2}(\FF_6(n))
+ \le\Iter\Theta{n+1}(\Val(M_0,n))
+ <\Val(\Omega(M_0),n).
+\]
+This proves \eqref{eq:initial-final}. Apply $\Theta$ to its non-strict
+consequence and then use \eqref{eq:ram-base} with base $M_\omega$ and tree
+$a_*$. The result is \eqref{eq:ram-final}. Apply $\Theta$ once more and use
+\eqref{eq:omega-base} with $M=M_*$ to get \eqref{eq:final-final}.
+\end{proof}
+
+Theorem~\ref{thm:main} now follows by taking $n=42$, using
+$C_6=\FF_6(42)$ and the definition of $C_7$. Inflationarity gives
+$C_6\le\Iter\Theta{46}(C_6)$, so the ordinary strict comparison follows too.
+
+The proof has deliberately not used most of the strength of the final omega
+closure or the structure of $a_*$. It establishes a readily inspectable
+numerical margin first. The next section explains a structural guarantee that
+would be lost if the schedule were replaced by an arbitrary single leaf.
+
+\section{Cofinality of the generated ramification schedule}
+\label{sec:cofinality}
+
+\subsection{Selecting a particular child}
+
+Let $\overline k$ be the unary numeral obtained from zero by $k$ applications
+of successor. Then $\rank(\overline k)=k+1$, and
+\begin{equation}\label{eq:numeral-rank}
+                  \rank(A(\overline k))=\max\{11,k+6\}.
+\end{equation}
+The use of unary numerals is a proof convenience, not a claim that it gives
+the most compact selectors. The full language can compute much larger
+selectors using shorter programs.
+
+\begin{lemma}[Visible child amplification]\label{lem:child}
+Let $a:\N\to\W$. If $n\ge11$ and $i+7\le n$, then
+\[
+ \Theta\bigl(\Val(\Ram(B,a(i)),n)\bigr)
+       <\Val(\Ram(B,\mathsf{node}(a)),n).
+\]
+In particular the same inequality holds with $\Theta$ omitted from the left.
+\end{lemma}
+\begin{proof}
+Set $M_i=\Ram(B,a(i))$ and $J=\MJoin(B,(M_i))$. The term
+$A(\overline{i+1})$ has rank $\max(11,i+7)\le n$, independently of the
+external oracle. The selected fields of $J$ are $S_{M_i}$ and $\idx(M_i)$.
+The uniform witness lemma gives
+\[
+                   \Theta(\Val(M_i,n))<\Val(J,n).
+\]
+The omega base bound gives
+$\Val(J,n)<\Theta(\Val(J,n))<\Val(\Omega(J),n)$.
+The last model is exactly $\Ram(B,\mathsf{node}(a))$.
+Inflationarity of $\Theta$ gives the unamplified consequence.
+\end{proof}
+
+\subsection{Every fixed definable schedule is eventually dominated}
+
+\begin{theorem}[Interpretation-relative cofinality]\label{thm:cofinality}
+For every base model $B$, model $M$, raw term $t$, and natural parameter $m$,
+there is a natural $N$ such that for every $n\ge N$,
+\begin{equation}\label{eq:cofinality}
+ \Val\bigl(\Ram(B,\td(M,m,t)),n\bigr)
+       <\Val\bigl(\Ram(B,\idx(M)),n\bigr).
+\end{equation}
+\end{theorem}
+\begin{proof}
+Let $d=\rank(t)$. Lemma~\ref{lem:enumeration} gives
+$t\in\mathcal T_d$. A simple induction on list membership supplies some
+position $i$ for which
+$\operatorname{nthD}(\mathcal T_d,i,\mathsf{zero})=t$.
+Choose
+\begin{equation}\label{eq:threshold}
+                N=\max\{11,d+7,m+7,i+7\}.
+\end{equation}
+For $n\ge N$, apply the unamplified conclusion of
+Lemma~\ref{lem:child} three times: first to position $i$, then to parameter
+$m$, and finally to depth $d$. The three node layers are exactly those in
+\eqref{eq:index}. Substituting the list-position equality at the innermost
+leaf gives \eqref{eq:cofinality}.
+\end{proof}
+
+For the final construction, take $B=M=M_\omega$. The intermediate model
+$M_*$ eventually dominates the model ramification along every fixed tree
+that the initially omega-strengthened interpretation produces, at every
+fixed numerical parameter. The final omega closure further dominates this
+intermediate model at all sufficiently large inputs.
+
+Several scope restrictions are essential. The threshold can be large because
+the position in a finite enumeration can be large. The theorem therefore does
+not say that every arbitrarily complicated schedule is already dominated at
+input 42. It is relative to a specified model's denotation of raw terms, not
+to the class of all Lean-definable trees or all computable well-orders. It is
+a numerical comparison of the resulting ramification constructions, not an
+assertion that the index has been assigned a particular ordinal rank.
+
+\section{Diagonal escape without a halting oracle}
+\label{sec:diagonal}
+
+\begin{theorem}[No eventual self-majorant]\label{thm:diagonal}
+Fix a model $M$, a raw term $t$, and any input-dependent family of external
+oracles $n\mapsto f_n$. There is no $N$ such that
+\[
+ \forall n\ge N,\qquad R_M(f_n,n)\le\Eval_M(f_n,n,t).
+\]
+\end{theorem}
+\begin{proof}
+Suppose such an $N$ exists and let $n=\max\{N,\rank(t)\}$. By
+Lemma~\ref{lem:enumeration}, $t\in\mathcal T_n$. The strict program bound of
+Lemma~\ref{lem:bounds} gives
+\[
+ \Eval_M(f_n,n,t)<R_M(f_n,n)\le\Eval_M(f_n,n,t),
+\]
+a contradiction.
+\end{proof}
+
+This diagonal theorem concerns a \emph{fixed} interpretation with its fixed
+interface. The successor construction can denote computations associated with
+the lower interpretation because it changes that interface. Consequently,
+there is no contradiction between the diagonal theorem and the successful
+short certificate that calls the lower forest in the next model.
+
+Nor is there an appeal to a Busy Beaver maximum. The finite lists contain
+terms of an independently total interpreted language. We neither filter all
+Turing programs by whether they halt nor assign values using a noncomputable
+halting predicate. The diagonal quantifiers range over the syntax of the
+specified language, not over every possible terminating host-language program.
+
+\section{Computability and foundational discipline}
+\label{sec:computability}
+
+\subsection{Why the closed number is computable in principle}
+
+The proposed computation uses the following forms of recursion. The existing
+interpreter recurses structurally on raw syntax, with natural and W-recursion
+provided at the denoted types. Prefix maxima and finite term lists use natural
+or list recursion. The new forest operator recurses structurally on its
+W-tree. The finite model tower uses natural recursion, and model ramification
+uses W-tree recursion. All later expressions in \eqref{eq:final} are finite
+compositions of these operations.
+
+This is a constructive recipe, not a classical existence definition of a
+natural. Once the definitions are accepted by the pinned Lean checker, their
+termination is supported by the same inductive-recursion discipline used by
+the baseline \cite{lean-recursion,lean-inductive}. Independently of compiler
+acceptance, the displayed mathematical recursions give the total construction
+and its proofs; the exact Lean source's acceptance is the separate validation
+question recorded in this package.
+
+For a generic argument $M$, the mathematical model record permits arbitrary
+total functions, which need not be computable. No claim is made that
+$\Val(M,n)$ is uniformly computable given a noncomputable external model.
+The computability assertion is about the \emph{closed} $M_0$ and the explicit
+constructors applied to it. Every model field in that closed dependency graph
+has an algorithmic definition; no noncomputable data are supplied at a leaf.
+
+There is no practical route to writing down the final decimal expansion.
+Computability in principle is not a resource-feasibility claim. Even the
+stated lower bound is beyond physical evaluation, and executing the finite
+maximum at depth 42 would itself be inappropriate. The build and proof
+strategy is to check symbolic definitions and inequalities while never
+normalizing either contender.
+
+\subsection{No hidden universes or paradoxical self-evaluation}
+
+The new record has a fixed collection of ordinary higher-order function
+fields. Iterating its construction does not require extending the object type
+syntax with a universe of all models, nor with a type of all host programs.
+The same finite type codes interpret each field at every stage. The host
+language defines the family of interpretations using its own structural
+recursion.
+
+Similarly, $\idx(M)$ is not defined as a join of all trees expressible using
+$\idx(M)$ as a new primitive. It is defined using the operations \emph{already
+stored in} $M$. Only after that index has been defined can \code{next M}
+expose it. This sequencing is exactly what keeps the diagonal argument and
+the construction compatible.
+
+The use of extensional equality in the cast proof is explicit. There is no
+\code{Classical.choice}, admitted theorem, custom axiom, or unsafe evaluation
+mechanism intentionally present in the new source. This source-level design
+statement is weaker than a completed transitive axiom audit. The latter must
+be obtained from the compiled environment, not from a grep result.
+
+\subsection{What has and has not been measured by ordinals}
+
+The upstream review describes rough ordinal calibrations for the language and
+its proposals, and labels them informal \cite{repo-review}. We do not use
+those calibrations as premises. A proof-theoretic ordinal of a theory, an
+ordinal notation system representing tree schedules, and a finite numerical
+comparison at input 42 are different mathematical objects. Identifying one
+with another requires a precisely stated translation and quantitative control
+of fundamental sequences or coding costs.
+
+The present contribution avoids this gap. It gives an exact program witness,
+an exact rank cutoff, exact iteration inequalities, and an explicit eventual
+cofinality threshold. It is meaningful even without determining which
+ordinal-analysis framework best describes the overall model hierarchy.
+
+\section{Formalization architecture and actual validation}
+\label{sec:validation}
+
+\subsection{Source modules}
+
+The new library consists of 823 lines across eight modules, with 32
+\code{def} declarations and 84 \code{theorem} declarations according to the
+included lexical audit. The declaration counts exclude structures and
+abbreviations and are not a proof-complexity measure.
+
+\begin{center}
+\begin{tabular}{@{}p{0.28\textwidth}p{0.66\textwidth}@{}}
+\toprule
+Module & Mathematical role\\
+\midrule
+\src{Definitions.lean} & Fixed model interface, new reflection and forest,
+  generated index, model constructors, closed contender.\\
+\src{Arithmetic.lean} & Inflationarity and monotonicity of exponential
+  feedback and its iterations.\\
+\src{Enumeration.lean} & Type/term rank inclusion and the depth-11
+  certificates, without expanding large enumerations.\\
+\src{Semantics.lean} & Self-cast identity, exact typed application,
+  certificate evaluation.\\
+\src{Reflection.lean} & Finite maximum inequalities, oracle-uniform
+  witness lifting, diagonal non-majorization.\\
+\src{Comparison.lean} & Successor/omega/ramification bounds and the
+  46-fold comparison with the pinned contender.\\
+\src{Selectors.lean} & Unary selectors and the explicit child
+  visibility cost.\\
+\src{Cofinality.lean} & Every fixed definable schedule is eventually
+  dominated by the generated ramification schedule.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The actual proposed scalar theorem names are
+\begin{lstlisting}
+BusyLean.contender_6_tower_lt_contender_7
+BusyLean.contender_6_lt_contender_7
+\end{lstlisting}
+The strongest uniform numerical theorem is \code{BusyLean7.final\_bound};
+the structural theorem is
+\code{BusyLean7.ramify\_index\_eventually\_dominates}.
+The package's root \src{BusyLean7.lean} imports both comparison and cofinality.
+
+\subsection{Independent finite tests}
+
+The Python reference implementation mirrors the raw syntax constructors,
+finite type denotations, casting convention, oldest-first lookup, and small
+finite enumerations. It has explicit safeguards against accidentally
+attempting large computations. The test run recorded in
+\src{evidence/python_tests.json} passed 1,830 assertions.
+
+\begin{center}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Depth & 0 & 1 & 2 & 3 & 4\\
+\midrule
+Number of raw terms & 0 & 2 & 13 & 308 & 147,129\\
+Mock-model numerical maximum & 0 & 0 & 1 & 3 & 5\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The second row of numbers concerns a deliberately small \emph{mock model};
+it is not a sequence of actual values of $C_6$, $C_7$, or the proposed
+self-ramified model. The tests also include 976 checks of the comparison
+certificate across different numerical inputs, external oracles, and
+selectors, as well as 48 small reflector checks. The tested tower values are
+$2$, $16$, and $2^{256}$. Evaluation beyond the guarded tiny cases is refused.
+
+These checks are useful for finding level-order errors, wrong application
+nesting, incorrect syntax-rank offsets, and mistakes in the fallback cast
+behavior. They cannot establish the universal claims of the article and
+cannot establish that Lean accepts a proof term. In particular, a passing
+independent interpreter cannot serve as a substitute for the Lean kernel.
+
+\subsection{The audit ledger}
+
+\begin{center}
+\begin{tabular}{@{}p{0.47\textwidth}p{0.47\textwidth}@{}}
+\toprule
+Check & Recorded outcome\\
+\midrule
+Pinned baseline Git blob identities & All three matched exactly.\\
+Finite Python reference tests & Passed; 1,830 assertions.\\
+Lexical scan of new computational sources & No prohibited tokens found;
+  no direct reference to the forbidden named winners.\\
+New Lean definition elaboration & Not run; compiler unavailable.\\
+New Lean proof checking & Not run; compiler unavailable.\\
+Transitive axiom/dependency audit & Supplied, but not run.\\
+15-second / 60-second clean-build budgets & Unverified.\\
+Evaluation of either contender & Not attempted.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A lexical scan is not a parser, a termination checker, or a dependency-closure
+computation. The proposed Lean audit separately traverses constants in both
+types and values, prints the axioms of submitted roots, and tests forbidden
+constant reachability. Its design follows the pinned repository's audit
+pattern \cite{repo-audit}; its execution remains outstanding.
+
+No \code{sorry} or custom axiom is inserted to make an apparent build succeed.
+If the first real compiler run reports an error, that should be repaired and
+recorded honestly rather than suppressed. The source is modular precisely so
+that enumeration, semantic casts, numerical comparisons, and cofinality can
+be checked in that order without evaluating a huge natural.
+
+\section{Reproduction and integration}
+\label{sec:reproduction}
+
+The ZIP is standalone for the proposed new definition and direct comparison:
+the three necessary old definition files are vendored. It does not require
+fetching the full repository or Mathlib merely to inspect or attempt the new
+build. The toolchain itself must be installed separately.
+
+From the package root, the available finite checks are
+\begin{lstlisting}
+python3 python/test_reference.py
+python3 scripts/source_audit.py
+\end{lstlisting}
+With Lean 4.34.0 and Lake installed, run
+\begin{lstlisting}
+python3 scripts/check.py
+\end{lstlisting}
+The script checks the toolchain, removes the package's Lean build directory,
+builds the definition phase and proof phase separately, runs safe smoke tests,
+and runs the axiom/dependency audit. Missing Lean yields a non-success result
+and an explicit \code{not\_run} receipt, not a fabricated pass. The script
+also records whether measured definition and proof times meet the repository
+budgets. A plain attempted library build is
+\begin{lstlisting}
+cd lean
+lake build BusyLean7
+\end{lstlisting}
+
+The optional \src{integration/Transitive.lean} imports the full pinned
+repository's existing \src{BusyLean/Comparison.lean} and composes its two
+strict inequalities with the proposed $C_6<C_7$ theorem. That optional file is
+outside the standalone build because the old comparison has additional
+port-agreement dependencies that are not needed for the new direct bound.
+It provides the intended statements
+\begin{lstlisting}
+BusyLean.contender_5_lt_contender_7
+BusyLean.p5_lt_contender_7
+\end{lstlisting}
+without modifying or redefining the old contender constants.
+
+For integration into the original repository, copy only the new namespace
+modules and the desired tests, retaining the pinned baseline references for
+review. The old files in this ZIP are source witnesses, not proposed changes
+to their upstream contents. See \src{docs/INTEGRATION.md} for the concrete
+layout and validation order.
+
+Build this article with
+\begin{lstlisting}
+bash scripts/build_pdf.sh
+\end{lstlisting}
+The script runs three \code{pdflatex} passes and writes build logs to the
+evidence directory. The delivered PDF was compiled from the accompanying
+source; its validation receipt is separate from the Lean receipt.
+
+\section{Further research questions}
+\label{sec:future}
+
+\subsection{Complete kernel certification before extending the hierarchy}
+
+The immediate priority is a Lean 4.34.0 build of all eight modules, followed
+by the transitive axiom/dependency audit and the clean timing measurement.
+The generic mathematical lemmas have intentionally been separated from
+scalar specialization to reduce accidental normalization. Any required
+elaboration repairs should preserve the defining equations and the exact
+rank-11 certificate, with a new validation receipt explaining the changes.
+Only after that pass should the proposal be described as a certified
+contest entry.
+
+\subsection{Certify the other proposal constants by translations}
+
+An exact $C_7>P_j$ statement for each of P1--P4 requires a concrete comparison,
+not reliance on the repository's heuristic ranking. One route is to encode
+their primitive tree operations and iteration functionals as fixed programs
+in a sufficiently low model, prove semantic agreement, and track syntax
+rank and parameter overhead. Another is a direct uniform interpretation of
+each proposal's definition into the current forest interface. The finite
+input 42 makes overhead accounting essential; eventual domination by itself
+does not settle the scalar inequality.
+
+\subsection{Reduce selection overhead without changing semantics}
+
+The threshold $i+7\le n$ in the cofinality proof comes from a unary numeral.
+Replacing it with a certified binary or arithmetic construction should make
+many branches visible at much smaller input. The correct theorem would
+state the cost in terms of the length of a verified selector program, not in
+terms of the child index itself. A general oracle-uniform selector lemma is
+already present conceptually; extending its library is a natural next step.
+The three independent schedule indices should be retained during such a
+compression.
+
+\subsection{Use more of the final model in the numerical lower bound}
+
+The final proof only uses the zero slot of the outermost omega closure and a
+base-preservation bound through the generated schedule. Stronger explicit
+bounds should exploit the input selector there, and then use identified
+branches of $a_*$ with small certified positions. The challenge is not
+merely obtaining a larger expression, but doing so with a transparent
+comparison theorem that avoids implicit monotonicity assumptions about
+interpreters.
+
+\subsection{Develop a precise ordinal analysis separately}
+
+A systematic calibration could define a notation system for the model
+constructors, prove a simulation theorem relating that system to the W-tree
+semantics, and derive upper and lower bounds for numerical evaluations.
+Each bridge should specify its coding costs and parameter shifts. It would
+be inappropriate to identify $\Omega(M)$ with a familiar ordinal operation
+solely because both involve a countable family. The exact results in this
+article can serve as constraints and test cases for such an analysis.
+
+\subsection{Generalize the interface and retain quantitative witnesses}
+
+The fixed-signature method applies whenever a total language can expose
+families of lower evaluators and their recursion schedules. Higher-type
+selectors, richer strictly positive data types, or multiple interacting
+schedule families could produce stronger variants. The key design target is
+an invariant short witness whose semantic value is independent of the
+current external oracle. Without such a witness, plausible structural
+strengthening can become difficult to compare at a fixed natural input.
+
+\section{Conclusion}
+
+The new number is obtained from a hierarchy of interpreters rather than from
+an unexplained enormous numeral or a halting oracle. A fixed interface makes
+lower reflection, forest recursion, and language-generated schedules
+available to the next interpretation. Natural iteration and structural
+model-valued W-recursion organize those interpretations without circular
+self-reference.
+
+A single depth-11 certificate proves a large, explicit, uniform gap. The
+result at the repository input is $\Iter\Theta{46}(C_6)<C_7$. The generated
+schedule additionally satisfies an exact eventual domination theorem for
+ramification along every fixed tree definable in the lower model. These are
+proved mathematical statements about the displayed construction, not
+heuristic ordinal rankings.
+
+The remaining boundary is computational verification of the submitted Lean
+text. The package states that boundary prominently, provides reproducible
+checking and audit scripts, and records only checks actually performed. This
+keeps the substantial mathematical proposal separate from the certification
+work that still has to be completed.
+
+\appendix
+\section{Complete new computational definition}
+\label{app:code}
+
+The following is the actual definition module included in the package. It
+imports the pinned current definition to reuse the generic old components;
+its new contender body does not reference the old contender or final unary
+family. Proofs and the transitive dependency audit are in separate files.
+
+\lstinputlisting[style=lean,basicstyle=\ttfamily\scriptsize]{../lean/BusyLean7/Definitions.lean}
+
+\section{Correspondence between mathematical statements and sources}
+\label{app:map}
+
+\begin{longtable}{@{}p{0.40\textwidth}p{0.54\textwidth}@{}}
+\toprule
+Statement & Proposed Lean declaration\\
+\midrule
+\endhead
+Enumeration inclusion & \code{BusyLean7.term\_mem}\\
+Identity W-map & \code{BusyLean7.wmap\_identity}\\
+Identity self-cast & \code{BusyLean7.castValue\_self}\\
+Certificate semantics & \code{BusyLean7.interpret\_amplified}\\
+Successor margin & \code{BusyLean7.next\_margin}\\
+Finite iteration bound & \code{BusyLean7.finite\_bound}\\
+Omega diagonal margin & \code{BusyLean7.omega\_diagonal\_margin}\\
+Omega iteration bound & \code{BusyLean7.omega\_bound}\\
+Ramification base margin & \code{BusyLean7.ramify\_margin}\\
+Uniform final bound & \code{BusyLean7.final\_bound}\\
+46-fold scalar bound & \code{BusyLean.contender\_6\_tower\_lt\_contender\_7}\\
+Strict scalar comparison & \code{BusyLean.contender\_6\_lt\_contender\_7}\\
+Eventual schedule domination & \code{BusyLean7.ramify\_index\_eventually\_dominates}\\
+Diagonal non-majorization & \code{BusyLean7.no\_eventual\_self\_majorant}\\
+\bottomrule
+\end{longtable}
+
+\noindent All entries in this correspondence table refer to supplied source,
+not to completed Lean kernel checks.
+
+\begin{thebibliography}{99}
+\bibitem{repo-readme}
+BusyLean contributors, \emph{BusyLean: name the biggest number, in Lean},
+root README at commit
+\code{86b360648163f0249eab79539438b6a83dfe8215}, retrieved October 12, 2026.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/README.md}{Pinned README and contest rules}.
+
+\bibitem{repo-c6}
+BusyLean contributors, \emph{Contender 6},
+\src{BusyLean/Contender6.lean}, same pinned commit.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/BusyLean/Contender6.lean}{Pinned definition}.
+
+\bibitem{repo-reflection}
+BusyLean contributors, \emph{Reflection over the W-language},
+\src{BusyLean/Reflection.lean}, same pinned commit.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/BusyLean/Reflection.lean}{Pinned reflection source}.
+
+\bibitem{p5-defs}
+BusyLean contributors, \emph{A conservative finite-type W-language and a
+constructive large-number entry}, proposal P5,
+\src{lean/BigNumber/Definitions.lean}, same pinned commit.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/proposals/P5-w-reflection/lean/BigNumber/Definitions.lean}{Pinned language and interpreter}.
+
+\bibitem{repo-comparison}
+BusyLean contributors, \emph{Contender 6: comparison theorems},
+\src{BusyLean/Comparison.lean}, same pinned commit.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/BusyLean/Comparison.lean}{Pinned comparison theorems}.
+
+\bibitem{repo-review}
+BusyLean contributors, \emph{Review of the five incoming proposals},
+\src{proposals/REVIEW.md}, same pinned commit.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/proposals/REVIEW.md}{Pinned review; its ordinal calibrations are explicitly informal}.
+
+\bibitem{repo-audit}
+BusyLean contributors, \emph{Audit}, \src{test/Audit.lean}, same pinned commit.
+\href{https://github.com/VladimirReshetnikov/BusyLean/blob/86b360648163f0249eab79539438b6a83dfe8215/test/Audit.lean}{Pinned dependency and axiom audit pattern}.
+
+\bibitem{lean-recursion}
+Lean development team, \emph{The Lean Language Reference: Recursive
+Definitions}, official documentation, consulted October 12, 2026.
+\href{https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/}{Recursive definitions and termination checking}.
+
+\bibitem{lean-inductive}
+Lean development team, \emph{The Lean Language Reference: Inductive Types},
+official documentation, consulted October 12, 2026.
+\href{https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/}{Inductive types and their recursors}.
+
+\bibitem{lean-release}
+Lean development team, \emph{Lean 4.34.0 release}, official release record.
+\href{https://github.com/leanprover/lean4/releases/tag/v4.34.0}{Pinned toolchain release}.
+\end{thebibliography}
+
+\end{document}

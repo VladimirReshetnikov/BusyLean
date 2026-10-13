@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/VladimirReshetnikov/BusyLean",
+  "commit": "86b360648163f0249eab79539438b6a83dfe8215",
+  "toolchain": "leanprover/lean4:v4.34.0",
+  "retrieval": "GitHub connector, default branch inspected alongside commit/main resolution",
+  "inspected_paths": [
+    "README.md",
+    "proposals/REVIEW.md",
+    "proposals/P5-w-reflection/lean/BigNumber/Definitions.lean",
+    "proposals/P5-w-reflection/lean/BigNumber/Proofs.lean",
+    "BusyLean/Contender6.lean",
+    "BusyLean/Reflection.lean",
+    "BusyLean/ReflectionFacts.lean",
+    "BusyLean/Comparison.lean",
+    "test/Audit.lean",
+    "lakefile.toml"
+  ],
+  "documentation": "https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/",
+  "comparison_scope": [
+    "BusyLean.contender_6",
+    "BigNumber.contender_6 (P5)",
+    "BusyLean.contender_5"
+  ],
+  "not_certified": [
+    "new Lean compilation",
+    "new axiom/dependency audit",
+    "contest resource budgets",
+    "individual P1-P4 fixed-input comparisons"
+  ]
+}

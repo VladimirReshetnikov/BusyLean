@@ -1,0 +1,8 @@
+{
+  "toolchain": "leanprover/lean4:v4.34.0",
+  "status": "unavailable",
+  "phases": [],
+  "definition_budget_seconds": 15,
+  "proof_budget_seconds": 60,
+  "reason": "No lake/Lean executable is installed"
+}

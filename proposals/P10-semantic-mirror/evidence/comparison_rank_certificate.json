@@ -1,0 +1,124 @@
+{
+  "constructor": "app",
+  "available_depth": 17,
+  "required_rank": 17,
+  "children": [
+    {
+      "constructor": "var",
+      "available_depth": 16,
+      "required_rank": 6,
+      "children": []
+    },
+    {
+      "constructor": "app",
+      "available_depth": 16,
+      "required_rank": 16,
+      "children": [
+        {
+          "constructor": "app",
+          "available_depth": 15,
+          "required_rank": 15,
+          "children": [
+            {
+              "constructor": "app",
+              "available_depth": 14,
+              "required_rank": 5,
+              "children": [
+                {
+                  "constructor": "var",
+                  "available_depth": 13,
+                  "required_rank": 2,
+                  "children": []
+                },
+                {
+                  "constructor": "var",
+                  "available_depth": 13,
+                  "required_rank": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "constructor": "app",
+              "available_depth": 14,
+              "required_rank": 14,
+              "children": [
+                {
+                  "constructor": "wnode",
+                  "available_depth": 13,
+                  "required_rank": 2,
+                  "children": []
+                },
+                {
+                  "constructor": "lam",
+                  "available_depth": 13,
+                  "required_rank": 13,
+                  "children": [
+                    {
+                      "constructor": "app",
+                      "available_depth": 12,
+                      "required_rank": 12,
+                      "children": [
+                        {
+                          "constructor": "wnode",
+                          "available_depth": 11,
+                          "required_rank": 2,
+                          "children": []
+                        },
+                        {
+                          "constructor": "lam",
+                          "available_depth": 11,
+                          "required_rank": 11,
+                          "children": [
+                            {
+                              "constructor": "app",
+                              "available_depth": 10,
+                              "required_rank": 10,
+                              "children": [
+                                {
+                                  "constructor": "app",
+                                  "available_depth": 9,
+                                  "required_rank": 9,
+                                  "children": [
+                                    {
+                                      "constructor": "var",
+                                      "available_depth": 8,
+                                      "required_rank": 3,
+                                      "children": []
+                                    },
+                                    {
+                                      "constructor": "var",
+                                      "available_depth": 8,
+                                      "required_rank": 8,
+                                      "children": []
+                                    }
+                                  ]
+                                },
+                                {
+                                  "constructor": "var",
+                                  "available_depth": 9,
+                                  "required_rank": 9,
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "constructor": "var",
+          "available_depth": 15,
+          "required_rank": 5,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

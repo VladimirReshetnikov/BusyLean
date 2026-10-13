@@ -1,0 +1,47 @@
+PDF: /mnt/data/BusyLean_Contender7/article/contender7.pdf
+Pages: 21
+Encrypted: False
+Page sizes (pt, rounded):
+  - 612 x 792 (21 page(s))
+Metadata:
+  /Author: 
+  /CreationDate: D:20261013022723Z
+  /Creator: LaTeX with hyperref
+  /Keywords: Lean, large numbers, reflection, W-types, proof theory
+  /ModDate: D:20261013022723Z
+  /PTEX.Fullbanner: This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) kpathsea version 6.4.0/dev
+  /Producer: pdfTeX-1.40.26
+  /Subject: A constructive large-number proposal for BusyLean
+  /Title: Contender 7: Autonomous Operator Reflection in Lean
+  /Trapped: /False
+Outline items: 47
+Form fields: 0
+Attachments: 0
+Annotations: 48
+
+Fonts (pdffonts, first 25 lines):
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+WQXPXO+LMRoman12-Bold                Type 1            Custom           yes yes yes    209  0
+LFQLBF+LMRoman12-Regular             Type 1            Custom           yes yes yes    210  0
+HTXVCR+LMRoman10-Bold                Type 1            Custom           yes yes yes    211  0
+QQWQLG+LMRoman10-Regular             Type 1            Custom           yes yes yes    212  0
+KSWJDU+LMRoman10-Italic              Type 1            Custom           yes yes yes    213  0
+WXJING+LMMono10-Regular              Type 1            Custom           yes yes yes    214  0
+QQWQLG+LMRoman10-Regular             Type 1            Custom           yes yes yes    215  0
+XTAJRJ+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    216  0
+TQKFST+LMSans10-Regular              Type 1            Custom           yes yes yes    217  0
+ZFCLZL+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    218  0
+FEFYLO+LMMathItalic7-Regular         Type 1            Custom           yes yes yes    219  0
+GHEYNL+LMRoman5-Regular              Type 1            Custom           yes yes yes    220  0
+IVTAWI+LMMathItalic5-Regular         Type 1            Custom           yes yes yes    221  0
+ONDJJC+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    269  0
+ASHKGF+LMMono9-Regular               Type 1            Custom           yes yes yes    270  0
+MFTCYA+LMMathItalic9-Regular         Type 1            Custom           yes yes yes    273  0
+CMFQYL+LMMono8-Regular               Type 1            Custom           yes yes yes    274  0
+TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    275  0
+TGBQMU+LMMathSymbols9-Regular        Type 1            Custom           yes yes yes    278  0
+WKNEQI+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    285  0
+KSULHP+LMRoman8-Regular              Type 1            Custom           yes yes yes    288  0
+BMSVLQ+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    320  0
+ANTFCB+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    321  0

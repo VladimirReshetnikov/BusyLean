@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "page_count": 19,
+  "latex_engine": "pdfTeX / TeX Live 2025",
+  "renderer": "Poppler pdftoppm, 85 DPI",
+  "latex_overfull_boxes": 0,
+  "latex_undefined_references": 0,
+  "text_blocks_outside_pages": [],
+  "visual_review": "All-page contact sheet inspected; detailed title, rank-proof and theorem-map pages inspected",
+  "lean_verification_status": "NOT_RUN; PDF compilation is unrelated to Lean checking",
+  "python_source_parse_check": "PASS"
+}

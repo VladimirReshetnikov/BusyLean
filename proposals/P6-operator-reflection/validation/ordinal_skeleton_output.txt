@@ -1,0 +1,12 @@
+PASS: finite exponent skeleton
+Contender 6 proxy: lambda^2
+outer height 0: lambda^2
+outer height 1: lambda^3
+outer height 2: lambda^4
+outer height 3: lambda^5
+outer height 4: lambda^6
+outer height 5: lambda^7
+outer height 6: lambda^8
+outer height 7: lambda^9
+outer height 8: lambda^10
+universal outer height lambda: heuristic limit lambda^lambda

@@ -1,0 +1,9 @@
+{
+  "status": "NOT_RUN",
+  "expected_version": "4.34.0",
+  "kernel_checked": false,
+  "budget_pass": null,
+  "records": [],
+  "candidate_evaluated": false,
+  "reason": "Lean executable is not installed or not on PATH."
+}

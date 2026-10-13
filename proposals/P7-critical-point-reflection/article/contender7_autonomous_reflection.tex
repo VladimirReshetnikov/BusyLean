@@ -1,0 +1,865 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{url}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!45!black,
+  pdftitle={BusyLean Contender 7: Autonomous Critical-Point Reflection},
+  pdfauthor={OpenAI research assistant for Vladimir Reshetnikov}
+}
+
+\lstdefinelanguage{Lean}{
+  keywords={def,theorem,inductive,namespace,end,open,import,where,match,with,fun,let,in,by,exact,change,forall,termination_by},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]"
+}
+\lstset{
+  language=Lean,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{blue!45!black},
+  commentstyle=\itshape\color{black!58},
+  frame=single,
+  framerule=0.35pt,
+  rulecolor=\color{black!30},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  xleftmargin=0.75em,
+  xrightmargin=0.75em
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{construction}[theorem]{Construction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{warning}[theorem]{Warning}
+
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\OT}{\ensuremath{\mathsf{OTree}}}
+\newcommand{\WT}{\ensuremath{\mathsf{WTree}}}
+\newcommand{\Stage}{\ensuremath{\mathsf{stage}}}
+\newcommand{\Reflect}{\ensuremath{\mathsf{reflect}}}
+\newcommand{\Index}{\ensuremath{\mathsf{index}}}
+\newcommand{\Cseven}{\ensuremath{\mathsf{C}_7}}
+\newcommand{\Csix}{\ensuremath{\mathsf{C}_6}}
+\newcommand{\lean}[1]{\texttt{#1}}
+
+\title{\textbf{BusyLean Contender 7}\\[0.35em]
+\Large Autonomous Critical-Point Reflection over a Self-Generated W-Tree Index}
+\author{Research proposal prepared for the BusyLean project}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The BusyLean repository asks for closed, constructive Lean definitions of very
+large natural numbers together with kernel-checked proofs that each new entry
+exceeds the preceding one.  The current entry, Contender~6, applies forest
+reflection over a finite-type W-language along an index that joins every
+$W\N$-tree definable in that same language.  This paper proposes Contender~7,
+called \emph{autonomous critical-point reflection}.
+
+The construction first embeds the Contender~6 index into a transparent
+Brouwer-tree syntax.  It then closes that seed under ordinal-style addition,
+multiplication, exponentiation, fixed-point enumeration, a finite hierarchy of
+critical functions, a diagonal common-critical-point operation, and forty-two
+levels of higher derivatives.  The resulting autonomous payloads are inserted
+into a guarded branch tower.  Every successor branch contains the entire
+preceding branch as child~0 and the next autonomous payload as child~1.  At
+input~42, the outer reflection root exposes branch~42.  Lean therefore proves a
+chain of forty-three strict reflection steps above the complete Contender~6
+index, as well as a separate strict lower bound by the level-41 autonomous
+payload.
+
+The exact submitted definition is a closed term
+\lean{BusyLean.contender\_7 : Nat}.  All recursion is structural; no
+\lean{noncomputable}, \lean{partial}, \lean{unsafe}, custom axiom,
+\lean{Classical.choice}, previous contender constant, or evaluation shortcut is
+used.  The formal theorem is
+\[
+  \lean{BusyLean.contender\_6\_lt\_contender\_7} :
+  \lean{contender\_6 < contender\_7}.
+\]
+The theorem is independent of any informal ordinal calibration.  The latter is
+presented separately and explicitly labelled as heuristic.
+\end{abstract}
+
+\tableofcontents
+
+%=====================================================================
+\section{Problem and result}
+
+\subsection{The BusyLean setting}
+
+BusyLean is a Lean~4 continuation of the ``name the biggest number'' style of
+formal competition.  A legitimate entry is not merely a suggestive notation:
+it is a closed Lean definition of type \lean{Nat}, constructive and computable
+in principle, accompanied by a kernel-checked strict comparison with the
+incumbent.  The repository's engineering rules also exclude the usual escape
+hatches: no classical choice in computational dependencies, no custom axioms,
+no \lean{sorry}, no \lean{native\_decide} certificate, and no definition that
+simply invokes the previous named contender.
+
+The incumbent in the repository at the time of this work is Contender~6:
+\begin{lstlisting}
+def contender_6 : Nat := stage p5Family index 42
+\end{lstlisting}
+Here \lean{stage} is forest reflection over a W-type object language, and
+\lean{index} is assembled from every $W\N$-tree denoted by an enumerated program
+of that language.  Its comparison with the exact Lean port of Contender~5 is
+already proved in the repository.
+
+\subsection{The proposed entry}
+
+The new definition is:
+\begin{lstlisting}
+def contender7Base : Autonomous.OTree :=
+  Autonomous.encode index
+
+def contender7RawBranch (k : Nat) : WTree Nat :=
+  Autonomous.realize
+    (Autonomous.hyper k
+      (Autonomous.OTree.succ contender7Base))
+
+def contender7Branch : Nat -> WTree Nat
+  | 0 => index
+  | k + 1 =>
+      .node (fun i =>
+        match i with
+        | 0 => contender7Branch k
+        | _ + 1 => contender7RawBranch k)
+
+def contender7Index : WTree Nat :=
+  .node contender7Branch
+
+def contender7Family (n : Nat) : Nat :=
+  stage p5Family contender7Index n
+
+def contender_7 : Nat := contender7Family 42
+\end{lstlisting}
+
+The construction has two deliberately separate margins.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{A fully formal guard margin.}  Branch~0 is exactly the complete
+  Contender~6 index.  Branch $k+1$ contains branch $k$ as child~0.  Thus, at
+  input~42, Lean proves
+  \[
+    \Stage(B_0,42)<\Stage(B_1,42)<\cdots<\Stage(B_{42},42)
+       <\Stage(\mathsf{root},42).
+  \]
+  This is a chain of forty-three strict reflection steps above the old index.
+\item \textbf{An autonomous ordinal-style payload.}  Branch $k+1$ also contains
+  as child~1 a realization of the $k$-th higher derivative of a
+  common-critical-point closure above the encoded old index.  Hence branch~42
+  formally exceeds the level-41 payload, and the final root exceeds branch~42.
+\end{enumerate}
+
+The required theorem is proved through the long guard chain rather than by the
+shorter direct observation that branch~0 is a child of the root.  This records a
+meaningful structural margin in the proof term itself.
+
+%=====================================================================
+\section{The inherited reflection engine}
+
+This proposal deliberately reuses the trusted reflection mechanism already
+present in BusyLean.  Only the index schedule is strengthened.
+
+\subsection{Oracle families and one-step reflection}
+
+A family is a binary natural-valued oracle:
+\[
+  \mathsf{Family}=\N\to\N\to\N.
+\]
+For a family $F$, the existing repository defines
+\[
+\Reflect(F,n)
+ = n+1+
+ \max\!\left(
+   \max_{i\le n}F(i,n),
+   \max_{t\in\mathsf{allTerms}(n)}\mathsf{evalWith}(F,t)
+ \right).
+\]
+The implementation uses primitive list maxima and the enumerator of the
+finite-type W-language.  Therefore every visible oracle value and every visible
+program value is strictly smaller than \Reflect$(F,n)$.
+
+\subsection{Forest reflection}
+
+For $a:\WT(\N)$, the inherited function \Stage is defined structurally:
+\begin{lstlisting}
+def stage (seed : Family) : WTree Nat -> Nat -> Nat
+  | .leaf   => reflect seed
+  | .node f => reflect (fun i => stage seed (f i))
+\end{lstlisting}
+At a node, the oracle family is precisely the family of recursively computed
+child stages.  The key theorem is:
+\begin{theorem}[Visible-child domination]
+For every seed family $S$, child function $f:\N\to\WT(\N)$, input $n$, and
+index $i\le n$,
+\[
+  \Stage(S,f(i),n)<\Stage(S,\mathsf{node}(f),n).
+\]
+\end{theorem}
+
+This theorem is the only fact required for the formal comparison.  No
+monotonicity of reflection in the oracle is used, because such monotonicity is
+false in general: an object-language program may inspect an oracle value and
+branch in a way that reverses a pointwise comparison.
+
+\subsection{Contender 6 as the seed schedule}
+
+Contender~6's \lean{index} is a node whose $k$-th child joins, in enumeration
+order, all trees denoted by programs of depth at most $k$.  Thus the old
+schedule already reflects along the object language's own definable trees.  In
+this proposal that entire schedule is treated as one indivisible base object.
+It is not re-enumerated, approximated, or replaced by a weaker external
+notation.
+
+%=====================================================================
+\section{A transparent autonomous tree language}
+
+\subsection{Raw syntax}
+
+We introduce a small Brouwer-tree syntax:
+\begin{lstlisting}
+inductive OTree : Type where
+  | zero  : OTree
+  | succ  : OTree -> OTree
+  | limit : (Nat -> OTree) -> OTree
+\end{lstlisting}
+The type is inductive and strictly positive.  Every inhabitant is a finite Lean
+value that may contain functions producing further finite values.  Structural
+recursion on this W-type is accepted by Lean's termination checker.
+
+One can assign an external ordinal reading by
+\[
+\begin{aligned}
+  |\mathsf{zero}| &= 0,\\
+  |\mathsf{succ}(a)| &= |a|+1,\\
+  |\mathsf{limit}(f)| &= \sup_{n<\omega}(|f(n)|+1).
+\end{aligned}
+\]
+This interpretation is explanatory only; the submitted Lean comparison does
+not depend on an ordinal quotient, ordinal equality, or a formalization of
+countable ordinals.
+
+\subsection{Arithmetic constructors}
+
+The source defines syntax-level addition, multiplication, and exponentiation by
+structural recursion in the right argument:
+\begin{lstlisting}
+def add (a : OTree) : OTree -> OTree
+  | .zero    => a
+  | .succ b  => .succ (add a b)
+  | .limit f => .limit (fun n => add a (f n))
+
+def mul (a : OTree) : OTree -> OTree
+  | .zero    => .zero
+  | .succ b  => add (mul a b) a
+  | .limit f => .limit (fun n => mul a (f n))
+
+def pow (a : OTree) : OTree -> OTree
+  | .zero    => .succ .zero
+  | .succ b  => mul (pow a b) a
+  | .limit f => .limit (fun n => pow a (f n))
+\end{lstlisting}
+With the usual cofinality hypotheses on limit sequences, these are the familiar
+recursive clauses for ordinal addition, multiplication, and exponentiation.
+The code intentionally avoids asserting quotient-level algebraic laws that have
+not been formalized.
+
+Let \lean{omega} be the limit of finite successor chains, and define
+\lean{omegaPow a := pow omega a}.  This supplies the level-zero normal-function
+syntax $\alpha\mapsto\omega^\alpha$.
+
+\subsection{Fixed-point enumeration}
+
+For a syntax transformer $F:\OT\to\OT$, define
+\begin{lstlisting}
+def derivative (f : OTree -> OTree) (a : OTree) : OTree :=
+  .limit (fun n => iterate f (n + 1) (.succ a))
+\end{lstlisting}
+
+The mathematical motivation is Veblen's fixed-point construction.
+
+\begin{proposition}[Classical fixed-point calculation]
+Let $F$ be a normal ordinal function, and let $a$ be an ordinal.  Put
+$x_0=a+1$, $x_{n+1}=F(x_n)$, and $\lambda=\sup_{n<\omega}x_n$.  Then
+$F(\lambda)=\lambda$, and $\lambda$ is the least fixed point of $F$ not below
+$x_0$.
+\end{proposition}
+
+\begin{proof}
+Continuity gives
+$F(\lambda)=F(\sup_n x_n)=\sup_n F(x_n)=\sup_n x_{n+1}=\lambda$.
+If $y\ge x_0$ and $F(y)=y$, monotonicity gives $x_n\le y$ for every $n$ by
+induction, hence $\lambda\le y$.
+\end{proof}
+
+The Lean term \lean{derivative} is total without assuming normality.  Normality
+is needed only for the intended ordinal interpretation.
+
+\subsection{Critical hierarchy and autonomous closure}
+
+Define finite critical levels by
+\[
+\begin{aligned}
+ C_0(a) &= \omega^a,\\
+ C_{k+1}(a) &= C_k'(a),
+\end{aligned}
+\]
+where the prime denotes the preceding fixed-point enumerator.  In Lean:
+\begin{lstlisting}
+def critical : Nat -> OTree -> OTree
+  | 0, a     => omegaPow a
+  | k + 1, a => derivative (fun b => critical k b) a
+\end{lstlisting}
+
+Next take a diagonal common-critical-point closure:
+\begin{lstlisting}
+def autonomous (a : OTree) : OTree :=
+  .limit (fun k => critical (k + 1) (.succ a))
+\end{lstlisting}
+The word ``autonomous'' refers to the classical proof-theoretic idea of closing
+an ordinal notation under successively stronger critical operations rather than
+choosing one fixed external level.  The construction is Veblen-inspired and
+Gamma-like, but this paper intentionally does \emph{not} identify its exact
+quotient-level order type with $\Gamma_0$ or any other named ordinal.  Such an
+identity would require a formal semantic development and a careful analysis of
+fundamental sequences.
+
+Finally, iterate the fixed-point operation on the autonomous transformer:
+\begin{lstlisting}
+def hyper : Nat -> OTree -> OTree
+  | 0, a     => autonomous a
+  | k + 1, a => derivative (fun b => hyper k b) a
+\end{lstlisting}
+At input 42, the proposed contender exposes \lean{hyper 41}.  This is a finite
+closed definition, not an appeal to an unbounded search or a noncomputable
+``least undefinable'' object.
+
+%=====================================================================
+\section{Embedding the old index and realizing new schedules}
+
+\subsection{Encoding and realization}
+
+The old reflection engine expects \lean{WTree Nat}, whereas the autonomous
+operators act on \lean{OTree}.  Two transparent structural maps connect them:
+\begin{lstlisting}
+def encode : WTree Nat -> OTree
+  | .leaf   => .zero
+  | .node f => .limit (fun n => encode (f n))
+
+def realize : OTree -> WTree Nat
+  | .zero   => .leaf
+  | .succ a =>
+      .node (fun n =>
+        match n with
+        | 0     => realize a
+        | _ + 1 => .leaf)
+  | .limit f => .node (fun n => realize (f n))
+\end{lstlisting}
+
+Under the rank convention
+$\operatorname{rk}(\mathsf{leaf})=0$ and
+$\operatorname{rk}(\mathsf{node}(f))=\sup_n(\operatorname{rk}(f(n))+1)$,
+\lean{realize} has the expected behavior: zero becomes rank~0, successor adds a
+visible predecessor child, and limit preserves a countable supremum.  Again,
+rank preservation is an intended semantic invariant, not an assumption used by
+the strict numerical comparison.
+
+\subsection{Why the seed is not merely an external notation}
+
+The base term is
+\[
+  B=\lean{Autonomous.encode BusyLean.index}.
+\]
+Thus the autonomous hierarchy starts \emph{above the actual self-generated
+Contender~6 schedule}.  This matters.  A fixed Veblen notation built from zero
+could remain far below the proof-theoretic strength already encoded by the
+W-language.  Starting from the old index instead applies the critical-point
+operations to that stronger base rather than attempting to catch it from below.
+
+The level-$k$ payload is
+\[
+  R_k=\mathsf{realize}\bigl(\mathsf{hyper}_k(\mathsf{succ}(B))\bigr).
+\]
+The successor ensures that the first iteration begins strictly above the base
+under the intended ordinal reading.
+
+%=====================================================================
+\section{The guarded branch tower}
+
+\subsection{Definition}
+
+Let $B_0=\Index$.  Recursively define
+\[
+  B_{k+1}=\mathsf{node}(g_k),\qquad
+  g_k(0)=B_k,\qquad g_k(i+1)=R_k.
+\]
+This is exactly \lean{contender7Branch}.  The final index is
+\[
+  J_7=\mathsf{node}(k\mapsto B_k).
+\]
+At input $n$, the reflection root is guaranteed to see every branch $B_i$ with
+$i\le n$.  Therefore input~42 sees $B_{42}$.
+
+\subsection{Why the guard is useful}
+
+The autonomous payload is intended to be much stronger than the old index, but
+a proof of that statement at the level of ordinal semantics would be a separate
+formalization project.  The guard tower isolates the concerns:
+
+\begin{itemize}[leftmargin=*]
+\item the exact strict comparison with Contender~6 follows from the already
+  trusted visible-child theorem;
+\item the autonomous payload can be studied, strengthened, or replaced without
+  endangering that comparison;
+\item the proof term explicitly records forty-two strict internal stages rather
+  than hiding the old index in a single opaque maximum;
+\item child~1 witnesses that the large payload is genuinely present in the
+  computed reflection family, not just discussed in comments.
+\end{itemize}
+
+The repetition of $R_k$ at every positive child index is intentional.  At any
+input $n\ge1$, the payload is visible.  It also avoids an auxiliary default
+branch and keeps the definitional reductions at indices 0 and 1 transparent.
+
+%=====================================================================
+\section{Formal comparison in Lean}
+
+\subsection{One guarded step}
+
+The repository theorem \lean{stage\_child\_lt} immediately gives:
+\begin{lstlisting}
+theorem contender7_branch_step_lt (k n : Nat) :
+    stage p5Family (contender7Branch k) n <
+      stage p5Family (contender7Branch (k + 1)) n := by
+  -- child 0 of branch (k+1) is branch k
+  exact stage_child_lt p5Family childFamily
+    (i := 0) (n := n) (Nat.zero_le n)
+\end{lstlisting}
+The submitted source spells out \lean{childFamily} as the defining match, so
+there is no extensionality argument or hidden rewrite.
+
+Similarly, for $n\ge1$, child~1 yields
+\[
+  \Stage(R_k,n)<\Stage(B_{k+1},n).
+\]
+
+\subsection{The forty-two-step chain}
+
+Primitive recursion on $k$ composes the strict inequalities:
+\begin{lstlisting}
+theorem contender7_branch_zero_lt_succ :
+    forall k n : Nat,
+      stage p5Family (contender7Branch 0) n <
+        stage p5Family (contender7Branch (k + 1)) n
+  | 0, n => contender7_branch_step_lt 0 n
+  | k + 1, n =>
+      Nat.lt_trans (contender7_branch_zero_lt_succ k n)
+        (contender7_branch_step_lt (k + 1) n)
+\end{lstlisting}
+Instantiating $k=41$ and $n=42$ gives
+\[
+  \Stage(B_0,42)<\Stage(B_{42},42).
+\]
+Because $B_0$ is definitionally the old \lean{index}, the left side is exactly
+Contender~6.
+
+\subsection{The outer step and final theorem}
+
+Branch~42 is child~42 of the outer root and $42\le42$, so
+\[
+  \Stage(B_{42},42)<\Stage(J_7,42)=\Cseven.
+\]
+Transitivity yields:
+\begin{theorem}[Kernel-checked comparison]
+\[
+  \lean{BusyLean.contender\_6 < BusyLean.contender\_7}.
+\]
+\end{theorem}
+The Lean declaration is
+\lean{BusyLean.contender\_6\_lt\_contender\_7}.
+
+A second theorem composes this with the repository's existing comparison from
+Contender~5:
+\[
+  \lean{BusyLean.contender\_5 < BusyLean.contender\_7}.
+\]
+
+\subsection{Payload inclusion theorem}
+
+Since $R_{41}$ is child~1 of $B_{42}$ and $1\le42$, Lean also proves
+\[
+  \Stage(R_{41},42)<\Stage(B_{42},42)<\Cseven.
+\]
+The final declaration is \lean{BusyLean.hyper41\_lt\_contender\_7}.  This
+separates the formal fact that the payload participates in the number from the
+informal claim about its ordinal magnitude.
+
+%=====================================================================
+\section{Computability and constructive status}
+
+\subsection{Why the number is computable in principle}
+
+Every definition used by Contender~7 is a total Lean function:
+
+\begin{itemize}[leftmargin=*]
+\item \lean{iterate}, \lean{ofNat}, \lean{critical}, \lean{hyper}, and
+  \lean{contender7Branch} recurse structurally on \lean{Nat};
+\item \lean{add}, \lean{mul}, \lean{pow}, and \lean{realize} recurse
+  structurally on \lean{OTree};
+\item \lean{encode} and the inherited \lean{stage} recurse structurally on
+  well-founded W-trees;
+\item all maxima range over finite lists generated from a finite depth;
+\item the final term is closed and has type \lean{Nat}.
+\end{itemize}
+
+Lean's acceptance of the definitions is itself a termination certificate for
+these recursive equations.  In particular, the construction uses no halting
+oracle, Busy Beaver function, minimization over an undecidable predicate, or
+choice of an unspecified witness.
+
+\subsection{Why non-evaluation is not noncomputability}
+
+The numerical value is far beyond feasible evaluation.  That is expected and
+does not conflict with computability.  A closed structurally recursive program
+can have an astronomically long reduction sequence.  The contest compares such
+terms intensionally, through proved inequalities, rather than attempting to
+print their decimal expansions.
+
+\subsection{Dependency discipline}
+
+The audit checks that \lean{contender\_7} does not depend on the named constants
+\lean{contender\_5}, \lean{contender\_6}, their comparison theorems, the old
+\lean{maxBy} winner, or P5's named contender constants.  It does reuse the
+structural ingredients \lean{index}, \lean{stage}, and \lean{p5Family}; this is
+analogous to extending a hierarchy from its previous notation system rather
+than inserting the previous final numeral as a seed.
+
+As with Contender~6, the inherited P5 seed family contains its historical
+\lean{oldMaximum} guard as a function of depth.  The package discloses this
+rather than presenting the dependency closure as cleaner than it is.
+
+%=====================================================================
+\section{Growth analysis: formal facts versus heuristic calibration}
+
+\subsection{What is formally established}
+
+The following statements require no ordinal analysis:
+
+\begin{enumerate}[leftmargin=*]
+\item Contender~6 is strictly smaller than Contender~7.
+\item The proof factors through forty-two guarded branch steps and one outer
+  root step.
+\item The level-41 autonomous payload is strictly smaller than Contender~7.
+\item The definition is total and constructive in Lean.
+\end{enumerate}
+
+These are the claims on which adoption as the next BusyLean contender can rest.
+
+\subsection{Intended ordinal reading}
+
+For an informal scale comparison, write $\alpha$ for the rank of the old
+self-generated index and $L$ for the effective strength of one reflection step
+using the W-language.  The repository's current heuristic describes
+Contender~6 as roughly a fast-growing value at an index of the form
+$L\cdot\alpha$.
+
+Let $H_0$ denote the diagonal common-critical-point transformer generated by
+\lean{autonomous}, and let $H_{k+1}$ enumerate fixed points of $H_k$.  Under the
+normal-function interpretation of the OTree constructors, the raw payload
+$R_{41}$ has rank on the scale
+\[
+  H_{41}(\alpha+1).
+\]
+Consequently the new schedule has rank at least that large, plus the finite
+guard and root structure, and the reflected numerical value is heuristically on
+a scale resembling
+\[
+  F_{L\cdot H_{41}(\alpha+1)}(42),
+\]
+whereas the old entry is on the scale $F_{L\cdot\alpha}(42)$.
+
+This is a qualitative statement: repeated fixed-point enumeration above
+$\alpha$ should dwarf multiplication by $\alpha$ or any finite stack of ordinary
+reflection steps.
+
+\begin{warning}
+The expression above is not a theorem of the submitted Lean development.  It
+depends on an external ordinal semantics for OTree, rank preservation of
+\lean{encode}/\lean{realize}, normality of the generated transformers, and a
+calibration of the object-language reflection operator.  The package therefore
+uses words such as ``intended'', ``heuristic'', and ``on the scale of'' rather
+than attaching a false precision to a named proof-theoretic ordinal.
+\end{warning}
+
+\subsection{Why this still constitutes a significant advance}
+
+Even without the heuristic, the advance is not merely the definition
+\lean{contender\_6 + 1}.  The new number performs fresh forest reflection over:
+
+\begin{itemize}[leftmargin=*]
+\item the complete old self-generated index;
+\item forty-two recursively guarded extensions of that index;
+\item an explicit hierarchy of critical-point payloads built above the old
+  index, culminating in the level-41 higher derivative;
+\item an outer root that exposes the whole branch family to the relativized
+  W-language.
+\end{itemize}
+
+Thus the construction adds a new schedule language and a new layer of
+reflection, while preserving a short, auditable comparison proof.
+
+%=====================================================================
+\section{Verification protocol}
+
+The archive includes the exact Lean sources, the workflow used for verification,
+and captured logs.  The intended checks are:
+
+\begin{enumerate}[leftmargin=*]
+\item cleanly build \lean{BusyLean.Contender7}, which contains definitions only;
+\item build the full library including \lean{BusyLean.Comparison7};
+\item run \lean{test/Contender7Audit.lean};
+\item print the axiom dependencies of the final definition and principal
+  theorems;
+\item assert that the definition's transitive dependency closure avoids the
+  forbidden previous contender constants and winner selectors;
+\item record the exact Lean and Lake versions.
+\end{enumerate}
+
+The final verification run succeeded on GitHub Actions at repository commit
+\begin{center}
+\lean{c01efa921d20fcb1d731329ef5582fd16c933fcb}
+\end{center}
+using Lean~4.34.0 (kernel commit
+\lean{293d5d0c0c3f3dded4688b3ccd6a33939ac5102b}) and Lake~5.0.0 on
+Ubuntu~24.04.  With both Lake build directories removed, the definition phase
+took 1.45 seconds against a 15-second budget, and the remaining proof phase took
+2.15 seconds against a 60-second budget.  Seventeen declarations across the
+historical and new audits were checked; every reported axiom belonged to the
+allowlist $\{\lean{propext},\lean{Quot.sound}\}$.  The new definition and each
+principal Contender~7 theorem reported \lean{propext} only.  The transitive
+closure of \lean{contender\_7} contained 575 constants and avoided all eight
+forbidden previous-winner names.  The feasible sanity check evaluated
+\lean{contender7Family 0} to 4; the final input 42 was not evaluated.
+
+The exact checker output and toolchain record are included in the archive and
+should be treated as authoritative over any prose in this paper.
+
+%=====================================================================
+\section{Limitations and open obligations}
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{No formal ordinal quotient.}  OTree is raw syntax.  Equivalent
+  fundamental sequences are not identified, and no well-order comparison
+  decision procedure is claimed.
+\item \textbf{No formal normality proof.}  The fixed-point interpretation of
+  \lean{derivative}, \lean{critical}, \lean{autonomous}, and \lean{hyper} is
+  mathematically standard in shape, but normality and exact semantic equations
+  are not mechanized here.
+\item \textbf{No exact proof-theoretic calibration.}  The fast-growing hierarchy
+  labels are explanatory estimates, not kernel-checked bounds.
+\item \textbf{Inherited seed complexity.}  The proposal inherits P5's seed
+  family and its historical guard.  A future entry could replace this with a
+  cleaner independently calibrated family.
+\item \textbf{Finite visible level.}  Input~42 exposes \lean{hyper 41}.  This is
+  deliberate for a closed contest entry, but an autonomous diagonal over the
+  entire higher-derivative sequence may offer a stronger next step.
+\end{enumerate}
+
+These limitations do not affect the theorem $\Csix<\Cseven$ or the
+computability of \Cseven.
+
+%=====================================================================
+\section{Further research questions}
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Formal rank semantics.}  Define a suitable ordinal or well-founded
+  rank semantics for \lean{OTree} and \lean{WTree Nat}; prove that
+  \lean{realize} preserves rank and characterize \lean{encode}.
+\item \textbf{Normality and derivatives.}  State a syntactic invariant ensuring
+  that an OTree transformer represents a normal function, then prove that
+  \lean{omegaPow}, \lean{critical}, \lean{autonomous}, and \lean{hyper}
+  preserve it.
+\item \textbf{Certified lower bounds.}  Formalize a fast-growing hierarchy over
+  OTree and prove that the numerical \lean{stage} operation dominates selected
+  hierarchy levels.  This would turn the present ordinal heuristic into an
+  explicit Lean lower-bound theorem.
+\item \textbf{Autonomous diagonalization.}  Replace the fixed index 41 by a
+  self-generated schedule that diagonalizes over all higher derivatives while
+  remaining structurally recursive and auditable.
+\item \textbf{Stronger object languages.}  Implement normalization and bounded
+  maxima for System~F, System~$F_\omega$, or a carefully controlled dependent
+  calculus, then relativize those languages to the present family.  A stronger
+  base language should dominate any improvement that changes only the external
+  tree schedule.
+\item \textbf{Independent kernel checking.}  Run Lean's independent checker or
+  another trusted checker on the compiled environment, and incorporate an
+  automated axiom allowlist audit in the repository CI.
+\item \textbf{Definition-budget optimization.}  Measure clean builds on the
+  official contest hardware, reduce imports and generated code, and keep the
+  definition/proof split within the repository's time budgets.
+\item \textbf{Eliminate the historical guard.}  Construct a seed family whose
+  domination of earlier entries is proved through an independent inclusion
+  theorem rather than an inherited maximum over the old language.
+\item \textbf{General guard combinator.}  Abstract the guarded-branch pattern and
+  prove generic theorems for finite chains, payload visibility, and quantitative
+  additive gaps at each reflection step.
+\item \textbf{Semantic robustness under alternative fundamental sequences.}
+  Determine which growth comparisons survive changes in the realization of
+  successor and limit trees, and isolate the invariants actually needed by the
+  reflection engine.
+\end{enumerate}
+
+%=====================================================================
+\section{Integration notes}
+
+The archive is arranged so that its \lean{lean/} directory can be overlaid on a
+checkout of BusyLean.  The principal files are:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+File & Purpose\\
+\midrule
+\lean{BusyLean/Contender7.lean} & definitions only\\
+\lean{BusyLean/Comparison7.lean} & strict comparisons and payload theorems\\
+\lean{test/Contender7Audit.lean} & axiom and dependency audit\\
+\lean{BusyLean.lean} & exports the new modules\\
+\lean{.github/workflows/contender7-ci.yml} & reproducible CI verification\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The development branch used for this proposal is
+\begin{center}
+\lean{research/autonomous-reflection-c7-20261012}.
+\end{center}
+Adoption should proceed by reviewing the source and verification logs, not by
+trusting the informal size calibration.
+
+%=====================================================================
+\section{Conclusion}
+
+Contender~7 combines a conservative proof strategy with an aggressive growth
+strategy.  Conservatively, the old Contender~6 schedule is exposed as branch~0,
+and forty-two explicit guard nodes plus the outer root provide a transparent
+strict comparison.  Aggressively, the same construction carries a hierarchy of
+Veblen-inspired critical-point payloads generated above the old self-referential
+index, culminating at the forty-first higher derivative visible at input~42.
+
+The resulting Lean term is closed, structurally recursive, and computable in
+principle.  Its essential comparison theorem is small enough to audit by hand,
+while the autonomous payload supplies a credible and extensible route far
+beyond the incumbent's schedule.  The proposal therefore meets the practical
+standard for a new BusyLean contender while clearly separating formal theorem,
+engineering verification, and proof-theoretic heuristic.
+
+%=====================================================================
+\appendix
+\section{Principal theorem inventory}
+
+\begin{longtable}{p{0.42\textwidth}p{0.51\textwidth}}
+\toprule
+Declaration & Meaning\\
+\midrule
+\endfirsthead
+\toprule
+Declaration & Meaning\\
+\midrule
+\endhead
+\lean{contender7\_branch\_step\_lt} & Every guarded branch is strictly below its successor at every input.\\
+\lean{contender7\_raw\_lt\_next} & Payload $R_k$ is strictly below guarded branch $B_{k+1}$ whenever input is at least one.\\
+\lean{contender7\_branch\_zero\_lt\_succ} & The finite transitive closure from branch zero to branch $k+1$.\\
+\lean{finalFamily\_lt\_contender7Branch42} & Contender~6's family at input 42 is below branch 42 after forty-two guard steps.\\
+\lean{contender7Branch42\_lt\_contender\_7} & The outer root strictly exceeds branch 42.\\
+\lean{contender\_6\_lt\_contender\_7} & Required incumbent comparison.\\
+\lean{contender\_5\_lt\_contender\_7} & Transitive comparison with the exact Contender~5 port.\\
+\lean{hyper41\_lt\_contender7Branch42} & The level-41 autonomous payload is present below branch 42.\\
+\lean{hyper41\_lt\_contender\_7} & The final number strictly exceeds the level-41 payload.\\
+\bottomrule
+\end{longtable}
+
+\section{Reproduction commands}
+
+From a BusyLean checkout containing the patch:
+\begin{verbatim}
+lake build BusyLean.Contender7
+lake build
+lake env lean test/Contender7Audit.lean
+\end{verbatim}
+Do not evaluate \lean{contender\_7}.  The audit evaluates only a feasible
+input-zero sanity check for the family.
+
+\section{Bibliographic note}
+
+The use of continuous increasing ordinal functions and fixed-point enumeration
+is inspired by Veblen's original hierarchy.  The term ``autonomous'' is used in
+the broad proof-theoretic tradition associated with transfinite progressions and
+predicative analysis.  The present construction is not claimed to reproduce any
+one historical notation system exactly.
+
+\begin{thebibliography}{9}
+
+\bibitem{Veblen1908}
+O. Veblen,
+\emph{Continuous Increasing Functions of Finite and Transfinite Ordinals},
+Transactions of the American Mathematical Society 9 (1908), 280--292.
+DOI: \url{https://doi.org/10.1090/S0002-9947-1908-1500814-9}.
+
+\bibitem{Feferman1962}
+S. Feferman,
+\emph{Transfinite Recursive Progressions of Axiomatic Theories},
+Journal of Symbolic Logic 27 (1962), 259--316.
+
+\bibitem{Feferman1964}
+S. Feferman,
+\emph{Systems of Predicative Analysis},
+Journal of Symbolic Logic 29 (1964), 1--30.
+DOI: \url{https://doi.org/10.2307/2269764}.
+
+\bibitem{Schuette1965}
+K. Schuette,
+\emph{Predicative Well-Orderings},
+in Formal Systems and Recursive Functions, Studies in Logic and the
+Foundations of Mathematics 40 (1965), 280--303.
+DOI: \url{https://doi.org/10.1016/S0049-237X(08)71694-X}.
+
+\bibitem{LeanRecursion}
+The Lean Project,
+\emph{Recursion - Recursive Functions in Lean 4},
+\url{https://lean4.dev/language/control-flow/recursion}.
+
+\bibitem{BusyLean}
+V. Reshetnikov et al.,
+\emph{BusyLean repository},
+\url{https://github.com/VladimirReshetnikov/BusyLean}.
+
+\end{thebibliography}
+
+\end{document}

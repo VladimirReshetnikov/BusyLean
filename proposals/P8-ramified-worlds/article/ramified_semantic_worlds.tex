@@ -1,0 +1,1045 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{microtype,booktabs,tabularx,array,xcolor}
+\usepackage{enumitem,listings,fancyhdr,hyperref}
+\definecolor{ink}{HTML}{183344}
+\definecolor{accent}{HTML}{176B78}
+\definecolor{pale}{HTML}{EFF5F7}
+\hypersetup{colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent,
+ pdftitle={Ramified Semantic Worlds for BusyLean},pdfauthor={Research proposal for Vladimir Reshetnikov}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{ink}BusyLean \textbar\ Ramified semantic worlds}
+\fancyhead[R]{\small Research proposal}
+\fancyfoot[C]{\thepage}
+\setlength{\parskip}{0.35em}
+\setlength{\emergencystretch}{1.5em}
+\setlength{\parindent}{1.2em}
+\setcounter{tocdepth}{2}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Tree}{\mathcal T}
+\newcommand{\Fam}{\mathcal F}
+\newcommand{\World}{\mathcal W}
+\newcommand{\Score}{\operatorname{Score}}
+\newcommand{\Ext}{\operatorname{Ext}}
+\newcommand{\Elev}{\operatorname{Elev}}
+\newcommand{\OldStage}{\operatorname{Stage}_0}
+\newcommand{\oldidx}{I_0}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\funiter}[2]{#1^{[#2]}}
+\newcommand{\ctx}{\boldsymbol w}
+\lstdefinelanguage{Lean}{keywords={import,open,namespace,end,def,abbrev,structure,inductive,where,match,with,fun,let,by,exact,theorem,termination_by,structural},
+ sensitive=true,morecomment=[l]{--},morecomment=[s]{/-}{-/},morestring=[b]"}
+\lstset{language=Lean,basicstyle=\ttfamily\footnotesize,keywordstyle=\bfseries\color{ink},
+ commentstyle=\itshape\color{black!55},columns=fullflexible,keepspaces=true,
+ breaklines=true,frame=single,rulecolor=\color{black!20},backgroundcolor=\color{pale},
+ xleftmargin=0.4em,xrightmargin=0.4em,
+ literate={→}{{$\to$}}1 {∀}{{$\forall$}}1 {≤}{{$\le$}}1 {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1
+ {ℕ}{{$\N$}}1 {≠}{{$\ne$}}1 {∧}{{$\wedge$}}1}
+
+\begin{document}
+\begin{center}
+{\small\sffamily\color{accent}CONSTRUCTIVE LARGE NUMBERS \quad / \quad BUSYLEAN}
+\vspace{0.7em}
+
+{\LARGE\bfseries\color{ink}Ramified Semantic Worlds\par}
+\vspace{0.3em}
+{\Large A proposed Contender 7 for BusyLean\par}
+\vspace{0.6em}
+{\large Whole-interpreter reflection, self-generated tree indices,\par
+and an explicit 42-fold tower lower bound\par}
+\vspace{0.8em}
+Research proposal prepared for Vladimir Reshetnikov\\
+October 12, 2026
+\end{center}
+
+\begin{abstract}
+The incumbent BusyLean construction reflects a finite-type W-language over
+numeric oracle families and iterates this reflection along the trees the
+language itself defines. We propose a further step: reflect \emph{entire
+semantic worlds}. A world supplies a tree-recursion operator accepting an
+arbitrary seed, an arbitrary countably branching well-founded tree, and a
+natural argument, together with its own program-generated index. A new
+language can access the complete operators and indices of a countable family
+of previously constructed worlds. Its bounded program maximum and its own
+tree index form a stronger world. We ramify this operation along the preceding
+world's own index and repeat the resulting world transformation 42 times.
+The resulting closed natural-number definition is computable in principle.
+Writing $C_6$ for the incumbent and
+$A(x)=\funiter{(u\mapsto 2^u)}{x}(x)$, we prove
+\[
+                 \boxed{\quad \funiter A{42}(C_6)<C_7.\quad}
+\]
+We also prove relative language domination, numerical non-representability,
+and non-representability of the new tree index. The comparisons do not assume
+monotonicity of an interpreter in its oracle. Lean definition and proof source,
+an independent small witness evaluator, and reproducible audit scripts are
+included. The mathematical argument is complete at the stated level; the
+Lean source has not been compiled in this authoring environment.
+\end{abstract}
+
+\noindent\colorbox{pale}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{
+\textbf{Validation boundary.} Nine Python test methods pass, including typed
+witness checks for all 36 child indices visible to the tower certificate at
+input 42. No Lean compiler was available. Accordingly, kernel acceptance,
+axiom-closure checks, and the 15-second/60-second contest budgets are
+\textbf{not certified}. No such success is asserted by this report.}}
+
+\vspace{0.4em}
+\noindent\textbf{Audited upstream snapshot:}\;
+\texttt{86b360648163f0249eab79539438b6a83dfe8215}.\\
+\textbf{Exact comparison scope:} incumbent Contender 6, proposal P5, and the
+faithful Contender 5 port. No exact comparison with each separate P1--P4
+proposal is claimed.
+
+\newpage
+\begingroup
+\small
+\setlength{\parskip}{0pt}
+\tableofcontents
+\endgroup
+\newpage
+
+\section{The result and its scope}
+
+The objective is not to append a successor to the old contestant, nor to
+assume an uncomputable busy-beaver oracle. It is to describe a stronger
+constructive mechanism and give a transparent comparison that remains
+meaningful even when neither number can be evaluated.
+
+Let $B$ denote the repository's existing seed family, called
+\code{BusyLean.p5Family}. Let $w_0$ consist of its existing forest-recursion
+operator and its existing index. We construct an operation $\Elev$ on
+semantic worlds and set
+\begin{equation}\label{eq:main}
+ w_{k+1}=\Elev(w_k),\qquad
+ S_k(n)=\Score(w_k,n),\qquad
+ C_7=S_{42}(42).
+\end{equation}
+The base is chosen so that $S_0(n)$ is \emph{definitionally} the incumbent's
+function \code{BusyLean.finalFamily n}. In particular, $S_0(42)=C_6$.
+
+The main uniform comparison is stronger than a comparison of two constants:
+for every $k\in\N$ and every $n\ge7$,
+\begin{equation}\label{eq:growth-overview}
+                   A(S_k(n))<S_{k+1}(n),
+ \qquad A(x)=\funiter{(u\mapsto 2^u)}{x}(x).
+\end{equation}
+Monotonicity of the elementary function $A$, \emph{not} of any reflection
+operator, then proves
+\begin{equation}\label{eq:orbit-overview}
+ \funiter A{k}(S_0(n))<S_k(n)\qquad(k\ge1,\ n\ge7).
+\end{equation}
+The bound in the abstract is the instance $k=n=42$.
+
+There is an additional, more structural reason to regard the proposal as an
+advance. The new interpreter exposes every lower world's full operator
+\[
+ (\text{seed},\text{tree},\text{argument})\longmapsto\text{natural number},
+\]
+not just its value at 42 or its distinguished unary scoring function.
+Programs can choose a lower world at a computed index, construct a new tree,
+construct a new seed family, and apply that world's recursion operator to
+these new arguments. Section~\ref{sec:separation} proves that the new score
+eventually exceeds every fixed program in this richer lower-world language.
+The explicit tower is a convenient certificate, not a complete description
+of the language's expressive reach.
+
+\paragraph{What is and is not claimed.}
+The repository already supplies exact comparisons $C_5<C_6$ and $P5<C_6$
+\cite{comparison}. These combine with our comparison to yield $C_5<C_7$ and
+$P5<C_7$. Its review ranks P1--P4 using informal growth calibrations
+\cite{review}; that is not an exact proof of their values at the contest
+input. We do not silently promote that ranking into a new theorem.
+Similarly, we assign no unproved proof-theoretic ordinal to $C_7$.
+
+The method uses familiar ingredients---typed interpretation, finite maxima,
+well-founded recursion, and diagonalization. The proposed contribution is
+their specific integration into a world-valued ramification construction
+with explicit, checkable comparison certificates. No claim of global
+literature novelty is needed for the results below.
+
+\section{What the incumbent actually supplies}\label{sec:incumbent}
+
+The audited repository defines a type of well-founded trees
+\[
+ \Tree=\operatorname{WTree}(\N),\qquad
+ \mathsf{leaf}:\Tree,\qquad
+ \mathsf{node}:(\N\to\Tree)\to\Tree.
+\]
+These are inductive, potentially infinitely branching trees, not arbitrary
+possibly ill-founded graphs. A finite program can denote such a tree by
+supplying a terminating function for its branches.
+
+The object language has types generated by
+\[
+ \tau ::= \mathsf{nat}\mid\tau\to\tau\mid W\tau,
+\]
+with natural-number recursion and W-recursion into every type. The repository
+interprets raw terms totally: type mismatches receive specified default
+values. Its finite list \code{BigNumber.allTerms n} is the syntax enumeration
+used by the incumbent \cite{definitions}.
+
+Put $\Fam=\N\to\N\to\N$. The incumbent reflector $R_0$ satisfies
+\[
+ R_0(f,n)=n+1+
+ \max\left\{\max_{i\le n} f(i,n),\,
+             \max_{t\in L_n}\operatorname{evalWith}(f,t)\right\}.
+\]
+The forest recursion derived from it is
+\begin{align*}
+ \OldStage(b,\mathsf{leaf},n)&=R_0(b,n),\\
+ \OldStage(b,\mathsf{node}(a),n)&=
+ R_0\bigl(i\mapsto[m\mapsto\OldStage(b,a(i),m)],n\bigr).
+\end{align*}
+The existing index $I_0$ joins every tree denoted by the old language,
+with an outer branch for enumeration depth and an inner branch for list
+position \cite{contender6,reflection}.
+
+Consequently, the incumbent is exactly
+\[
+                       C_6=\OldStage(B,I_0,42).
+\]
+Our base world reuses $\OldStage$, $I_0$, and $B$. The new number's dependency
+cone is designed not to contain \code{BusyLean.contender\_6},
+\code{BusyLean.finalFamily}, or either proposal-level named contender. This
+is more than renaming the previous constant: the reused operator accepts
+arbitrary seeds and arbitrary trees, and the new interpreter makes those
+parameters available to generated programs.
+
+\subsection{Why oracle monotonicity is the wrong comparison principle}
+
+A program may inspect an oracle result and branch on it. Even an elementary
+expression such as ``return 100 if the oracle returns zero, otherwise return
+zero'' is not monotone in its oracle. The repository itself explicitly warns
+against assuming monotonicity of its reflector \cite{reflectionfacts}.
+
+We therefore do not argue that replacing each child score by a larger score
+necessarily makes its parent's reflection larger. Our proofs instead use a
+single well-typed witness program whose \emph{exact} denotation is known.
+Its value is one of the finitely many values over which the new reflector
+maximizes. This approach is unaffected by the behavior of the other
+programs in the maximum.
+
+\section{Worlds and a finite semantic signature}\label{sec:worlds}
+
+\begin{definition}[Semantic world]
+A world is a pair $w=(\operatorname{run}_w,I_w)$, where
+\[
+ \operatorname{run}_w:\Fam\to\Tree\to\N\to\N,
+ \qquad I_w:\Tree.
+\]
+Its distinguished score is
+\[
+                  \Score(w,n)=\operatorname{run}_w(B,I_w,n).
+\]
+The base world is $w_0=(\OldStage,I_0)$.
+\end{definition}
+
+The record deliberately has no field containing its distinguished natural
+number. It stores the reusable semantic machinery. The type of a runner is
+itself a finite object-language type, since $\Fam$, $\Tree$, and $\N$ all
+have codes in the existing type grammar.
+
+Fix a family $\ctx:\N\to\World$ of already available worlds, a live numeric
+forest oracle $f:\Fam$, and an input $n$. The extension has the following
+nine atoms. All types in this table are finite types of the old grammar.
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+Atom & Type & Denotation\\
+\midrule
+\code{zero} & $\N$ & $0$\\
+\code{succ} & $\N\to\N$ & Natural successor\\
+\code{input} & $\N$ & Current input $n$\\
+\code{oracles} & $\Fam$ & Current numeric forest $f$\\
+\code{lowerRun} & $\N\to\Fam\to\Tree\to\N\to\N$ & $i\mapsto\operatorname{run}_{\ctx(i)}$\\
+\code{lowerIndex} & $\N\to\Tree$ & $i\mapsto I_{\ctx(i)}$\\
+\code{seed} & $\Fam$ & Existing seed $B$\\
+\code{iterate} & $(\N\to\N)\to\N\to\N\to\N$ & Finite iteration\\
+\code{exp} & $\N\to\N$ & $x\mapsto2^x$\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The atoms \code{iterate} and \code{exp} are ordinary System T operations.
+They are included explicitly to keep the comparison certificate short and
+transparent. They do not smuggle in any large contestant value. Removing
+these convenience atoms and replacing them by old-language terms would
+change syntax-depth constants, not the basic construction.
+
+\subsection{A combinatory extension rather than a second binder mechanism}
+
+The new raw syntax is
+\[
+ p::=\mathsf{old}(t)\mid\mathsf{atom}(a)\mid\mathsf{app}(p,p).
+\]
+An old leaf is interpreted as \code{BigNumber.interpret [] t}. Thus the entire
+old closed language is retained unchanged. Application uses a dynamic pair
+of a type code and a value. If the function has arrow type $\sigma\to\tau$,
+its argument is checked against $\sigma$. Equal type codes transport the
+argument unchanged; unequal codes supply the specified default value of
+$\sigma$. Applying a non-function yields the natural number zero.
+
+We use exact type equality for this \emph{new} application layer. In
+particular, a correctly typed tree argument is not reconstructed by the old
+language's structural tree cast. This makes the seven-level witness below
+literally denote the old runner on the supplied tree. The semantics inside
+an old leaf remains the original semantics. This distinction avoids claiming
+that a new casting convention is definitionally identical to every old cast.
+
+No new lambda syntax is needed. Closed old lambda terms provide typed
+combinators; application of such combinators to semantic atoms expresses
+abstraction over the new constants. For example, the standard typed
+$K$- and $S$-combinators are available at all finite types. The implementation
+therefore avoids any second de Bruijn-level convention or capture-avoidance
+translation.
+
+\subsection{The enumeration really is finite}
+
+Let $C_0=[]$, and write $L_r$ for the old finite term list at depth $r$.
+With $\mathsf{Atoms}$ the fixed nine-element list, define
+\begin{equation}\label{eq:enumeration}
+\begin{split}
+ C_{r+1}={}&C_r\mathbin{+\!+}\mathsf{atom}(\mathsf{Atoms})
+ \mathbin{+\!+}\mathsf{old}(L_{r+1})\\
+ &\mathbin{+\!+}
+ [\mathsf{app}(p,q):p\in C_r,\ q\in C_r].
+\end{split}
+\end{equation}
+Duplicates are permitted. Every displayed operation constructs a finite
+list; there is no search over semantic equality, halting, or arbitrary
+functions.
+
+\begin{lemma}[Persistence and application closure]\label{lem:enumeration}
+If $p\in C_r$ and $r\le s$, then $p\in C_s$. Every atom belongs to $C_{r+1}$.
+If $p,q\in C_r$, then $\mathsf{app}(p,q)\in C_{r+1}$.
+\end{lemma}
+\begin{proof}
+Persistence for one step is the first summand of
+\eqref{eq:enumeration}; iterate it. The other assertions are the second and
+fourth summands.
+\end{proof}
+
+Arbitrary old terms are \emph{not} unit-cost literals. An old leaf must first
+occur in $L_{r+1}$. For completeness, assign type costs
+$d(\mathsf{nat})=1$, $d(\sigma\to\tau)=1+\max(d\sigma,d\tau)$, and
+$d(W\sigma)=1+d\sigma$. Give old variables $\mathsf{var}(j)$ cost $j+2$,
+zero and successor cost 1, each one-type recursor or tree constructor cost
+one plus its type cost, application cost one plus the maximum subterm cost,
+and lambdas and W-recursors cost one plus the maximum of the costs of their
+annotations and subterms. Induction on types and terms, together with
+monotonicity of the old enumerations, shows that every old term occurs at its
+cost and at all larger depths. A further induction on $p$ shows that every
+finite new program belongs to some $C_r$. The supplied Lean separation
+theorems take the explicit membership certificate $p\in C_r$, so they do not
+need this additional completeness lemma in their dependency cone.
+
+\section{Reflecting whole lower worlds}\label{sec:reflection}
+
+Write $E_{\ctx,f,n}(p)$ for the new natural-number evaluator, returning zero
+when the resulting value has a non-natural type. Define
+\begin{equation}\label{eq:R}
+ R_{\ctx}(f,n)=n+1+
+ \max\left\{\max_{i\le n}f(i,n),\,
+                    \max_{p\in C_n} E_{\ctx,f,n}(p)\right\},
+\end{equation}
+with the empty program maximum taken to be zero.
+
+\begin{lemma}[Reflection inequalities]\label{lem:reflection}
+For all $\ctx,f,n$, one has $n<R_{\ctx}(f,n)$. If $i\le n$, then
+$f(i,n)<R_{\ctx}(f,n)$. If $p\in C_n$, then
+$E_{\ctx,f,n}(p)<R_{\ctx}(f,n)$.
+\end{lemma}
+\begin{proof}
+Every relevant value is bounded by one of the displayed maxima. Adding
+$n+1\ge1$ makes that bound strict. The input bound follows immediately from
+the nonnegativity of the maximum.
+\end{proof}
+
+For an arbitrary reflector $R:\Fam\to\N\to\N$, define
+\begin{align}
+ \operatorname{Fold}_R(b,\mathsf{leaf},n)&=R(b,n),\label{eq:fold}\\
+ \operatorname{Fold}_R(b,\mathsf{node}(a),n)&=
+ R\bigl(i\mapsto[m\mapsto\operatorname{Fold}_R(b,a(i),m)],n\bigr).
+ \nonumber
+\end{align}
+The recursion is structural on the tree. A higher-order program inside $R$
+may call the supplied family at dynamically computed indices and arguments,
+but every such family member refers to a proper subtree of the current tree.
+
+The distinction between two interfaces is essential. The atom
+\code{oracles} accesses the current numeric forest in \eqref{eq:fold}. The
+atoms \code{lowerRun} and \code{lowerIndex} access previously constructed
+semantic worlds. The latter are available with arbitrary newly constructed
+seeds and trees. They are not confined to the child scores currently used by
+the numeric forest.
+
+\section{The new language generates its own tree index}\label{sec:index}
+
+For a fixed family $\ctx$, interpret a program with the live numeric oracle
+identically zero and the input zero, and extract a value of type $\Tree$,
+using the leaf as a default. Call this tree $T_{\ctx}(p)$. Let $C_k[i]$ be the
+$i$th list element, with the zero atom as default. Set
+\begin{equation}\label{eq:index}
+ I_{\ctx}=\mathsf{node}\left(k\mapsto
+        \mathsf{node}\left(i\mapsto T_{\ctx}(C_k[i])\right)\right).
+\end{equation}
+The new world is
+\begin{equation}\label{eq:extend}
+ \Ext(\ctx)=
+ \bigl(\operatorname{Fold}_{R_{\ctx}},\ I_{\ctx}\bigr).
+\end{equation}
+
+This is not a circular definition. The evaluator in $T_{\ctx}$ can inspect
+only the supplied lower worlds and the fixed atoms. It does not contain
+$\Ext(\ctx)$, $R_{\ctx}$, or $I_{\ctx}$ as one of its own semantic atoms.
+Only after the lower-world evaluation and reflection mechanisms have been
+defined are the new runner and index packaged together.
+
+\begin{theorem}[Strict domination of every generated tree]\label{thm:tree}
+Fix $\ctx$, a seed $b$, and $p\in C_k$. There is $N$ such that for all $n\ge N$,
+\[
+ \OldStage(b,T_{\ctx}(p),n)<\OldStage(b,I_{\ctx},n).
+\]
+\end{theorem}
+\begin{proof}
+Because $p$ is a member of the finite list $C_k$, choose a list position $i$
+with $C_k[i]=p$. Take $N=k+i$. The old forest-reflection inequality says that
+at an argument $n$, every child with index at most $n$ has score strictly
+smaller than its parent. Here $i\le n$ and $k\le n$. Apply that inequality
+first to the inner node in \eqref{eq:index}, then to the outer node, and
+compose the two strict inequalities. No comparison between different
+oracles is used.
+\end{proof}
+
+\begin{corollary}[Non-representability of the index]\label{cor:tree-diagonal}
+For every $p\in C_k$,
+\[
+                         T_{\ctx}(p)\ne I_{\ctx}.
+\]
+\end{corollary}
+\begin{proof}
+Equality would turn Theorem~\ref{thm:tree}, at $n=N$, into a strict
+inequality between a natural number and itself.
+\end{proof}
+
+This is a constructive tree diagonalization. It does not need an ordinal
+notation system or a rank assignment. In an ordinary set-theoretic model one
+may also explain it by ranks: the new index has a two-edge path to every
+program-generated tree, so its rank is at least the rank of each such tree
+plus two. That observation is optional and supplies no numerical
+fast-growing-hierarchy calibration.
+
+The new index also contains each lower world's distinguished tree. The
+program
+\[
+             \mathsf{app}(\mathsf{lowerIndex},\overline i)
+\]
+denotes $I_{\ctx(i)}$ and occurs by depth $i+2$. Thus index reflection is
+strictly extending a semantic collection of trees, not merely choosing a
+larger natural parameter for a fixed notation.
+
+\section{A seven-level tower certificate}\label{sec:tower}
+
+Let $P(x)=2^x$, and define finite iteration by
+\[
+ \funiter f0(x)=x,\qquad
+ \funiter f{k+1}(x)=\funiter f{k}(f(x)).
+\]
+Define
+\begin{equation}\label{eq:A}
+                         A(x)=\funiter P{x}(x).
+\end{equation}
+For orientation only, $A(0)=0$, $A(1)=2$, $A(2)=16$, and $A(3)=2^{256}$.
+For $x\ge1$, $A(x)$ is at least a tower of $x$ twos with top value 1, because
+iteration of $P$ is increasing in its starting argument.
+
+\subsection{The witness and its exact type}
+
+Write $\overline i$ for the unary successor program for $i$, and abbreviate
+application by juxtaposition. Define
+\begin{align*}
+ G_i&=\mathsf{lowerRun}\ \overline i\ \mathsf{seed}\
+                          (\mathsf{lowerIndex}\ \overline i),\\
+ B_i&=G_i\ \mathsf{input},\\
+ Q_i&=\mathsf{iterate}\ \mathsf{exp}\ B_i\ B_i.
+\end{align*}
+The types are respectively $\N\to\N$, $\N$, and $\N$. At any numeric forest
+$f$ and input $n$, exact typing gives
+\begin{equation}\label{eq:witness}
+ G_i(x)=\Score(\ctx(i),x),\qquad
+ E_{\ctx,f,n}(Q_i)=A(\Score(\ctx(i),n)).
+\end{equation}
+In particular, the value is independent of $f$.
+
+The occurrence of $B_i$ twice is intentional. Its value supplies both the
+number of exponential iterations and their starting value. It is not merely
+a single exponentiation of the lower score.
+
+\begin{lemma}[Membership certificate]\label{lem:witness-depth}
+For each $i\in\N$, $Q_i\in C_{i+7}$.
+\end{lemma}
+\begin{proof}
+A direct application-depth calculation, using
+Lemma~\ref{lem:enumeration}, gives the following certificates.
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Expression & Certified enumeration depth\\
+\midrule
+$\overline i$ & $i+1$\\
+$\mathsf{lowerRun}\ \overline i$ & $i+2$\\
+$\mathsf{lowerRun}\ \overline i\ \mathsf{seed}$ & $i+3$\\
+$\mathsf{lowerIndex}\ \overline i$ & $i+2$\\
+$G_i$ & $i+4$\\
+$B_i$ & $i+5$\\
+$\mathsf{iterate}\ \mathsf{exp}$ & $2$\\
+$\mathsf{iterate}\ \mathsf{exp}\ B_i$ & $i+6$\\
+$Q_i$ & $i+7$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Whenever two argument depths differ, persistence raises the smaller one to
+the larger before the application-closure rule is used. No evaluation of
+$C_{i+7}$ is involved.
+\end{proof}
+
+\begin{theorem}[Whole-world tower bound]\label{thm:extend-tower}
+For every $\ctx$, every seed $b$, every tree $a$, and all $i,n$ satisfying
+$i+7\le n$,
+\[
+ A(\Score(\ctx(i),n))<
+          \operatorname{Fold}_{R_{\ctx}}(b,a,n).
+\]
+In particular,
+\[
+ A(\Score(\ctx(i),n))<\Score(\Ext(\ctx),n).
+\]
+\end{theorem}
+\begin{proof}
+By the membership certificate and persistence, $Q_i\in C_n$. Reflection
+strictly exceeds its value. Equation~\eqref{eq:witness} identifies that value
+for \emph{every} numeric forest. At a leaf the relevant forest is $b$; at a
+node it is the family of recursively computed child stages. These two cases
+are precisely \eqref{eq:fold}. Finally take $b=B$ and $a=I_{\ctx}$.
+\end{proof}
+
+The arbitrary-tree and arbitrary-seed quantifiers matter. They allow the
+next construction to choose a complicated self-generated index without
+introducing any monotonicity obligation.
+
+\section{World-valued ramification and the final number}\label{sec:ramify}
+
+\begin{definition}[Anchored ramification]
+For a base world $w$, define $H_w:\Tree\to\World$ by structural recursion:
+\begin{align*}
+ H_w(\mathsf{leaf})&=\Ext(i\mapsto w),\\
+ H_w(\mathsf{node}(a))&=\Ext(c),
+ \quad c(0)=w,\quad c(j+1)=H_w(a(j)).
+\end{align*}
+Then set $\Elev(w)=H_w(I_w)$.
+\end{definition}
+
+At each ramification node, the new interpreter sees the whole semantic worlds
+produced by all its child subtrees. Branch zero is an explicit anchor
+retaining the base world. The anchor serves two purposes: it gives a small
+uniform comparison certificate, and it prevents the proof from needing to
+locate the base inside an enormous program enumeration. It contains an
+operator and index, not a named predecessor number.
+
+The following is the central portion of the supplied Lean definition.
+\begin{lstlisting}
+def ramify (base : World) : Tree → World
+  | .leaf => extend (fun _ => base)
+  | .node f => extend fun i =>
+      match i with
+      | 0 => base
+      | j + 1 => ramify base (f j)
+termination_by structural a => a
+
+def elevate (w : World) : World := ramify w w.index
+
+def levels : Nat → World
+  | 0 => baseWorld
+  | k + 1 => elevate (levels k)
+
+def contender_7 : Nat := score (levels 42) 42
+\end{lstlisting}
+
+\begin{theorem}[Uniform ramification margin]\label{thm:ramify-margin}
+For every world $w$, every tree $a$, and every $n\ge7$,
+\[
+                    A(\Score(w,n))<\Score(H_w(a),n).
+\]
+\end{theorem}
+\begin{proof}
+Inspect the root constructor of $a$. If it is a leaf, the lower-world family
+is constantly $w$. If it is a node, its anchored family satisfies $c(0)=w$.
+In either case apply Theorem~\ref{thm:extend-tower} with $i=0$. The theorem
+requires no inductive comparison of the recursively generated worlds.
+\end{proof}
+
+Substituting $a=I_w$ gives the same inequality for $\Elev(w)$, and hence
+\eqref{eq:growth-overview} for every stratum.
+
+\subsection{The elementary monotonicity that is actually used}
+
+\begin{lemma}\label{lem:Amono}
+The function $P(x)=2^x$ is nondecreasing and satisfies $x\le P(x)$.
+Consequently $A$ is nondecreasing and $x\le A(x)$.
+\end{lemma}
+\begin{proof}
+For the inflationary inequality, induction gives $1\le2^x$ and
+\[
+             x+1\le2^x+2^x=2^{x+1}.
+\]
+The same doubling recurrence gives monotonicity of $P$. Induction on $r$
+shows that $\funiter P r$ is nondecreasing in its starting value. Since
+$P(x)\ge x$, this iterate is also nondecreasing in $r$.
+If $a\le b$, then
+\[
+ \funiter P a(a)\le\funiter P a(b)\le\funiter P b(b),
+\]
+which is the required monotonicity of $A$. Inflationarity follows by repeated
+application of $P(x)\ge x$, including the zero-iteration case.
+\end{proof}
+
+\begin{theorem}[The explicit 42-fold bound]\label{thm:main}
+For every $n\ge7$ and $k\ge1$,
+\[
+                  \funiter A{k}(S_0(n))<S_k(n).
+\]
+In particular, $\funiter A{42}(C_6)<C_7$.
+\end{theorem}
+\begin{proof}
+Let $b_0=S_0(n)$ and $b_{r+1}=A(b_r)$. First prove $b_r\le S_r(n)$ by
+induction. Equality holds for $r=0$. At the successor step,
+\[
+ b_{r+1}=A(b_r)\le A(S_r(n))<S_{r+1}(n),
+\]
+using Lemma~\ref{lem:Amono} and Theorem~\ref{thm:ramify-margin}. The displayed
+successor argument is already strict, proving the first assertion. Put
+$k=n=42$ and use $S_0(42)=C_6$.
+\end{proof}
+
+This is not a fixed-height exponentiation bound. Even the first application
+of $A$ uses the incumbent's entire value as a tower height, and the theorem
+iterates this transformation 42 times. The true construction additionally
+reflects much richer lower-world programs at each level and along its
+self-generated tree indices.
+
+\subsection{A uniform diagonal family}
+
+Set $D(n)=S_n(n)$. This is a single total computable function, with
+$C_7=D(42)$.
+
+\begin{corollary}[Domination of every fixed stratum]
+For $n\ge7$ and $k<n$, one has $S_k(n)<D(n)$.
+\end{corollary}
+\begin{proof}
+Each successor step strictly increases the score because
+$S_j(n)\le A(S_j(n))<S_{j+1}(n)$. Compose these inequalities from $k$ to $n$.
+\end{proof}
+
+The diagonalization is over this explicitly constructed hierarchy of worlds,
+not over all total computable functions or all Lean definitions.
+
+\section{Relative language domination and separation}\label{sec:separation}
+
+Call a program \emph{forest-oracle-free} when it contains no occurrence of
+the atom \code{oracles}. Such a program may still use \code{lowerRun},
+\code{lowerIndex}, \code{seed}, \code{input}, all old-language terms, and
+arbitrary applications. It can therefore carry out substantial higher-order
+computations involving lower worlds.
+
+\begin{lemma}[Independence of the live forest]
+If $p$ is forest-oracle-free, then for all $f,g$,
+\[
+                    E_{\ctx,f,n}(p)=E_{\ctx,g,n}(p).
+\]
+\end{lemma}
+\begin{proof}
+Induct on the application tree of $p$. An old leaf ignores both forests.
+Every permitted atom has the same denotation for $f$ and $g$. Application
+preserves equality of both evaluated operands.
+\end{proof}
+
+\begin{theorem}[Domination of the full lower-world language]\label{thm:lang}
+If $p\in C_k$ is forest-oracle-free, then for every $n\ge k$,
+\[
+               E_{\ctx,0,n}(p)<\Score(\Ext(\ctx),n).
+\]
+\end{theorem}
+\begin{proof}
+Persistence puts $p$ in $C_n$. At the root of any evaluation of
+$\operatorname{Fold}_{R_{\ctx}}$, reflection strictly exceeds the value of
+$p$ in the current numeric forest. The preceding lemma identifies this value
+with $E_{\ctx,0,n}(p)$ independently of the root forest. Apply this to seed
+$B$ and index $I_{\ctx}$.
+\end{proof}
+
+\begin{corollary}[No lower-language representation]\label{cor:lang}
+No forest-oracle-free $p\in C_k$ satisfies
+\[
+       E_{\ctx,0,n}(p)=\Score(\Ext(\ctx),n)\quad\hbox{for all }n.
+\]
+\end{corollary}
+\begin{proof}
+Use $n=k$ in Theorem~\ref{thm:lang}. The proposed equality contradicts the
+strict inequality.
+\end{proof}
+
+There is also a direct local version without forest-oracle-freeness. For a
+fixed external forest $f$, no $p\in C_k$ can satisfy
+$E_{\ctx,f,n}(p)=R_{\ctx}(f,n)$ for every $n$, by the same contradiction at
+$n=k$. The forest-oracle-free theorem is stronger for comparing \emph{world
+scores}, because a world's internal root forest differs from an externally
+chosen $f$.
+
+These theorems are the substantive distinction between the proposal and a
+simple numerical amplification. The next world does not merely evaluate one
+chosen formula in lower scores. Its score eventually dominates \emph{every
+fixed program} of a language that can call the complete lower semantic
+operators on arbitrary program-generated arguments. Theorems are stated with
+explicit syntax membership bounds: they do not pretend that a program of
+unbounded depth is already dominated at input 42.
+
+\section{Why the number is computable in principle}\label{sec:computability}
+
+A bare statement that a fixed natural number is computable would be nearly
+vacuous: each fixed natural has a constant program. What is needed here is an
+effective route from the displayed definition to its value, and preferably
+a uniform family such as $D$ whose totality is justified.
+
+\begin{theorem}[Constructive totality]
+The definitions in Sections~\ref{sec:worlds}--\ref{sec:ramify}, starting from
+the repository's constructive base machinery, give a total effective
+procedure for $D(n)$ for every $n\in\N$. In particular they define $C_7$ as
+a computable natural number.
+\end{theorem}
+\begin{proof}
+The proof follows the construction's dependency order.
+
+First, type-code equality and the new raw interpreter are structurally
+recursive procedures on finite codes and finite programs. Old leaves use the
+existing total W-language interpreter. Each primitive is a total function
+when its supplied lower worlds are effectively available.
+
+Second, $C_n$ is a finite list produced by natural-number recursion. Every
+maximum in $R_{\ctx}$ is over that finite list or a finite initial segment of
+$\N$. It therefore terminates, however large the list and its values may be.
+
+Third, $I_{\ctx}$ is built using two W-node constructors and total branch
+functions. To request a branch, one computes a finite list lookup and the
+tree denotation of one terminating program. Constructing the tree does not
+require materializing all infinitely many branches.
+
+Fourth, $\operatorname{Fold}_{R_{\ctx}}$ recurses structurally on a W-tree.
+Its recursive functional arguments refer only to proper subtrees. Programs
+may make enormous numbers of calls and choose their arguments dynamically,
+but those calls do not introduce a self-reference to the current tree.
+
+Fifth, $H_w$ recurses structurally on its schedule tree and returns a world.
+For a node, every non-anchor lower world comes from a proper child subtree.
+The new interpreter sees these lower worlds as already supplied data; it
+never interprets its own semantic definition. Finally, $w_n$ is obtained by
+natural-number recursion on $n$, and $D(n)$ is its score at $n$.
+
+All operations are therefore combinations of finite recursion, total
+interpretation, and structural recursion on inductive W-trees. No halting
+oracle, minimization over an undecidable predicate, or classical selection of
+a maximizing program occurs.
+\end{proof}
+
+\paragraph{Arbitrary parameters versus the closed candidate.}
+An arbitrary set-theoretic element of a function type need not come with an
+effective presentation. The parametric theorems about $\ctx$ are statements
+about total semantic functions. The computability assertion concerns
+\emph{effectively supplied} lower worlds, and ultimately the closed family
+built from $w_0$. It does not assert that an arbitrary external mathematical
+oracle becomes computable merely by appearing in a Lean parameter.
+
+\paragraph{Why there is no diagonal paradox.}
+The lower-world language does not contain its new reflector or its new index
+as an atom. Corollaries~\ref{cor:tree-diagonal} and \ref{cor:lang} show exactly
+why that boundary is essential. A total evaluator can interpret an explicitly
+weaker, stratified language without interpreting itself. The finite
+hierarchy and its diagonal remain within Lean's host theory; they do not
+supply a total interpreter for every total Lean function.
+
+The intended Lean implementations use ordinary \code{def} declarations,
+finite lists, inductive types, and structural recursion. This is the standard
+termination route described by Lean's language reference \cite{leanrec}.
+The theoretical argument is distinct from a claim that a particular source
+file has passed the kernel, which requires actually running the toolchain.
+
+\section{Lean artifacts, audit design, and validation}\label{sec:validation}
+
+\subsection{Artifact organization}
+
+The archive contains a standalone Lake project pinned to the audited BusyLean
+commit and to Lean 4.34.0, the repository's declared version. The principal
+modules are:
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+File & Role\\
+\midrule
+\code{BusyLeanNext/Definitions.lean} & Worlds, exact casts, atoms, evaluator,
+finite enumeration, reflection, index, ramification, final number, and
+comparison-witness syntax.\\
+\code{BusyLeanNext/Proofs.lean} & Enumeration membership, exact witness
+semantics, tower inequalities, comparisons, language separation, and tree
+index non-representability.\\
+\code{test/Audit.lean} & Transitive constant-closure and axiom checks.\\
+\code{test/Smoke.lean} & Only small primitive equalities and theorem-signature
+checks; no contender evaluation.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The proofs specialize general inequalities only at the end. They do not ask
+Lean's simplifier to compute a candidate number or expand a bounded maximum
+at depth 42. Correctly typed application witnesses are proved at symbolic
+worlds and inputs, before any enormous world is substituted.
+
+The supplied audit is intended to reject dependency on the predecessor's
+named constant or final-family wrapper, as well as on
+\code{Classical.choice}, \code{sorryAx}, or any custom axiom. The allowed
+axioms are exactly \code{propext} and \code{Quot.sound}, matching the
+repository's rule. That is a specification of the audit, not a statement that
+its output has already been obtained.
+
+\subsection{What was actually tested}
+
+Nine Python unit-test methods passed. They verify exact simple-fragment types,
+the depth formula $i+7$ for 100 indices, absence of the live numeric oracle in
+the witness, correct routing of lower runners and tree identities, exact
+small tower values, basic exponential inequalities, exact-cast behavior,
+wrong-function defaults, and the arithmetic finite-maximum inequality.
+The semantic witness is exercised for every $i\in\{0,\ldots,35\}$ at input
+42, with four deliberately small lower-world scores. These 144 semantic
+cases ensure that the same indexed world's runner and tree are used and that
+the live numeric oracle is not accidentally consulted.
+
+The reference evaluator deliberately does \emph{not} implement or enumerate
+the complete old W-language. It is an independent check of the small
+certificate and application layer, not a test of $C_7$ and not a substitute
+for formal proof. Its safety limits apply only to this testing program;
+they are not part of the mathematical definition.
+
+A lexical delimiter check was also performed on the supplied Lean files.
+This catches only elementary source damage. It proves nothing about typing,
+termination checking, theorem acceptance, or axiom dependencies.
+
+\subsection{What remains unverified}
+
+No Lean executable was present in the authoring environment. Attempts to
+obtain the pinned compiler did not provide an executable toolchain. The
+included \code{audit/lean-validation.json} therefore records
+\code{status: unavailable} and an empty list of executed Lean phases.
+There are no fabricated build times or kernel-success logs.
+
+In particular, all of the following are outstanding: acceptance of the
+source by Lean 4.34.0; successful kernel checking of the comparison proofs;
+the intended transitive dependency and axiom checks; and compliance with the
+15-second definition and 60-second proof budgets. The source contains no
+placeholder proofs, but it is still \emph{uncompiled formalization source},
+not a fully validated contest submission. Elaboration or library-interface
+repairs may be necessary. Such repairs must preserve the mathematical
+semantics and be followed by the full audit.
+
+To run the reproducibility checks after installing the pinned toolchain:
+\begin{lstlisting}[language={}]
+python3 scripts/check_lean.py
+python3 -m unittest discover -s tests -v
+\end{lstlisting}
+The Lean script fetches dependencies before timing, removes project and
+dependency build outputs while retaining Lean core, builds definitions and
+proofs in separate phases, and then runs the audit and smoke tests. It fails
+rather than treating a timeout or missing compiler as a pass.
+
+\subsection{The theorem-to-source correspondence}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+Mathematical result & Principal Lean declaration\\
+\midrule
+Witness depth & \code{towerProgram\_mem}\\
+Exact tower denotation & \code{evalNat\_towerProgram}\\
+Any-seed, any-tree margin & \code{tower\_lt\_foldReflect}\\
+Anchored ramification margin & \code{tower\_lt\_score\_ramify}\\
+42-fold incumbent bound & \code{towerOrbit\_contender6\_lt\_contender7}\\
+Required strict comparison & \code{contender\_6\_lt\_contender\_7}\\
+All lower-language programs & \code{lower\_language\_eventually\_lt}\\
+No lower-language representation & \code{no\_lower\_language\_representation}\\
+No self-index representation & \code{no\_programTree\_eq\_index}\\
+Fixed-stratum diagonal domination & \code{fixed\_level\_lt\_diagonal}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Research directions and unresolved comparisons}
+
+\subsection{Complete the kernel and resource audit}
+
+The immediate engineering objective is to compile this exact source at the
+pinned version, repair any elaboration mismatches, and publish the complete
+logs. Definitions and proofs should remain separated so that proof-library
+imports do not inflate the definition budget. Exact casts and explicit
+membership certificates should be retained unless their replacements come
+with semantic-equivalence proofs.
+
+\subsection{Certify P1--P4 at the fixed input}
+
+A worthwhile next theorem is a source-to-syntax compilation of every earlier
+proposal into this language, with a verified enumeration-depth certificate.
+That would replace the repository's informal ranking by exact pointwise
+comparisons. An asymptotic ordinal estimate is insufficient: eventual
+domination of functions does not by itself compare their values at 42.
+This is a concrete missing comparison, not a limitation of the incumbent
+bound proved here.
+
+\subsection{Remove convenience atoms without losing the 42 budget}
+
+Translate \code{iterate} and \code{exp} into closed old-language terms and
+prove semantic equality. Then optimize the witness's exact enumeration
+cost. Similar work could remove the explicit zero and successor atoms,
+although those are already elementary. The interesting optimization target
+is not merely fewer source characters; it is a smaller, independently
+verified syntactic certificate with predictable elaboration cost.
+
+\subsection{Replace the inherited seed guard}
+
+The base seed inherits the old P5 guard involving the old-language maximum.
+It is constructive and allowed by the present dependency rule, but it remains
+a historical comparison device. A fully intrinsic typed embedding of the
+original System T contender, with an explicit short program certificate,
+could remove this guard while retaining an exact $C_5$ comparison.
+
+\subsection{Analyze world ramification as an operation on function classes}
+
+The language-domination theorem is a precise starting point for a
+proof-theoretic analysis. One should identify which classes of functionals
+are represented at each stratum, and establish simulations with explicit
+size translations before assigning an ordinal calibration. The construction
+combines tree recursion and interpreter promotion; it should not be assigned
+a growth ordinal by mechanically multiplying the incumbent's informal
+estimate.
+
+\subsection{Study observational equivalence and tree transformations}
+
+Exact type casts retain tree values, whereas the old language's self-casts
+may reconstruct them extensionally. A logical relation connecting these
+representations would clarify compiler-correctness results and permit
+aggressive combinatory optimizations. It would also separate genuine
+semantic strength from harmless changes in tree presentation or enumeration
+order.
+
+\subsection{Higher-order world operators and alternative schedules}
+
+The present number uses 42 repetitions of a world transformation that is
+already ramified along its own index. One can investigate languages whose
+atoms expose higher-order operations on worlds, or systematically compare
+alternative anchored schedules. Such an extension needs a fresh stratification
+argument: merely inserting the current interpreter into its own atom table
+would violate the separation theorems and destroy the intended totality
+boundary.
+
+\subsection{A reusable constructive reflection framework}
+
+Most arguments above depend only on a finite cumulative syntax enumeration,
+a total typed evaluator, a W-tree type, and a small set of semantic atoms.
+Abstracting these hypotheses could turn the seven-level witness method,
+anchored ramification lemma, and self-index separation theorem into reusable
+Lean components. Future contestants could then change their object language
+without re-proving all low-level finite-maximum facts.
+
+\section{Conclusion}
+
+The proposed number is
+\[
+                        C_7=\Score(w_{42},42),
+ \qquad w_{k+1}=H_{w_k}(I_{w_k}).
+\]
+Its construction promotes complete lower-level semantic operators into a
+new total language, generates that language's tree index, and ramifies the
+result at the level of semantic worlds. The explicit certificate proves
+\[
+                 \funiter A{42}(C_6)<C_7,
+ \qquad A(x)=\funiter{(u\mapsto2^u)}{x}(x).
+\]
+The language and tree separation theorems explain why the mechanism is more
+than one preselected numerical amplification. Computability follows from a
+stratified dependency graph and structural recursion, not from an oracle or
+an unsupported normalization assumption. The remaining validation step is
+concrete and falsifiable: compile the supplied Lean source, execute its
+dependency audit, and measure it against the repository's resource rules.
+
+\begin{thebibliography}{9}
+\raggedright
+\bibitem{repository}
+V. Reshetnikov and contributors.
+\emph{BusyLean}, audited commit
+\texttt{86b360648163f0249eab79539438b6a83dfe8215}.
+\url{https://github.com/VladimirReshetnikov/BusyLean}.
+Source retrieved October 12, 2026 (America/Los\_Angeles).
+
+\bibitem{definitions}
+BusyLean contributors.
+\emph{P5 W-language definitions},
+\path{proposals/P5-w-reflection/lean/BigNumber/Definitions.lean},
+at the commit in \cite{repository}.
+
+\bibitem{contender6}
+BusyLean contributors.
+\emph{Contender 6}, \texttt{BusyLean/Contender6.lean},
+at the commit in \cite{repository}.
+
+\bibitem{reflection}
+BusyLean contributors.
+\emph{Reflection over the W-language},
+\texttt{BusyLean/Reflection.lean}, at the commit in \cite{repository}.
+
+\bibitem{reflectionfacts}
+BusyLean contributors.
+\emph{Inequalities for reflection and forest reflection},
+\texttt{BusyLean/ReflectionFacts.lean}, at the commit in \cite{repository}.
+
+\bibitem{comparison}
+BusyLean contributors.
+\emph{Contender 6 comparison theorems},
+\texttt{BusyLean/Comparison.lean}, at the commit in \cite{repository}.
+
+\bibitem{review}
+BusyLean contributors.
+\emph{Review of the five incoming proposals},
+\texttt{proposals/REVIEW.md}, at the commit in \cite{repository}.
+Its ordinal-based rankings are explicitly described as informal.
+
+\bibitem{leanrec}
+Lean contributors.
+\emph{The Lean Language Reference: Recursive Definitions}.
+\url{https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/}.
+Consulted October 12, 2026. The executable project is pinned to Lean 4.34.0,
+not to a moving ``latest'' toolchain.
+\end{thebibliography}
+\end{document}

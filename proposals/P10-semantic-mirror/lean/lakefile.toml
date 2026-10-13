@@ -1,0 +1,12 @@
+name = "busylean_semantic_mirror"
+version = "0.1.0"
+defaultTargets = ["Mirror"]
+
+[[lean_lib]]
+name = "BigNumber"
+
+[[lean_lib]]
+name = "BusyLean"
+
+[[lean_lib]]
+name = "Mirror"

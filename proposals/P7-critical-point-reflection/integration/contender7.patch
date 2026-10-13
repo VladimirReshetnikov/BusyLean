@@ -1,0 +1,521 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -4,3 +4,5 @@
+ import BusyLean.ReflectionFacts
+ import BusyLean.Contender6
+ import BusyLean.Comparison
++import BusyLean.Contender7
++import BusyLean.Comparison7
+diff --git a/scripts/check.py b/scripts/check.py
+--- a/scripts/check.py
++++ b/scripts/check.py
+@@ -1,18 +1,19 @@
+ #!/usr/bin/env python3
+-"""Clean-build the contest entry, check the time budgets, and audit axioms.
++"""Clean-build Contender 7, enforce the time budgets, and audit axioms.
+ 
+ Usage (from the repository root):  python3 scripts/check.py
+ 
+-Two timed phases, both from a clean build directory (the Lean core library is
+-precompiled, as the rules allow):
++Two timed phases, both beginning after both Lake build directories are removed
++(the Lean core library is precompiled, as the rules allow):
+ 
+-1. definitions: `lake build BusyLean.Contender6`, which checks the definition
+-   of `contender_6` and everything it imports (P5's definitions included);
+-   budget 15 s;
+-2. proofs: the remaining modules (the Contender 5 port, the port-agreement
+-   proof, all comparison theorems); budget 60 s.
++1. definitions: `lake build BusyLean.Contender7`, which checks the new
++   definition and everything it imports; budget 15 s;
++2. proofs: the remaining full library, including `BusyLean.Comparison7`;
++   budget 60 s.
+ 
+-Then every audited declaration must use only the permitted axioms.
++Finally both the historical audit and the Contender 7 audit must run cleanly,
++and every declaration reported by `#print axioms` must use only the permitted
++axioms.
+ """
+ import re
+ import shutil
+@@ -22,10 +23,12 @@
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parent.parent
+-BUILD_DIRS = [ROOT / ".lake" / "build",
+-              ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
++BUILD_DIRS = [
++    ROOT / ".lake" / "build",
++    ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build",
++]
+ PERMITTED = {"propext", "Quot.sound"}
+-DEFINITION_BUDGET = 15.0  # seconds
++DEFINITION_BUDGET = 15.0
+ PROOF_BUDGET = 60.0
+ LAKE = shutil.which("lake") or "lake"
+ 
+@@ -34,33 +37,54 @@
+     return subprocess.run([LAKE, *args], cwd=ROOT, capture_output=True, text=True)
+ 
+ 
++def audit(path: str):
++    result = run(["env", "lean", path])
++    out = result.stdout + result.stderr
++    print(f"--- {path} ---")
++    print(out)
++    if result.returncode != 0:
++        sys.exit(f"FAIL: {path} did not run cleanly")
++    reports = re.findall(
++        r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)", out
++    )
++    if not reports:
++        sys.exit(f"FAIL: {path} produced no axiom reports")
++    bad = [
++        (name, axioms)
++        for name, axioms in reports
++        if axioms
++        and set(a.strip() for a in axioms.split(",")) - PERMITTED
++    ]
++    if bad:
++        sys.exit(f"FAIL: forbidden axioms in {path}: {bad}")
++    return len(reports)
++
++
+ def main():
+-    for d in BUILD_DIRS:
+-        shutil.rmtree(d, ignore_errors=True)
++    for directory in BUILD_DIRS:
++        shutil.rmtree(directory, ignore_errors=True)
+ 
+-    for label, target, budget in [("definitions", ["BusyLean.Contender6"], DEFINITION_BUDGET),
+-                                  ("proofs", [], PROOF_BUDGET)]:
++    phases = [
++        ("definitions", ["BusyLean.Contender7"], DEFINITION_BUDGET),
++        ("proofs", [], PROOF_BUDGET),
++    ]
++    for label, target, budget in phases:
+         start = time.monotonic()
+         build = run(["build", *target])
+         elapsed = time.monotonic() - start
+         if build.returncode != 0:
+             print(build.stdout, build.stderr)
+             sys.exit(f"FAIL: {label} build failed")
+-        print(f"{label}: {elapsed:.1f} s (budget {budget:.0f} s)")
++        print(f"{label}: {elapsed:.2f} s (budget {budget:.0f} s)")
+         if elapsed > budget:
+-            sys.exit(f"FAIL: {label} exceed the budget")
++            sys.exit(f"FAIL: {label} exceeded the budget")
+ 
+-    audit = run(["env", "lean", "test/Audit.lean"])
+-    out = audit.stdout + audit.stderr
+-    print(out)
+-    if audit.returncode != 0:
+-        sys.exit("FAIL: audit did not run cleanly")
+-    reports = re.findall(r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)", out)
+-    bad = [(name, axs) for name, axs in reports
+-           if axs and set(a.strip() for a in axs.split(",")) - PERMITTED]
+-    if not reports or bad:
+-        sys.exit(f"FAIL: forbidden axioms: {bad}")
+-    print(f"PASS: {len(reports)} declarations audited, axioms within {sorted(PERMITTED)}")
++    report_count = audit("test/Audit.lean")
++    report_count += audit("test/Contender7Audit.lean")
++    print(
++        f"PASS: {report_count} declarations audited; "
++        f"axioms within {sorted(PERMITTED)}"
++    )
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/BusyLean/Contender7.lean b/BusyLean/Contender7.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Contender7.lean
+@@ -0,0 +1,147 @@
++import BusyLean.Contender6
++
++/-!
++# Contender 7: autonomous critical-point reflection
++
++This file contains definitions only.  The comparison theorem and audits live in
++`BusyLean/Comparison7.lean` and `test/Contender7Audit.lean`.
++
++The existing Contender 6 reflects along `index`, the join of all `W Nat` trees
++defined by the finite-level W-language.  Here we first regard that tree as the
++base of a separate, transparent Brouwer-tree notation language.  We close the
++base under ordinal-style addition, multiplication, exponentiation, derivatives
++(first fixed points above a parameter), a finite critical-function hierarchy,
++and then a diagonal/common-critical-point constructor.
++
++The final schedule has two independent sources of margin.
++
++* `contender7RawBranch k` realizes the `k`-th higher derivative of the
++  autonomous closure above the encoded Contender 6 index.
++* `contender7Branch (k+1)` contains `contender7Branch k` as child zero and
++  `contender7RawBranch k` as child one.  Thus branch 42 carries a visible
++  42-step strict guard chain above the old index, as well as the level-41
++  autonomous payload.  The outer root adds one more strict reflection step.
++
++All recursion is structural on `Nat`, `OTree`, or `WTree`.  In particular the
++number is a closed computable `Nat`; it contains no `noncomputable`, `partial`,
++`unsafe`, `opaque`, `extern`, choice oracle, or previous contender constant.
++Do not evaluate `contender_7`.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++namespace Autonomous
++
++/-- A transparent language of countably branching well-founded trees.  We use
++it as syntax, not as a quotient by ordinal equality. -/
++inductive OTree : Type where
++  | zero : OTree
++  | succ : OTree -> OTree
++  | limit : (Nat -> OTree) -> OTree
++
++/-- Finite iteration, exposed as a structural definition. -/
++def iterate {A : Type u} (f : A -> A) : Nat -> A -> A
++  | 0, x => x
++  | k + 1, x => iterate f k (f x)
++
++/-- Syntactic ordinal addition: replace each zero leaf of the second argument
++by the first argument. -/
++def add (a : OTree) : OTree -> OTree
++  | .zero => a
++  | .succ b => .succ (add a b)
++  | .limit f => .limit (fun n => add a (f n))
++
++/-- Syntactic ordinal multiplication, recursive in the right argument. -/
++def mul (a : OTree) : OTree -> OTree
++  | .zero => .zero
++  | .succ b => add (mul a b) a
++  | .limit f => .limit (fun n => mul a (f n))
++
++/-- Syntactic ordinal exponentiation, recursive in the exponent. -/
++def pow (a : OTree) : OTree -> OTree
++  | .zero => .succ .zero
++  | .succ b => mul (pow a b) a
++  | .limit f => .limit (fun n => pow a (f n))
++
++/-- The finite ordinal `n`. -/
++def ofNat : Nat -> OTree
++  | 0 => .zero
++  | n + 1 => .succ (ofNat n)
++
++/-- A canonical omega-shaped tree. -/
++def omega : OTree := .limit ofNat
++
++/-- The normal-function syntax `a |-> omega^a`. -/
++def omegaPow (a : OTree) : OTree := pow omega a
++
++/-- Starting above `a`, iterate `f` and take the countable limit.  When `f`
++represents a normal ordinal function this is its first fixed point above `a`.
++The Lean construction itself needs no semantic normality assumption. -/
++def derivative (f : OTree -> OTree) (a : OTree) : OTree :=
++  .limit (fun n => iterate f (n + 1) (.succ a))
++
++/-- Finite critical-function hierarchy.  Level zero is exponentiation by omega;
++each successor level enumerates fixed points of the preceding level. -/
++def critical : Nat -> OTree -> OTree
++  | 0, a => omegaPow a
++  | k + 1, a => derivative (fun b => critical k b) a
++
++/-- A diagonal common-critical-point closure over every finite critical level.
++It is Gamma-like, but the source deliberately makes no quotient-level ordinal
++identity claim. -/
++def autonomous (a : OTree) : OTree :=
++  .limit (fun k => critical (k + 1) (.succ a))
++
++/-- Higher derivatives of the autonomous closure. -/
++def hyper : Nat -> OTree -> OTree
++  | 0, a => autonomous a
++  | k + 1, a => derivative (fun b => hyper k b) a
++
++/-- Read an existing `W Nat` tree as an autonomous notation. -/
++def encode : WTree Nat -> OTree
++  | .leaf => .zero
++  | .node f => .limit (fun n => encode (f n))
++
++/-- Realize an autonomous notation as a `W Nat` schedule for forest reflection. -/
++def realize : OTree -> WTree Nat
++  | .zero => .leaf
++  | .succ a =>
++      .node (fun n =>
++        match n with
++        | 0 => realize a
++        | _ + 1 => .leaf)
++  | .limit f => .node (fun n => realize (f n))
++
++end Autonomous
++
++/-- Contender 6's self-generated index, imported only as structural seed data. -/
++def contender7Base : Autonomous.OTree := Autonomous.encode index
++
++/-- The autonomous payload at level `k`. -/
++def contender7RawBranch (k : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper k (Autonomous.OTree.succ contender7Base))
++
++/-- A guarded branch tower.  At each successor, child zero is the whole
++preceding branch and child one is the next autonomous payload. -/
++def contender7Branch : Nat -> WTree Nat
++  | 0 => index
++  | k + 1 =>
++      .node (fun i =>
++        match i with
++        | 0 => contender7Branch k
++        | _ + 1 => contender7RawBranch k)
++
++/-- The new autonomous reflection schedule.  At input 42, branch 42 is visible. -/
++def contender7Index : WTree Nat := .node contender7Branch
++
++/-- The new reflection family. -/
++def contender7Family (n : Nat) : Nat := stage p5Family contender7Index n
++
++/-- **Contender 7.** Never evaluate it. -/
++def contender_7 : Nat := contender7Family 42
++
++end BusyLean
+diff --git a/BusyLean/Comparison7.lean b/BusyLean/Comparison7.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Comparison7.lean
+@@ -0,0 +1,126 @@
++import BusyLean.Contender7
++import BusyLean.Comparison
++
++/-!
++# Contender 7 comparison theorems
++
++Every comparison is by explicit inclusion; no monotonicity of reflection is
++assumed.  That is important because a reflected program may inspect and branch
++on oracle values, so reflection is not monotone in its oracle in general.
++
++Branch zero is definitionally Contender 6's entire self-generated index.  Every
++successor branch contains the preceding branch as child zero and its autonomous
++payload as child one.  At input 42 the outer root sees branch 42, yielding a
++kernel-checked chain of 43 strict reflection steps above the old index (42 guard
++steps plus the outer root), while also exposing the level-41 autonomous payload.
++-/
++
++namespace BusyLean
++
++open BusyLean.W
++
++/-- Every branch visible at input `n` is strictly below the Contender 7 family. -/
++theorem contender7_branch_lt {i n : Nat} (hi : i <= n) :
++    stage p5Family (contender7Branch i) n < contender7Family n :=
++  stage_child_lt p5Family contender7Branch hi
++
++/-- The old self-generated index is branch zero. -/
++theorem contender7_branch_zero : contender7Branch 0 = index := rfl
++
++/-- Each guarded branch is strictly below its successor, at every input. -/
++theorem contender7_branch_step_lt (k n : Nat) :
++    stage p5Family (contender7Branch k) n <
++      stage p5Family (contender7Branch (k + 1)) n := by
++  change stage p5Family (contender7Branch k) n <
++    stage p5Family
++      (.node (fun i =>
++        match i with
++        | 0 => contender7Branch k
++        | _ + 1 => contender7RawBranch k)) n
++  exact stage_child_lt p5Family
++    (fun i =>
++      match i with
++      | 0 => contender7Branch k
++      | _ + 1 => contender7RawBranch k)
++    (i := 0) (n := n) (Nat.zero_le n)
++
++/-- The autonomous payload at level `k` is child one of guarded branch `k+1`. -/
++theorem contender7_raw_lt_next (k : Nat) {n : Nat} (hn : 1 <= n) :
++    stage p5Family (contender7RawBranch k) n <
++      stage p5Family (contender7Branch (k + 1)) n := by
++  change stage p5Family (contender7RawBranch k) n <
++    stage p5Family
++      (.node (fun i =>
++        match i with
++        | 0 => contender7Branch k
++        | _ + 1 => contender7RawBranch k)) n
++  exact stage_child_lt p5Family
++    (fun i =>
++      match i with
++      | 0 => contender7Branch k
++      | _ + 1 => contender7RawBranch k)
++    (i := 1) (n := n) hn
++
++/-- Iterating the previous theorem gives a strict path from branch zero through
++any requested finite number of guarded branches. -/
++theorem contender7_branch_zero_lt_succ :
++    forall k n : Nat,
++      stage p5Family (contender7Branch 0) n <
++        stage p5Family (contender7Branch (k + 1)) n
++  | 0, n => contender7_branch_step_lt 0 n
++  | k + 1, n =>
++      Nat.lt_trans (contender7_branch_zero_lt_succ k n)
++        (contender7_branch_step_lt (k + 1) n)
++
++/-- The 42 guarded steps give a strict lower bound before the outer root is even
++applied. -/
++theorem finalFamily_lt_contender7Branch42 :
++    finalFamily 42 < stage p5Family (contender7Branch 42) 42 := by
++  change stage p5Family (contender7Branch 0) 42 <
++    stage p5Family (contender7Branch (41 + 1)) 42
++  exact contender7_branch_zero_lt_succ 41 42
++
++/-- Branch 42 is visible to the outer root at input 42. -/
++theorem contender7Branch42_lt_contender_7 :
++    stage p5Family (contender7Branch 42) 42 < contender_7 :=
++  contender7_branch_lt (Nat.le_refl 42)
++
++/-- At every input, the direct branch-zero inclusion already puts the old family
++below the new family. -/
++theorem finalFamily_lt_contender7Family (n : Nat) :
++    finalFamily n < contender7Family n :=
++  contender7_branch_lt (Nat.zero_le n)
++
++/-- **Required comparison:** Contender 6 is strictly below Contender 7.  The
++chosen proof records the full 42-step guard margin rather than taking the direct
++branch-zero shortcut. -/
++theorem contender_6_lt_contender_7 : contender_6 < contender_7 :=
++  Nat.lt_trans finalFamily_lt_contender7Branch42
++    contender7Branch42_lt_contender_7
++
++/-- The exact Lean port of Contender 5 is also strictly below Contender 7. -/
++theorem contender_5_lt_contender_7 : contender_5 < contender_7 :=
++  Nat.lt_trans contender_5_lt_contender_6 contender_6_lt_contender_7
++
++/-- The level-41 autonomous payload is strictly below guarded branch 42. -/
++theorem hyper41_lt_contender7Branch42 :
++    stage p5Family
++      (Autonomous.realize
++        (Autonomous.hyper 41
++          (Autonomous.OTree.succ contender7Base))) 42 <
++      stage p5Family (contender7Branch 42) 42 := by
++  change stage p5Family (contender7RawBranch 41) 42 <
++    stage p5Family (contender7Branch (41 + 1)) 42
++  exact contender7_raw_lt_next 41 (Nat.succ_le_succ (Nat.zero_le 41))
++
++/-- The highest autonomous payload selected by input 42 is strictly below the
++final contender. -/
++theorem hyper41_lt_contender_7 :
++    stage p5Family
++      (Autonomous.realize
++        (Autonomous.hyper 41
++          (Autonomous.OTree.succ contender7Base))) 42 < contender_7 :=
++  Nat.lt_trans hyper41_lt_contender7Branch42
++    contender7Branch42_lt_contender_7
++
++end BusyLean
+diff --git a/test/Contender7Audit.lean b/test/Contender7Audit.lean
+new file mode 100644
+--- /dev/null
++++ b/test/Contender7Audit.lean
+@@ -0,0 +1,62 @@
++import BusyLean
++import Lean
++
++/-!
++# Contender 7 audit
++
++Run with `lake env lean test/Contender7Audit.lean`.
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through declaration types and values. -/
++def c7ConstClosure (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant occurs in the dependency closure. -/
++elab "#c7_assert_not_in_closure " root:ident " : " bad:ident* : command => do
++  let env <- getEnv
++  let r <- liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := c7ConstClosure env r
++  for b in bad do
++    let n <- liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.contender_7
++#print axioms BusyLean.contender7_branch_step_lt
++#print axioms BusyLean.contender7_branch_zero_lt_succ
++#print axioms BusyLean.finalFamily_lt_contender7Branch42
++#print axioms BusyLean.contender_6_lt_contender_7
++#print axioms BusyLean.contender_5_lt_contender_7
++#print axioms BusyLean.finalFamily_lt_contender7Family
++#print axioms BusyLean.hyper41_lt_contender7Branch42
++#print axioms BusyLean.hyper41_lt_contender_7
++
++-- The definition is independent of the previous named values and comparison
++-- theorems.  It may reuse structural machinery (`index`, `stage`, `p5Family`).
++#c7_assert_not_in_closure BusyLean.contender_7 :
++  BusyLean.contender_5 BusyLean.contender_6
++  BusyLean.contender_5_lt_contender_6 BusyLean.contender_6_lt_contender_7
++  BigNumber.contender_5 BigNumber.contender_6
++  BusyLean.C5.largestOfDepth BusyLean.C5.maxBy
++
++#check @BusyLean.contender_6_lt_contender_7
++#check @BusyLean.hyper41_lt_contender_7
++
++-- A feasible computability sanity check.  Never evaluate input 42.
++#eval BusyLean.contender7Family 0
+diff --git a/.github/workflows/contender7-ci.yml b/.github/workflows/contender7-ci.yml
+new file mode 100644
+--- /dev/null
++++ b/.github/workflows/contender7-ci.yml
+@@ -0,0 +1,37 @@
++name: Contender 7 verification
++
++on:
++  push:
++    branches: ["research/autonomous-reflection-c7-20261012"]
++  pull_request:
++    branches: ["main"]
++  workflow_dispatch:
++
++jobs:
++  verify:
++    runs-on: ubuntu-latest
++    timeout-minutes: 20
++    steps:
++      - uses: actions/checkout@v4
++      - uses: leanprover/lean-action@v1
++        with:
++          auto-config: false
++          use-github-cache: false
++      - name: Run reproducible contest checker
++        run: |
++          set -o pipefail
++          mkdir -p verification
++          python3 scripts/check.py 2>&1 | tee verification/contender7-check.log
++      - name: Record toolchain and revision
++        run: |
++          {
++            git rev-parse HEAD
++            lean --version
++            lake --version
++          } | tee verification/toolchain.txt
++      - name: Preserve verification logs
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: contender7-verification-${{ github.sha }}
++          path: verification

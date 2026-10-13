@@ -1,0 +1,38 @@
+definitions: 1.45 s (budget 15 s)
+proofs: 2.15 s (budget 60 s)
+--- test/Audit.lean ---
+'BusyLean.contender_5' does not depend on any axioms
+'BusyLean.contender_6' depends on axioms: [propext]
+'BusyLean.contender_5_lt_contender_6' depends on axioms: [propext]
+'BusyLean.p5_lt_contender_6' depends on axioms: [propext]
+'BusyLean.p5Family_lt_finalFamily' depends on axioms: [propext]
+'BusyLean.defined_tree_eventually_lt' depends on axioms: [propext]
+'BusyLean.program_lt_finalFamily' depends on axioms: [propext]
+'BusyLean.PortAgreement.largest_eq_oldMaximum' depends on axioms: [propext]
+BusyLean.contender_6: closure of 534 constants avoids all 6 forbidden names
+BusyLean.contender_6 uses 0 constants under BusyLean.C5: []
+BusyLean.contender_6 uses 0 constants under BusyLean.PortAgreement: []
+BusyLean.contender_6 uses 1 constants under BigNumber.oldMaximum: [BigNumber.oldMaximum]
+BusyLean.contender_6 uses 2 constants under BigNumber.oldTerms: [BigNumber.oldTerms, BigNumber.oldTerms._f]
+BusyLean.contender_5_lt_contender_6 : BusyLean.contender_5 < BusyLean.contender_6
+BusyLean.p5_lt_contender_6 : BigNumber.contender_6 < BusyLean.contender_6
+3
+
+--- test/Contender7Audit.lean ---
+'BusyLean.contender_7' depends on axioms: [propext]
+'BusyLean.contender7_branch_step_lt' depends on axioms: [propext]
+'BusyLean.contender7_branch_zero_lt_succ' depends on axioms: [propext]
+'BusyLean.finalFamily_lt_contender7Branch42' depends on axioms: [propext]
+'BusyLean.contender_6_lt_contender_7' depends on axioms: [propext]
+'BusyLean.contender_5_lt_contender_7' depends on axioms: [propext]
+'BusyLean.finalFamily_lt_contender7Family' depends on axioms: [propext]
+'BusyLean.hyper41_lt_contender7Branch42' depends on axioms: [propext]
+'BusyLean.hyper41_lt_contender_7' depends on axioms: [propext]
+BusyLean.contender_7: closure of 575 constants avoids all 8 forbidden names
+BusyLean.contender_6_lt_contender_7 : BusyLean.contender_6 < BusyLean.contender_7
+BusyLean.hyper41_lt_contender_7 : BusyLean.W.stage BusyLean.p5Family
+    (BusyLean.Autonomous.realize (BusyLean.Autonomous.hyper 41 BusyLean.contender7Base.succ)) 42 <
+  BusyLean.contender_7
+4
+
+PASS: 17 declarations audited; axioms within ['Quot.sound', 'propext']

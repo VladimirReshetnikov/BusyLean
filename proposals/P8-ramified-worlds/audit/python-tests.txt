@@ -1,0 +1,14 @@
+test_bad_function_application_returns_zero (test_reference.WitnessTests.test_bad_function_application_returns_zero) ... ok
+test_exact_cast_retains_tree (test_reference.WitnessTests.test_exact_cast_retains_tree) ... ok
+test_exact_height_certificate (test_reference.WitnessTests.test_exact_height_certificate) ... ok
+test_exponential_inflation_and_monotonicity (test_reference.WitnessTests.test_exponential_inflation_and_monotonicity) ... ok
+test_finite_reflection_inequality (test_reference.WitnessTests.test_finite_reflection_inequality) ... ok
+test_no_numeric_forest_oracle (test_reference.WitnessTests.test_no_numeric_forest_oracle) ... ok
+test_small_tower_values (test_reference.WitnessTests.test_small_tower_values) ... ok
+test_types_all_visible_children (test_reference.WitnessTests.test_types_all_visible_children) ... ok
+test_witness_values_and_world_routing (test_reference.WitnessTests.test_witness_values_and_world_routing) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.059s
+
+OK

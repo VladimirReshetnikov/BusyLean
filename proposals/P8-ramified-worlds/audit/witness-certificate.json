@@ -1,0 +1,186 @@
+{
+  "description": "The tower comparison witness, not a complete-contender evaluation",
+  "program_child_zero": {
+    "kind": "app",
+    "atom": null,
+    "left": {
+      "kind": "app",
+      "atom": null,
+      "left": {
+        "kind": "app",
+        "atom": null,
+        "left": {
+          "kind": "atom",
+          "atom": "iterate",
+          "left": null,
+          "right": null
+        },
+        "right": {
+          "kind": "atom",
+          "atom": "exp",
+          "left": null,
+          "right": null
+        }
+      },
+      "right": {
+        "kind": "app",
+        "atom": null,
+        "left": {
+          "kind": "app",
+          "atom": null,
+          "left": {
+            "kind": "app",
+            "atom": null,
+            "left": {
+              "kind": "app",
+              "atom": null,
+              "left": {
+                "kind": "atom",
+                "atom": "lowerRun",
+                "left": null,
+                "right": null
+              },
+              "right": {
+                "kind": "atom",
+                "atom": "zero",
+                "left": null,
+                "right": null
+              }
+            },
+            "right": {
+              "kind": "atom",
+              "atom": "seed",
+              "left": null,
+              "right": null
+            }
+          },
+          "right": {
+            "kind": "app",
+            "atom": null,
+            "left": {
+              "kind": "atom",
+              "atom": "lowerIndex",
+              "left": null,
+              "right": null
+            },
+            "right": {
+              "kind": "atom",
+              "atom": "zero",
+              "left": null,
+              "right": null
+            }
+          }
+        },
+        "right": {
+          "kind": "atom",
+          "atom": "input",
+          "left": null,
+          "right": null
+        }
+      }
+    },
+    "right": {
+      "kind": "app",
+      "atom": null,
+      "left": {
+        "kind": "app",
+        "atom": null,
+        "left": {
+          "kind": "app",
+          "atom": null,
+          "left": {
+            "kind": "app",
+            "atom": null,
+            "left": {
+              "kind": "atom",
+              "atom": "lowerRun",
+              "left": null,
+              "right": null
+            },
+            "right": {
+              "kind": "atom",
+              "atom": "zero",
+              "left": null,
+              "right": null
+            }
+          },
+          "right": {
+            "kind": "atom",
+            "atom": "seed",
+            "left": null,
+            "right": null
+          }
+        },
+        "right": {
+          "kind": "app",
+          "atom": null,
+          "left": {
+            "kind": "atom",
+            "atom": "lowerIndex",
+            "left": null,
+            "right": null
+          },
+          "right": {
+            "kind": "atom",
+            "atom": "zero",
+            "left": null,
+            "right": null
+          }
+        }
+      },
+      "right": {
+        "kind": "atom",
+        "atom": "input",
+        "left": null,
+        "right": null
+      }
+    }
+  },
+  "type": [
+    "nat"
+  ],
+  "height_child_zero": 7,
+  "height_general": "i + 7",
+  "input_bound": "n >= i + 7",
+  "denotation": "iterate(exp2, score(worlds[i], n), score(worlds[i], n))",
+  "live_numeric_oracle_used": false,
+  "visible_child_indices_at_42": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35
+  ],
+  "formalization_status": "Lean source supplied; not compiled in authoring environment"
+}

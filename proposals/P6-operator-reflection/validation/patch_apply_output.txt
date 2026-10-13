@@ -1,0 +1,10 @@
+PASS: patch applies cleanly
+BusyLean.lean
+BusyLean/Comparison7.lean
+BusyLean/Contender7.lean
+BusyLean/MetaReflection.lean
+BusyLean/MetaReflectionFacts.lean
+CONTENDER7.md
+scripts/check_contender7.py
+test/Contender7Audit.lean
+test/MetaReflectionSmoke.lean

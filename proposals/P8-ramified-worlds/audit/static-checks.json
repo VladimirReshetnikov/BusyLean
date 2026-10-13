@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "lean_files": [
+    {
+      "file": "lean/BusyLeanNext/Definitions.lean",
+      "delimiters": "balanced",
+      "forbidden_tokens": []
+    },
+    {
+      "file": "lean/BusyLeanNext/Proofs.lean",
+      "delimiters": "balanced",
+      "forbidden_tokens": []
+    },
+    {
+      "file": "lean/BusyLeanNext.lean",
+      "delimiters": "balanced",
+      "forbidden_tokens": []
+    },
+    {
+      "file": "lean/test/Audit.lean",
+      "delimiters": "balanced",
+      "forbidden_tokens": []
+    },
+    {
+      "file": "lean/test/Smoke.lean",
+      "delimiters": "balanced",
+      "forbidden_tokens": []
+    }
+  ],
+  "python_syntax_files": 4,
+  "limitation": "Lexical checks do not establish Lean compilation or theorem correctness."
+}

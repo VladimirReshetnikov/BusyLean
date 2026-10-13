@@ -1,0 +1,6 @@
+PDF: /mnt/data/busylean_contender7_autonomous_reflection/article/contender7_autonomous_reflection.pdf
+Pages: 14
+Encrypted: False
+Openable (PyMuPDF): True
+Likely scanned: False
+XFA present: False

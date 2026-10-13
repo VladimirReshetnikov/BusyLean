@@ -1,0 +1,54 @@
+{
+  "enumeration": [
+    {
+      "depth": 0,
+      "types": 0,
+      "terms": 0
+    },
+    {
+      "depth": 1,
+      "types": 1,
+      "terms": 2
+    },
+    {
+      "depth": 2,
+      "types": 3,
+      "terms": 13
+    },
+    {
+      "depth": 3,
+      "types": 13,
+      "terms": 308
+    },
+    {
+      "depth": 4,
+      "types": 183,
+      "terms": 147129
+    }
+  ],
+  "compiler_ranks": [
+    2,
+    14,
+    16,
+    17
+  ],
+  "generic_compiler_environment_cases": 480,
+  "sampled_tree_paths_per_case": 3,
+  "w_cast_identity_path_tests": 24,
+  "program_nonmonotonicity": {
+    "smaller_oracle_output": 1,
+    "larger_oracle_output": 0,
+    "claim_scope": "one program, not the full maximum"
+  },
+  "boost_small_values": [
+    "3",
+    "18",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639939"
+  ],
+  "bounded_tower_monotonicity_tests": 100,
+  "original_finalFamily_zero": 3,
+  "submitted_number_evaluated": false,
+  "full_rank_17_enumeration_materialized": false,
+  "lean_kernel_verification": "not performed by this Python test",
+  "status": "PASS"
+}

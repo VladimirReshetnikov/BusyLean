@@ -1,0 +1,20 @@
+[
+  {
+    "path": "lean/BigNumber/Definitions.lean",
+    "expected_git_blob": "0cb1e14966d62d4c17302f8f6b41316fb4181a42",
+    "actual_git_blob": "0cb1e14966d62d4c17302f8f6b41316fb4181a42",
+    "identical": true
+  },
+  {
+    "path": "lean/BusyLean/Reflection.lean",
+    "expected_git_blob": "2703943ffe1207bd398d5f750daadff8139c5418",
+    "actual_git_blob": "2703943ffe1207bd398d5f750daadff8139c5418",
+    "identical": true
+  },
+  {
+    "path": "lean/BusyLean/Contender6.lean",
+    "expected_git_blob": "248aa97049d0045b9635bb816842870d4a19eaed",
+    "actual_git_blob": "248aa97049d0045b9635bb816842870d4a19eaed",
+    "identical": true
+  }
+]

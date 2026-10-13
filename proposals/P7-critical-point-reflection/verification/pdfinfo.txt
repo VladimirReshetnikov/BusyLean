@@ -1,0 +1,22 @@
+Title:           BusyLean Contender 7: Autonomous Critical-Point Reflection
+Subject:         
+Keywords:        
+Author:          OpenAI research assistant for Vladimir Reshetnikov
+Creator:         LaTeX with hyperref
+Producer:        pdfTeX-1.40.26
+CreationDate:    Tue Oct 13 02:49:20 2026 UTC
+ModDate:         Tue Oct 13 02:49:20 2026 UTC
+Custom Metadata: yes
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           14
+Encrypted:       no
+Page size:       612 x 792 pts (letter)
+Page rot:        0
+File size:       378967 bytes
+Optimized:       no
+PDF version:     1.7

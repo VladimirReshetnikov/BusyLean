@@ -1,0 +1,1018 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{microtype}
+\usepackage[margin=0.88in]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  urlcolor=blue!45!black,
+  citecolor=blue!45!black,
+  pdftitle={Contender 7: Autonomous Operator Reflection in Lean},
+  pdfsubject={A constructive large-number proposal for BusyLean},
+  pdfkeywords={Lean, large numbers, reflection, W-types, proof theory}
+}
+
+\pagestyle{fancy}
+\setlength{\headheight}{14pt}
+\fancyhf{}
+\lhead{BusyLean Contender 7}
+\rhead{Autonomous operator reflection}
+\cfoot{\thepage\ of \pageref*{LastPage}}
+
+\lstdefinelanguage{lean}{
+  keywords={abbrev,def,theorem,inductive,structure,where,match,with,fun,let,in,
+    namespace,end,open,import,by,have,show,exact,apply,intro,change,rw,refine,
+    obtain,termination_by,private,example},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]"
+}
+\lstset{
+  language=lean,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\bfseries\color{blue!45!black},
+  commentstyle=\itshape\color{black!58},
+  stringstyle=\color{green!35!black},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.25pt,
+  rulecolor=\color{black!25},
+  xleftmargin=0.6em,
+  xrightmargin=0.6em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  literate=
+    {→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {ℕ}{{$\mathbb{N}$}}1
+    {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {≤}{{$\le$}}1
+    {<}{{$<$}}1 {≥}{{$\ge$}}1 {λ}{{$\lambda$}}1
+    {ψ}{{$\psi$}}1 {Ω}{{$\Omega$}}1 {ω}{{$\omega$}}1
+    {·}{{$\cdot$}}1 {≈}{{$\approx$}}1 {≃}{{$\simeq$}}1 {∈}{{$\in$}}1
+    {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{construction}[theorem]{Construction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{status}[theorem]{Validation status}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Fam}{\mathcal{F}}
+\newcommand{\Trans}{\mathcal{T}}
+\newcommand{\Run}{\operatorname{Run}}
+\newcommand{\Lift}{\operatorname{Lift}}
+\newcommand{\OpStage}{\operatorname{OpStage}}
+\newcommand{\Refl}{\operatorname{Ref}}
+\newcommand{\Index}{\mathsf{Index}}
+\newcommand{\Pfive}{\mathsf{P5}}
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\codepath}[1]{\texttt{#1}}
+
+\title{\textbf{Contender 7: Autonomous Operator Reflection in Lean}\\[0.45em]
+\large A constructive large-number proposal for the BusyLean repository}
+\author{Research artifact prepared for the BusyLean project}
+\date{12 October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The BusyLean repository formalizes a Lean edition of the ``name the biggest
+number'' contest.  Its current Contender~6 applies forest reflection over a
+finite-type W-language along a universal W-tree that joins every tree definable
+in that language.  This article proposes a next entry, \emph{Contender~7}, by
+lifting the same construction one type level: from oracle families to
+\emph{transformers of oracle families}.  The primitive reflection operation is
+packaged as a transformer; arbitrary transformers are run along W-trees; the
+resulting autonomous lift is itself iterated along the universal tree.  The
+closed Lean definition is
+\[
+  \lean{contender\_7}
+  = \OpStage(\Refl,\Index)(\Pfive)(42,42).
+\]
+The supplied Lean proof source establishes the pointwise inequality
+\[
+  \texttt{finalFamily }n
+  < \texttt{autonomousFamily }n\,n,
+\]
+and hence
+\[
+  \texttt{contender\_6}<\texttt{contender\_7}.
+\]
+The proof uses explicit child occurrences and never assumes monotonicity of
+reflection in its oracle, a property known to fail for the underlying object
+language.  Under the repository's informal calibration
+\(\lambda\approx\psi(\Omega_\omega)\), Contender~6 has scale roughly
+\(f_{\lambda^2}(42)\), while the operator-level autonomous closure proposed
+here has the heuristic scale \(f_{\lambda^\lambda}(42)\).  The strict
+inequality is a formal Lean theorem statement with proof source; the ordinal
+calibration is deliberately presented only as a heuristic.  The bundle also
+contains source audits, smoke tests, a clean-build script, a unified patch, and
+this compiled article.  Because the execution environment used to prepare the
+bundle lacks Lean~4.34.0, final kernel compilation and timing remain a required
+integration check rather than a claimed result.
+\end{abstract}
+
+\tableofcontents
+
+%======================================================================
+\section{Problem and repository baseline}
+
+BusyLean changes the usual large-number game in two decisive ways.  A contender
+must denote a closed, computable natural number, and superiority over the
+previous contender must be justified by a proof checked by Lean's kernel.  The
+rules exclude nonconstructive or implementation-only escape hatches such as
+\lean{noncomputable}, \lean{partial}, \lean{unsafe}, opaque stand-ins,
+\lean{implemented\_by}, external primitives, \lean{native\_decide}, custom
+axioms, and appeals to uncomputable functions such as Busy Beaver.  They also
+impose separate checking budgets for definitions and proofs.
+
+The repository revision used by this artifact is
+\[
+\texttt{86b360648163f0249eab79539438b6a83dfe8215}.
+\]
+At that revision the incumbent is
+\begin{lstlisting}
+def contender_6 : Nat := stage p5Family index 42
+\end{lstlisting}
+and the principal comparison theorem is
+\begin{lstlisting}
+theorem contender_5_lt_contender_6 : contender_5 < contender_6
+\end{lstlisting}
+The source is organized so that the definition layer can be checked without
+normalizing the enormous number.  This proposal preserves that architecture:
+definitions live in \codepath{MetaReflection.lean} and
+\codepath{Contender7.lean}; proofs live in
+\codepath{MetaReflectionFacts.lean} and \codepath{Comparison7.lean}.
+
+\subsection{Why a mere arithmetic wrapper is inadequate}
+
+There are trivial ways to obtain a larger number, for example
+\(\lean{contender\_6}+1\) or \(2^{\lean{contender\_6}}\).  Such definitions are
+computable and easy to compare, but they violate the scientific intent of the
+contest's ``no laziness'' rule: they exploit the previous contender as data and
+add only a superficial arithmetic shell.  The new definition must instead
+strengthen the \emph{generating mechanism} and should not mention the constant
+\lean{contender\_6} at all.
+
+Contender~7 meets this stronger criterion.  Its definition imports the
+W-language, universal tree, and ordinary-reflection machinery behind
+Contender~6, but not the previous named value.  It introduces a new recursion
+at the operator level and proves the old family is embedded strictly below it.
+
+%======================================================================
+\section{Contender 6 in functional form}
+\label{sec:c6}
+
+The design of Contender~7 is easiest to understand by restating the incumbent
+as a functional construction.
+
+\subsection{Families and ordinary reflection}
+
+Let
+\[
+  \Fam = \N\to\N\to\N
+\]
+be the type of countable families of unary numerical functions.  In Lean this
+is the abbreviation
+\begin{lstlisting}
+abbrev Family := Nat → Nat → Nat
+\end{lstlisting}
+The first coordinate selects an oracle member; the second is the numerical
+input.  The W-language interpreter is evaluated in an environment whose oldest
+variable denotes such a family.  The operation
+\(
+  \Refl(fs,n)
+\)
+strictly exceeds both:
+\begin{enumerate}[leftmargin=*]
+  \item every visible oracle value \(fs(i,n)\) with \(i\le n\), and
+  \item every enumerated program of depth at most \(n\), evaluated relative to
+        \(fs\).
+\end{enumerate}
+The implementation is a finite maximum plus a positive offset, so it is
+constructive and total.
+
+\subsection{Forest reflection}
+
+The type \lean{WTree Nat} has a leaf constructor and countably branching nodes:
+\[
+  a ::= \mathsf{leaf}\mid \mathsf{node}(f),\qquad
+  f:\N\to \mathsf{WTree}(\N).
+\]
+Ordinary forest reflection is
+\[
+\begin{aligned}
+  \mathsf{stage}(s,\mathsf{leaf})(n)
+    &= \Refl(s,n),\\
+  \mathsf{stage}(s,\mathsf{node}(f))(n)
+    &= \Refl\bigl((i,m)\mapsto
+        \mathsf{stage}(s,f(i))(m),\,n\bigr).
+\end{aligned}
+\]
+At a node, the child stages are retained as a family rather than collapsed
+pointwise.  A program may therefore compute which child to call.  This is
+crucial: a simple pointwise maximum would erase the dynamic indexing power of
+the oracle language.
+
+\subsection{The universal index}
+
+For a program \(t\), \lean{defTree t} interprets it and casts the result to a
+\lean{WTree Nat}, using a leaf on type mismatch.  The tree
+\lean{treesOfDepth k} joins the trees denoted by every program enumerated at
+depth at most \(k\).  Finally,
+\begin{lstlisting}
+def index : WTree Nat := .node treesOfDepth
+\end{lstlisting}
+joins those finite-depth joins for every \(k\).  Thus \lean{index} does not
+encode a hand-written ordinal notation system; it ranges over every W-tree
+that the object language itself defines.
+
+Writing \(\Index\) for this tree and \(s=\Pfive\) for the P5 seed family,
+Contender~6 is
+\[
+  C_6 = \mathsf{stage}(s,\Index)(42).
+\]
+Equivalently, after packaging reflection as a family transformer, it will be
+one autonomous lift of the primitive transformer.  This reformulation reveals
+the next natural closure operation.
+
+%======================================================================
+\section{From functions to operators}
+\label{sec:operators}
+
+\subsection{Transformers}
+
+\begin{definition}[Transformer]
+A transformer is a function from oracle families to oracle families:
+\[
+  \Trans = \Fam\to\Fam.
+\]
+In Lean:
+\begin{lstlisting}
+abbrev Transformer := Family → Family
+\end{lstlisting}
+\end{definition}
+
+The ordinary reflection step is packaged as the transformer
+\[
+  R(fs)(o,n)=\Refl(fs,n),
+\]
+where the output coordinate \(o\) is intentionally ignored.
+\begin{lstlisting}
+def reflectionTransformer : Transformer :=
+  fun fs _ n => reflect fs n
+\end{lstlisting}
+The redundant coordinate is not cosmetic.  Once transformers are combined,
+that coordinate becomes the routing channel through which a higher-level
+operator selects a child transformer.
+
+\subsection{Running a transformer along a tree}
+
+\begin{definition}[Transformer run]
+For \(T\in\Trans\), seed \(s\in\Fam\), and W-tree \(a\), define
+\(\Run(T,s,a)\in\Fam\) recursively by
+\[
+\begin{aligned}
+  \Run(T,s,\mathsf{leaf})
+    &=T(s),\\
+  \Run(T,s,\mathsf{node}(f))
+    &=T\bigl((i,n)\mapsto \Run(T,s,f(i))(i,n)\bigr).
+\end{aligned}
+\]
+\end{definition}
+
+The aligned coordinate \(i\) in the recursive clause is important.  Coordinate
+\(i\) of the family supplied to \(T\) contains child \(i\), evaluated at child
+output coordinate \(i\).  Thus a transformer can inspect or route through the
+entire countable forest.
+
+The Lean definition is structural:
+\begin{lstlisting}
+def runTransformer (op : Transformer) (seed : Family) :
+    WTree Nat → Family
+  | .leaf => op seed
+  | .node f =>
+      op (fun i n => runTransformer op seed (f i) i n)
+\end{lstlisting}
+No general recursion, termination oracle, or postulated well-founded relation
+is required; recursion is directly on the inductive W-tree.
+
+\subsection{Autonomous lifting}
+
+\begin{definition}[Autonomous lift]
+The lift of a transformer runs it along the universal index:
+\[
+  \Lift(T)(s)=\Run(T,s,\Index).
+\]
+\end{definition}
+
+\begin{lstlisting}
+def liftTransformer (op : Transformer) : Transformer :=
+  fun seed => runTransformer op seed index
+\end{lstlisting}
+For the primitive reflection transformer, this recovers the incumbent forest
+reflection exactly.
+
+\begin{theorem}[Compatibility with Contender 6]
+For every seed family \(s\), output coordinate \(o\), and input \(n\),
+\[
+ \Lift(R)(s)(o,n)=\mathsf{stage}(s,\Index)(n).
+\]
+\end{theorem}
+
+The supplied Lean theorem is
+\begin{lstlisting}
+theorem liftReflection_eq_stage (seed : Family) (o n : Nat) :
+    liftTransformer reflectionTransformer seed o n =
+      stage seed index n
+\end{lstlisting}
+It follows by structural induction on the W-tree, not by extensional or
+ordinal reasoning.
+
+%======================================================================
+\section{Iterating the lift itself}
+\label{sec:operator-stage}
+
+A single application of \(\Lift\) turns ordinary reflection into the mechanism
+behind Contender~6.  Contender~7 makes \(\Lift\) itself the operation that is
+iterated.
+
+\subsection{Splicing child transformers}
+
+Given a countable family \((T_i)_{i\in\N}\) of transformers, define their
+splice by
+\[
+  \mathsf{splice}(T_0,T_1,\ldots)(s)(i,n)=T_i(s)(0,n).
+\]
+Output coordinate \(i\) chooses the \(i\)-th transformer.  Coordinate zero is
+the canonical observation point inside the selected child.
+
+\begin{lstlisting}
+def spliceTransformers (ops : Nat → Transformer) : Transformer :=
+  fun seed i n => ops i seed 0 n
+\end{lstlisting}
+
+\subsection{The outer recursion}
+
+\begin{definition}[Operator stage]
+For a base transformer \(B\), define a tree-indexed transformer
+\(\OpStage(B,a)\) by
+\[
+\begin{aligned}
+  \OpStage(B,\mathsf{leaf})
+    &=\Lift(B),\\
+  \OpStage(B,\mathsf{node}(f))
+    &=\Lift\bigl(\mathsf{splice}
+       (i\mapsto\OpStage(B,f(i)))\bigr).
+\end{aligned}
+\]
+\end{definition}
+
+In Lean:
+\begin{lstlisting}
+def operatorStage (base : Transformer) : WTree Nat → Transformer
+  | .leaf => liftTransformer base
+  | .node f =>
+      liftTransformer
+        (spliceTransformers (fun i => operatorStage base (f i)))
+\end{lstlisting}
+This is the central new definition.  There are now two autonomous W-tree
+layers:
+\begin{enumerate}[leftmargin=*]
+  \item the \emph{inner} universal index inside every application of
+        \(\Lift\), and
+  \item the \emph{outer} tree controlling how those lifted transformers are
+        spliced and lifted again.
+\end{enumerate}
+Choosing the universal index for the outer tree closes the hierarchy under all
+operator stages generated by trees definable in the same W-language.
+
+%======================================================================
+\section{The proposed number}
+\label{sec:number}
+
+\begin{construction}[Contender 7]
+Define
+\[
+\begin{aligned}
+  A &= \OpStage(R,\Index),\\
+  F &= A(\Pfive),\\
+  C_7 &= F(42,42).
+\end{aligned}
+\]
+\end{construction}
+
+The complete definition layer is only:
+\begin{lstlisting}
+def autonomousTransformer : Transformer :=
+  operatorStage reflectionTransformer index
+
+def autonomousFamily : Family :=
+  autonomousTransformer p5Family
+
+def contender_7 : Nat := autonomousFamily 42 42
+\end{lstlisting}
+The diagonal coordinate \((42,42)\) is deliberate.  The first 42 exposes the
+outer transformer's output channel, while the second 42 is the ordinary
+numerical input and the visibility bound used by progressivity.  No occurrence
+of the constant \lean{contender\_6} appears in these definitions.
+
+\subsection{Computability in principle}
+
+Every component is executable:
+\begin{itemize}[leftmargin=*]
+  \item program enumerations at a fixed depth are finite lists;
+  \item the interpreter of the finite-type W-language is total;
+  \item \lean{reflect} computes finite maxima and arithmetic;
+  \item \lean{runTransformer} and \lean{operatorStage} recurse structurally on
+        inductive W-trees;
+  \item \lean{index} is a closed W-tree whose branches are generated by total
+        functions; and
+  \item the seed \lean{p5Family} is already a total function in the repository.
+\end{itemize}
+Consequently \lean{contender\_7} is a closed \lean{Nat}.  ``Computable in
+principle'' does not mean feasible: evaluating it would require an
+inconceivable amount of computation and must not be attempted.  Lean checks
+its definition and proofs symbolically, without normalizing the numeral.
+
+%======================================================================
+\section{Direct comparison without monotonicity}
+\label{sec:comparison}
+
+The key technical risk is monotonicity.  A program in the object language can
+inspect an oracle value and branch on it; increasing an oracle pointwise can
+therefore decrease a program's output.  Neither \lean{reflect} nor the lifted
+operators should be treated as monotone in their oracle argument.  The proof
+instead records explicit occurrences.
+
+\subsection{Progressive transformers}
+
+\begin{definition}[Progressivity]
+A transformer \(T\) is progressive when
+\[
+  i\le n \quad\Longrightarrow\quad
+  s(i,n)<T(s)(o,n)
+\]
+for every seed \(s\), every input \(n\), and every output coordinate \(o\).
+\end{definition}
+
+The Lean predicate is
+\begin{lstlisting}
+def Progressive (op : Transformer) : Prop :=
+  ∀ (seed : Family) (i o n : Nat),
+    i ≤ n → seed i n < op seed o n
+\end{lstlisting}
+Ordinary reflection is progressive by the repository theorem
+\lean{oracle\_lt\_reflect}.
+
+\subsection{Child dominance}
+
+At a node, a visible aligned child is literally one coordinate of the family
+supplied to the parent transformer.  Progressivity therefore gives the strict
+inequality directly.
+
+\begin{lemma}[Run child]
+If \(T\) is progressive and \(i\le n\), then
+\[
+  \Run(T,s,f(i))(i,n)
+  <\Run(T,s,\mathsf{node}(f))(o,n).
+\]
+\end{lemma}
+
+The corresponding Lean theorem is \lean{runTransformer\_child\_lt}.  No
+comparison between two different oracle families is made.
+
+\subsection{A transformer lies below its autonomous lift}
+
+The universal index has the form
+\[
+  \Index=\mathsf{node}(k\mapsto\mathsf{treesOfDepth}(k)).
+\]
+At depth zero, the term enumeration is empty.  Every defaulted child of
+\lean{treesOfDepth 0} is therefore a leaf.  For any visible coordinate
+\(i\le n\), there is an explicit two-edge path
+\[
+  \mathsf{leaf}
+  \longrightarrow \mathsf{treesOfDepth}(0)
+  \longrightarrow \Index.
+\]
+Applying the run-child lemma on each edge yields:
+
+\begin{theorem}[Lift dominance]
+If \(T\) is progressive and \(i\le n\), then
+\[
+  T(s)(i,n)<\Lift(T)(s)(o,n).
+\]
+\end{theorem}
+
+This is formalized as \lean{transformer\_lt\_lift\_at}.  It immediately gives
+that autonomous lifting preserves progressivity.  Splicing also preserves
+progressivity when every selected child transformer is progressive.  A
+structural induction then proves:
+
+\begin{theorem}[Progressivity of operator stages]
+If the base transformer \(B\) is progressive, then
+\(\OpStage(B,a)\) is progressive for every W-tree \(a\).
+\end{theorem}
+
+A second direct child lemma gives
+\[
+ \OpStage(B,f(i))(s)(0,n)
+ <\OpStage(B,\mathsf{node}(f))(s)(o,n)
+ \qquad(i\le n).
+\]
+
+\subsection{Contender 6 is a visible outer leaf}
+
+At an outer leaf,
+\[
+  \OpStage(R,\mathsf{leaf})=\Lift(R).
+\]
+By the compatibility theorem in \cref{sec:operators}, this is exactly the
+Contender~6 family.  The same two explicit outer edges
+\[
+  \mathsf{leaf}
+  \longrightarrow \mathsf{treesOfDepth}(0)
+  \longrightarrow \Index
+\]
+strictly dominate that leaf transformer.  Therefore:
+
+\begin{theorem}[Pointwise formal margin]
+For every \(n\in\N\),
+\[
+  \lean{finalFamily}\ n
+  <\lean{autonomousFamily}\ n\ n.
+\]
+\end{theorem}
+
+The supplied proof is:
+\begin{lstlisting}
+theorem finalFamily_lt_autonomousFamily (n : Nat) :
+    finalFamily n < autonomousFamily n n := by
+  have h0 :
+      operatorStage reflectionTransformer .leaf p5Family 0 n <
+        operatorStage reflectionTransformer
+          (treesOfDepth 0) p5Family 0 n := by
+    have h := operatorStage_child_lt reflectionTransformer
+      reflectionTransformer_progressive p5Family
+      (fun i => defTree
+        (nthD (BigNumber.allTerms 0) i .zero))
+      (i := 0) (o := 0) (n := n) (Nat.zero_le n)
+    rw [depthZeroTreeLeaf] at h
+    exact h
+  have h1 :
+      operatorStage reflectionTransformer
+          (treesOfDepth 0) p5Family 0 n <
+        operatorStage reflectionTransformer
+          index p5Family n n :=
+    operatorStage_child_lt reflectionTransformer
+      reflectionTransformer_progressive p5Family treesOfDepth
+      (i := 0) (o := n) (n := n) (Nat.zero_le n)
+  have h :
+      liftTransformer reflectionTransformer p5Family 0 n <
+        operatorStage reflectionTransformer index p5Family n n :=
+    Nat.lt_trans h0 h1
+  change stage p5Family index n <
+    operatorStage reflectionTransformer index p5Family n n
+  rw [← liftReflection_eq_stage p5Family 0 n]
+  exact h
+\end{lstlisting}
+Specializing to 42 proves the contest comparison:
+\begin{lstlisting}
+theorem contender_6_lt_contender_7 :
+    contender_6 < contender_7 :=
+  finalFamily_lt_autonomousFamily 42
+\end{lstlisting}
+By transitivity, the bundle also derives strict inequalities from the exact
+Contender~5 port and from proposal P5's number.
+
+%======================================================================
+\section{A stronger closure theorem}
+\label{sec:closure}
+
+The definition is designed to exceed more than one named constant.  Let \(t\)
+be any enumerated object-language program denoting a W-tree.  If \(t\) appears
+at finite enumeration depth \(k\), then \lean{defTree t} is a child of
+\lean{treesOfDepth k}, and that tree is a child of \lean{index}.  Reusing direct
+child dominance at the operator level yields the theorem
+\begin{lstlisting}
+theorem defined_operator_eventually_lt {k : Nat} {t : Term}
+    (ht : t ∈ BigNumber.allTerms k) :
+    ∃ N, ∀ n, N ≤ n →
+      operatorStage reflectionTransformer (defTree t)
+          p5Family 0 n <
+        autonomousFamily n n
+\end{lstlisting}
+Thus every operator-stage whose outer schedule is denoted by a fixed program
+of the W-language is eventually dominated by the autonomous family.  This is
+the meaningful structural margin: Contender~7 closes not only over the old
+number, but over a whole class of independently generated operator hierarchies.
+
+The theorem is still deliberately modest.  It does not claim that every total
+Lean transformer is represented, nor does it quantify over arbitrary semantic
+well-orderings.  Its scope is exactly the effective W-language already audited
+by BusyLean.
+
+%======================================================================
+\section{Informal size analysis}
+\label{sec:size}
+
+This section is heuristic.  None of its ordinal identifications is used in the
+Lean comparison proof.
+
+\subsection{Repository calibration}
+
+Let \(\lambda\) denote the proof-theoretic scale of the finite-type W-language.
+The repository informally calibrates it near
+\[
+  \lambda\approx\psi(\Omega_\omega).
+\]
+One reflection step relative to an oracle is treated as adding about
+\(\lambda\) to the fast-growing index.  Iteration along a W-tree of height
+\(\alpha\) then has the rough effect of right multiplication by \(\alpha\).
+Because the universal index ranges over the language's own definable trees,
+its effective height is heuristically \(\lambda\).  On that account:
+\[
+  C_6\quad\text{has scale roughly}\quad f_{\lambda\cdot\lambda}(42)
+  =f_{\lambda^2}(42).
+\]
+
+\subsection{One type-level lift adds an exponent}
+
+Suppose, schematically, that a progressive transformer has increment scale
+\(\lambda^e\).  Running it along the universal index composes that increment
+through height \(\lambda\), suggesting
+\[
+  \lambda^e\cdot\lambda=\lambda^{e+1}.
+\]
+The primitive reflection transformer starts at exponent one.  Its autonomous
+lift---the mechanism of Contender~6---is therefore at exponent two.
+
+For a finite outer tree of rank \(h\), \lean{operatorStage} applies one further
+universal lift at each outer level.  The finite skeleton is
+\[
+\begin{array}{c|c}
+\text{outer height} & \text{heuristic increment scale}\\
+\hline
+0 & \lambda^2\\
+1 & \lambda^3\\
+2 & \lambda^4\\
+\vdots & \vdots\\
+h & \lambda^{h+2}.
+\end{array}
+\]
+The included script \codepath{scripts/ordinal\_skeleton.py} regression-tests
+this finite bookkeeping model.
+
+\subsection{Closing over the universal outer tree}
+
+The outer tree is again \(\Index\), heuristically cofinal through ranks below
+\(\lambda\).  Taking the supremum of the finite and transfinite outer stages
+therefore suggests
+\[
+  \sup_{\alpha<\lambda}\lambda^{\alpha+2}
+  =\lambda^\lambda.
+\]
+Accordingly, the proposed calibration is
+\[
+  C_7\quad\text{roughly}\quad f_{\lambda^\lambda}(42),
+  \qquad \lambda\approx\psi(\Omega_\omega).
+\]
+This is a substantial mechanism-level jump over \(f_{\lambda^2}(42)\), while
+remaining within the same constructive object language.
+
+\begin{remark}[Limits of the calibration]
+The equation ``Contender~7 is \(f_{\lambda^\lambda}(42)\)'' is not a theorem of
+this work.  A rigorous calibration would require an ordinal notation system,
+a semantics relating transformer runs to that system, upper and lower bounds,
+and a proof that the universal tree enumeration is cofinal in the required
+sense.  The present Lean development proves strict numerical inequalities and
+structural domination theorems, not ordinal equivalences.
+\end{remark}
+
+%======================================================================
+\section{Why not claim the System F jump yet?}
+\label{sec:systemf}
+
+The existing BusyLean article identifies impredicative polymorphism as a
+promising qualitative next step.  A fully satisfactory System~F contender
+would require considerably more infrastructure:
+\begin{enumerate}[leftmargin=*]
+  \item syntax and decidable typing for a suitable presentation of System~F;
+  \item substitution, reduction, and a deterministic normalizer;
+  \item a formal strong-normalization proof, most naturally through
+        reducibility candidates in Lean's impredicative \lean{Prop};
+  \item a verified decoder for Church numerals;
+  \item a finite bounded syntax enumeration; and
+  \item an oracle extension whose normalization proof remains constructive.
+\end{enumerate}
+Such a development could plausibly dwarf the predicative W-language, but an
+uncompiled sketch would not satisfy the contest.  The present proposal instead
+makes a smaller foundational change that can be expressed entirely using the
+already audited W-language and structural recursion.  It is intended as a
+credible, reviewable Contender~7 rather than a promise of a stronger but
+unfinished system.
+
+%======================================================================
+\section{Lean engineering and dependency discipline}
+\label{sec:engineering}
+
+\subsection{Definition/proof separation}
+
+The new files follow the incumbent's time-budget architecture:
+\begin{center}
+\begin{tabular}{p{0.32\linewidth}p{0.58\linewidth}}
+\toprule
+File & Role\\
+\midrule
+\codepath{MetaReflection.lean}
+  & Definition-only operator machinery.\\
+\codepath{Contender7.lean}
+  & Closed family and number definitions.\\
+\codepath{MetaReflectionFacts.lean}
+  & Progressivity, compatibility, and direct child inequalities.\\
+\codepath{Comparison7.lean}
+  & Named-contender comparisons and autonomous closure theorem.\\
+\codepath{MetaReflectionSmoke.lean}
+  & Tiny executable recursion checks.\\
+\codepath{Contender7Audit.lean}
+  & Axiom reports and theorem signature checks.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Excluded constructs}
+
+A source audit checks the Lean code, after removing comments, for the forbidden
+patterns
+\begin{center}
+\lean{noncomputable}, \lean{partial}, \lean{unsafe}, \lean{opaque},
+\lean{implemented\_by}, \lean{extern}, \lean{native\_decide},
+\lean{sorry}, \lean{admit}, and custom \lean{axiom} declarations.
+\end{center}
+It also checks that the definition layer does not mention
+\lean{contender\_6}; that expected declarations exist; and that the aggregate
+\codepath{BusyLean.lean} imports all new modules.  The Lean-side audit goes
+further: it reconstructs the transitive declaration closure from the kernel
+environment and is set to reject dependencies on the named Contender~6 and
+Contender~5 constants or selectors.  That closure check becomes authoritative
+only when the supplied test is run by Lean.
+
+\subsection{Avoiding accidental normalization}
+
+The comparison proof first proves a general pointwise inequality in a symbolic
+variable \(n\), and only then specializes to 42.  The proof never unfolds the
+astronomical arithmetic computation.  Rewriting is directed through
+\lean{liftReflection\_eq\_stage}, so elaboration needs only definitional
+unfolding of the construction, not evaluation of the number.
+
+\subsection{Expected axiom profile}
+
+The mathematical proof uses direct natural-number inequalities, structural
+induction, function extensionality in the compatibility lemma, and existing
+BusyLean results.  On Lean~4.34.0, the repository permits \lean{propext} and
+\lean{Quot.sound}; the audit script rejects any reported axiom outside that
+set.  The exact reported set must be established by the final kernel run.
+
+%======================================================================
+\section{Validation protocol and current status}
+\label{sec:validation}
+
+\subsection{Checks completed in this bundle}
+
+The preparation environment performed the following checks:
+\begin{enumerate}[leftmargin=*]
+  \item source-level audit of all new Lean and test files;
+  \item verification that no forbidden constructive-rule token occurs in code;
+  \item verification that the definition layer is independent of the named
+        constant \lean{contender\_6};
+  \item verification that the expected definitions, theorem names, comparison
+        chain, and imports are present;
+  \item execution of the finite ordinal-exponent skeleton script;
+  \item Python bytecode compilation of the validation scripts;
+  \item two-pass \LaTeX{} compilation of this article;
+  \item PDF metadata inspection, text extraction, and page rendering; and
+  \item visual inspection of the rendered pages for clipping and glyph errors.
+\end{enumerate}
+
+\subsection{Decisive check still required}
+
+\begin{status}
+The current execution environment contains no Lean or Lake executable and has
+no network access from which to install the pinned Lean~4.34.0 binary.  I
+therefore do \emph{not} claim that the supplied Lean source has been accepted by
+Lean's kernel or that it satisfies the 15-second/60-second budgets on this
+machine.  The source has been manually and statically reviewed, but kernel
+checking is authoritative.
+\end{status}
+
+The bundle supplies \codepath{scripts/check\_contender7.py}.  After applying
+the overlay to the recorded BusyLean revision, run
+\begin{lstlisting}[language={}]
+python3 scripts/check_contender7.py
+\end{lstlisting}
+The script deletes build directories, builds \lean{BusyLean.Contender7} under
+the definition budget, builds the proof layer under the proof budget, executes
+the smoke test, runs the axiom audit, and rejects any axiom outside
+\(\{\lean{propext},\lean{Quot.sound}\}\).
+
+\subsection{Likely integration failure modes}
+
+The most plausible issues are engineering rather than mathematical:
+\begin{itemize}[leftmargin=*]
+  \item Lean may require a small elaboration adjustment in a higher-order
+        structural recursion equation;
+  \item a rewrite may need an explicit unfolding directive to prevent the
+        elaborator from choosing an undesirable normal form;
+  \item the toolchain may attribute \lean{propext} or \lean{Quot.sound} through
+        core lemmas, as already happens elsewhere in the repository; or
+  \item clean-build time may exceed the contest budget despite short source.
+\end{itemize}
+None should be concealed.  If the kernel rejects a term, the theorem is not yet
+established, regardless of the paper proof.  The validation report in the
+bundle records this distinction.
+
+%======================================================================
+\section{Integration instructions}
+\label{sec:integration}
+
+The archive contains a \codepath{repo\_overlay/} directory mirroring the
+repository root and a unified patch in
+\codepath{patches/contender7.patch}.  From a checkout at the recorded commit:
+\begin{lstlisting}[language={}]
+git apply patches/contender7.patch
+python3 scripts/check_contender7.py
+\end{lstlisting}
+Alternatively copy the overlay into the checkout, preserving paths.  The
+aggregate file \codepath{BusyLean.lean} gains four imports:
+\begin{lstlisting}
+import BusyLean.MetaReflection
+import BusyLean.MetaReflectionFacts
+import BusyLean.Contender7
+import BusyLean.Comparison7
+\end{lstlisting}
+No existing definition is modified.  The proposal is therefore easy to remove
+or review in isolation.
+
+%======================================================================
+\section{Further research questions}
+\label{sec:further}
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Kernel stabilization.}  Compile on Lean~4.34.0, minimize any
+        elaboration fixes, and preserve the definition/proof timing split.
+
+  \item \textbf{Richer dependency-closure reporting.}  After the bundled
+        rejection test passes, list and classify all inherited constants under
+        the old-language and proposal namespaces, as the Contender~6 audit does.
+
+  \item \textbf{Tighter structural theorem.}  Formalize domination of every
+        finite iteration of \lean{liftTransformer}, perhaps using canonical
+        spine trees and an explicit embedding into \lean{index}.
+
+  \item \textbf{Representation theorem.}  Characterize which progressive
+        transformers can be represented by W-language programs or by
+        \lean{operatorStage} schedules.
+
+  \item \textbf{Ordinal lower bound.}  Define an ordinal notation semantics for
+        the operator hierarchy and prove a lower bound approaching
+        \(\lambda^\lambda\), rather than relying on the present calibration
+        heuristic.
+
+  \item \textbf{Ordinal upper bound.}  Show that the recursion does not silently
+        exceed the proposed calibration because of higher-type oracle routing.
+        A matching upper bound would make the ordinal claim meaningful.
+
+  \item \textbf{Higher transformer levels.}  Iterate the construction at types
+        \(\Fam\to\Fam\), \((\Fam\to\Fam)\to(\Fam\to\Fam)\), and beyond, while
+        retaining a direct, non-monotone comparison principle.
+
+  \item \textbf{Diagonal autonomous tower.}  Encode all finite transformer
+        levels in one inductive universe of codes and take a verified diagonal
+        across levels.  This may suggest scales analogous to
+        \(\lambda\uparrow\uparrow\lambda\), but requires careful typing.
+
+  \item \textbf{Impredicative successor.}  Complete a constructive System~F
+        normalization development, then compare a bounded-depth System~F
+        maximum against Contender~7 without invoking classical choice.
+
+  \item \textbf{Calculus of Constructions.}  Investigate a Lean-hosted,
+        independently normalized dependent type theory in the direction of
+        Loader-style numbers, with a faithful and auditable syntax bound.
+
+  \item \textbf{Complexity of checking.}  Measure elaboration and kernel costs
+        separately.  A definition may be mathematically compact yet expensive
+        for Lean because of generated recursors or closure size.
+
+  \item \textbf{Robustness under toolchain upgrades.}  Test the axiom profile
+        and generated code on subsequent Lean releases, documenting changes
+        due solely to core implementation details.
+\end{enumerate}
+
+%======================================================================
+\section{Conclusion}
+
+Contender~7 replaces a one-level autonomous reflection hierarchy by an
+autonomous hierarchy of reflection \emph{operators}.  The proposal remains a
+closed, structurally recursive Lean natural number and does not mention the
+previous contender constant.  Its formal comparison strategy is deliberately
+conservative: define progressivity, follow explicit child occurrences, identify
+the outer leaf with the Contender~6 family, and compose two strict inequalities.
+The same argument proves eventual domination of every operator-stage generated
+by a fixed W-language-definable tree.
+
+The construction is therefore substantially more than an arithmetic wrapper.
+Under the repository's own proof-theoretic heuristic it moves from
+\(\lambda^2\) to \(\lambda^\lambda\), with
+\(\lambda\approx\psi(\Omega_\omega)\).  That estimate is not passed off as a
+formal theorem.  The formal deliverable is the Lean source for
+\lean{contender\_7}, its pointwise comparison theorem, and the associated
+closure lemmas.  The remaining gate is unambiguous: apply the patch to the
+recorded repository revision and pass the supplied Lean~4.34.0 clean-build,
+timing, smoke, and axiom checks.
+
+%======================================================================
+\appendix
+\section{Definition source}
+\label{app:definitions}
+
+\subsection{\codepath{MetaReflection.lean}}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{../repo_overlay/BusyLean/MetaReflection.lean}
+
+\subsection{\codepath{Contender7.lean}}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{../repo_overlay/BusyLean/Contender7.lean}
+
+\section{Proof source}
+\label{app:proofs}
+
+\subsection{\codepath{MetaReflectionFacts.lean}}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{../repo_overlay/BusyLean/MetaReflectionFacts.lean}
+
+\subsection{\codepath{Comparison7.lean}}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{../repo_overlay/BusyLean/Comparison7.lean}
+
+\section{Tests}
+\label{app:tests}
+
+\subsection{Smoke test}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{../repo_overlay/test/MetaReflectionSmoke.lean}
+
+\subsection{Axiom audit}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{../repo_overlay/test/Contender7Audit.lean}
+
+%======================================================================
+\begin{thebibliography}{9}
+
+\bibitem{BusyLean}
+V. Reshetnikov,
+\emph{BusyLean: name the biggest number, in Lean},
+repository revision
+\texttt{86b360648163f0249eab79539438b6a83dfe8215}, October 2026.
+
+\bibitem{Roux}
+C. Roux,
+\emph{name-the-biggest-number},
+original Coq contest repository, with Contenders 4 and 5.
+
+\bibitem{Aaronson}
+S. Aaronson,
+\emph{Who Can Name the Bigger Number?},
+expository essay on large-number contests and definability.
+
+\bibitem{Girard}
+J.-Y. Girard, Y. Lafont, and P. Taylor,
+\emph{Proofs and Types},
+Cambridge Tracts in Theoretical Computer Science, 1989.
+
+\bibitem{Pohlers}
+W. Pohlers,
+\emph{Proof Theory: The First Step into Impredicativity},
+Springer, 2009.
+
+\end{thebibliography}
+
+\end{document}

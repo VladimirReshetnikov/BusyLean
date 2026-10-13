@@ -1,0 +1,11 @@
+name = "busylean_next"
+version = "0.1.0"
+defaultTargets = ["BusyLeanNext"]
+
+[[require]]
+name = "busylean"
+git = "https://github.com/VladimirReshetnikov/BusyLean.git"
+rev = "86b360648163f0249eab79539438b6a83dfe8215"
+
+[[lean_lib]]
+name = "BusyLeanNext"

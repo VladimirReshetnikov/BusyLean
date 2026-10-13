@@ -1,0 +1,33 @@
+{
+  "repository": "https://github.com/VladimirReshetnikov/BusyLean",
+  "commit": "86b360648163f0249eab79539438b6a83dfe8215",
+  "vendored_files": [
+    {
+      "local_path": "lean/BigNumber/Definitions.lean",
+      "upstream_path": "proposals/P5-w-reflection/lean/BigNumber/Definitions.lean",
+      "bytes": 6834,
+      "git_blob_sha1": "0cb1e14966d62d4c17302f8f6b41316fb4181a42",
+      "expected_git_blob_sha1": "0cb1e14966d62d4c17302f8f6b41316fb4181a42",
+      "sha256": "0824ff511961811b3bef8a23863fd038913cf8923efcfdb80587a5ea8df71d84",
+      "exact_match": true
+    },
+    {
+      "local_path": "lean/BusyLean/Reflection.lean",
+      "upstream_path": "BusyLean/Reflection.lean",
+      "bytes": 2841,
+      "git_blob_sha1": "2703943ffe1207bd398d5f750daadff8139c5418",
+      "expected_git_blob_sha1": "2703943ffe1207bd398d5f750daadff8139c5418",
+      "sha256": "203679c08c2f833fb50d136a5d960a77ebf942aa4c50ad809cce4526235d9a32",
+      "exact_match": true
+    },
+    {
+      "local_path": "lean/BusyLean/Contender6.lean",
+      "upstream_path": "BusyLean/Contender6.lean",
+      "bytes": 2033,
+      "git_blob_sha1": "248aa97049d0045b9635bb816842870d4a19eaed",
+      "expected_git_blob_sha1": "248aa97049d0045b9635bb816842870d4a19eaed",
+      "sha256": "3be8705eec25f9fc90d23dbae4c1dd0a899b4ec53c3113047205390e4d8fb464",
+      "exact_match": true
+    }
+  ]
+}

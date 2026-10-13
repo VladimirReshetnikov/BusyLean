@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "errors": [],
+  "lean_files_scanned": 16,
+  "exact_upstream_files": 3,
+  "kernel_checked": false,
+  "transitive_dependency_audit": "NOT_RUN; see Mirror/Audit.lean",
+  "scope": "Git blob hashes, lexical exclusions, direct Model.lean names only"
+}
