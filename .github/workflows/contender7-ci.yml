@@ -21,6 +21,8 @@ jobs:
         run: lake build BusyLean.Contender7
       - name: Build full library
         run: lake build
+      - name: Run Contender 7 audit
+        run: lake env lean test/Contender7Audit.lean
       - name: Record toolchain
         run: |
           lean --version
