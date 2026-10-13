@@ -4,14 +4,14 @@ import BusyLean.Ordinal.RelUniverses
 # A total language with first-class universes
 
 The existing tree languages manipulate natural numbers, countable ordinal
-codes, and functions. Universe builders remain meta-level Lean definitions.
+codes, and functions.  Universe builders remain meta-level Lean definitions.
 This module adds a genuinely new object-language base type, `univ`, interpreted
 by `U2.Univ`, together with constructors for universe formation, closure at the
 universe and universe-operator levels, and collapse relative to a program-built
 tree operator.
 
-The language is simply typed and its interpreter is structural. Every closed
-program therefore denotes constructively. Raw programs of bounded depth form
+The language is simply typed and its interpreter is structural.  Every closed
+program therefore denotes constructively.  Raw programs of bounded depth form
 a finite list, so their output trees may be joined into one computable tree.
 -/
 
@@ -19,7 +19,7 @@ namespace BusyLean.Ordinal
 
 namespace UL
 
-/-- Object-language types. `univ` is the new base kind. -/
+/-- Object-language types.  `univ` is the new base kind. -/
 inductive Ty where
   | nat : Ty
   | tree : Ty
@@ -27,10 +27,11 @@ inductive Ty where
   | arr : Ty → Ty → Ty
   deriving DecidableEq
 
-/-- Semantic interpretation. Universe values force the codomain to `Type 1`. -/
+/-- Semantic interpretation.  Universe values force the codomain to `Type 1`.
+The small base types are lifted uniformly into that universe. -/
 def Ty.den : Ty → Type 1
-  | .nat => Nat
-  | .tree => CTree
+  | .nat => ULift Nat
+  | .tree => ULift CTree
   | .univ => U2.Univ
   | .arr a b => a.den → b.den
 
@@ -41,7 +42,7 @@ inductive Var : List Ty → Ty → Type where
 
 /-- Intrinsically typed terms.
 
-`tin` is the input tree and `jin` is the input closure operator. The remaining
+`tin` is the input tree and `jin` is the input closure operator.  The remaining
 new constants expose universe construction to object-language programs.
 -/
 inductive Tm : List Ty → Ty → Type where
@@ -70,8 +71,11 @@ inductive Tm : List Ty → Ty → Type where
 
 /-- Semantic environments. -/
 def Env : List Ty → Type 1
-  | [] => Unit
+  | [] => ULift Unit
   | a :: Γ => a.den × Env Γ
+
+/-- The unique closed environment. -/
+def emptyEnv : Env [] := ULift.up ()
 
 def Var.get : Var Γ a → Env Γ → a.den
   | .here, (x, _) => x
@@ -84,16 +88,16 @@ def natIter {α : Type 1} (z : α) (s : α → α) : Nat → α
 
 /-- Structural iteration over countable trees at an arbitrary semantic type. -/
 def treeIter {α : Type 1} (z : α) (s : α → α)
-    (l : (Nat → α) → α) : CTree → α
+    (l : (ULift Nat → α) → α) : CTree → α
   | .zero => z
   | .succ t => s (treeIter z s l t)
-  | .lim f => l fun n => treeIter z s l (f n)
+  | .lim f => l fun n => treeIter z s l (f n.down)
   | .supL _ => z
   | .supH _ => z
 
 /-- Total semantic interpreter.
 
-The two parameters are the input closure operator and input tree. In
+The two parameters are the input closure operator and input tree.  In
 particular, `ucollapse` may collapse any universe constructed by the program
 relative to any tree operator constructed by the same program.
 -/
@@ -102,30 +106,35 @@ def Tm.eval (jinF : CTree → CTree) (tinT : CTree) :
   | .var v, ρ => v.get ρ
   | .lam t, ρ => fun x => t.eval jinF tinT (x, ρ)
   | .app t u, ρ => (t.eval jinF tinT ρ) (u.eval jinF tinT ρ)
-  | .zero, _ => (0 : Nat)
-  | .succ t, ρ => Nat.succ (t.eval jinF tinT ρ)
+  | .zero, _ => ULift.up 0
+  | .succ t, ρ => ULift.up (Nat.succ (t.eval jinF tinT ρ).down)
   | .natRec z s n, ρ =>
       natIter (z.eval jinF tinT ρ) (s.eval jinF tinT ρ)
-        (n.eval jinF tinT ρ)
-  | .tzero, _ => (Tre.zero : CTree)
-  | .tsucc t, ρ => (Tre.succ (t.eval jinF tinT ρ) : CTree)
-  | .tlim f, ρ => (Tre.lim (f.eval jinF tinT ρ) : CTree)
+        (n.eval jinF tinT ρ).down
+  | .tzero, _ => ULift.up (Tre.zero : CTree)
+  | .tsucc t, ρ =>
+      ULift.up (Tre.succ (t.eval jinF tinT ρ).down : CTree)
+  | .tlim f, ρ =>
+      ULift.up (Tre.lim (fun n =>
+        (f.eval jinF tinT ρ (ULift.up n)).down) : CTree)
   | .treeRec z s l t, ρ =>
       treeIter (z.eval jinF tinT ρ) (s.eval jinF tinT ρ)
-        (l.eval jinF tinT ρ) (t.eval jinF tinT ρ)
-  | .tin, _ => tinT
-  | .jin, _ => jinF
+        (l.eval jinF tinT ρ) (t.eval jinF tinT ρ).down
+  | .tin, _ => ULift.up tinT
+  | .jin, _ => fun t => ULift.up (jinF t.down)
   | .ubase, _ => U2.Univ.base
   | .unext u, ρ => U2.Univ.next (u.eval jinF tinT ρ)
-  | .uunion f, ρ => U2.Univ.union (f.eval jinF tinT ρ)
+  | .uunion f, ρ =>
+      U2.Univ.union fun n => f.eval jinF tinT ρ (ULift.up n)
   | .uphi f u, ρ => U2.Φ (f.eval jinF tinT ρ) (u.eval jinF tinT ρ)
   | .uopClose f g, ρ =>
       U2.closureA 1 (f.eval jinF tinT ρ) (g.eval jinF tinT ρ)
   | .uindex t, ρ =>
-      let T := t.eval jinF tinT ρ
+      let T := (t.eval jinF tinT ρ).down
       U2.transTypeUniv (U2.ΦT T) T
   | .ucollapse j u, ρ =>
-      U2.universeTreeJ (u.eval jinF tinT ρ) (j.eval jinF tinT ρ)
+      ULift.up (U2.universeTreeJ (u.eval jinF tinT ρ)
+        (fun t => (j.eval jinF tinT ρ (ULift.up t)).down))
 
 /-! ## Raw syntax and decidable type checking -/
 
@@ -273,7 +282,7 @@ def treesUpTo (jinF : CTree → CTree) (tinT : CTree) (n : Nat) :
     List CTree :=
   (rawsUpTo n).filterMap fun r =>
     match infer [] r with
-    | some ⟨.tree, t⟩ => some (t.eval jinF tinT ())
+    | some ⟨.tree, t⟩ => some (t.eval jinF tinT emptyEnv).down
     | _ => none
 
 /-! ## Canonical witness programs -/
@@ -291,7 +300,7 @@ def phiTransformer :
     Tm [] (.arr (.arr .univ .univ) (.arr .univ .univ)) :=
   .lam (.lam (.uphi (.var (.there .here)) (.var .here)))
 
-/-- A canonical higher-kind program. It closes `next` under repeated
+/-- A canonical higher-kind program.  It closes `next` under repeated
 `g ↦ Φ g`, applies the resulting universe operator above the indexed input
 universe, and collapses the result relative to `jin`.
 -/
@@ -301,7 +310,7 @@ def operatorClosureTerm : Tm [] .tree :=
 
 /-- Definitional embedding of Contender 46's universe-relative primitive. -/
 theorem oldBoostTerm_eval (J : CTree → CTree) (T : CTree) :
-    oldBoostTerm.eval J T () = boost31J J T := rfl
+    (oldBoostTerm.eval J T emptyEnv).down = boost31J J T := rfl
 
 end UL
 
@@ -309,7 +318,7 @@ end UL
 universe-language program of result type `tree`. -/
 def universeProgramTree (J : CTree → CTree) (T : CTree) (n : Nat) : CTree :=
   .lim fun i =>
-    if i = 0 then UL.operatorClosureTerm.eval J T ()
+    if i = 0 then (UL.operatorClosureTerm.eval J T UL.emptyEnv).down
     else ((UL.treesUpTo J T n)[i - 1]?).getD .zero
 
 /-- An inflationary universe-language jump. -/
