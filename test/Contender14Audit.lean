@@ -56,7 +56,7 @@ elab "#contender14_assert_not_in_closure " root:ident " : " bad:ident* : command
 #check @BusyLean.fdTransformer14_progressive
 #check @BusyLean.metaTower14_progressive
 #check @BusyLean.transformer_lt_metaStep14
-#check @BusyLean.coreStage_lt_metaStep14
+#check @BusyLean.coreStage_lt_crowned14
 #check @BusyLean.family13_lt_F14
 #check @BusyLean.contender_13_lt_contender_14
 #check @BusyLean.fvalue_lt_contender_14
