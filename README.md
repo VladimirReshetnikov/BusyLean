@@ -9,7 +9,32 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 22
+## Current contender: Contender 23
+
+```lean
+def family22 (n : Nat) : Nat := F22 (F22 n)                  -- Contender 22 = family22 42
+def F23 (n : Nat) : Nat :=                                   -- BusyLean/Contender23.lean
+  wDiagonalLift (schedule23 n) (rank23 n) twTransformer (fun _ => family22) n n
+def contender_23 : Nat := F23 (F23 42)
+
+theorem contender_22_lt_contender_23 : contender_22 < contender_23   -- BusyLean/Comparison23.lean
+```
+
+The language is Contender 22's (the ladder over `tower n` at input `n`). The
+amplifier adopts proposal P22's idea
+([`TreeHyperReflection.lean`](BusyLean/TreeHyperReflection.lean), taken
+unchanged): the rank of the hierarchy of transformer lifts is a well-founded
+W-tree instead of a natural number. Here the rank is an autonomous notation
+above the schedule, so it is a large countable ordinal.
+
+| Theorem | Statement |
+|---|---|
+| `wDiagonalLift_strictlyInflationary` | every W-tree rank strictly exceeds its base |
+| `contender_22_lt_contender_23` | Contender 22 < Contender 23 |
+| `family22_lt_F23` | Contender 22's family is beaten at every input |
+| `tvalue22_lt_F23` | every program of depth ≤ `n` over the atoms of `tower n` is below `F23 n` |
+
+## Contender 22
 
 ```lean
 def family21 (n : Nat) : Nat := F21 (F21 n)                  -- Contender 21 = family21 42
@@ -576,8 +601,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 22's definition modules take
-about 4 s and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 23's definition modules take
+about 3 s and its proofs about 4 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -618,9 +643,11 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender20.lean`](BusyLean/Contender20.lean), [`Comparison20.lean`](BusyLean/Comparison20.lean) | Contender 20 definitions and theorems |
 | [`BusyLean/Contender21.lean`](BusyLean/Contender21.lean), [`Comparison21.lean`](BusyLean/Comparison21.lean) | Contender 21 definitions and theorems |
 | [`BusyLean/Contender22.lean`](BusyLean/Contender22.lean), [`Comparison22.lean`](BusyLean/Comparison22.lean) | Contender 22 definitions and theorems |
+| [`BusyLean/TreeHyperReflection.lean`](BusyLean/TreeHyperReflection.lean), [`TreeHyperReflectionFacts.lean`](BusyLean/TreeHyperReflectionFacts.lean) | W-tree-ranked lift hierarchy (adopted from P22) |
+| [`BusyLean/Contender23.lean`](BusyLean/Contender23.lean), [`Comparison23.lean`](BusyLean/Comparison23.lean) | Contender 23 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
-| [`proposals/`](proposals) | the twenty-one reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`proposals/`](proposals) | the twenty-two reviewed proposals and [the review](proposals/REVIEW.md) |
 | [`incoming/`](incoming) | drop zone for new proposal archives ([how they are processed](incoming/README.md)) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
 
@@ -647,8 +674,9 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 20 | Lean | this repository | the ladder extended to Bachmann–Howard length (collapsing; impredicative WF proof) |
 | 21 | Lean | this repository | Buchholz ladders with level bound `n` at input `n`, lengths up to `ψ₀(Ω_ω)` |
 | 22 | Lean | this repository | ladders over a tower of Buchholz notations relativized to well-founded bases |
+| 23 | Lean | this repository | 22 with P22's transfinite (W-tree) rank for the lift hierarchy |
 
-Proposals P1–P21 (four batches and a late arrival) were reviewed, rebuilt and ranked; see
+Proposals P1–P22 (four batches and two late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).

@@ -89,7 +89,8 @@ bounds the number of collapsing levels, which turns the multi-level argument
 into a downward induction over relativized scopes. It then diagonalizes over the
 bound, so ladder lengths climb to Buchholz's ordinal $\psi_0(\Omega_\omega)$.
 Contender~22 relativizes the bounded systems to a well-founded base and
-iterates, which goes beyond $\psi_0(\Omega_\omega)$.
+iterates, which goes beyond $\psi_0(\Omega_\omega)$. Contender~23 adds a
+proposal's transfinite-rank hierarchy of lifts.
 \end{abstract}
 
 \tableofcontents
@@ -1125,6 +1126,39 @@ operator over a base atom of \lean{tower 2} into the universe at $\psi_0$ of
 that atom (value~10). The definitions check in 3.7\,s and the proofs in 1.9\,s.
 
 %======================================================================
+\section{Proposal P22 and Contender 23: transfinite ranks}
+
+Two more proposals arrived. P21 is a tower of operator stages over
+Contender~13's language. It compiles even though its package says it was never
+compiled, and it is subsumed by the rank hierarchy of lifts. P22 makes a real
+improvement to that hierarchy. The rank, a natural number in P17's version, becomes a
+\emph{well-founded W-tree}:
+\begin{lstlisting}
+def wDiagonalLift (schedule : WTree ℕ) : WTree ℕ → TransformerLift
+  | .leaf => liftTransformer
+  | .node f =>
+      let lower := spliceLifts (fun i => wDiagonalLift schedule (f i))
+      fun base => stageLift lower (lower base) schedule
+\end{lstlisting}
+At a node, the lifts of all children are spliced into one lift, which is used
+twice: to pre-amplify the base, and as the local lift along the schedule. The
+rank tree is an autonomous notation above the schedule, so the hierarchy has a
+large countable rank instead of~$\omega$. P22 compiles and passes the audit. It
+targets Contender~19's language, so it lies below Contenders~20--22. But the
+amplifier composes with any ladder.
+
+Contender~23 adopts P22's modules unchanged, with attribution, and applies
+them to Contender~22's tower ladders:
+\begin{lstlisting}
+def rank23 (n : ℕ) := realize (hyper (family22 n + 42) (encode (schedule23 n)))
+def F23 (n : ℕ) : ℕ :=
+  wDiagonalLift (schedule23 n) (rank23 n) twTransformer (fun _ => family22) n n
+\end{lstlisting}
+Proved: \lean{contender\_22\_lt\_\allowbreak contender\_23},
+\lean{family22\_lt\_F23} and \lean{tvalue22\_lt\_F23}. The definitions check in
+2.6\,s and the proofs in 3.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1172,6 +1206,7 @@ Contender & idea & informal size\\
 20 (Lean) & 15 over a ladder of Bachmann--Howard length & $\psi$-terms of height $n$ at input $n$\\
 21 (Lean) & 15 over Buchholz ladders, level bound $n$ at input $n$ & lengths up to $\psi_0(\Omega_\omega)$\\
 22 (Lean) & 15 over a tower of relativized Buchholz notations & beyond $\psi_0(\Omega_\omega)$\\
+23 (Lean) & 22 with P22's W-ranked lift hierarchy & transfinite rank over 22\\
 \bottomrule
 \end{tabular}
 \end{center}
