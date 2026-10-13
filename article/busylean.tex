@@ -106,7 +106,8 @@ finite types over universes; Contender~31 to transfinite types indexed by
 collapsed trees. Contender~32 turns the constructions into programs of a typed
 language over tree ordinals with a semantic interpreter, and takes all programs of
 bounded size. Contender~33 stacks the language on itself, and Contender~34 stacks
-it along tree ordinals.
+it along tree ordinals. Contender~35 takes its trees from impredicative System~F
+programs, made well-founded by a reducibility candidate for trees.
 \end{abstract}
 
 \tableofcontents
@@ -1496,6 +1497,50 @@ ladder runs over the addresses of the result. Proved:
 \lean{tsvalue\_lt\_F34}. The definitions check in 2.0\,s and the proofs in 2.1\,s.
 
 %======================================================================
+\section{Contender 35: impredicative trees}
+
+All the trees of Contenders~25--34 come from \emph{predicative} constructions:
+collapsing functions, universes of codes, System~T over trees, and stackings of
+that language. Contender~35 lets an impredicative language build the tree.
+
+\paragraph{System FT.} \lean{SystemFT} is System~F with a base type
+\lean{tree} and three inert constants
+\[
+\mathsf{con}_0:\mathsf{tree},\qquad
+\mathsf{con}_1:\mathsf{tree}\to\mathsf{tree},\qquad
+\mathsf{con}_2:(\mathsf{nat}\to\mathsf{tree})\to\mathsf{tree}.
+\]
+There is no eliminator for \lean{tree}. Programs compute with Church-encoded
+data and then build a tree with the constructors. A polymorphic Church tree of
+type $\forall X.\,X\to(X\to X)\to((\mathsf{nat}\to X)\to X)\to X$ can be
+instantiated at $X=\mathsf{tree}$. So every tree that System~F can describe
+becomes a real tree. The ordinals of such trees go beyond everything that
+predicative constructions reach.
+
+\paragraph{Well-foundedness by candidates.} The tree type is interpreted by
+an inductive candidate $\mathrm{WT}$: a term is in $\mathrm{WT}$ when it is
+strongly normalizing, all its reducts are in $\mathrm{WT}$, and
+$\mathsf{con}_1\,b$ has $b\in\mathrm{WT}$ while $\mathsf{con}_2\,g$ has
+$g\,\bar k\in\mathrm{WT}$ for every numeral $\bar k$. Condition CR3 of
+reducibility candidates is stated for \emph{neutral} terms. Constructor-headed
+terms must not count as neutral, otherwise CR3 would force
+$\mathsf{con}_1\,b\in\mathrm{WT}$ without $b\in\mathrm{WT}$. With that change
+the adequacy proof of System~F goes through, and
+\lean{wt\_of\_typed} shows that every program of type \lean{tree} is in
+$\mathrm{WT}$. Because $\mathrm{WT}$ is inductive, the child relation (reduce,
+then take a constructor argument) is accessible. \lean{toTree} reads the tree off
+the normal form by well-founded recursion on it. Like the normalizer it is
+compiled code, and it uses only \lean{propext} and \lean{Quot.sound}.
+
+\paragraph{The contender.} At input $n$, \lean{ftTree n} is the limit of
+Contender~34's tree and the trees of all System~FT programs of depth $\le n$,
+with Contender~34's family as the oracle. The ladder runs over its addresses
+and is amplified by the W-ranked lift seeded with
+$\mathrm{family}_{34}$. Proved: \lean{contender\_34\_lt\_\allowbreak contender\_35},
+\lean{family34\_lt\_F35} and \lean{ftvalue\_lt\_F35}. The definitions check in
+8.0\,s, which now includes compiling System~FT, and the proofs in 3.4\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1515,6 +1560,12 @@ and further) are well-founded in Lean's type theory, and each one plugs into
 
 \paragraph{Reflection along trees.} As with Contenders~9 and~11, reflecting
 the ladder along the W-language's trees is a cheap multiplicative step.
+
+\paragraph{Impredicative trees in stronger systems.} The candidate
+$\mathrm{WT}$ needs nothing specific to System~F. The same constants added to
+F$_\omega$ or to the kind-polymorphic system of Contender~10 give trees
+described by higher-order impredicative encodings. Feeding the trees back as
+oracles, or letting programs inspect the ladder over a tree, is a further step.
 
 \paragraph{Large elimination and trees.} Runtime-to-type dependency with large
 elimination remains the route to a CIC-like system. A language able to hand
@@ -1558,6 +1609,7 @@ Contender & idea & informal size\\
 32 (Lean) & System T over trees with Contender 31 as a primitive & all programs of size $\le n{+}3$\\
 33 (Lean) & the language stacked $n{+}1$ times on itself & languages over languages\\
 34 (Lean) & the language stacked along a collapsed tree & stacking height = tree\\
+35 (Lean) & trees built by System F programs (System FT) & impredicative trees\\
 \bottomrule
 \end{tabular}
 \end{center}
