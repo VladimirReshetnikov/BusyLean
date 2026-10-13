@@ -553,7 +553,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender20.lean`](BusyLean/Contender20.lean), [`Comparison20.lean`](BusyLean/Comparison20.lean) | Contender 20 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
-| [`proposals/`](proposals) | the twenty reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`proposals/`](proposals) | the twenty-one reviewed proposals and [the review](proposals/REVIEW.md) |
 | [`incoming/`](incoming) | drop zone for new proposal archives ([how they are processed](incoming/README.md)) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
 
@@ -579,7 +579,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 19 | Lean | this repository | the ladder extended to large-Veblen length (Klammersymbole with term positions) |
 | 20 | Lean | this repository | the ladder extended to Bachmann–Howard length (collapsing; impredicative WF proof) |
 
-Proposals P1–P20 (four batches) were reviewed, rebuilt and ranked; see
+Proposals P1–P21 (four batches and a late arrival) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).
