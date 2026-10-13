@@ -1,0 +1,11 @@
+PDF render inspection
+=====================
+Input: article/contender14.pdf
+Renderer: /home/oai/skills/pdfs/scripts/render_pdf.py
+Resolution: 180 dpi
+Pages rendered: 22
+Inspection method: four contact sheets covering all pages, with additional
+attention to the title/TOC, mathematical displays, comparison table, theorem
+dependency table, and full Lean source listings.
+Result: PASS - no clipped text, overlaps, black squares, broken glyphs, or
+missing pages observed.

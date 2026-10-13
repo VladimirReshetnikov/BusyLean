@@ -1,0 +1,53 @@
+digraph Contender14 {
+  rankdir=TB;
+  graph [fontname="DejaVu Sans", label="BusyLean proposed Contender 14: construction and proof flow", labelloc=t];
+  node [shape=box, fontname="DejaVu Sans"];
+  edge [fontname="DejaVu Sans"];
+
+  family12 [label="family12\n(Contender 12 construction)"];
+  F13 [label="F13 = reflectFd family12"];
+  family13 [label="family13 n = F13 (F13 n)"];
+  iter [label="iterateF13 / seed13\nall finite further F13 iterates"];
+
+  fd [label="dynamic-kind System Fω\nchecker + normalizer"];
+  reflector [label="reflectFdFamily\nfinite family prefix + program maximum"];
+  base [label="fdFamilyTransformer\nprogressive base transformer"];
+
+  index [label="W-language index"];
+  tree12 [label="tree12\nautonomous closure above index"];
+  tree14 [label="tree14\nsecond autonomous closure"];
+
+  stage [label="operatorStage base tree14"];
+  step [label="towerStep base\noperator-stage feedback"];
+  tower [label="operatorTower (n+1)\nstrict ramified meta-tower"];
+  F14 [label="F14 n = operatorTower (n+1) seed13 n n"];
+  C14 [label="contender_14 = F14 (F14 42)", shape=doubleoctagon];
+
+  prog [label="Progressive invariant"];
+  margin [label="iterateF13 42 contender_13 < F14 42"];
+  comparison [label="contender_13 < contender_14", shape=doubleoctagon];
+  programs [label="all accepted Fd programs\nat the bounded budget are below F14"];
+
+  family12 -> F13 -> family13 -> iter;
+  fd -> reflector;
+  iter -> reflector [label="packed family oracle"];
+  reflector -> base;
+  index -> tree12 -> tree14;
+  base -> stage;
+  tree14 -> stage;
+  stage -> step -> tower;
+  base -> tower;
+  iter -> F14;
+  tower -> F14 -> C14;
+
+  base -> prog;
+  stage -> prog;
+  prog -> tower;
+  iter -> margin;
+  F14 -> margin;
+  family13 -> comparison;
+  F14 -> comparison;
+  C14 -> comparison;
+  reflector -> programs;
+  F14 -> programs;
+}

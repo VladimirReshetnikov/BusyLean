@@ -1,0 +1,75 @@
+{
+  "definition_files_for_constant_check": [
+    "overlay/BusyLean/HyperReflection.lean",
+    "overlay/BusyLean/Contender14.lean"
+  ],
+  "failures": [],
+  "files": [
+    {
+      "delimiter_check": "ok",
+      "lines": 110,
+      "over_100_columns": [],
+      "path": "overlay/BusyLean/Comparison14.lean",
+      "prohibited_tokens": [],
+      "sha256": "c75b2b21a09cb5cb211e56d553905fbe94f1267e5af23f84deae83726f05f72d",
+      "tabs": [],
+      "trailing_whitespace": []
+    },
+    {
+      "delimiter_check": "ok",
+      "lines": 83,
+      "over_100_columns": [],
+      "path": "overlay/BusyLean/Contender14.lean",
+      "prohibited_tokens": [],
+      "sha256": "146f804a10be0492ce96052df6f5bb55c0f6368531d2f74803bae868d0469d29",
+      "tabs": [],
+      "trailing_whitespace": []
+    },
+    {
+      "delimiter_check": "ok",
+      "lines": 137,
+      "over_100_columns": [],
+      "path": "overlay/BusyLean/HyperReflection.lean",
+      "prohibited_tokens": [],
+      "sha256": "99fe0f6db55915b14b701201aba87b5c6e84e5c94d402f52f3d1da1553a3358f",
+      "tabs": [],
+      "trailing_whitespace": []
+    },
+    {
+      "delimiter_check": "ok",
+      "lines": 55,
+      "over_100_columns": [],
+      "path": "overlay/test/Audit14.lean",
+      "prohibited_tokens": [],
+      "sha256": "de5d9231f1632cb8c532659b150e4fa80c5cac519955287249c7a05a6fabaaa5",
+      "tabs": [],
+      "trailing_whitespace": []
+    }
+  ],
+  "forbidden_constant_names": [
+    "contender_10",
+    "contender_11",
+    "contender_12",
+    "contender_13",
+    "contender_5",
+    "contender_6",
+    "contender_7",
+    "contender_8",
+    "contender_9"
+  ],
+  "kind": "source-level audit only; not a Lean kernel check",
+  "prohibited_tokens": [
+    "Classical.choice",
+    "admit",
+    "extern",
+    "implemented_by",
+    "native_decide",
+    "noncomputable",
+    "opaque",
+    "partial",
+    "sorry",
+    "unsafe"
+  ],
+  "root": "/mnt/data/BusyLean_Contender14_RankDiagonal",
+  "status": "PASS"
+}

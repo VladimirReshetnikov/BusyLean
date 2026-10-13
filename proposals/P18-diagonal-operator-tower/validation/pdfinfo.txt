@@ -1,0 +1,22 @@
+Title:           Contender 14: Self-Indexed Diagonal Operator Reflection
+Subject:         
+Keywords:        
+Author:          Research proposal for BusyLean
+Creator:         LaTeX with hyperref
+Producer:        pdfTeX-1.40.26
+CreationDate:    Tue Oct 13 04:12:56 2026 UTC
+ModDate:         Tue Oct 13 04:12:56 2026 UTC
+Custom Metadata: yes
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           22
+Encrypted:       no
+Page size:       612 x 792 pts (letter)
+Page rot:        0
+File size:       429164 bytes
+Optimized:       no
+PDF version:     1.7

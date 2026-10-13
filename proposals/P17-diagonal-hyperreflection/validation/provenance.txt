@@ -1,0 +1,7 @@
+Repository: https://github.com/VladimirReshetnikov/BusyLean
+Baseline main commit inspected: 7f6a5c6e44ef31e389b10f6ab6da2bb0284c3502
+Research branch: research/contender14-diagonal-hyperreflection
+Validated branch commit: d408935e8a24da36709886bb08af3439765d05bf
+Validation workflow run: https://github.com/VladimirReshetnikov/BusyLean/actions/runs/38344636651
+Initial full-clean workflow run: https://github.com/VladimirReshetnikov/BusyLean/actions/runs/38344464663
+Default branch modified by this research process: no

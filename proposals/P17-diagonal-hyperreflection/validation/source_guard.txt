@@ -1,0 +1,14 @@
+Forbidden-construct source scan
+===============================
+
+Files scanned:
+  BusyLean/HyperReflection.lean
+  BusyLean/HyperReflectionFacts.lean
+  BusyLean/Contender14.lean
+  BusyLean/Comparison14.lean
+
+Rejected tokens/patterns:
+  noncomputable, partial, unsafe, opaque, implemented_by, extern,
+  native_decide, sorryAx, Classical.choice
+
+Result: PASS (no matches)

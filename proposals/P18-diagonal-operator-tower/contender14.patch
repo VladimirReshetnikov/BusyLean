@@ -1,0 +1,336 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index cc93d7b..8062756 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -21,3 +21,5 @@ import BusyLean.Contender12
+ import BusyLean.Comparison12
+ import BusyLean.Contender13
+ import BusyLean.Comparison13
++import BusyLean.Contender14
++import BusyLean.Comparison14
+diff --git a/BusyLean/Comparison14.lean b/BusyLean/Comparison14.lean
+new file mode 100644
+index 0000000..11f5512
+--- /dev/null
++++ b/BusyLean/Comparison14.lean
+@@ -0,0 +1,182 @@
++import BusyLean.Contender14
++import BusyLean.MetaReflectionFacts
++import BusyLean.Comparison13
++
++/-! # Contender 14: comparison theorems -/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- The arithmetic core of family-aware dynamic-kind reflection. -/
++theorem lt_reflect14 {fs : W.Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN (W.prefixMax (fun i => fs i n) n)
++      (BigNumber.maximum (Fd.fvalue (packFamily fs) n) (Fd.ctmsUpTo n))) :
++    m < reflect14 fs n := by
++  show m < n + 1 + _
++  have hM : ∀ M : Nat, M + 1 ≤ n + 1 + M := fun M => by
++    rw [Nat.add_comm M 1]
++    exact Nat.add_le_add_right (Nat.le_add_left 1 n) M
++  exact Nat.lt_of_le_of_lt h
++    (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (hM _))
++
++/-- Every visible coordinate of the oracle family is strictly exceeded. -/
++theorem oracle_lt_reflect14 (fs : W.Family) {i n : Nat} (hi : i ≤ n) :
++    fs i n < reflect14 fs n :=
++  lt_reflect14
++    (Nat.le_trans (W.le_prefixMax (fun j => fs j n) hi)
++      (BigNumber.le_maxN_left _ _))
++
++/-- Every enumerated dynamic-kind program, run with the packed family oracle,
++is strictly exceeded by one reflection step. -/
++theorem fvalue_lt_reflect14 (fs : W.Family) {n : Nat} {t : Fd.CTm}
++    (ht : t ∈ Fd.ctmsUpTo n) :
++    Fd.fvalue (packFamily fs) n t < reflect14 fs n :=
++  lt_reflect14
++    (Nat.le_trans (W.le_maximum (Fd.fvalue (packFamily fs) n) ht)
++      (BigNumber.le_maxN_right _ _))
++
++/-- The numerical input is strictly exceeded by one reflection step. -/
++theorem input_lt_reflect14 (fs : W.Family) (n : Nat) : n < reflect14 fs n :=
++  Nat.lt_of_lt_of_le (Nat.lt_succ_self n) (Nat.le_add_right _ _)
++
++/-- Family-aware dynamic-kind reflection is a progressive transformer. -/
++theorem fdFamilyTransformer_progressive : Progressive fdFamilyTransformer := by
++  intro seed i o n hi
++  exact oracle_lt_reflect14 seed hi
++
++/-- Every finite rank of the diagonal operator tower is progressive. -/
++theorem diagonalOperatorTower_progressive
++    (schedule : Nat → WTree Nat) (base : Transformer)
++    (hbase : Progressive base) (k : Nat) :
++    Progressive (diagonalOperatorTower schedule base k) := by
++  induction k with
++  | zero => simpa [diagonalOperatorTower] using hbase
++  | succ k ih =>
++      simpa [diagonalOperatorTower] using
++        (operatorStage_progressive
++          (diagonalOperatorTower schedule base k) ih (schedule k))
++
++/-- One use of `schedule14 k` strictly raises every visible value of a
++progressive transformer.  The proof uses only the explicit leaf at branch zero;
++it does not assume any monotonicity of reflection in an oracle. -/
++theorem transformer_lt_operatorStage_schedule14 {base : Transformer}
++    (hbase : Progressive base) (seed : W.Family) (k : Nat)
++    {i o n : Nat} (hi : i ≤ n) :
++    base seed i n < operatorStage base (schedule14 k) seed o n := by
++  let f : Nat → WTree Nat := fun j =>
++    match j with
++    | 0 => .leaf
++    | r + 1 =>
++        Autonomous.realize
++          (Autonomous.hyper (k + r + 1) (Autonomous.encode tree12))
++  have h1 : base seed i n < liftTransformer base seed 0 n :=
++    transformer_lt_lift_at hbase seed hi
++  have h2 : operatorStage base (f 0) seed 0 n <
++      operatorStage base (.node f) seed o n :=
++    operatorStage_child_lt base hbase seed f (Nat.zero_le n)
++  have h2' : liftTransformer base seed 0 n <
++      operatorStage base (schedule14 k) seed o n := by
++    simpa [f, schedule14] using h2
++  exact Nat.lt_trans h1 h2'
++
++/-- Consecutive ranks of the concrete tower are pointwise strictly increasing
++at every visible coordinate. -/
++theorem diagonalOperatorTower_step_lt (seed : W.Family) (k : Nat)
++    {i o n : Nat} (hi : i ≤ n) :
++    diagonalOperatorTower schedule14 fdFamilyTransformer k seed i n <
++      diagonalOperatorTower schedule14 fdFamilyTransformer (k + 1) seed o n := by
++  simpa [diagonalOperatorTower] using
++    (transformer_lt_operatorStage_schedule14
++      (diagonalOperatorTower_progressive schedule14 fdFamilyTransformer
++        fdFamilyTransformer_progressive k)
++      seed k hi)
++
++/-- Every lower rank is pointwise strictly below every higher rank at visible
++coordinates.  This is the finite transitive closure of the one-step theorem. -/
++theorem diagonalOperatorTower_rank_lt (seed : W.Family)
++    {k l i o n : Nat} (hi : i ≤ n) (hkl : k < l) :
++    diagonalOperatorTower schedule14 fdFamilyTransformer k seed i n <
++      diagonalOperatorTower schedule14 fdFamilyTransformer l seed o n := by
++  induction l generalizing k i o with
++  | zero =>
++      exact False.elim (Nat.not_lt_zero k hkl)
++  | succ l ih =>
++      cases Nat.lt_or_eq_of_le (Nat.le_of_lt_succ hkl) with
++      | inl hlt =>
++          exact Nat.lt_trans
++            (ih (k := k) (i := i) (o := 0) hi hlt)
++            (diagonalOperatorTower_step_lt seed l (i := 0)
++              (o := o) (n := n) (Nat.zero_le n))
++      | inr heq =>
++          subst k
++          exact diagonalOperatorTower_step_lt seed l hi
++
++/-- At every input, `F14` strictly exceeds Contender 13's entire family. -/
++theorem family13_lt_F14 (n : Nat) : family13 n < F14 n := by
++  change family13 n <
++    diagonalOperatorTower schedule14 fdFamilyTransformer (family13 n)
++      (fun _ => family13) n n
++  exact
++    (diagonalOperatorTower_progressive schedule14 fdFamilyTransformer
++      fdFamilyTransformer_progressive (family13 n))
++      (fun _ => family13) 0 n n (Nat.zero_le n)
++
++/-- `F13` is input-increasing. -/
++theorem input_lt_F13 (n : Nat) : n < F13 n :=
++  Fd.input_lt_reflectFd family12 n
++
++/-- The family used as the rank and seed of Contender 14 is input-increasing. -/
++theorem input_lt_family13 (n : Nat) : n < family13 n :=
++  Nat.lt_trans (input_lt_F13 n) (input_lt_F13 (F13 n))
++
++/-- `F14` is input-increasing. -/
++theorem input_lt_F14 (n : Nat) : n < F14 n :=
++  Nat.lt_trans (input_lt_family13 n) (family13_lt_F14 n)
++
++/-- The self-indexing rank is positive at every input. -/
++theorem zero_lt_family13 (n : Nat) : 0 < family13 n :=
++  Nat.lt_of_le_of_lt (Nat.zero_le n) (input_lt_family13 n)
++
++/-- Every proper lower tower rank is below the selected self-indexed rank. -/
++theorem lower_rank_lt_F14 {k n : Nat} (hk : k < family13 n) :
++    diagonalOperatorTower schedule14 fdFamilyTransformer k
++        (fun _ => family13) 0 n < F14 n := by
++  change diagonalOperatorTower schedule14 fdFamilyTransformer k
++      (fun _ => family13) 0 n <
++    diagonalOperatorTower schedule14 fdFamilyTransformer (family13 n)
++      (fun _ => family13) n n
++  exact diagonalOperatorTower_rank_lt (fun _ => family13)
++    (i := 0) (o := n) (n := n) (Nat.zero_le n) hk
++
++/-- Even the rank-zero family-aware dynamic reflector is below `F14`. -/
++theorem reflect14_seed_lt_F14 (n : Nat) :
++    reflect14 (fun _ => family13) n < F14 n := by
++  simpa [diagonalOperatorTower, fdFamilyTransformer] using
++    (lower_rank_lt_F14 (k := 0) (n := n) (zero_lt_family13 n))
++
++/-- Every dynamic-kind program enumerated at depth `n`, run with the packed
++Contender-13 family oracle, is strictly below `F14 n`. -/
++theorem fvalue_lt_F14 {n : Nat} {t : Fd.CTm} (ht : t ∈ Fd.ctmsUpTo n) :
++    Fd.fvalue (packFamily (fun _ => family13)) n t < F14 n :=
++  Nat.lt_trans (fvalue_lt_reflect14 (fun _ => family13) ht)
++    (reflect14_seed_lt_F14 n)
++
++/-- The tower rank at input 42 is definitionally the previous contender. -/
++theorem tower14_rank_at_42 :
++    tower14 42 =
++      diagonalOperatorTower schedule14 fdFamilyTransformer contender_13 := by
++  rfl
++
++/-- **The required comparison:** Contender 13 is strictly smaller than
++Contender 14. -/
++theorem contender_13_lt_contender_14 : contender_13 < contender_14 := by
++  simpa [contender_13, contender_14, family13] using
++    (Nat.lt_trans (family13_lt_F14 42) (input_lt_F14 (F14 42)))
++
++/-- All previously accepted contenders are therefore smaller as well. -/
++theorem contender_12_lt_contender_14 : contender_12 < contender_14 :=
++  Nat.lt_trans contender_12_lt_contender_13 contender_13_lt_contender_14
++
++end BusyLean
+diff --git a/BusyLean/Contender14.lean b/BusyLean/Contender14.lean
+new file mode 100644
+index 0000000..db422b6
+--- /dev/null
++++ b/BusyLean/Contender14.lean
+@@ -0,0 +1,91 @@
++import BusyLean.Contender13
++import BusyLean.MetaReflection
++import BusyLean.Autonomous
++
++/-!
++# Contender 14: self-indexed diagonal operator reflection
++
++The reflected object language is Contender 13's dynamic-kind System F-omega,
++but the unary oracle is now a packed countable family.  A separate prefix
++maximum makes the resulting transformer progressive without assuming the
++(false) monotonicity of reflection in its oracle.
++
++The base transformer is then lifted through a diagonal tower of operator
++stages.  At rank `k`, `schedule14 k` has a canonical leaf branch (used by the
++strict comparison proofs) and countably many branches carrying successively
++higher autonomous schedules above Contender 12's `tree12`.
++
++The tower height at input `n` is `family13 n = F13 (F13 n)`.  In particular,
++the height at input 42 is definitionally Contender 13, but the definition never
++mentions the constant `contender_13` itself.
++
++```
++family13 n  = F13 (F13 n)
++tower14 n   = diagonalOperatorTower schedule14 fdFamilyTransformer (family13 n)
++F14 n       = tower14 n (fun _ => family13) n n
++contender_14 = F14 (F14 42)
++```
++
++All definitions are transparent, structural, and executable.  Do not evaluate
++`contender_14`.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Dynamic-kind System F-omega reflection with a countable oracle family.
++
++The family is presented to the object language through `packFamily`.  The
++explicit prefix maximum is logically separate: it ensures that every visible
++seed coordinate `fs i n`, for `i <= n`, is below the reflector even though
++object-language evaluation is not monotone in the oracle. -/
++def reflect14 (fs : W.Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN (W.prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum (Fd.fvalue (packFamily fs) n) (Fd.ctmsUpTo n))
++
++/-- One family-aware dynamic-kind reflection step, packaged as a transformer.
++The output coordinate is ignored, exactly as for the earlier primitive
++reflection transformers. -/
++def fdFamilyTransformer : Transformer := fun fs _ n => reflect14 fs n
++
++/-- A rank-dependent autonomous schedule.
++
++Branch zero is a leaf, giving a canonical embedded copy of one autonomous lift.
++Branch `r+1` carries the `(k+r+1)`-st higher autonomous derivative above
++Contender 12's schedule.  Thus every rank exposes an unbounded diagonal family
++of schedules while retaining an explicit branch for direct inequalities. -/
++def schedule14 (k : Nat) : WTree Nat :=
++  .node (fun j =>
++    match j with
++    | 0 => .leaf
++    | r + 1 =>
++        Autonomous.realize
++          (Autonomous.hyper (k + r + 1) (Autonomous.encode tree12)))
++
++/-- Iterate operator-stage closure along a rank-dependent schedule.
++
++At successor rank, the entire transformer from the previous rank becomes the
++base transformer for a fresh operator stage. -/
++def diagonalOperatorTower (schedule : Nat → WTree Nat)
++    (base : Transformer) : Nat → Transformer
++  | 0 => base
++  | k + 1 =>
++      operatorStage (diagonalOperatorTower schedule base k) (schedule k)
++
++/-- Contender 13's construction as a function of its input.
++Definitionally, `family13 42 = contender_13`. -/
++def family13 (n : Nat) : Nat := F13 (F13 n)
++
++/-- The self-indexed tower: its rank at input `n` is `family13 n`. -/
++def tower14 (n : Nat) : Transformer :=
++  diagonalOperatorTower schedule14 fdFamilyTransformer (family13 n)
++
++/-- The diagonal operator tower, seeded by Contender 13's family. -/
++def F14 (n : Nat) : Nat := tower14 n (fun _ => family13) n n
++
++/-- **Contender 14.** Never evaluate it. -/
++def contender_14 : Nat := F14 (F14 42)
++
++end BusyLean
+diff --git a/scripts/check.py b/scripts/check.py
+index 6148894..c18fef0 100644
+--- a/scripts/check.py
++++ b/scripts/check.py
+@@ -26,8 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
+ BUILD_DIRS = [ROOT / ".lake" / "build",
+               ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
+ PERMITTED = {"propext", "Quot.sound"}
+-PREVIOUS = "BusyLean.Comparison12"   # previous contender: definitions + proofs
+-CURRENT_DEF = "BusyLean.Contender13"  # current contender's definition module
++PREVIOUS = "BusyLean.Comparison13"   # previous contender: definitions + proofs
++CURRENT_DEF = "BusyLean.Contender14"  # current contender's definition module
+ DEFINITION_BUDGET = 15.0  # seconds
+ PROOF_BUDGET = 60.0
+ LAKE = shutil.which("lake") or "lake"
+diff --git a/test/Audit.lean b/test/Audit.lean
+--- a/test/Audit.lean
++++ b/test/Audit.lean
+@@ -152,2 +152,22 @@
+ -- The final family is a genuine computable function (only input 0 is feasible).
+ #eval BusyLean.finalFamily 0
++
++-- Contender 14: self-indexed diagonal operator reflection.
++#print axioms BusyLean.contender_14
++#print axioms BusyLean.contender_13_lt_contender_14
++#print axioms BusyLean.family13_lt_F14
++#print axioms BusyLean.fvalue_lt_reflect14
++#print axioms BusyLean.fvalue_lt_F14
++#print axioms BusyLean.diagonalOperatorTower_step_lt
++#print axioms BusyLean.diagonalOperatorTower_rank_lt
++
++#assert_not_in_closure BusyLean.contender_14 :
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_13_lt_contender_14
++#check @BusyLean.family13_lt_F14
++#check @BusyLean.diagonalOperatorTower_step_lt
++#check @BusyLean.diagonalOperatorTower_rank_lt
++#check @BusyLean.fvalue_lt_F14

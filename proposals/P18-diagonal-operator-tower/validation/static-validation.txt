@@ -1,0 +1,4 @@
+OK   repo_overlay/BusyLean/Contender14.lean  sha256=81c8979cccdddc667ff800b07ba73a52615bab5c54ddd1db11c2e5dfa7813ce7
+OK   repo_overlay/BusyLean/Comparison14.lean  sha256=d845bc14f24a080706fd3ecd7196161d84fd6ae4fa9d177dd9c6f784abac748f
+PASS: static overlay checks completed
+NOTE: Lean 4.34.0 kernel checking remains mandatory after applying the overlay.

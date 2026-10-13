@@ -1,0 +1,18 @@
+Selected kernel-checked theorem signatures
+==========================================
+
+BusyLean.contender_13_lt_contender_14 :
+  BusyLean.contender_13 < BusyLean.contender_14
+
+BusyLean.fdDiagonal_rank_lt_succ :
+  forall (schedule : BigNumber.WTree Nat) (k : Nat)
+    (seed : BusyLean.W.Family) (i o n : Nat),
+    i <= n ->
+    BusyLean.diagonalLift schedule k BusyLean.fdFamilyTransformer seed i n <
+    BusyLean.diagonalLift schedule (k + 1) BusyLean.fdFamilyTransformer seed o n
+
+BusyLean.fvalue_lt_F14 :
+  forall {n : Nat} {t : BusyLean.Fd.CTm},
+    t in BusyLean.Fd.ctmsUpTo n ->
+    BusyLean.Fd.fvalue
+      (BusyLean.packFamily (fun _ => BusyLean.family13)) n t < BusyLean.F14 n

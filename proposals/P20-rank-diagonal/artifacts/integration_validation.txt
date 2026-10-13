@@ -1,0 +1,24 @@
+INTEGRATION ARTIFACT VALIDATION
+===============================
+
+Status: PASS
+
+Checks performed in an isolated temporary checkout skeleton:
+- install.sh shell syntax
+- unified patch dry-run with git apply --check
+- unified patch application
+- byte-for-byte equality of patched files and overlay files
+- unique BusyLean.lean imports
+- Python syntax compilation for check14.py and static_audit.py
+
+The installer was also tested earlier for first installation and idempotent
+second installation; it leaves nonidentical files untouched unless --force is
+supplied.
+
+Excluded from this status:
+- Lean elaboration and kernel checking
+- Lean axiom reports
+- clean-build timing budgets
+
+Those excluded checks require the pinned Lean 4.34.0 toolchain and are handled
+by overlay/scripts/check14.py.

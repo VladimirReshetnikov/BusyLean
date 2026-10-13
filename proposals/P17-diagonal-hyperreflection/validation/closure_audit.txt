@@ -1,0 +1,21 @@
+Transitive definition-closure audit
+===================================
+
+BusyLean.contender_14: closure of 1918 constants avoids all 9 forbidden names.
+
+Forbidden earlier contender constants:
+  BusyLean.contender_5
+  BusyLean.contender_6
+  BusyLean.contender_7
+  BusyLean.contender_8
+  BusyLean.contender_9
+  BusyLean.contender_10
+  BusyLean.contender_11
+  BusyLean.contender_12
+  BusyLean.contender_13
+
+Result: PASS
+
+The construction legitimately reuses prior families, syntax, interpreters,
+normalizers, schedules, and comparison infrastructure; it does not use a
+previous contender value as an opaque seed.

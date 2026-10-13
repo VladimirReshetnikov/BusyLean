@@ -1,0 +1,252 @@
+{
+  "package": "BusyLean_Contender14_RDOR",
+  "title": "Ramified Dynamic Operator Reflection: A Proposed Contender 14 for BusyLean",
+  "generated_utc": "2026-10-13T04:17:01Z",
+  "base_repository": "VladimirReshetnikov/BusyLean",
+  "base_commit": "1ee50c7d97bbed57a60709f661453c3e213f4db3",
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "verification_level": "static preflight and PDF QA complete; pinned Lean kernel build pending",
+  "file_count": 48,
+  "files": [
+    {
+      "path": "BASE_COMMIT.txt",
+      "bytes": 150,
+      "sha256": "31aa334267afba4d7b3cdb7db83d8e526dcea10eb8362adacf0f4ff295aaab7f"
+    },
+    {
+      "path": "BUILD_RECEIPT_TEMPLATE.md",
+      "bytes": 1380,
+      "sha256": "9f05341e036621f36368e752b7e475af255ad5fdc3ac85e8ecee72ff26c2a8ab"
+    },
+    {
+      "path": "BusyLean/Comparison14.lean",
+      "bytes": 7299,
+      "sha256": "147b4497a1f406b0baa26477597b0c87e9beee93b8f8ebf6892f8164c7154c9e"
+    },
+    {
+      "path": "BusyLean/Contender14.lean",
+      "bytes": 4056,
+      "sha256": "a42fcfc785b675936a87f89ac35b3f93f49c211410e42f3561c31004198f4932"
+    },
+    {
+      "path": "DESIGN_SUMMARY.md",
+      "bytes": 4625,
+      "sha256": "1e8f44d20c02e19c810d33b2f8fa6c3b90092d58e65206de1c535ce1ba0d52a8"
+    },
+    {
+      "path": "INTEGRATION.md",
+      "bytes": 3963,
+      "sha256": "4e6bc1685151b5ffd7385cc6ccd6b96b9eeb48c5f6c5decb7005022fdb71a3c5"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5558,
+      "sha256": "ff30d74310fe748bc1a41d792b535816cae01ffb03c5616b6bd4335200d7e060"
+    },
+    {
+      "path": "README_SECTION.md",
+      "bytes": 1789,
+      "sha256": "1b355bc40bffd84f96669d7c6d390fac975871882086c5a31dfef5b451ed6f1d"
+    },
+    {
+      "path": "VERIFICATION_STATUS.md",
+      "bytes": 2721,
+      "sha256": "9f3508c54702949b35fa48a3eaac7324ed5ce9e35ff6f49aefce564ed7f5eac8"
+    },
+    {
+      "path": "article/contender14_rdor.pdf",
+      "bytes": 443284,
+      "sha256": "f302533dbf8b9908fdaafbe5b15da8f1e63e5c6317291d77906abfe9757c390e"
+    },
+    {
+      "path": "article/contender14_rdor.tex",
+      "bytes": 42062,
+      "sha256": "dcd39776b045a1364b4c002483329ac9a8ffcc1f9e8dfc9463c49545e0b76e10"
+    },
+    {
+      "path": "artifacts/construction_graph.dot",
+      "bytes": 1834,
+      "sha256": "086e6cf9de3910b5a90cff6b38a937a26a4f4bdf3a1efc6318e0a9972f15ed15"
+    },
+    {
+      "path": "artifacts/construction_graph.png",
+      "bytes": 158711,
+      "sha256": "4c71f832f74f594ede474cf9e0c42f621194b6c02f05e8f6b67755de583eda36"
+    },
+    {
+      "path": "artifacts/construction_graph.svg",
+      "bytes": 16118,
+      "sha256": "7429fc26fa5790ea2fea1454d0eaa0e6797c15b2a184c19cb776c50fed7ca260"
+    },
+    {
+      "path": "artifacts/latex_build.log",
+      "bytes": 32709,
+      "sha256": "cd686499cfbadea06c09bbb54ee64fe8f1c55aeb57d6eab2154d13663bded109"
+    },
+    {
+      "path": "artifacts/pdf_contact_sheet.png",
+      "bytes": 979219,
+      "sha256": "d9725e65d8b41c78410310c78b8b4ad3641ecfb36d2412741ee865a3549a3bf6"
+    },
+    {
+      "path": "artifacts/pdf_inspect.json",
+      "bytes": 4480,
+      "sha256": "c3db1d344b20cfc2ab4e3920ba7d560d1d8f6d952e170bfa6e06bb0789d3bf96"
+    },
+    {
+      "path": "artifacts/pdf_inspection.txt",
+      "bytes": 5891,
+      "sha256": "32e7aadf63643eeca56c8a6d37b5d810ba0d282d48d2cbff16e04c194e25e6ec"
+    },
+    {
+      "path": "artifacts/pdf_preflight.json",
+      "bytes": 234,
+      "sha256": "329846955cb835c4fe8c317341818cfa7c752f2abbb87fb2f727556354baa0de"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-01.png",
+      "bytes": 297276,
+      "sha256": "a9beba6c7845e6bee214c4a33fe0391329c25842191392a0cea795eff6453bf0"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-02.png",
+      "bytes": 217553,
+      "sha256": "357d3d41ec2b64f7c0480c9ce3e6715477698481a8713e3312342570ad9d7add"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-03.png",
+      "bytes": 287641,
+      "sha256": "79264635f9e70a899cb62301e625463b7a11adea1d014497969bac82da99a025"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-04.png",
+      "bytes": 346253,
+      "sha256": "42f00dc692d3d49eaf907c3ed8beaf5e995df9cc876bd0623c3127fc8754d2e8"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-05.png",
+      "bytes": 345769,
+      "sha256": "a600ee0c7b6750bc687397b21839bb028bd9a66c597775591cdd485f7282f892"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-06.png",
+      "bytes": 291809,
+      "sha256": "0a3af090e483ecb37d169de575f4ba7c4e82a81afd8522b1eda74017182aed6b"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-07.png",
+      "bytes": 319441,
+      "sha256": "1b3d2f298028bed6cc079b711d0f9d27030b3e7fdb53a882e3f3aae0d52d6bce"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-08.png",
+      "bytes": 265842,
+      "sha256": "c8b3dbfab7915370184a48d0bf487260cf91ff03e6392a6bb60ab71dd76c8b96"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-09.png",
+      "bytes": 228368,
+      "sha256": "e81f3f334957f1c9a94cc3521e28dedc6f44c8088831df4418d123a275e3b7d8"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-10.png",
+      "bytes": 331948,
+      "sha256": "6a65e72f13430c18cea26f3a65a7b4a695ded7deb4add0213669d20eb4cdf8b1"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-11.png",
+      "bytes": 307773,
+      "sha256": "ed4801f99983f9a2810af7ee26b8978ffcfe882caa1763fdb8d8fe6900bf4f7d"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-12.png",
+      "bytes": 300712,
+      "sha256": "7adbf8e254eca60163beb0889d42b04d83f2bfaaa06f931ba215d39eaad384d4"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-13.png",
+      "bytes": 291882,
+      "sha256": "462964f608d0cd15cebc09dc89cfd73cf5564565241a1d6cb4e1201e4bfec105"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-14.png",
+      "bytes": 392031,
+      "sha256": "a9be9b369dd95104e85ce0db17d4bbd5c3d1d41d587986eb8c2b2fef85e57e0a"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-15.png",
+      "bytes": 348556,
+      "sha256": "c6c55d1eae291ba475a4ced0d585f07798b2d4a9a06a609b110d1acdabd0e230"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-16.png",
+      "bytes": 335648,
+      "sha256": "a0764648d6af9771ee238bf2b38fcc07e368f5cc944646d2392880997efa33aa"
+    },
+    {
+      "path": "artifacts/rendered_pdf/page-17.png",
+      "bytes": 108837,
+      "sha256": "783327ffaef540c36ecbab8c1db5c5e1e7a1e11843e9902abae15884022cae0a"
+    },
+    {
+      "path": "artifacts/repo_baseline.json",
+      "bytes": 934,
+      "sha256": "a048ab266a8a433bea71908c51daed2adaa15816577b2592b4f5a64cb0a7b2d4"
+    },
+    {
+      "path": "artifacts/static_audit.txt",
+      "bytes": 254,
+      "sha256": "bfc17b998152a48e49ce52c9cd6c8a865db54c59e4f1210a4da1c8b4fa9a46cc"
+    },
+    {
+      "path": "artifacts/tooling_checks.txt",
+      "bytes": 818,
+      "sha256": "0c432397d84a0228308d325a3858eb5b8d167e6f88571164b4edf5132662de53"
+    },
+    {
+      "path": "lean-toolchain",
+      "bytes": 25,
+      "sha256": "8733782dc070a99b312039cda424f601b80f3be6f6f512627da5ba25adc27632"
+    },
+    {
+      "path": "patches/Audit14.append.lean",
+      "bytes": 588,
+      "sha256": "b67d8c94d7f3abd1572870b044aa0da544193a8dc4eed1d83aedc88f64e8f57d"
+    },
+    {
+      "path": "patches/integration.patch",
+      "bytes": 57944,
+      "sha256": "3f65103215e333fbc2ec2019aba20c0af55b5d233c26fc97a9579398e4fb293e"
+    },
+    {
+      "path": "scripts/apply_overlay.sh",
+      "bytes": 3196,
+      "sha256": "626ffbf95f1a4e1387413f6d1f050ce9655265018e6c41d1e702189ae01468ea"
+    },
+    {
+      "path": "scripts/check_in_repo.sh",
+      "bytes": 344,
+      "sha256": "932a818c69be0eb8ac16e0ac8ca318838b7d623b182d878bc5892e9a137a29af"
+    },
+    {
+      "path": "scripts/make_integration_patch.py",
+      "bytes": 2671,
+      "sha256": "fa112bac26d9a74a3e62da4ccc7187cddd8ff99725c295a322594e753333b9d2"
+    },
+    {
+      "path": "scripts/static_audit.py",
+      "bytes": 5306,
+      "sha256": "9d59f55cf813391f29f778c3a61b2a69244e4872aee7d1102908b49448fda622"
+    },
+    {
+      "path": "scripts/validate_package.sh",
+      "bytes": 1054,
+      "sha256": "8a1db34fefa34776132dfad0fa24fa1c04c641caa9d15075690854a442ffddf3"
+    },
+    {
+      "path": "test/Contender14Audit.lean",
+      "bytes": 740,
+      "sha256": "109cb24c363e80fdfc3fcb2ea1b8ead98c482634e28213363c923648fabee790"
+    }
+  ]
+}

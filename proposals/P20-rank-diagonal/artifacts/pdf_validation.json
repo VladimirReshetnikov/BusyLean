@@ -1,0 +1,385 @@
+{
+  "status": "PASS",
+  "pdf": "article/contender14.pdf",
+  "rendered_pages": 23,
+  "render_dpi": 120,
+  "all_pages_nonblank": true,
+  "visual_inspection": "All-page contact sheet inspected; title/status page and references inspected at full page scale. Earlier full-scale review also covered the dependency graph, source-listing transitions, comparison source, and audit source. No clipped text, overlapping objects, broken glyphs, or truncated code frames observed.",
+  "pdfinfo": [
+    "Title:           Contender 14 for BusyLean: Bi-Diagonal Rank Reflection",
+    "Subject:         ",
+    "Keywords:        ",
+    "Author:          Research memorandum for the BusyLean project",
+    "Creator:         LaTeX with hyperref",
+    "Producer:        pdfTeX-1.40.26",
+    "CreationDate:    Tue Oct 13 04:16:38 2026 UTC",
+    "ModDate:         Tue Oct 13 04:16:38 2026 UTC",
+    "Custom Metadata: yes",
+    "Metadata Stream: no",
+    "Tagged:          no",
+    "UserProperties:  no",
+    "Suspects:        no",
+    "Form:            none",
+    "JavaScript:      no",
+    "Pages:           23",
+    "Encrypted:       no",
+    "Page size:       612 x 792 pts (letter)",
+    "Page rot:        0",
+    "File size:       478165 bytes",
+    "Optimized:       no",
+    "PDF version:     1.7"
+  ],
+  "fonts": [
+    "name                                 type              encoding         emb sub uni object ID",
+    "------------------------------------ ----------------- ---------------- --- --- --- ---------",
+    "MZHPEB+LMRoman12-Bold                Type 1            Custom           yes yes yes    170  0",
+    "XLNCNQ+LMRoman12-Regular             Type 1            Custom           yes yes yes    171  0",
+    "OFICCI+LMMathItalic12-Regular        Type 1            Custom           yes yes yes    172  0",
+    "XQQKUY+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    173  0",
+    "AZSGAM+LMRoman10-Bold                Type 1            Custom           yes yes yes    174  0",
+    "QQKKRQ+LMRoman10-Regular             Type 1            Custom           yes yes yes    175  0",
+    "UCINBL+LMMathItalic7-Regular         Type 1            Custom           yes yes yes    176  0",
+    "KRNEZI+LMRoman10-Italic              Type 1            Custom           yes yes yes    177  0",
+    "EQLPGC+LMMono10-Regular              Type 1            Custom           yes yes yes    178  0",
+    "JCMNYY+LMRoman8-Regular              Type 1            Custom           yes yes yes    232  0",
+    "EAOUUG+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    238  0",
+    "QQKKRQ+LMRoman10-Regular             Type 1            Custom           yes yes yes    240  0",
+    "IUEUDB+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    241  0",
+    "VDYDBT+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    243  0",
+    "TMDUIO+LMSans10-Regular              Type 1            Custom           yes yes yes    254  0",
+    "TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    255  0",
+    "LTWTGU+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    277  0",
+    "WJZQNN+LMMono10-Italic               Type 1            Custom           yes yes yes    280  0",
+    "RGCFHB+LMRoman6-Regular              Type 1            Custom           yes yes yes    292  0",
+    "KHMVCW+DejaVuSans                    TrueType          WinAnsi          yes yes yes    297  0",
+    "UBVZQD+DejaVuSans                    CID TrueType      Identity-H       yes yes yes    298  0",
+    "NUNDCC+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    352  0",
+    "BXCOAN+LMMono9-Regular               Type 1            Custom           yes yes yes    382  0",
+    "PVXBGU+LMMathSymbols9-Regular        Type 1            Custom           yes yes yes    388  0",
+    "KCPAGP+LMMathItalic9-Regular         Type 1            Custom           yes yes yes    539  0"
+  ],
+  "page_metrics": [
+    {
+      "page": "page-01.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        181,
+        913,
+        1265
+      ],
+      "nonwhite_pixels": 322852
+    },
+    {
+      "page": "page-02.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 67552
+    },
+    {
+      "page": "page-03.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 119505
+    },
+    {
+      "page": "page-04.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        913,
+        1266
+      ],
+      "nonwhite_pixels": 94575
+    },
+    {
+      "page": "page-05.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 101398
+    },
+    {
+      "page": "page-06.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 84198
+    },
+    {
+      "page": "page-07.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 108221
+    },
+    {
+      "page": "page-08.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 67519
+    },
+    {
+      "page": "page-09.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        913,
+        1266
+      ],
+      "nonwhite_pixels": 76316
+    },
+    {
+      "page": "page-10.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 85623
+    },
+    {
+      "page": "page-11.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        106,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 124759
+    },
+    {
+      "page": "page-12.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        913,
+        1266
+      ],
+      "nonwhite_pixels": 101137
+    },
+    {
+      "page": "page-13.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        913,
+        1266
+      ],
+      "nonwhite_pixels": 99818
+    },
+    {
+      "page": "page-14.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 130577
+    },
+    {
+      "page": "page-15.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        107,
+        50,
+        914,
+        1266
+      ],
+      "nonwhite_pixels": 161403
+    },
+    {
+      "page": "page-16.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        913,
+        1266
+      ],
+      "nonwhite_pixels": 600475
+    },
+    {
+      "page": "page-17.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 877297
+    },
+    {
+      "page": "page-18.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 817360
+    },
+    {
+      "page": "page-19.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 877323
+    },
+    {
+      "page": "page-20.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 817152
+    },
+    {
+      "page": "page-21.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 877307
+    },
+    {
+      "page": "page-22.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        912,
+        1266
+      ],
+      "nonwhite_pixels": 815438
+    },
+    {
+      "page": "page-23.png",
+      "size": [
+        1020,
+        1320
+      ],
+      "content_bbox": [
+        108,
+        50,
+        915,
+        1266
+      ],
+      "nonwhite_pixels": 86233
+    }
+  ]
+}

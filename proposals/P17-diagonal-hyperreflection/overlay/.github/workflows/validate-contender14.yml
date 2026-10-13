@@ -1,0 +1,49 @@
+name: Validate Contender 14 research branch
+
+on:
+  push:
+    branches:
+      - research/contender14-diagonal-hyperreflection
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Toolchain
+        run: |
+          lean --version
+          lake --version
+      - name: Build previous accepted contender
+        run: lake build BusyLean.Comparison13
+      - name: Time Contender 14 definitions
+        run: |
+          /usr/bin/time -f '%e' -o /tmp/definitions.time lake build BusyLean.Contender14
+          printf 'definitions_seconds=' && cat /tmp/definitions.time
+          python3 - <<'PY'
+          value = float(open('/tmp/definitions.time').read().strip())
+          assert value <= 15.0, f'definition budget exceeded: {value:.2f}s'
+          PY
+      - name: Time Contender 14 proofs
+        run: |
+          /usr/bin/time -f '%e' -o /tmp/proofs.time lake build BusyLean.Comparison14
+          printf 'proofs_seconds=' && cat /tmp/proofs.time
+          python3 - <<'PY'
+          value = float(open('/tmp/proofs.time').read().strip())
+          assert value <= 60.0, f'proof budget exceeded: {value:.2f}s'
+          PY
+      - name: Source guard
+        run: |
+          if grep -R -nE '\b(noncomputable|partial|unsafe|opaque|implemented_by|extern|native_decide|sorryAx|Classical\.choice)\b' \
+            BusyLean/HyperReflection.lean BusyLean/HyperReflectionFacts.lean \
+            BusyLean/Contender14.lean BusyLean/Comparison14.lean; then
+            echo 'forbidden construct found'
+            exit 1
+          fi
+      - name: Axiom and closure audit
+        run: lake env lean test/Contender14Audit.lean

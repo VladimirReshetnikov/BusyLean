@@ -1,0 +1,11 @@
+Lean 4.34.0 axiom audit
+=======================
+
+'BusyLean.contender_14' depends on axioms: [propext, Quot.sound]
+'BusyLean.contender_13_lt_contender_14' depends on axioms: [propext, Quot.sound]
+'BusyLean.family13_lt_F14' depends on axioms: [propext, Quot.sound]
+'BusyLean.fvalue_lt_F14' depends on axioms: [propext, Quot.sound]
+'BusyLean.diagonalLift_rank_lt_succ' depends on axioms: [propext]
+
+Repository-permitted set: {propext, Quot.sound}
+Result: PASS

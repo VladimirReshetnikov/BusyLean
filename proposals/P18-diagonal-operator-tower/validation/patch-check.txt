@@ -1,0 +1,1 @@
+PASS: contender14.patch applies to baseline-shaped files

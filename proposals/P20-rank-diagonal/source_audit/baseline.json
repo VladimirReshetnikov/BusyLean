@@ -1,0 +1,24 @@
+{
+  "repository": "VladimirReshetnikov/BusyLean",
+  "repository_url": "https://github.com/VladimirReshetnikov/BusyLean",
+  "audited_commit": "1ee50c7d97bbed57a60709f661453c3e213f4db3",
+  "audited_commit_message": "Document Contender 13 in the README and the article",
+  "audited_commit_time_utc": "2026-10-13T03:55:00Z",
+  "local_audit_date_america_los_angeles": "2026-10-12",
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "critical_files": {
+    "BusyLean/Contender9.lean": "9673d7308f0e1ade6d6b8520937a6362197e111c",
+    "BusyLean/Contender12.lean": "e994d28311f862e35456e3e9dbacc75e3a74cdcf",
+    "BusyLean/Contender13.lean": "67d296805249b190d3480dd26dae9e0e9818b86d",
+    "BusyLean/Comparison13.lean": "6c559db162ec9b3ccee233af584386c041556e60",
+    "BusyLean/MetaReflection.lean": "d3926cca1be43254f93e25029ea575597cdc0dbc",
+    "BusyLean/MetaReflectionFacts.lean": "8f30eee48c3341176f2b723dd181a7cc650acaa4",
+    "BusyLean/Autonomous.lean": "3ee214d7443a9629c20609b52e2e1275efe7912e",
+    "BusyLean/ReflectionFacts.lean": "baa1790fd5d1b16fca69b31ff1a3a53a29fd06b1",
+    "test/Audit.lean": "869b1c47a2be08f6bf84c29c61e8a16b66b23eb0",
+    "lean-toolchain": "12359f928f18e4a89ebd1444a0310b025931b17d"
+  },
+  "validation_note": "Repository source was audited through the GitHub connector. The sandbox used to build this package did not contain Lean or Lake, so the included Lean overlay has not been replayed by the Lean kernel here.",
+  "parent_code_commit": "7f6a5c6e44ef31e389b10f6ab6da2bb0284c3502",
+  "baseline_note": "The audited HEAD changes README.md and article/busylean.{tex,pdf} only; the critical Lean source blobs listed below are unchanged from the parent code commit."
+}

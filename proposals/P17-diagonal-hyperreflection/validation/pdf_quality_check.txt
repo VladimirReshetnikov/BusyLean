@@ -1,0 +1,18 @@
+PDF quality inspection
+======================
+
+Artifact: article/contender14_diagonal_hyperreflection.pdf
+Pages: 19
+Page size: US Letter (612 x 792 pt)
+Renderer: pdftoppm through the PDF inspection workflow
+
+Checks performed:
+- all 19 pages rendered successfully;
+- title/abstract/contents page inspected;
+- design-trajectory table on page 5 inspected after its final edit;
+- source-guard page and long wrapped identifiers inspected;
+- theorem-inventory table on page 18 inspected after column-width repair;
+- final bibliography page inspected;
+- no clipping, overlap, missing glyphs, or corrupted pages observed;
+- LaTeX log contains no overfull boxes, undefined references, or fatal errors;
+- one harmless underfull hbox warning remains in a narrow table cell.

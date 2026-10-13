@@ -1,0 +1,11 @@
+contender,base mechanism,amplifier/diagonal,formal comparison present in audited repo or proposal
+5,bounded maximum over raw System T terms,depth 42,baseline port in repo
+6,System T plus W-types over all finite types,family reflection along language-defined W-trees,contender_5_lt_contender_6
+7,System F with oracle,finite syntax maximum and outer diagonal,contender_6_lt_contender_7
+8,System F-omega with oracle,finite syntax maximum and outer diagonal,contender_7_lt_contender_8
+9,System F-omega with packed oracle family,forest reflection along W-language index,contender_8_lt_contender_9
+10,kind-polymorphic System F-omega,finite syntax maximum and outer diagonal,contender_9_lt_contender_10
+11,kind-polymorphic System F-omega with family oracle,forest reflection along W-language index,contender_10_lt_contender_11
+12,kind-polymorphic System F-omega transformer,operator-level reflection along autonomous hyper-tree,contender_11_lt_contender_12
+13,dynamic-kind System F-omega with unary oracle,single reflection over family12,contender_12_lt_contender_13
+14 (proposed),dynamic-kind System F-omega with packed family oracle,previous-number-controlled schedule and strictly increasing meta-rank plus final reflection,contender_13_lt_contender_14 in included overlay

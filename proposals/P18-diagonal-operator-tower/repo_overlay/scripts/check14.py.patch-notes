@@ -1,0 +1,11 @@
+In `scripts/check.py`, change:
+
+    PREVIOUS = "BusyLean.Comparison12"
+    CURRENT_DEF = "BusyLean.Contender13"
+
+to:
+
+    PREVIOUS = "BusyLean.Comparison13"
+    CURRENT_DEF = "BusyLean.Contender14"
+
+The existing 15 s definition and 60 s proof budgets can remain unchanged.

@@ -1,0 +1,1403 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -20,4 +20,6 @@
+ import BusyLean.Contender12
+ import BusyLean.Comparison12
+ import BusyLean.Contender13
+ import BusyLean.Comparison13
++import BusyLean.Contender14
++import BusyLean.Comparison14
+diff --git a/scripts/check.py b/scripts/check.py
+--- a/scripts/check.py
++++ b/scripts/check.py
+@@ -28,7 +28,7 @@
+ BUILD_DIRS = [ROOT / ".lake" / "build",
+               ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
+ PERMITTED = {"propext", "Quot.sound"}
+-PREVIOUS = "BusyLean.Comparison12"   # previous contender: definitions + proofs
+-CURRENT_DEF = "BusyLean.Contender13"  # current contender's definition module
++PREVIOUS = "BusyLean.Comparison13"   # previous contender: definitions + proofs
++CURRENT_DEF = "BusyLean.Contender14"  # current contender's definition module
+ DEFINITION_BUDGET = 15.0  # seconds
+ PROOF_BUDGET = 60.0
+diff --git a/test/Audit.lean b/test/Audit.lean
+--- a/test/Audit.lean
++++ b/test/Audit.lean
+@@ -150,5 +150,20 @@
+ #check @BusyLean.Fd.sn_of_typed
+ #check @BusyLean.Fk.sn_of_typed
+ 
+ -- The final family is a genuine computable function (only input 0 is feasible).
+ #eval BusyLean.finalFamily 0
++
++-- Contender 14 additions.
++#print axioms BusyLean.contender_14
++#print axioms BusyLean.contender_13_lt_contender_14
++#print axioms BusyLean.fortyTwo_F13_steps_lt_F14
++#print axioms BusyLean.fvalue_lt_contender_14
++
++#assert_not_in_closure BusyLean.contender_14 :
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_13_lt_contender_14
++#check @BusyLean.fortyTwo_F13_steps_lt_F14
++#check @BusyLean.fvalue_lt_contender_14
+diff --git a/BusyLean/Contender14.lean b/BusyLean/Contender14.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Contender14.lean
+@@ -0,0 +1,102 @@
++import BusyLean.Contender13
++import BusyLean.MetaReflection
++import BusyLean.Autonomous
++
++/-!
++# Contender 14: ramified dynamic operator reflection
++
++Contender 13 performs one reflection step over dynamic-kind System Fω with a
++unary oracle.  This file makes four construction-level upgrades, without ever
++mentioning the constant `contender_13` in the new number's dependency closure.
++
++1. `reflectFdFamily` gives dynamic-kind System Fω a packed countable oracle
++   family and dominates every visible coordinate of that family.
++2. `fdFamilyTransformer` packages this as a progressive transformer.
++3. `towerStep` feeds a transformer's output back into a full operator-stage
++   closure along `tree14`, a schedule obtained by stacking another autonomous
++   hyper-closure above Contender 12's `tree12`.
++4. `operatorTower (n+1)` nests this strict meta-step an input-dependent number
++   of times.  Its seed exposes every finite additional iterate of the
++   Contender-13 construction.
++
++```
++family13 n       = F13 (F13 n)
++iterateF13 i x   = F13^[i] x
++seed13 i n       = iterateF13 i (family13 n)
++operatorTower 0  = fdFamilyTransformer
++operatorTower(k+1) = towerStep (operatorTower k)
++F14 n            = operatorTower (n+1) seed13 n n
++contender_14      = F14 (F14 42)
++```
++
++All recursion is structural.  There is no use of `noncomputable`, `partial`,
++`unsafe`, `opaque`, `implemented_by`, `extern`, or an unbounded search.
++
++**Do not evaluate `contender_14`.**
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Reflection over dynamic-kind System Fω with a packed countable oracle
++family.  Besides all accepted program values, it strictly exceeds each
++coordinate `fs i n` visible at the current budget (`i ≤ n`). -/
++def reflectFdFamily (fs : W.Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN
++    (W.prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum (Fd.fvalue (packFamily fs) n) (Fd.ctmsUpTo n))
++
++/-- One family-aware dynamic-kind reflection step, as a transformer.  The
++output-family coordinate is intentionally ignored. -/
++def fdFamilyTransformer : Transformer :=
++  fun fs _ n => reflectFdFamily fs n
++
++/-- A second autonomous schedule above Contender 12's schedule.  Recall that
++`tree12 = realize (hyper 42 (encode index))`; here the same closure is stacked
++once more above `tree12`. -/
++def tree14 : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper 42 (Autonomous.encode tree12))
++
++/-- One strict meta-step.  First run `base` on `seed`; then use that whole
++output family as the seed of a full operator-stage closure of `base`.
++
++When `base` is progressive, `towerStep base` is progressive and strictly
++exceeds `base` pointwise on every visible coordinate; these facts are proved
++in `Comparison14.lean`. -/
++def towerStep (base : Transformer) : Transformer :=
++  fun seed => (operatorStage base tree14) (base seed)
++
++/-- The ramified operator tower.  Level zero is family-aware dynamic-kind
++reflection.  Every successor level applies a full `towerStep` to the preceding
++level. -/
++def operatorTower : Nat → Transformer
++  | 0 => fdFamilyTransformer
++  | k + 1 => towerStep (operatorTower k)
++
++/-- Contender 13's construction as a function of its input:
++`family13 42 = contender_13`.  The constant `contender_13` itself is not used. -/
++def family13 (n : Nat) : Nat := F13 (F13 n)
++
++/-- Right-associated finite iteration of the Contender-13 reflector. -/
++def iterateF13 : Nat → Nat → Nat
++  | 0, n => n
++  | k + 1, n => F13 (iterateF13 k n)
++
++/-- The seed family exposes arbitrarily many additional `F13` iterations to
++packed-oracle programs and to the transformer machinery.  Coordinate zero is
++exactly `family13`; coordinate `i` adds `i` further reflection steps. -/
++def seed13 : W.Family :=
++  fun i n => iterateF13 i (family13 n)
++
++/-- The Contender-14 family.  At input `n` it uses `n+1` nested operator-tower
++levels, reads coordinate `n`, and evaluates at numerical input `n`. -/
++def F14 (n : Nat) : Nat :=
++  operatorTower (n + 1) seed13 n n
++
++/-- **Contender 14.** Never evaluate it. -/
++def contender_14 : Nat := F14 (F14 42)
++
++end BusyLean
+diff --git a/BusyLean/Comparison14.lean b/BusyLean/Comparison14.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Comparison14.lean
+@@ -0,0 +1,180 @@
++import BusyLean.Contender14
++import BusyLean.Comparison13
++import BusyLean.MetaReflectionFacts
++
++/-!
++# Contender 14: comparison and lower-bound theorems
++
++The main result is `contender_13_lt_contender_14`.  The proof does not evaluate
++any contender.  It factors through generic progressivity of operator stages.
++
++A stronger quantitative certificate is also exposed: at every input `n`,
++`F14 n` dominates every visible seed coordinate.  In particular, `F14 42`
++dominates forty-two further iterations of `F13` starting at `contender_13`,
++before the final outer application of `F14` is taken.
++-/
++
++namespace BusyLean
++
++/-! ## Family-aware dynamic-kind reflection -/
++
++/-- Anything below the maximum component is strictly below the reflector. -/
++theorem lt_reflectFdFamily {fs : W.Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN
++      (W.prefixMax (fun i => fs i n) n)
++      (BigNumber.maximum (Fd.fvalue (packFamily fs) n) (Fd.ctmsUpTo n))) :
++    m < reflectFdFamily fs n := by
++  show m < n + 1 + _
++  have hM : ∀ M : Nat, M + 1 ≤ n + 1 + M := fun M => by
++    rw [Nat.add_comm M 1]
++    exact Nat.add_le_add_right (Nat.le_add_left 1 n) M
++  exact Nat.lt_of_le_of_lt h
++    (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (hM _))
++
++/-- Every visible oracle-family coordinate is strictly below the reflector. -/
++theorem oracle_lt_reflectFdFamily (fs : W.Family) {i n : Nat}
++    (hi : i ≤ n) : fs i n < reflectFdFamily fs n :=
++  lt_reflectFdFamily
++    (Nat.le_trans (W.le_prefixMax (fun j => fs j n) hi)
++      (BigNumber.le_maxN_left _ _))
++
++/-- Every accepted dynamic-kind program in the bounded enumeration is strictly
++below the reflector, with access to the packed family oracle. -/
++theorem fvalue_lt_reflectFdFamily (fs : W.Family) {n : Nat} {t : Fd.CTm}
++    (ht : t ∈ Fd.ctmsUpTo n) :
++    Fd.fvalue (packFamily fs) n t < reflectFdFamily fs n :=
++  lt_reflectFdFamily
++    (Nat.le_trans (W.le_maximum _ ht) (BigNumber.le_maxN_right _ _))
++
++/-- The numerical input is strictly below family-aware reflection. -/
++theorem input_lt_reflectFdFamily (fs : W.Family) (n : Nat) :
++    n < reflectFdFamily fs n :=
++  Nat.lt_of_lt_of_le (Nat.lt_succ_self n) (Nat.le_add_right _ _)
++
++/-- Family-aware dynamic-kind reflection is a progressive transformer. -/
++theorem fdFamilyTransformer_progressive :
++    Progressive fdFamilyTransformer := by
++  intro seed i o n hi
++  exact oracle_lt_reflectFdFamily seed hi
++
++/-! ## A strict tower of operator closures -/
++
++/-- One tower step strictly dominates its base transformer at every visible
++coordinate. -/
++theorem transformer_lt_towerStep {base : Transformer}
++    (hbase : Progressive base) (seed : W.Family)
++    {i o n : Nat} (hi : i ≤ n) :
++    base seed i n < towerStep base seed o n := by
++  change base seed i n < operatorStage base tree14 (base seed) o n
++  exact (operatorStage_progressive base hbase tree14)
++    (base seed) i o n hi
++
++/-- A tower step over a progressive transformer remains progressive. -/
++theorem towerStep_progressive {base : Transformer}
++    (hbase : Progressive base) : Progressive (towerStep base) := by
++  intro seed i o n hi
++  exact Nat.lt_trans
++    (hbase seed i i n hi)
++    (transformer_lt_towerStep hbase seed
++      (i := i) (o := o) (n := n) hi)
++
++/-- Every level of the ramified operator tower is progressive. -/
++theorem operatorTower_progressive :
++    (k : Nat) → Progressive (operatorTower k)
++  | 0 => fdFamilyTransformer_progressive
++  | k + 1 => towerStep_progressive (operatorTower_progressive k)
++
++/-- Successive tower levels form a strict pointwise chain on visible
++coordinates. -/
++theorem operatorTower_level_lt_succ (k : Nat) (seed : W.Family)
++    {i o n : Nat} (hi : i ≤ n) :
++    operatorTower k seed i n < operatorTower (k + 1) seed o n := by
++  change operatorTower k seed i n <
++    towerStep (operatorTower k) seed o n
++  exact transformer_lt_towerStep (operatorTower_progressive k) seed hi
++
++/-- The base dynamic-family reflector is below every positive tower level. -/
++theorem fdFamilyTransformer_lt_operatorTower_succ :
++    ∀ (k : Nat) (seed : W.Family) (o n : Nat),
++      fdFamilyTransformer seed 0 n <
++        operatorTower (k + 1) seed o n
++  | 0, seed, o, n =>
++      operatorTower_level_lt_succ 0 seed
++        (i := 0) (o := o) (n := n) (Nat.zero_le n)
++  | k + 1, seed, o, n =>
++      Nat.lt_trans
++        (fdFamilyTransformer_lt_operatorTower_succ k seed 0 n)
++        (operatorTower_level_lt_succ (k + 1) seed
++          (i := 0) (o := o) (n := n) (Nat.zero_le n))
++
++/-! ## The seed and the final comparison -/
++
++@[simp] theorem seed13_zero (n : Nat) : seed13 0 n = family13 n := rfl
++
++/-- Every application of `F13` is strictly input-increasing. -/
++theorem input_lt_F13 (n : Nat) : n < F13 n :=
++  Fd.input_lt_reflectFd family12 n
++
++/-- Any nonempty finite iteration of `F13` strictly exceeds its starting
++value.  No monotonicity assumption on `F13` is needed. -/
++theorem input_lt_iterateF13_succ :
++    ∀ (k n : Nat), n < iterateF13 (k + 1) n
++  | 0, n => input_lt_F13 n
++  | k + 1, n =>
++      Nat.lt_trans
++        (input_lt_iterateF13_succ k n)
++        (input_lt_F13 (iterateF13 (k + 1) n))
++
++/-- Every seed coordinate visible at input `n` is below `F14 n`. -/
++theorem seed13_lt_F14 {i n : Nat} (hi : i ≤ n) :
++    seed13 i n < F14 n :=
++  operatorTower_progressive (n + 1) seed13 i n n hi
++
++/-- At every input, `F14` exceeds the whole Contender-13 family. -/
++theorem family13_lt_F14 (n : Nat) : family13 n < F14 n := by
++  rw [← seed13_zero n]
++  exact seed13_lt_F14 (i := 0) (n := n) (Nat.zero_le n)
++
++/-- The exact formal margin at the contest input: `F14 42` already exceeds
++forty-two additional `F13` iterations starting from Contender 13. -/
++theorem fortyTwo_F13_steps_lt_F14 :
++    iterateF13 42 contender_13 < F14 42 := by
++  change seed13 42 42 < F14 42
++  exact seed13_lt_F14 (i := 42) (n := 42) (Nat.le_refl 42)
++
++/-- The Contender-13 family itself is input-increasing. -/
++theorem input_lt_family13 (n : Nat) : n < family13 n :=
++  Nat.lt_trans (input_lt_F13 n) (input_lt_F13 (F13 n))
++
++/-- `F14` is input-increasing. -/
++theorem input_lt_F14 (n : Nat) : n < F14 n :=
++  Nat.lt_trans (input_lt_family13 n) (family13_lt_F14 n)
++
++/-- **The required comparison:** Contender 13 is strictly smaller than
++Contender 14. -/
++theorem contender_13_lt_contender_14 : contender_13 < contender_14 :=
++  Nat.lt_trans (family13_lt_F14 42) (input_lt_F14 (F14 42))
++
++/-- Consequently, Contender 12 is also below Contender 14. -/
++theorem contender_12_lt_contender_14 : contender_12 < contender_14 :=
++  Nat.lt_trans contender_12_lt_contender_13 contender_13_lt_contender_14
++
++/-- Every bounded dynamic-kind program using the packed, iterated
++Contender-13 seed family is below `F14` at the same input. -/
++theorem fvalue_lt_F14 {n : Nat} {t : Fd.CTm}
++    (ht : t ∈ Fd.ctmsUpTo n) :
++    Fd.fvalue (packFamily seed13) n t < F14 n := by
++  have h₁ : Fd.fvalue (packFamily seed13) n t <
++      fdFamilyTransformer seed13 0 n :=
++    fvalue_lt_reflectFdFamily seed13 ht
++  have h₂ : fdFamilyTransformer seed13 0 n < F14 n :=
++    fdFamilyTransformer_lt_operatorTower_succ n seed13 n n
++  exact Nat.lt_trans h₁ h₂
++
++/-- The same program-domination result at Contender 14's outer budget. -/
++theorem fvalue_lt_contender_14 {t : Fd.CTm}
++    (ht : t ∈ Fd.ctmsUpTo (F14 42)) :
++    Fd.fvalue (packFamily seed13) (F14 42) t < contender_14 :=
++  fvalue_lt_F14 ht
++
++end BusyLean
+diff --git a/test/Contender14Audit.lean b/test/Contender14Audit.lean
+new file mode 100644
+--- /dev/null
++++ b/test/Contender14Audit.lean
+@@ -0,0 +1,21 @@
++import BusyLean.Comparison14
++import Lean
++
++/-!
++Standalone audit additions for Contender 14.  The repository's existing
++`test/Audit.lean` defines `#assert_not_in_closure`; the integration patch adds
++the same checks there.  This file concentrates the ordinary kernel reports.
++-/
++
++#print axioms BusyLean.reflectFdFamily
++#print axioms BusyLean.fdFamilyTransformer
++#print axioms BusyLean.operatorTower
++#print axioms BusyLean.contender_14
++#print axioms BusyLean.contender_13_lt_contender_14
++#print axioms BusyLean.fortyTwo_F13_steps_lt_F14
++#print axioms BusyLean.fvalue_lt_contender_14
++
++#check @BusyLean.contender_13_lt_contender_14
++#check @BusyLean.fortyTwo_F13_steps_lt_F14
++#check @BusyLean.seed13_lt_F14
++#check @BusyLean.fvalue_lt_contender_14
+diff --git a/article/contender14_rdor.tex b/article/contender14_rdor.tex
+new file mode 100644
+--- /dev/null
++++ b/article/contender14_rdor.tex
+@@ -0,0 +1,1033 @@
++\documentclass[11pt]{article}
++
++\usepackage[T1]{fontenc}
++\usepackage[utf8]{inputenc}
++\usepackage{lmodern}
++\usepackage{microtype}
++\usepackage[margin=1in]{geometry}
++\usepackage{amsmath,amssymb,amsthm,mathtools}
++\usepackage{booktabs}
++\usepackage{longtable}
++\usepackage{array}
++\usepackage{enumitem}
++\usepackage{xcolor}
++\usepackage{listings}
++\usepackage{fancyhdr}
++\usepackage{lastpage}
++\usepackage{hyperref}
++\usepackage[nameinlink,noabbrev]{cleveref}
++\usepackage{url}
++
++\hypersetup{
++  colorlinks=true,
++  linkcolor=blue!55!black,
++  citecolor=blue!55!black,
++  urlcolor=blue!55!black,
++  pdftitle={Ramified Dynamic Operator Reflection: A Proposed Contender 14 for BusyLean},
++  pdfsubject={Lean 4 large-number construction and formal comparison},
++  pdfkeywords={Lean 4, BusyLean, large numbers, reflection, System F omega, proof theory}
++}
++
++\pagestyle{fancy}
++\fancyhf{}
++\lhead{BusyLean Contender 14}
++\rhead{Ramified dynamic operator reflection}
++\cfoot{\thepage\ of \pageref{LastPage}}
++\setlength{\headheight}{14pt}
++
++\newtheorem{theorem}{Theorem}[section]
++\newtheorem{lemma}[theorem]{Lemma}
++\newtheorem{proposition}[theorem]{Proposition}
++\newtheorem{corollary}[theorem]{Corollary}
++\theoremstyle{definition}
++\newtheorem{definition}[theorem]{Definition}
++\newtheorem{remark}[theorem]{Remark}
++
++\newcommand{\Nat}{\ensuremath{\mathbb{N}}}
++\newcommand{\Family}{\ensuremath{\mathsf{Family}}}
++\newcommand{\Transformer}{\ensuremath{\mathsf{Transformer}}}
++\newcommand{\Prog}{\ensuremath{\mathsf{Progressive}}}
++\newcommand{\Fd}{\ensuremath{\mathsf{F}_{\mathrm{dyn}}}}
++\newcommand{\lean}[1]{\texttt{#1}}
++\newcommand{\Cthirteen}{\ensuremath{C_{13}}}
++\newcommand{\Cfourteen}{\ensuremath{C_{14}}}
++\newcommand{\Fthirteen}{\ensuremath{F_{13}}}
++\newcommand{\Ffourteen}{\ensuremath{F_{14}}}
++\newcommand{\opstage}{\ensuremath{\mathsf{operatorStage}}}
++\newcommand{\pack}{\ensuremath{\mathsf{packFamily}}}
++\newcommand{\prefixmax}{\ensuremath{\mathsf{prefixMax}}}
++\newcommand{\tower}{\ensuremath{\mathsf{operatorTower}}}
++\newcommand{\step}{\ensuremath{\mathsf{towerStep}}}
++
++\lstdefinelanguage{Lean}{
++  morekeywords={def,theorem,lemma,namespace,end,import,open,abbrev,inductive,structure,
++    where,match,with,if,then,else,fun,by,exact,have,show,change,rw,calc,forall},
++  sensitive=true,
++  morecomment=[l]{--},
++  morecomment=[s]{/-}{-/},
++  morestring=[b]"
++}
++\lstset{
++  language=Lean,
++  basicstyle=\ttfamily\small,
++  keywordstyle=\bfseries\color{blue!50!black},
++  commentstyle=\itshape\color{green!35!black},
++  stringstyle=\color{red!45!black},
++  columns=fullflexible,
++  keepspaces=true,
++  breaklines=true,
++  frame=single,
++  framerule=0.3pt,
++  xleftmargin=0.4em,
++  xrightmargin=0.4em,
++  aboveskip=0.8em,
++  belowskip=0.8em
++}
++
++\title{\textbf{Ramified Dynamic Operator Reflection}\\
++A Proposed Contender 14 for BusyLean}
++\author{Research note prepared for the BusyLean project}
++\date{12 October 2026\\\small Base repository commit \texttt{1ee50c7d97bbed57a60709f661453c3e213f4db3}}
++
++\begin{document}
++\maketitle
++
++\begin{abstract}
++We propose a closed computable Lean natural number \lean{contender\_14} that
++strictly exceeds the current BusyLean champion, \lean{contender\_13}, without
++using the predecessor constant in the new definition.  The construction is a
++ramified tower of operator-level reflection over the current dynamic-kind
++System~$F_\omega$ normalizer.  Its base step upgrades the unary oracle of
++Contender~13 to a packed countable family and explicitly dominates every
++visible family coordinate.  A strict meta-step then feeds the transformer's
++whole output family into a full operator-stage closure along a schedule stacked
++above Contender~12's autonomous schedule.  Repeating this meta-step $n+1$ times
++at input $n$ yields a strict tower of progressively stronger transformers.
++The seed family exposes all finite additional iterations of the Contender~13
++construction.
++
++The proposed Lean development proves, without evaluating any contender,
++\[
++  \lean{contender\_13} < \lean{contender\_14}.
++\]
++It also proves the much sharper certificate
++\[
++  \Fthirteen^{\,42}(\Cthirteen) < \Ffourteen(42) < \Cfourteen,
++\]
++where the first exponent denotes forty-two right-associated functional
++iterations.  Moreover, every accepted dynamic-kind program of depth at most
++$n$, run with the packed iterated seed family as oracle, has value below
++$\Ffourteen(n)$.  All numerical definitions are structural and executable in
++principle.  The archive contains Lean source, integration scripts, an axiom and
++dependency audit extension, and this article.  The PDF was compiled and
++inspected.  The preparation environment did not contain Lean~4.34.0, so no
++kernel-build receipt is fabricated; final acceptance requires running the
++included commands in the pinned BusyLean checkout.
++\end{abstract}
++
++\tableofcontents
++\newpage
++
++%======================================================================
++\section{Executive statement}
++
++The proposed number is
++\begin{lstlisting}
++def contender_14 : Nat := F14 (F14 42)
++\end{lstlisting}
++with the following constructional ingredients:
++\begin{lstlisting}
++def family13 (n : Nat) : Nat := F13 (F13 n)
++
++def iterateF13 : Nat -> Nat -> Nat
++  | 0, n     => n
++  | k + 1, n => F13 (iterateF13 k n)
++
++def seed13 : W.Family :=
++  fun i n => iterateF13 i (family13 n)
++
++def operatorTower : Nat -> Transformer
++  | 0     => fdFamilyTransformer
++  | k + 1 => towerStep (operatorTower k)
++
++def F14 (n : Nat) : Nat :=
++  operatorTower (n + 1) seed13 n n
++\end{lstlisting}
++The base transformer is a family-aware version of the repository's
++\lean{Fd.reflectFd}.  The schedule \lean{tree14} is obtained by placing another
++42-level autonomous hyper-closure above \lean{tree12}.  The successor operation
++\lean{towerStep} does not merely compose the previous transformer with a fast
++arithmetic function; it reruns the repository's full operator-level reflection
++machinery with the previous transformer's output as the new oracle family.
++
++The main theorem is represented by the Lean declaration
++\begin{lstlisting}
++theorem contender_13_lt_contender_14 :
++    contender_13 < contender_14
++\end{lstlisting}
++and follows from three uniform facts:
++\begin{enumerate}[label=(\roman*)]
++  \item every level of \lean{operatorTower} is progressive;
++  \item the seed's coordinate zero is \lean{family13}; and
++  \item \lean{F14} is strictly input-increasing.
++\end{enumerate}
++No numeral is evaluated in this proof.
++
++%======================================================================
++\section{Repository context and admissibility constraints}
++
++BusyLean is a Lean~4 continuation of the ``name the biggest number'' contest.
++Its operative rules require a closed computable \lean{Nat}, a formal strict
++comparison with the previous contender, a small permitted axiom set, and a
++source-level prohibition on defining a new entry from the predecessor constant
++itself.  The repository currently identifies Contender~13 as the champion.
++That contender reflects all bounded programs of dynamic-kind System~$F_\omega$
++over the function \lean{family12}; it is therefore already far beyond an
++ordinary tower, Ackermann function, or fixed fast-growing hierarchy at a
++hand-written ordinal notation.
++
++The relevant predecessor definitions are schematically
++\begin{align*}
++  \mathsf{family}_{12}(n) &= F_{12}(F_{12}(n)),\\
++  F_{13}(n) &= \mathsf{reflectFd}(\mathsf{family}_{12},n),\\
++  C_{13} &= F_{13}(F_{13}(42)).
++\end{align*}
++The reflector contains a finite enumeration of terms, a sound bounded type
++checker, a total normalizer justified by strong normalization, and a maximum of
++the decoded numeral values.  Thus any serious successor should operate on the
++\emph{construction} of $F_{13}$, not append an elementary wrapper to $C_{13}$.
++
++\subsection{Design requirements used here}
++
++The proposal was designed against the following stronger checklist.
++
++\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\textwidth}
++                  >{\raggedright\arraybackslash}p{0.68\textwidth}}
++\toprule
++Requirement & Realization \\
++\midrule
++\endhead
++Closed and constructive & Every list, maximum, normalization, tree recursion,
++and numerical iteration is finite or structurally recursive. \\
++No predecessor constant & \lean{Contender14.lean} uses \lean{F13} and
++\lean{family12}'s construction, but not \lean{contender\_13}. \\
++Formal margin & The proof gives both $C_{13}<C_{14}$ and a 42-extra-iteration
++lower bound. \\
++Qualitative amplification & Reflection is upgraded from a unary oracle to a
++family oracle, lifted through operator reflection, and nested by an
++input-indexed tower of strict meta-steps. \\
++Auditability & Definitions and comparison proofs are separated; the archive
++adds axiom checks and a transitive dependency-closure check. \\
++Budget plausibility & Earlier large modules are imported precompiled.  New
++definitions are short transparent recursors; proofs reuse generic progressivity
++theorems. \\
++No informal oracle & The packed family is an ordinary computable function, and
++program evaluation is the existing total \Fd\ evaluator. \\
++\bottomrule
++\end{longtable}
++
++%======================================================================
++\section{Why obvious alternatives are inadequate}
++
++\subsection{Arithmetic post-composition}
++A definition such as $2^{C_{13}}$, a tetration of height $C_{13}$, or even an
++Ackermann diagonal applied to $C_{13}$ would certainly be larger if it were
++allowed.  It would nevertheless violate the contest's no-laziness principle:
++the new entry would obtain its strength from the already named constant rather
++than from a stronger constructive mechanism.  Replacing the constant by the
++definitional equal term $F_{13}(F_{13}(42))$ would evade only a textual check,
++not the mathematical objection.
++
++\subsection{Unbounded Busy Beaver maxima}
++A true maximum over all terminating programs below a syntax bound is not
++computable because termination is undecidable.  The repository avoids this by
++using total typed languages and formal normalization theorems.  The present
++proposal keeps that discipline: it reuses the total \Fd\ evaluator and only
++maximizes over a finite syntax list.
++
++\subsection{A new calculus without a normalization proof}
++A hierarchy of dynamic universes $\mathtt{dyn}_0,\mathtt{dyn}_1,\ldots$ is a
++promising qualitative successor and is discussed in the repository's roadmap.
++However, introducing it responsibly requires extending syntax, kinding,
++conversion, type inference, semantic interpretation, and the reducibility
++argument.  A large numeral whose central language theorem is merely asserted
++would not be a valid contest entry.  The current proposal instead extracts a
++substantial new reflection level from machinery that is already normalized and
++audited, while leaving the dynamic-universe ladder as the leading next base-
++language project.
++
++%======================================================================
++\section{Preliminaries: families, transformers, and progressivity}
++
++A family is a two-argument natural-number function
++\[
++  \Family := \Nat \to \Nat \to \Nat.
++\]
++The first argument is an oracle-family coordinate and the second is the
++numerical input.  A transformer maps families to families:
++\[
++  \Transformer := \Family \to \Family.
++\]
++The repository's key abstract invariant is progressivity.
++
++\begin{definition}[Progressive transformer]
++A transformer $T$ is progressive when
++\[
++  \Prog(T) :\Longleftrightarrow
++  \forall S,i,o,n\,\bigl(i\le n \Rightarrow S(i,n)<T(S)(o,n)\bigr).
++\]
++The output coordinate $o$ is unrestricted.  Only the seed coordinate $i$ must
++be visible at the current budget.
++\end{definition}
++
++This deliberately avoids monotonicity in the oracle.  Oracle programs may
++inspect values and branch, so replacing an oracle pointwise by a larger one
++need not increase a program's output.  Progressivity is instead proved from an
++\emph{explicit occurrence}: a visible seed value is inserted into a finite
++maximum, or a child value is directly exposed to the parent transformer.
++
++The existing \lean{operatorStage} construction is generic in a progressive
++base transformer.  It first iterates a transformer along the universal
++well-founded tree \lean{index}; it then recursively splices child transformers
++and lifts the splice again.  The repository proves
++\begin{equation}
++  \Prog(T) \quad\Longrightarrow\quad
++  \Prog(\opstage(T,a))
++  \label{eq:operator-progressive}
++\end{equation}
++for every schedule tree $a$.
++
++%======================================================================
++\section{Family-aware dynamic-kind reflection}
++
++Contender~13's \lean{Fd.reflectFd} accepts one unary oracle $f:\Nat\to\Nat$.
++For operator reflection, a countable family is more natural: child stages must
++remain separately addressable.  The repository already provides a computable
++pairing code \lean{packFamily} satisfying the intended decode equation for
++family coordinates and arguments.  We therefore define
++\begin{align}
++R_{\mathrm{fam}}(S,n)
++  := {}& n+1+\max\Bigl(
++    \max_{i\le n} S(i,n),\notag\\
++   &\hspace{33mm}
++    \max_{t\in\mathsf{ctmsUpTo}(n)}
++      \mathsf{fvalue}(\pack(S),n,t)
++  \Bigr).
++\label{eq:family-reflector}
++\end{align}
++In Lean this is \lean{reflectFdFamily}:
++\begin{lstlisting}
++def reflectFdFamily (fs : W.Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN
++    (W.prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum
++      (Fd.fvalue (packFamily fs) n) (Fd.ctmsUpTo n))
++\end{lstlisting}
++
++\begin{lemma}[Visible-coordinate domination]
++For every family $S$ and $i\le n$,
++\[
++  S(i,n)<R_{\mathrm{fam}}(S,n).
++\]
++\end{lemma}
++\begin{proof}
++The prefix maximum contains $S(i,n)$.  Hence $S(i,n)$ is at most the left
++component of the outer maximum.  The summand $n+1$ makes the final inequality
++strict.
++\end{proof}
++
++\begin{lemma}[Program domination]
++If $t\in\mathsf{ctmsUpTo}(n)$, then
++\[
++  \mathsf{fvalue}(\pack(S),n,t)<R_{\mathrm{fam}}(S,n).
++\]
++\end{lemma}
++\begin{proof}
++The value is at most the finite maximum over the enumerated terms, which is at
++most the outer maximum.  Again $n+1$ supplies strictness.
++\end{proof}
++
++The associated transformer ignores its output coordinate:
++\[
++  T_0(S)(o,n):=R_{\mathrm{fam}}(S,n).
++\]
++Visible-coordinate domination is exactly \(\Prog(T_0)\).  Thus
++\lean{fdFamilyTransformer} can be fed to all generic operator-reflection
++lemmas without changing the existing \Fd\ normalizer.
++
++%======================================================================
++\section{A schedule above Contender 12's schedule}
++
++Contender~12 uses
++\[
++  \mathsf{tree}_{12}
++  =\mathsf{realize}\bigl(\mathsf{hyper}(42,
++       \mathsf{encode}(\mathsf{index}))\bigr).
++\]
++The autonomous notation language contains countably branching trees,
++syntactic addition and multiplication, $\omega$-powers, derivatives, a
++finite critical hierarchy, a common-critical-point closure, and higher
++derivatives.  It is intentionally used as tree syntax; no quotient-level
++ordinal identity is needed for correctness.
++
++The new schedule stacks the same closure once more:
++\[
++  \mathsf{tree}_{14}
++  =\mathsf{realize}\bigl(\mathsf{hyper}(42,
++       \mathsf{encode}(\mathsf{tree}_{12}))\bigr).
++\]
++The definition is transparent and structurally recursive.  Its role is not in
++the elementary strict comparison---progressivity holds for every schedule---but
++in making each meta-step a much richer closure than one fixed lift.
++
++\begin{remark}
++The exact proof-theoretic ordinal denoted by these raw trees is deliberately not
++asserted.  The construction is valid because \lean{operatorStage} recurses on
++the actual well-founded Lean tree, not because an informal ordinal label has
++been proved correct.
++\end{remark}
++
++%======================================================================
++\section{The strict meta-step}
++
++For a progressive transformer $T$, define
++\begin{equation}
++  \step(T)(S)
++    := \opstage(T,\mathsf{tree}_{14})\bigl(T(S)\bigr).
++\label{eq:tower-step}
++\end{equation}
++This is \lean{towerStep}.  It has two conceptually distinct parts:
++\begin{enumerate}[label=(\alph*)]
++  \item first expose the entire output family $T(S)$;
++  \item then use that family as the seed of the operator-stage closure of the
++        same transformer $T$.
++\end{enumerate}
++The feedback is what gives a clean strict chain.
++
++\begin{theorem}[Strict domination by one meta-step]
++If \(\Prog(T)\), $i\le n$, and $S$ is any family, then
++\[
++  T(S)(i,n)<\step(T)(S)(o,n)
++\]
++for every output coordinate $o$.
++\end{theorem}
++\begin{proof}
++By \cref{eq:operator-progressive}, the transformer
++$\opstage(T,\mathsf{tree}_{14})$ is progressive.  Apply its progressivity to
++the seed family $T(S)$ and visible coordinate $i$.
++\end{proof}
++
++\begin{theorem}[Preservation of progressivity]
++If \(\Prog(T)\), then \(\Prog(\step(T))\).
++\end{theorem}
++\begin{proof}
++For $i\le n$,
++\[
++  S(i,n)<T(S)(i,n)<\step(T)(S)(o,n).
++\]
++The first inequality is progressivity of $T$; the second is the preceding
++theorem.
++\end{proof}
++
++This proof is important methodologically.  It never assumes that reflection is
++monotone in its oracle.  Both strict inequalities are witnessed by the generic
++progressivity interface.
++
++%======================================================================
++\section{The ramified operator tower}
++
++Define a sequence of transformers by
++\begin{align*}
++  T_0 &:= \mathsf{fdFamilyTransformer},\\
++  T_{k+1} &:= \step(T_k).
++\end{align*}
++This is \lean{operatorTower}.  Structural recursion is on $k$.
++
++\begin{theorem}[Tower invariant]
++For every $k\in\Nat$, $T_k$ is progressive.
++\end{theorem}
++\begin{proof}
++Induct on $k$.  The base case is visible-coordinate domination for
++\lean{reflectFdFamily}.  The successor case is preservation of progressivity
++by \lean{towerStep}.
++\end{proof}
++
++\begin{theorem}[Strict level chain]
++For every $k$, family $S$, $i\le n$, and output coordinate $o$,
++\[
++  T_k(S)(i,n)<T_{k+1}(S)(o,n).
++\]
++\end{theorem}
++\begin{proof}
++This is strict domination by one meta-step, using the tower invariant at level
++$k$.
++\end{proof}
++
++The word ``tower'' here is therefore not rhetorical.  The Lean development
++contains a pointwise strict theorem between every two successive levels.  Each
++successor is also substantially more structured than a simple function
++composition: it invokes a complete operator-stage closure whose base is the
++entire preceding level.
++
++%======================================================================
++\section{The iterated Contender 13 seed}
++
++The predecessor construction is exposed as
++\[
++  \mathsf{family}_{13}(n):=F_{13}(F_{13}(n)).
++\]
++Thus $\mathsf{family}_{13}(42)=C_{13}$ definitionally, but the constant
++\lean{contender\_13} is absent from the new executable definition.
++
++Define right-associated iteration by
++\begin{align*}
++  \mathsf{iterateF13}(0,x)&:=x,\\
++  \mathsf{iterateF13}(k+1,x)&:=F_{13}(\mathsf{iterateF13}(k,x)).
++\end{align*}
++The seed family is
++\begin{equation}
++  S_{13}(i,n):=
++  \mathsf{iterateF13}\bigl(i,\mathsf{family}_{13}(n)\bigr).
++\label{eq:seed13}
++\end{equation}
++Coordinate zero is exactly the predecessor family.  Coordinate $i$ supplies
++$i$ further applications of the dynamic-kind reflector.  Because visible
++coordinates satisfy $i\le n$, the input $n$ makes the first $n+1$ such
++iterations simultaneously available to the packed oracle and to the
++progressivity maximum.
++
++\begin{lemma}[Strictness of nonempty \(F_{13}\)-iteration]
++For all $k,x\in\Nat$,
++\[
++  x<\mathsf{iterateF13}(k+1,x).
++\]
++\end{lemma}
++\begin{proof}
++The repository proves $y<F_{13}(y)$ for every $y$.  Induct on $k$ and append
++this input-growth inequality to the preceding chain.  No monotonicity of
++$F_{13}$ is required.
++\end{proof}
++
++%======================================================================
++\section{\texorpdfstring{Definition of \(F_{14}\) and the final number}{Definition of F14 and the final number}}
++
++At input $n$, choose tower level $n+1$, seed it with $S_{13}$, select output
++coordinate $n$, and evaluate at numerical input $n$:
++\begin{equation}
++  F_{14}(n):=T_{n+1}(S_{13})(n,n).
++\label{eq:F14}
++\end{equation}
++Finally set
++\begin{equation}
++  C_{14}:=F_{14}(F_{14}(42)).
++\label{eq:C14}
++\end{equation}
++The outer self-application mirrors the recent BusyLean contenders and is useful
++because $F_{14}$ is formally input-increasing.
++
++The complete executable spine is only a few transparent definitions.  The
++size comes from the already verified total interpreters and from structural
++reflection, not from a giant literal term.
++
++%======================================================================
++\section{Formal comparison theorem}
++
++\begin{theorem}[Visible seed bound]
++If $i\le n$, then
++\[
++  S_{13}(i,n)<F_{14}(n).
++\]
++\end{theorem}
++\begin{proof}
++Apply progressivity of $T_{n+1}$ to seed $S_{13}$, input coordinate $i$, output
++coordinate $n$, and numerical input $n$.
++\end{proof}
++
++At coordinate zero this gives
++\begin{equation}
++  \mathsf{family}_{13}(n)<F_{14}(n).
++\label{eq:family13-F14}
++\end{equation}
++The existing input-growth theorem for $F_{13}$ yields
++\[
++  n<F_{13}(n)<F_{13}(F_{13}(n))
++    =\mathsf{family}_{13}(n).
++\]
++Combining with \cref{eq:family13-F14} proves
++\begin{equation}
++  n<F_{14}(n).
++\label{eq:F14-input}
++\end{equation}
++
++\begin{theorem}[Main comparison]
++\[
++  C_{13}<C_{14}.
++\]
++\end{theorem}
++\begin{proof}
++At $n=42$, \cref{eq:family13-F14} gives
++\[
++  C_{13}=\mathsf{family}_{13}(42)<F_{14}(42).
++\]
++Apply \cref{eq:F14-input} at input $F_{14}(42)$:
++\[
++  F_{14}(42)<F_{14}(F_{14}(42))=C_{14}.
++\]
++Transitivity completes the proof.
++\end{proof}
++
++The corresponding Lean term is intentionally short:
++\begin{lstlisting}
++theorem contender_13_lt_contender_14 :
++    contender_13 < contender_14 :=
++  Nat.lt_trans (family13_lt_F14 42)
++    (input_lt_F14 (F14 42))
++\end{lstlisting}
++The complexity lies in the reusable invariants, not in forcing Lean to
++normalize either number.
++
++%======================================================================
++\section{A certified large margin}
++
++The coordinate $i=42$ is visible at input $42$.  Therefore the visible-seed
++bound gives the exact theorem
++\begin{equation}
++  \mathsf{iterateF13}(42,C_{13})<F_{14}(42).
++\label{eq:42-margin}
++\end{equation}
++Since $C_{13}=F_{13}^2(42)$, the left side is $F_{13}^{44}(42)$ under the
++right-associated iteration convention.  Thus the formal chain includes
++\[
++  C_{13}<F_{13}^{44}(42)<F_{14}(42)<C_{14}.
++\]
++The archive exposes \cref{eq:42-margin} as
++\lean{fortyTwo\_F13\_steps\_lt\_F14}.
++
++This lower bound is useful for two reasons.  First, it demonstrates a margin
++that cannot be dismissed as ``plus one.''  Second, it is independent of any
++informal ordinal assignment to dynamic-kind System~$F_\omega$ or to the
++schedule trees.  It follows only from explicit occurrences in finite maxima
++and from structural progressivity.
++
++%======================================================================
++\section{Program domination}
++
++The base family reflector dominates every accepted \Fd\ term in the finite
++enumeration.  The strict tower-level chain places the base below every positive
++operator-tower level.  Consequently:
++
++\begin{theorem}[Bounded program domination]
++If $t\in\mathsf{ctmsUpTo}(n)$, then
++\[
++  \mathsf{fvalue}(\pack(S_{13}),n,t)<F_{14}(n).
++\]
++\end{theorem}
++\begin{proof}
++The finite maximum in \cref{eq:family-reflector} first gives
++\[
++  \mathsf{fvalue}(\pack(S_{13}),n,t)
++  <T_0(S_{13})(0,n).
++\]
++The strict tower chain, iterated through the positive level $n+1$, gives
++\[
++  T_0(S_{13})(0,n)<T_{n+1}(S_{13})(n,n)=F_{14}(n).
++\]
++\end{proof}
++
++At the outer budget $F_{14}(42)$ this becomes
++\begin{align*}
++ &t\in\mathsf{ctmsUpTo}(F_{14}(42))\\
++ &\qquad\Longrightarrow\quad
++ \mathsf{fvalue}(\pack(S_{13}),F_{14}(42),t)<C_{14}.
++\end{align*}
++This is formalized as \lean{fvalue\_lt\_contender\_14}.
++
++The oracle is more expressive than the unary predecessor oracle.  A program
++can decode an index and query any seed coordinate, while operator-stage nodes
++replace the seed by families of distinct child outputs.  The family interface
++therefore preserves dynamic access rather than collapsing all child stages to
++one diagonal function.
++
++%======================================================================
++\section{Constructivity and computability}
++
++\begin{proposition}
++\lean{contender\_14} denotes a total computable natural number in principle.
++\end{proposition}
++\begin{proof}[Computational analysis]
++Each component is total:
++\begin{enumerate}[label=(\arabic*)]
++  \item \lean{Fd.ctmsUpTo n} is a finite list produced by recursion on $n$.
++  \item The bounded checker and the \Fd\ evaluator are total; accepted terms
++        normalize by the repository's strong-normalization theorem.
++  \item \lean{BigNumber.maximum} and \lean{W.prefixMax} inspect finite data.
++  \item \lean{runTransformer}, \lean{operatorStage}, \lean{Autonomous.encode},
++        and \lean{Autonomous.realize} recurse structurally on well-founded
++        inductive trees.
++  \item \lean{iterateF13} and \lean{operatorTower} recurse on a natural number.
++  \item Function packing is an explicit arithmetic encoding, not an oracle.
++\end{enumerate}
++No definition is partial, unsafe, noncomputable, opaque, externally
++implemented, or based on unbounded search.  Therefore Lean's evaluator has a
++finite reduction sequence for the closed term, although its resource demand is
++astronomical.
++\end{proof}
++
++\begin{remark}
++``Computable in principle'' does not mean feasible to print.  BusyLean's own
++README warns never to evaluate the contenders.  Kernel checking verifies the
++transparent definitions and proof terms without normalizing the final numeral.
++\end{remark}
++
++%======================================================================
++\section{Why the growth jump is substantial}
++
++Only the exact inequalities above are claimed as theorems.  Nevertheless, the
++architecture supports a useful qualitative analysis.
++
++\subsection{Four independent amplification axes}
++
++\begin{enumerate}[label=\textbf{A\arabic*.},leftmargin=3.2em]
++  \item \textbf{Oracle arity.}  One unary predecessor oracle is replaced by a
++        packed countable family with explicit prefix domination.
++  \item \textbf{Autonomous reflection.}  A family-aware \Fd\ step is iterated
++        along the W-language's universal index inside each lift.
++  \item \textbf{Operator reflection.}  Child transformers remain separately
++        selectable and are recursively spliced along \lean{tree14}.
++  \item \textbf{Ramification.}  The entire operator closure becomes the base
++        of the next level, and the number of levels is $n+1$ at input $n$.
++\end{enumerate}
++
++The predecessor uses one \Fd\ reflection over \lean{family12}.  In contrast,
++$F_{14}(42)$ uses level 43 of a strict operator tower, with a seed already
++containing 42 extra $F_{13}$ iterations at visible coordinate 42.  The exact
++lower bound captures only a small, easy-to-state fragment of the full
++operator-stage computation.
++
++\subsection{Schematic ordinal reading}
++Let $\Lambda_{\Fd}$ denote, purely schematically, the closure strength of one
++family-aware dynamic-kind reflection step, and let $\alpha$ and $\gamma$ denote
++the heights represented by \lean{index} and \lean{tree14}.  One may view a
++lift as iterating a $\Lambda_{\Fd}$-strength operation along $\alpha$, while an
++operator stage recursively lifts spliced operators along $\gamma$.  Replacing
++the base transformer by the resulting feedback closure and repeating produces
++a hierarchy
++\[
++  T_0,\quad \step(T_0),\quad \step^2(T_0),\quad\ldots
++\]
++whose 43rd level is selected already at input 42.
++
++This paragraph is an explanatory model, not a formal ordinal calibration.  A
++sound calibration would require assigning ordinal semantics to the actual
++raw-tree operations and proving preservation theorems.  The formal Lean
++comparison deliberately does not depend on such an assignment.
++
++%======================================================================
++\section{Axiom and dependency discipline}
++
++The archive extends the repository's audit in two ways.
++
++\subsection{Axiom reports}
++The proposed audit asks Lean to print the axioms of
++\begin{itemize}
++  \item \lean{contender\_14};
++  \item \lean{contender\_13\_lt\_contender\_14};
++  \item \lean{fortyTwo\_F13\_steps\_lt\_F14}; and
++  \item \lean{fvalue\_lt\_contender\_14}.
++\end{itemize}
++No new axiom is introduced by the source.  The expected inherited set is the
++repository-permitted subset of \lean{propext} and \lean{Quot.sound}.
++
++\subsection{No-laziness dependency closure}
++The existing meta-level command \lean{\#assert\_not\_in\_closure} traverses all
++constants reachable through declaration types and bodies.  The integration
++appendix checks that \lean{contender\_14} does not depend on any predecessor
++constant \lean{contender\_13},\ldots,\lean{contender\_5}.  It is allowed to
++depend on \lean{F13}, \lean{family12}, the normalizer, and the generic
++reflection machinery: those are predecessor \emph{constructions}, exactly as
++the contest rule permits.
++
++\subsection{Static preflight}
++The supplied Python preflight strips nested Lean comments and strings, then
++checks the executable source for forbidden tokens and predecessor constants.
++It also verifies the expected declaration set and records SHA-256 hashes.  This
++is useful before integration but is explicitly labeled as not being a kernel
++check.
++
++%======================================================================
++\section{Expected build behavior}
++
++The repository permits earlier contender modules to be precompiled when timing
++a new entry.  Under that convention the definition phase imports
++\lean{Contender13}, adds one finite maximum, several small transparent
++recursors, and no new normalization proof.  The comparison phase is dominated
++by generic theorem instantiation and short inductions over natural tower
++levels.  Thus the design is intentionally conservative with respect to the
++15-second definition and 60-second proof budgets.
++
++The archive pins the same toolchain as the base repository:
++\[
++  \lean{leanprover/lean4:v4.34.0}.
++\]
++The intended commands after applying the overlay are
++\begin{lstlisting}[language={}]
++python3 scripts/check.py
++lake env lean test/Contender14Audit.lean
++\end{lstlisting}
++A successful run should be retained as a build receipt.  Because the execution
++environment used to create this archive had no Lean binary and could not fetch
++the 4.34.0 toolchain, this article does not claim a completed kernel build.
++That limitation is explicit rather than hidden behind a fabricated log.
++
++%======================================================================
++\section{Integration plan}
++
++The archive is an overlay, not a fork.  It contains
++\begin{itemize}
++  \item \lean{BusyLean/Contender14.lean};
++  \item \lean{BusyLean/Comparison14.lean};
++  \item \lean{test/Contender14Audit.lean};
++  \item an append block for the repository-wide audit;
++  \item scripts to copy the overlay and run checks;
++  \item a unified integration patch and documentation;
++  \item this \LaTeX{} article and compiled PDF.
++\end{itemize}
++
++The root module should import the two new modules after
++\lean{BusyLean.Comparison13}.  The timing script should set
++\begin{lstlisting}[language=Python]
++PREVIOUS = "BusyLean.Comparison13"
++CURRENT_DEF = "BusyLean.Contender14"
++\end{lstlisting}
++and the audit should add the declarations listed in the preceding section.
++
++%======================================================================
++\section{Risk assessment}
++
++\begin{longtable}{>{\raggedright\arraybackslash}p{0.27\textwidth}
++                  >{\raggedright\arraybackslash}p{0.28\textwidth}
++                  >{\raggedright\arraybackslash}p{0.36\textwidth}}
++\toprule
++Risk & Consequence & Mitigation \\
++\midrule
++\endhead
++Lean elaboration mismatch & Source needs a local syntactic repair. & The code
++copies theorem shapes already used by Comparisons 11--13 and minimizes tactic
++use.  Run the pinned checker before acceptance. \\
++Unexpected axiom dependency & Contest audit fails. & No new semantic theorem is
++introduced; all proofs use existing progressivity and elementary \lean{Nat}
++lemmas.  Explicit \lean{\#print axioms} entries are supplied. \\
++Definition budget regression & Entry violates timing rule. & No new object
++language or normalization proof; previous modules are precompiled by the
++contest's timing convention. \\
++No-laziness audit failure & Entry is inadmissible. & The executable module does
++not mention predecessor constants.  A transitive closure assertion is supplied. \\
++Overstated proof-theoretic size & Misleading research claim. & Only strict
++numeric and program bounds are theorem claims.  Ordinal discussion is labeled
++schematic. \\
++Oracle nonmonotonicity & Invalid comparison proof. & All inequalities use
++explicit progressivity; no oracle monotonicity is assumed. \\
++\bottomrule
++\end{longtable}
++
++%======================================================================
++\section{Alternative constructions considered}
++
++\subsection{\texorpdfstring{One operator stage over \Fd}{One operator stage over Fd}}
++The smallest natural successor would instantiate Contender~12's generic
++operator stage with family-aware \Fd\ reflection and seed it with
++\lean{family13}.  That already gives a large strict improvement.  The present
++proposal goes further by proving a strict feedback step and iterating that
++whole step through an input-indexed tower.
++
++\subsection{Fixed repeated reflection}
++One could iterate \lean{Fd.reflectFd} 42 times.  This is simple and formally
++large, but it collapses all child stages to a unary chain and fails to exploit
++the repository's family and operator infrastructure.  It also gives a much
++weaker structural explanation of the growth margin.
++
++\subsection{A dynamic-kind universe ladder}
++A hierarchy $\mathtt{dyn}_j$ would be a stronger base-language advance.  It is
++likely the most important next long-term direction.  It is not used here
++because a valid implementation requires a new normalization model and sound
++checker, not just syntax.  The current operator tower can later be re-based on
++such a language: replace \lean{fdFamilyTransformer} with the progressive
++reflector of the verified ladder while keeping the rest of the construction.
++
++\subsection{Large elimination and tree-returning programs}
++A calculus with inductive trees and large elimination could internalize the
++world/model bootstraps explored by earlier proposals.  This may eventually
++outgrow any amplifier over \Fd.  It is again a base-language research program,
++not a small safe overlay.
++
++%======================================================================
++\section{Further research questions}
++
++\begin{enumerate}[leftmargin=2.1em]
++  \item \textbf{Kernel-check and benchmark the overlay.}  Resolve any version-
++  specific elaboration issue, record clean definition/proof times, and preserve
++  complete axiom output.
++
++  \item \textbf{Formalize a generic strict meta-closure theorem.}  Abstract
++  \lean{towerStep} away from \lean{tree14} and prove reusable results for any
++  schedule and progressive transformer, including closed forms for finite
++  level chains.
++
++  \item \textbf{Prove stronger program bounds at every tower level.}  Track
++  not merely the base \Fd\ program maximum but programs relative to each
++  derived child family, with explicit embedding lemmas through
++  \lean{operatorStage}.
++
++  \item \textbf{Develop ordinal semantics for the raw autonomous trees.}
++  Define a quotient or simulation relation, prove monotonicity of \lean{add},
++  \lean{mul}, \lean{pow}, \lean{derivative}, and \lean{hyper}, and derive
++  certified lower bounds for \lean{tree12} and \lean{tree14}.
++
++  \item \textbf{Implement the dynamic-universe ladder.}  Add
++  $\mathtt{dyn}_0,\ldots,\mathtt{dyn}_{n-1}$ at syntax budget $n$, define the
++  level-indexed semantic dependent sums, and extend strong normalization and
++  inference soundness.  A diagonal reflector over this language should be the
++  next qualitative base jump.
++
++  \item \textbf{Universe-polymorphic compression.}  Investigate whether the
++  finite ladder can be represented by one level-indexed kind constructor while
++  preserving a decidable, predicative semantic model and fast elaboration.
++
++  \item \textbf{Tree-capable dynamic calculus.}  Combine dynamic kinds with
++  W-types or strictly positive inductives, prove normalization with large
++  elimination where sound, and expose generated trees to the reflection
++  schedule.
++
++  \item \textbf{Higher meta-types.}  Formalize certified progressive
++  transformers as a subtype and iterate the lift at the level
++  $(\Transformer\to\Transformer)$, then at higher finite meta-types.  Compare
++  this genuine type-level tower with the present same-type feedback tower.
++
++  \item \textbf{Minimality and redundancy.}  Determine which components of
++  \lean{tree14}, the seed iteration, and the feedback composition are needed
++  for the strongest formal lower bounds under the timing budget.
++
++  \item \textbf{Machine-checked no-laziness specification.}  Replace the
++  current blacklist with a positive provenance policy describing which
++  predecessor families and constructors may occur, and prove the policy stable
++  under refactoring.
++
++  \item \textbf{Independent normalization replay.}  Export the \Fd\ strong-
++  normalization dependency graph and replay its critical semantic lemmas in a
++  second small checker or a minimized Lean environment.
++
++  \item \textbf{Compare amplifier versus language jumps.}  Build a formal
++  embedding framework that can prove when an object-language extension
++  dominates any bounded number of reflection amplifiers over the old language.
++\end{enumerate}
++
++%======================================================================
++\section{Conclusion}
++
++The proposed Contender~14 is a direct, auditable successor to the current
++BusyLean architecture.  It avoids the prohibited shortcut of applying a fast
++function to the old constant.  Instead it upgrades the old reflector to a
++family oracle, performs autonomous operator reflection, feeds the result back
++as the next seed, and repeats the entire strict closure at an input-indexed
++number of levels.  The comparison theorem is elementary once the right
++invariant---progressivity---is isolated, but the number it certifies is
++extraordinarily large.
++
++The most informative exact certificate is not merely $C_{13}<C_{14}$ but
++\[
++  F_{13}^{44}(42)<F_{14}(42)<C_{14}.
++\]
++The full construction also dominates all bounded \Fd\ programs using the
++packed iterated seed family.  This makes the proposal a substantial
++construction-level advance while remaining small enough to audit and integrate.
++The remaining mandatory step is a clean Lean~4.34.0 kernel build in the base
++repository, using the supplied scripts and audit extensions.
++
++%======================================================================
++\appendix
++\section{Lean declaration inventory}
++
++\begin{longtable}{>{\ttfamily\raggedright\arraybackslash}p{0.39\textwidth}
++                  >{\raggedright\arraybackslash}p{0.53\textwidth}}
++\toprule
++\normalfont Declaration & Purpose \\
++\midrule
++\endhead
++reflectFdFamily & Family-aware \Fd\ reflector with a finite prefix maximum. \\
++fdFamilyTransformer & Base progressive transformer. \\
++tree14 & Autonomous schedule stacked above \lean{tree12}. \\
++towerStep & Feedback through a full operator-stage closure. \\
++operatorTower & Natural-number-indexed strict transformer tower. \\
++family13 & Predecessor construction as a function, not a constant. \\
++iterateF13 & Right-associated finite iteration of \lean{F13}. \\
++seed13 & Family of further \lean{F13} iterations. \\
++F14 & Input-indexed tower output. \\
++contender\_14 & Final closed natural number. \\
++lt\_reflectFdFamily & Generic maximum-to-reflector strict inequality. \\
++oracle\_lt\_reflectFdFamily & Visible family coordinate bound. \\
++fvalue\_lt\_reflectFdFamily & Bounded \Fd\ program bound. \\
++fdFamilyTransformer\_progressive & Base progressivity. \\
++transformer\_lt\_towerStep & Strict feedback-step theorem. \\
++towerStep\_progressive & Preservation of progressivity. \\
++operatorTower\_progressive & Invariant for every tower level. \\
++operatorTower\_level\_lt\_succ & Strict pointwise level chain. \\
++seed13\_lt\_F14 & Uniform visible-seed lower bound. \\
++fortyTwo\_F13\_steps\_lt\_F14 & Exact contest-input margin. \\
++contender\_13\_lt\_contender\_14 & Required comparison. \\
++fvalue\_lt\_contender\_14 & Outer-budget program domination. \\
++\bottomrule
++\end{longtable}
++
++\section{Reproduction checklist}
++
++\begin{enumerate}
++  \item Check out BusyLean commit
++  \lean{1ee50c7d97bbed57a60709f661453c3e213f4db3}.
++  \item Confirm \lean{lean-toolchain} contains
++  \lean{leanprover/lean4:v4.34.0}.
++  \item Run \texttt{scripts/apply\_overlay.sh\ /path/to/BusyLean} from this archive.
++  \item Append the supplied audit block to the repository audit.  Its path is
++        \path{patches/Audit14.append.lean}.  Alternatively, apply the unified
++        patch in \path{patches/integration.patch}.
++  \item Run \texttt{python3\ scripts/check.py}.
++  \item Run \texttt{lake\ env\ lean\ test/Contender14Audit.lean}.
++  \item Save stdout, wall-clock timings, Lean version, operating system, and
++        commit hash as the acceptance receipt.
++  \item Confirm the dependency-closure assertion excludes all predecessor
++        constants and that the printed axiom sets are permitted.
++\end{enumerate}
++
++\section{Artifact integrity}
++The archive includes \lean{SHA256SUMS.txt}, generated after PDF compilation and
++quality inspection.  The file \lean{artifacts/static\_audit.txt} records the
++preflight hashes of the two principal Lean modules.  The verification-status
++file distinguishes completed checks from checks that still require a pinned
++Lean installation.
++
++\begin{thebibliography}{9}
++\bibitem{BusyLean}
++V.~Reshetnikov,
++\emph{BusyLean: name the biggest number, in Lean}, GitHub repository,
++2026.  Base commit used here:
++\texttt{1ee50c7d97bbed57a60709f661453c3e213f4db3}.
++
++\bibitem{Roux}
++C.~Roux,
++\emph{name-the-biggest-number}, Coq contest repository.
++
++\bibitem{Aaronson}
++S.~Aaronson,
++\emph{Who Can Name the Bigger Number?}, expository essay.
++
++\bibitem{Girard}
++J.-Y.~Girard,
++\emph{Interpr\'etation fonctionnelle et \'elimination des coupures de
++l'arithm\'etique d'ordre sup\'erieur}, 1972.
++
++\bibitem{Tait}
++W.~W.~Tait,
++Intensional interpretations of functionals of finite type I,
++\emph{Journal of Symbolic Logic} 32 (1967), 198--212.
++\end{thebibliography}
++
++\end{document}

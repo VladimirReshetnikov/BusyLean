@@ -1,0 +1,6 @@
+PDF: /mnt/data/BusyLean_Contender14_DiagonalOperatorTower/article/contender14.pdf
+Pages: 22
+Encrypted: False
+Openable (PyMuPDF): True
+Likely scanned: False
+XFA present: False

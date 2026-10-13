@@ -1,0 +1,26 @@
+BusyLean Contender 14 validation timing
+=======================================
+
+Toolchain
+---------
+Lean 4.34.0 (x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b)
+Lake 5.0.0-src+293d5d0
+Runner: GitHub Actions ubuntu-24.04
+Validation commit: d408935e8a24da36709886bb08af3439765d05bf
+Workflow run: 38344636651
+
+Budget-faithful pass
+--------------------
+Previous accepted layer: lake build BusyLean.Comparison13 (unbudgeted)
+New definitions:        0.54 s (budget 15 s) -- PASS
+New proofs:             0.65 s (budget 60 s) -- PASS
+Source guard:           PASS
+Axiom and closure audit: PASS
+
+Full clean dependency pass (earlier run 38344464663)
+----------------------------------------------------
+Definitions through Contender14, including prior dependencies: 7.27 s
+Proofs through Comparison14, including prior dependencies:      3.24 s
+Audit: PASS
+
+The timings are machine-dependent, but both passes have wide margins.

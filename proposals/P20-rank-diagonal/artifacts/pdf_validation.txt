@@ -1,0 +1,47 @@
+PDF VALIDATION
+==============
+
+Status: PASS
+PDF: article/contender14.pdf
+Pages rendered: 23 at 120 DPI
+All rendered pages nonblank: yes
+Visual inspection: all-page contact sheet plus full-scale review of the title/status page,
+dependency graph, code-listing page transitions, comparison source, audit source, and references.
+Observed clipping/overlap/broken glyphs: none.
+
+pdfinfo summary:
+  Tagged:          no
+  Pages:           23
+  Encrypted:       no
+  Page size:       612 x 792 pts (letter)
+  File size:       478165 bytes
+  PDF version:     1.7
+
+Font report:
+  name                                 type              encoding         emb sub uni object ID
+  ------------------------------------ ----------------- ---------------- --- --- --- ---------
+  MZHPEB+LMRoman12-Bold                Type 1            Custom           yes yes yes    170  0
+  XLNCNQ+LMRoman12-Regular             Type 1            Custom           yes yes yes    171  0
+  OFICCI+LMMathItalic12-Regular        Type 1            Custom           yes yes yes    172  0
+  XQQKUY+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    173  0
+  AZSGAM+LMRoman10-Bold                Type 1            Custom           yes yes yes    174  0
+  QQKKRQ+LMRoman10-Regular             Type 1            Custom           yes yes yes    175  0
+  UCINBL+LMMathItalic7-Regular         Type 1            Custom           yes yes yes    176  0
+  KRNEZI+LMRoman10-Italic              Type 1            Custom           yes yes yes    177  0
+  EQLPGC+LMMono10-Regular              Type 1            Custom           yes yes yes    178  0
+  JCMNYY+LMRoman8-Regular              Type 1            Custom           yes yes yes    232  0
+  EAOUUG+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    238  0
+  QQKKRQ+LMRoman10-Regular             Type 1            Custom           yes yes yes    240  0
+  IUEUDB+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    241  0
+  VDYDBT+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    243  0
+  TMDUIO+LMSans10-Regular              Type 1            Custom           yes yes yes    254  0
+  TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    255  0
+  LTWTGU+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    277  0
+  WJZQNN+LMMono10-Italic               Type 1            Custom           yes yes yes    280  0
+  RGCFHB+LMRoman6-Regular              Type 1            Custom           yes yes yes    292  0
+  KHMVCW+DejaVuSans                    TrueType          WinAnsi          yes yes yes    297  0
+  UBVZQD+DejaVuSans                    CID TrueType      Identity-H       yes yes yes    298  0
+  NUNDCC+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    352  0
+  BXCOAN+LMMono9-Regular               Type 1            Custom           yes yes yes    382  0
+  PVXBGU+LMMathSymbols9-Regular        Type 1            Custom           yes yes yes    388  0
+  KCPAGP+LMMathItalic9-Regular         Type 1            Custom           yes yes yes    539  0

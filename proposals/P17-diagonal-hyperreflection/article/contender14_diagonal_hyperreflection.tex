@@ -1,0 +1,794 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{parskip}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!60!black,
+  pdftitle={Diagonal Hyperreflection over Dynamic-Kind System F-omega},
+  pdfauthor={Research memorandum for the BusyLean project}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{BusyLean Contender 14}
+\rhead{Diagonal hyperreflection}
+\cfoot{\thepage\ of \pageref{LastPage}}
+\setlength{\headheight}{14pt}
+
+\lstdefinelanguage{LeanSketch}{
+  morekeywords={def,theorem,abbrev,namespace,end,where,fun,match,with,if,then,else,by,exact,intro,have,show},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]"
+}
+\lstset{
+  language=LeanSketch,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\bfseries\color{blue!55!black},
+  commentstyle=\itshape\color{black!60},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  frame=single,
+  framerule=0.4pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  showstringspaces=false
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{design}[theorem]{Design invariant}
+
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Family}{\mathcal{F}}
+\newcommand{\Trans}{\mathcal{T}}
+\newcommand{\Lift}{\mathcal{L}}
+\newcommand{\Prog}{\mathsf{Prog}}
+\newcommand{\Strict}{\mathsf{Strict}}
+\newcommand{\stage}{\mathsf{Stage}}
+\newcommand{\diag}{\mathsf{D}}
+\newcommand{\Fd}{\mathsf{Fd}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{\textbf{Diagonal Hyperreflection over Dynamic-Kind System F$\boldsymbol{\omega}$}\\
+A Computable and Formally Dominating Contender 14 for BusyLean}
+\author{Research memorandum for the BusyLean project}
+\date{October 12, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We propose and formally implement a new BusyLean number, \code{contender\_14}, that strictly exceeds the repository's dynamic-kind \mbox{System F$\omega$} Contender 13.  The construction has two ingredients.  First, it upgrades the unary oracle of Contender 13 to a countable oracle family and packages dynamic-kind reflection as a progressive transformer.  Second, it introduces a \emph{diagonal hyperreflection hierarchy}: rank zero is the repository's autonomous transformer lift; at successor rank, the preceding rank is used both as the local lifting operation along a well-founded schedule and as a pre-amplification of the base transformer.  The rank and the schedule are themselves indexed by Contender 13's entire family, rather than by a fixed small numeral.
+
+The formal development proves more than the minimum contest comparison.  Every diagonal rank is progressive; every rank is strictly inflationary over its base; consecutive ranks are strictly increasing at every visible coordinate; every dynamic-kind program within the current syntax budget is below the resulting family; and finally
+\[
+  \texttt{contender\_13} < \texttt{contender\_14}.
+\]
+The comparison avoids the invalid assumption that reflection is monotone in its oracle.  Every inequality is instead witnessed by an explicit occurrence of a seed or child transformer.  The closed natural-number definition is structurally recursive and computable in principle.  Lean 4.34.0 validation succeeds, including the repository's time budgets, an axiom audit, a forbidden-construct scan, and a transitive-closure audit showing that no earlier contender constant occurs in the definition.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Executive summary}
+
+The current repository already contains a substantial ladder of formally verified large numbers.  Contender 12 applies operator-level reflection over kind-polymorphic System F$\omega$ along an explicit autonomous tree schedule.  Contender 13 then makes a qualitative language jump: it reflects a dynamic-kind extension of System F$\omega$ with a predicative universe of operators, type-level packing and unpacking, and two levels of kind quantification.  Contender 13 is therefore the correct baseline; a proposal aimed only at Contender 11 or 12 would already be obsolete.
+
+The new proposal exploits a gap between the two latest constructions.  Contender 13 has the strongest object language in the repository, but applies it only through one ordinary unary reflection step.  Contender 12 has the strongest generic amplifier, but its base language is weaker.  The first obvious idea is to put Contender 13's reflector into Contender 12's operator stage.  That is valid and already yields a larger number, but it leaves the amplification rank fixed.  The present proposal goes further: it iterates the \emph{lifting mechanism itself} through a hierarchy whose rank is larger than Contender 13's value at the same input.
+
+For input $n$, define
+\begin{align*}
+  \mathrm{family}_{13}(n) &:= F_{13}(F_{13}(n)),\\
+  r_{14}(n) &:= \mathrm{family}_{13}(n)+1,\\
+  S_{14}(n) &:= \operatorname{realize}\!\left(
+    \operatorname{hyper}_{\mathrm{family}_{13}(n)+42}
+    (\operatorname{encode}(\mathrm{tree}_{12}))\right).
+\end{align*}
+The final family is
+\[
+  F_{14}(n)
+  := \diag^{S_{14}(n)}_{r_{14}(n)}(R_{\Fd})
+       (\lambda i.\,\mathrm{family}_{13})(n,n),
+\]
+where $R_{\Fd}$ is countable-family reflection for dynamic-kind System F$\omega$ and $\diag^S_k$ is the new diagonal hierarchy of transformer lifts.  Finally,
+\[
+  \mathrm{contender}_{14}:=F_{14}(F_{14}(42)).
+\]
+
+The formal margin is substantial in four independent senses:
+\begin{enumerate}[label=(\roman*)]
+\item $F_{14}(n)$ exceeds the entire previous family at every input $n$;
+\item it exceeds the raw dynamic-kind family-reflection layer at every input;
+\item it exceeds every enumerated dynamic-kind program in the current syntax budget;
+\item it sits at the top of a pointwise strict chain of transformer ranks of length $\mathrm{family}_{13}(n)+1$.
+\end{enumerate}
+Only the first and a growth-in-input lemma are needed for the contest theorem.  The other results document why the construction is not merely a one-unit wrapper around the old number.
+
+\section{Repository baseline and design constraints}
+
+\subsection{The accepted ladder through Contender 13}
+
+The relevant recent stages are summarized in Table~\ref{tab:baseline}.  This table is a code-level description, not a claim of exact proof-theoretic ordinals.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{@{}p{0.12\textwidth}p{0.26\textwidth}p{0.52\textwidth}@{}}
+\toprule
+Stage & Main mechanism & Salient gain \\
+\midrule
+11 & Forest reflection over kind-polymorphic F$\omega$ & Applies the W-language tree amplifier to a stronger language. \\
+12 & Operator-level reflection plus an autonomous schedule & Lifts from families to transformers and iterates the lift along a Veblen-style tree syntax. \\
+13 & Dynamic-kind System F$\omega$ reflection & Adds a predicative universe of operators and two-level kind quantification, but only one ordinary reflection layer. \\
+14 & Input-indexed diagonal hyperreflection over dynamic-kind family reflection & Iterates the transformer-lifting mechanism at a previous-family-sized rank and schedule. \\
+\bottomrule
+\end{tabular}
+\caption{The local design trajectory.}
+\label{tab:baseline}
+\end{table}
+
+The word ``reflection'' here is operational: a finite syntax enumeration is type checked, normalized by a total Lean function justified by a strong-normalization theorem, decoded as a natural number, and bounded by a new natural number.  It is related in spirit to proof-theoretic reflection and ordinal iteration, but the formal object in BusyLean is a concrete computable bound, not an abstract consistency principle.
+
+\subsection{Contest constraints}
+
+The implementation was designed against the repository's explicit rules:
+\begin{enumerate}
+\item The entry must be a closed, constructive \code{Nat}.  It may use no Busy Beaver or undecidable oracle and no nontermination, foreign primitive, or opaque stand-in.
+\item The comparison with the preceding entry must be a Lean theorem.
+\item Only the already permitted axioms \code{propext} and \code{Quot.sound} may occur in the transitive dependency closure.
+\item The new definition and proof layers must fit the stated 15-second and 60-second budgets after earlier accepted modules are precompiled.
+\item The definition may reuse the preceding construction as a family, but must not directly insert the constant \code{contender\_13} and add a trivial amount.
+\item No monotonicity of reflection in its oracle may be assumed.  Such monotonicity is generally false because reflected programs can inspect an oracle result and branch on it.
+\end{enumerate}
+
+The sixth point is mathematically important.  Many apparently natural hierarchy proofs silently require
+\[
+  f\le g \quad\Longrightarrow\quad \operatorname{Reflect}(f,n)
+  \le \operatorname{Reflect}(g,n),
+\]
+but an object-language program may return a huge value when the oracle is even and a small value when it is odd.  Increasing the oracle pointwise can therefore lower a program value.  The repository's sound comparison style is instead \emph{occurrence based}: arrange for the smaller quantity to appear literally among the values bounded by the larger reflection step.  The present development follows that discipline throughout.
+
+\section{Families, transformers, and progressivity}
+
+A BusyLean oracle family is a function
+\[
+  \Family := \Nat\to\Nat\to\Nat.
+\]
+The first argument names an oracle coordinate; the second is the ordinary numeric input.  A transformer is
+\[
+  \Trans := \Family\to\Family.
+\]
+Thus a transformer accepts a countable family and returns a countable family.
+
+The key order property is \emph{progressivity}.
+
+\begin{definition}[Progressive transformer]
+A transformer $T$ is progressive when
+\[
+ \Prog(T) :\Longleftrightarrow
+ \forall s\in\Family\;\forall i,o,n\in\Nat,
+ \quad i\le n \Longrightarrow s(i,n)<T(s)(o,n).
+\]
+\end{definition}
+
+The output coordinate $o$ is arbitrary.  The input coordinate $i$ need only be visible in the finite prefix $i\le n$.  This matches the finite maximum built into the reflection operation and is strong enough to follow explicit child coordinates through the universal W-tree.
+
+The repository already provides:
+\begin{itemize}
+\item \code{spliceTransformers}, which combines a countable family of transformers by selecting one at each output coordinate;
+\item \code{runTransformer}, which iterates a transformer along a well-founded W-tree;
+\item \code{liftTransformer}, which runs a transformer along the universal index tree;
+\item proofs that autonomous lifting preserves progressivity and strictly exceeds its input transformer at every visible coordinate.
+\end{itemize}
+
+Those facts are the reusable foundation for the new hierarchy.
+
+\section{A generic stage for arbitrary transformer lifts}
+
+The existing operator stage hard-codes \code{liftTransformer}.  To iterate lifting itself, one first abstracts over the local lift.
+
+\begin{definition}[Transformer lift]
+A transformer lift is an endomap on transformers:
+\[
+  \Lift := \Trans\to\Trans.
+\]
+\end{definition}
+
+For $L\in\Lift$, base transformer $B$, and well-founded schedule $a$, define
+\[
+\stage(L,B,\mathsf{leaf}) := L(B),
+\]
+and
+\[
+\stage(L,B,\mathsf{node}(f))
+ :=L\!\left(\operatorname{splice}
+       \bigl(i\mapsto\stage(L,B,f(i))\bigr)\right).
+\]
+The corresponding Lean definition is only six lines:
+
+\begin{lstlisting}[caption={Schematic ASCII rendering of \texttt{stageLift}.}]
+abbrev TransformerLift := Transformer -> Transformer
+
+def stageLift (lift : TransformerLift) (base : Transformer) :
+    WTree Nat -> Transformer
+  | .leaf   => lift base
+  | .node f =>
+      lift (spliceTransformers (fun i => stageLift lift base (f i)))
+\end{lstlisting}
+
+This is structural recursion on the W-tree.  It is therefore executable and does not rely on an accessibility proof hidden behind an opaque definition.  The old \code{operatorStage} is recovered by specializing $L$ to \code{liftTransformer}.
+
+Two predicates on lifts drive all later proofs.
+
+\begin{definition}[Preservation and strict inflation]
+For $L\in\Lift$, let
+\begin{align*}
+ \mathsf{Pres}(L)
+  &:\Longleftrightarrow \forall B,\;\Prog(B)\Rightarrow\Prog(L(B)),\\
+ \Strict(L)
+  &:\Longleftrightarrow \forall B,\;\Prog(B)\Rightarrow
+     \forall s,i,o,n,\;i\le n\Rightarrow B(s)(i,n)<L(B)(s)(o,n).
+\end{align*}
+\end{definition}
+
+The repository's autonomous lift has both properties.  The new generic theorem is that a stage over a preserving lift remains progressive.
+
+\begin{theorem}[Stage progressivity]
+If $L$ preserves progressive transformers and $B$ is progressive, then
+\[
+  \Prog(\stage(L,B,a))
+\]
+for every well-founded schedule $a$.
+\end{theorem}
+
+\begin{proof}[Proof architecture]
+Induct on $a$.  The leaf case is exactly preservation.  At a node, the induction hypothesis makes every child stage progressive.  Splicing progressive child transformers is progressive, and one more application of preservation finishes the node case.  This is formalized as \path{stageLift_progressive}.
+\end{proof}
+
+The strict counterpart is more delicate because there is no monotonicity assumption.
+
+\begin{theorem}[Base occurs strictly below every stage]
+Suppose $L$ preserves progressivity and is strictly inflationary, and $B$ is progressive.  Then for every schedule $a$, seed $s$, coordinates $i,o$, and input $n$,
+\[
+  i\le n\quad\Longrightarrow\quad
+  B(s)(i,n)<\stage(L,B,a)(s)(o,n).
+\]
+\end{theorem}
+
+\begin{proof}[Explicit-occurrence proof]
+At a leaf, strict inflation is exactly the desired statement.  At a node $\mathsf{node}(f)$, follow child zero.  By induction,
+\[
+ B(s)(i,n)<\stage(L,B,f(0))(s)(0,n).
+\]
+The right side is definitionally coordinate zero of the spliced child transformer.  Since the splice is progressive, strict inflation of $L$ places that coordinate below the parent.  Transitivity completes the proof.  No comparison between different oracle families is used.
+\end{proof}
+
+In Lean this theorem is \path{base_lt_stageLift}.  It is the principal engine behind the diagonal hierarchy.
+
+\section{The diagonal hyperreflection hierarchy}
+
+Fix a schedule $S$.  Define a hierarchy of lifts $\diag^S_k$ by
+\begin{align*}
+ \diag^S_0(B)&:=\operatorname{liftTransformer}(B),\\
+ \diag^S_{k+1}(B)&:=
+   \stage\bigl(\diag^S_k,\,\diag^S_k(B),\,S\bigr).
+\end{align*}
+The Lean implementation is again direct structural recursion, now on $k$:
+
+\begin{lstlisting}[caption={The diagonal hierarchy.}]
+def diagonalLift (schedule : WTree Nat) : Nat -> TransformerLift
+  | 0, base => liftTransformer base
+  | k + 1, base =>
+      stageLift (diagonalLift schedule k)
+        (diagonalLift schedule k base) schedule
+\end{lstlisting}
+
+The successor clause contains the preceding rank in two roles:
+\begin{enumerate}
+\item \emph{extensionally}, as the local lift at every node of the schedule;
+\item \emph{intensionally}, as the first amplification of the base transformer before the schedule traversal begins.
+\end{enumerate}
+This is why the construction is called diagonal hyperreflection rather than plain finite iteration.  It is not simply $L^{k}(B)$ for a fixed endomap $L$; the operator used at stage $k+1$ is itself the entire rank-$k$ hierarchy.
+
+\subsection{Formal rank theorems}
+
+The generic facts imply two simultaneous inductions.
+
+\begin{theorem}[Every rank preserves progressivity]
+For every schedule $S$ and $k\in\Nat$,
+\[
+  \mathsf{Pres}(\diag^S_k).
+\]
+\end{theorem}
+
+\begin{theorem}[Every rank is strictly inflationary]
+For every schedule $S$ and $k\in\Nat$,
+\[
+  \Strict(\diag^S_k).
+\]
+\end{theorem}
+
+At rank zero these are the existing theorems for \code{liftTransformer}.  At a successor rank, progressivity follows from stage progressivity.  Strict inflation first inserts the base below $\diag^S_k(B)$ and then inserts $\diag^S_k(B)$ below the stage built over it.  The proof again uses explicit occurrences and transitivity.
+
+The more informative comparison is rank-to-rank.
+
+\begin{theorem}[Strict rank growth]
+Let $B$ be progressive.  For every $S,k,s,i,o,n$ with $i\le n$,
+\[
+  \diag^S_k(B)(s)(i,n)
+  <\diag^S_{k+1}(B)(s)(o,n).
+\]
+\end{theorem}
+
+This is the theorem \path{diagonalLift_rank_lt_succ}.  It certifies an actual pointwise strict hierarchy, not merely a family of syntactically different definitions.  In the final contender, $k$ ranges through all naturals below a number already larger than the preceding contender's family value.
+
+\section{Dynamic-kind reflection over a countable family}
+
+Contender 13's reflector accepts a unary oracle $f:\Nat\to\Nat$.  Operator-level amplification requires a countable family.  The repository already has an injective packing convention \code{packFamily} that presents a family $s(i,m)$ through one unary input.  The new reflector is
+\[
+ R_{\Fd}(s,n):=
+ n+1+\max\!\left(
+   \max_{i\le n}s(i,n),
+   \max_{t\in\operatorname{CTm}_{\le n}}
+     \operatorname{val}_{\Fd}(\operatorname{pack}(s),n,t)
+ \right).
+\]
+The actual Lean definition uses the repository's \code{prefixMax}, \code{maximum}, and \code{maxN} functions:
+
+\begin{lstlisting}[caption={Dynamic-kind reflection with a family oracle.}]
+def reflectFdFamily (fs : Family) (n : Nat) : Nat :=
+  n + 1 + maxN (prefixMax (fun i => fs i n) n)
+    (maximum (Fd.fvalue (packFamily fs) n) (Fd.ctmsUpTo n))
+
+def fdFamilyTransformer : Transformer :=
+  fun fs _ n => reflectFdFamily fs n
+\end{lstlisting}
+
+The visible prefix maximum is not redundant.  Although every coordinate can in principle be reached through the packed unary oracle, an object-language enumeration theorem would require exhibiting a particular accessor program.  The prefix maximum gives an immediate, syntax-independent inequality
+\[
+  i\le n\Longrightarrow s(i,n)<R_{\Fd}(s,n),
+\]
+which is exactly the \code{Progressive} contract needed by the generic hierarchy.
+
+The second maximum gives the language domination theorem:
+\[
+ t\in\operatorname{CTm}_{\le n}
+ \Longrightarrow
+ \operatorname{val}_{\Fd}(\operatorname{pack}(s),n,t)<R_{\Fd}(s,n).
+\]
+Strong normalization of the dynamic-kind calculus makes \code{fvalue} total; the new layer does not add any new object-language reduction rule or consistency assumption.
+
+\section{Definition of Contender 14}
+
+\subsection{Previous construction as a family}
+
+As required by the contest's non-laziness rule, the new definition does not mention the closed constant \code{contender\_13}.  It reuses the preceding \emph{construction}:
+\[
+  \mathrm{family}_{13}(n):=F_{13}(F_{13}(n)).
+\]
+Consequently, by definitional equality,
+\[
+  \mathrm{family}_{13}(42)=\mathrm{contender}_{13},
+\]
+but the constant itself is absent from the transitive closure of the new definition.  This is checked mechanically rather than trusted as a textual convention.
+
+\subsection{Input-dependent schedule and rank}
+
+The schedule is
+\[
+ S_{14}(n):=\operatorname{realize}\!\left(
+   \operatorname{hyper}_{\mathrm{family}_{13}(n)+42}
+    (\operatorname{encode}(\mathrm{tree}_{12}))
+ \right).
+\]
+The repository's \code{Autonomous.OTree} is transparent syntax for countably branching well-founded trees.  Its operations mimic ordinal addition, multiplication, exponentiation, derivatives, common critical closures, and higher derivatives.  The implementation deliberately does not quotient this syntax by ordinal equality.  Therefore the article makes no theorem that $S_{14}(n)$ denotes a particular named ordinal.  What is formal is that it is a well-founded executable schedule built by structural recursion, and that every node supplies explicit child occurrences used by the inequality proofs.
+
+The rank is
+\[
+ r_{14}(n):=\mathrm{family}_{13}(n)+1.
+\]
+Both schedule complexity and diagonal rank therefore grow with the previous family.  A fixed ``42 levels'' construction would be much weaker as a design: it would add a fixed meta-level above an already enormous language.  Here the number of strict rank transitions is itself beyond the preceding family value at the same input.
+
+\subsection{Final family and number}
+
+The central definitions are:
+
+\begin{lstlisting}[caption={Contender 14, schematic ASCII rendering.}]
+def family13 (n : Nat) : Nat := F13 (F13 n)
+
+def schedule14 (n : Nat) : WTree Nat :=
+  Autonomous.realize
+    (Autonomous.hyper (family13 n + 42)
+      (Autonomous.encode tree12))
+
+def rank14 (n : Nat) : Nat := family13 n + 1
+
+def F14 (n : Nat) : Nat :=
+  diagonalLift (schedule14 n) (rank14 n) fdFamilyTransformer
+    (fun _ => family13) n n
+
+def contender_14 : Nat := F14 (F14 42)
+\end{lstlisting}
+
+Every recursion visible here or in its dependencies is structural: finite list enumeration, strongly normalizing term evaluation, W-tree recursion, OTree recursion, and natural-number recursion.  The definition is a closed \code{Nat} and is computable in the ordinary intensional sense.  As with every serious BusyLean contender, attempting to normalize the final numeral is physically infeasible and should never be done.
+
+\section{Formal comparison and domination results}
+
+\subsection{The previous family is below the new family}
+
+The final transformer is progressive, because the base transformer is progressive and every diagonal rank preserves progressivity.  Instantiating progressivity with coordinate zero of the constant seed family gives:
+
+\begin{theorem}[Pointwise family domination]
+For every $n\in\Nat$,
+\[
+  \mathrm{family}_{13}(n)<F_{14}(n).
+\]
+\end{theorem}
+
+This is \path{family13_lt_F14}.  It is the most direct formal statement that the new construction amplifies the previous one at every input, not only at the distinguished input $42$.
+
+\subsection{Raw dynamic-kind reflection is below the hyperreflection layer}
+
+Strict inflation of every diagonal rank yields:
+
+\begin{theorem}[Raw reflection margin]
+For every $n$,
+\[
+ R_{\Fd}(\lambda i.\,\mathrm{family}_{13},n)<F_{14}(n).
+\]
+\end{theorem}
+
+Thus the diagonal layer is formally above an entire dynamic-kind reflection step applied to the previous family.  This rules out the interpretation that the new result is only the old family plus an administrative wrapper.
+
+\subsection{\texorpdfstring{Every enumerated dynamic-kind program is below $F_{14}$}{Every enumerated dynamic-kind program is below F14}}
+
+Combining program domination by $R_{\Fd}$ with the raw-reflection margin gives:
+
+\begin{theorem}[Program domination]
+For every $n$ and every dynamic-kind Church term $t$ in the depth-$n$ enumeration,
+\[
+  \operatorname{fvalue}_{\Fd}
+    (\operatorname{packFamily}(\lambda i.\mathrm{family}_{13}),n,t)
+  <F_{14}(n).
+\]
+\end{theorem}
+
+The formal name is \path{fvalue_lt_F14}.  The theorem applies to the same soundly type-checked and strongly normalizing language used by Contender 13, but with access to the whole previous family through the packed oracle.
+
+\subsection{The required contender comparison}
+
+The reflector contains $n+1$, so $F_{13}(n)>n$; applying this twice shows $\mathrm{family}_{13}(n)>n$.  Pointwise family domination then gives $F_{14}(n)>n$.  At $n=42$,
+\[
+ \mathrm{contender}_{13}
+ =\mathrm{family}_{13}(42)
+ <F_{14}(42)
+ <F_{14}(F_{14}(42))
+ =\mathrm{contender}_{14}.
+\]
+Lean checks exactly this transitive chain:
+
+\begin{theorem}[Required contest theorem]
+\[
+  \texttt{contender\_13}<\texttt{contender\_14}.
+\]
+\end{theorem}
+
+The theorem is \path{contender_13_lt_contender_14}.  Combining it with the accepted comparison for Contender 13 gives \code{contender\_12\_lt\_contender\_14}, and transitivity extends to the entire preceding ladder.
+
+\section{Why the gain is structurally significant}
+
+The phrase ``significantly exceeds'' should be supported by theorem structure, not rhetoric.  Four features distinguish the proposal from a trivial successor construction.
+
+\subsection{A previous-family-sized strict rank chain}
+
+At input $n$, the chosen rank is $\mathrm{family}_{13}(n)+1$.  The theorem \path{fdDiagonal_rank_lt_succ} says that every adjacent pair of ranks is strictly ordered at every visible coordinate.  Hence the final rank is reached only after a formally certified sequence of strict transformer amplifications indexed by all $k<\mathrm{family}_{13}(n)+1$.
+
+The development does not materialize this chain as a list---doing so would be gratuitously expensive and unnecessary.  The universally quantified rank theorem is stronger: any desired adjacent comparison is obtained by instantiation.
+
+\subsection{Two uses of the preceding rank at each successor}
+
+The successor equation
+\[
+ \diag^S_{k+1}(B)
+ =\stage(\diag^S_k,\diag^S_k(B),S)
+\]
+uses rank $k$ as both operator and base amplification.  This is qualitatively different from repeating a single fixed function.  Each level changes the language of lifting available at every node of the schedule.
+
+\subsection{Countable-family access at the strongest language level}
+
+Contender 13's dynamic-kind programs receive a unary oracle.  The new reflector packs a countable family into that oracle, while also retaining an explicit prefix maximum for unconditional progressivity.  Thus each local reflection node can dynamically access values derived from different children and coordinates, rather than receiving only one frozen predecessor value.
+
+\subsection{Schedule growth is also previous-family indexed}
+
+The schedule is not fixed at \code{tree12}.  It applies a number of higher-derivative constructors equal to $\mathrm{family}_{13}(n)+42$ above the encoding of that existing operator schedule.  This second diagonalization is intentionally separated from the rank diagonalization: even a skeptical reader who assigns no ordinal semantics to \code{Autonomous.hyper} still has the rank theorem; a reader interested in ordinal-style schedules can study the additional tree growth independently.
+
+\section{Computability, constructivity, and axiom profile}
+
+\subsection{Computable in principle}
+
+There are two notions that must not be conflated:
+\begin{description}
+\item[Computability.] A finite program determines the unique natural number and could, given unbounded time and storage, evaluate it.
+\item[Feasible evaluation.] The value can be materialized by current or physically possible hardware.
+\end{description}
+The first holds; the second emphatically does not.  BusyLean is a largest-number contest, so infeasibility is expected.  The relevant formal facts are that the definition is closed, total, structurally recursive, and free of semantic oracles such as a halting predicate.
+
+Dynamic-kind program evaluation is total because the repository proves strong normalization and supplies a total normalizer over a term paired with its normalization certificate.  Proof terms are computationally irrelevant to the decoded natural number.  The new meta-level hierarchy adds only primitive structural recursion over natural numbers and well-founded inductive trees.
+
+\subsection{Axiom audit}
+
+Lean reports:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Declaration & Reported axioms \\
+\midrule
+\code{contender\_14} & \code{[propext, Quot.sound]} \\
+\path{contender_13_lt_contender_14} & \code{[propext, Quot.sound]} \\
+\path{family13_lt_F14} & \code{[propext, Quot.sound]} \\
+\path{fvalue_lt_F14} & \code{[propext, Quot.sound]} \\
+\path{diagonalLift_rank_lt_succ} & \code{[propext]} \\
+\bottomrule
+\end{tabular}
+\end{center}
+These are exactly within the repository's allowed set.  No new axiom is introduced by diagonal hyperreflection.
+
+\subsection{Closure audit}
+
+A custom Lean command traverses every constant occurring in the type and value of \code{contender\_14}, recursively following definitions and theorems.  The validated audit states that the closure avoids all nine constants
+\[
+ \texttt{contender\_5},\ldots,\texttt{contender\_13}.
+\]
+The definition legitimately depends on prior \emph{families}, interpreters, normalizers, and schedules.  What it does not do is insert a previously computed winner as an opaque seed.
+
+\subsection{Forbidden-construct scan}
+
+The validation workflow rejects the following constructs in the four new definition/proof modules:
+\begin{center}
+\small\path{noncomputable}, \path{partial}, \path{unsafe}, \path{opaque}, \path{implemented_by}, \path{extern}, \path{native_decide}, \path{sorryAx}, and \path{Classical.choice}.
+\end{center}
+This textual guard is not a substitute for the kernel or axiom audit, but it catches common ways a superficially total definition can evade the intended contest rules.
+
+\section{Machine validation}
+
+The implementation was checked from a clean Ubuntu 24.04 GitHub Actions runner with Lean 4.34.0 and Lake 5.0.0.  Two passes were used.
+
+\subsection{Full clean dependency pass}
+
+The first pass built all definition dependencies through Contender 14 and then all proof dependencies through Comparison 14:
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Phase & Measured time & Budget \\
+\midrule
+Definitions, including all prior definition dependencies & 7.27 s & 15 s \\
+Proofs, including all prior proof dependencies & 3.24 s & 60 s \\
+Axiom/smoke audit & passed & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+This is stronger than the repository's incremental rule because the measured phases included substantial accepted history.
+
+\subsection{Budget-faithful cached pass}
+
+The final workflow first builds \code{BusyLean.Comparison13} as the already accepted predecessor, then times only the new definition and proof layers.  The validated results are:
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Phase & Measured time & Budget \\
+\midrule
+New definition layer & 0.54 s & 15 s \\
+New proof layer & 0.65 s & 60 s \\
+Source guard & passed & --- \\
+Axiom and closure audit & passed & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+Timing is inherently machine dependent, but the margin is large enough that ordinary runner variation is immaterial.
+
+The validated branch is \code{research/contender14-diagonal-hyperreflection}; the final validation commit is \code{d408935e8a24da36709886bb08af3439765d05bf}.  The default branch was not modified.
+
+\section{Proof-theoretic interpretation: what is and is not claimed}
+
+Transfinite iteration, Veblen progressions, and reflection hierarchies are standard tools for organizing proof-theoretic strength.  Hyperations provide canonical transfinite iterations of normal ordinal functions and refine Veblen progressions \cite{fernandezduque-joosten}.  Reflection ranks can coincide with proof-theoretic ordinals in appropriate settings \cite{pakhomov-walsh}.  These themes motivate the terminology and schedule design.
+
+However, the BusyLean construction differs from those mathematical frameworks in important ways:
+\begin{enumerate}
+\item A reflected program can branch on oracle values, so the reflection transformer is not generally monotone in its oracle.
+\item \code{Autonomous.OTree} is raw syntax for trees, not a quotient with a proved ordinal interpretation.
+\item The diagonal hierarchy acts on concrete bounding transformers, not on theories ordered by consistency or on normal ordinal functions.
+\item No theorem in the present development identifies \code{contender\_14} with a fast-growing hierarchy value at a named ordinal.
+\end{enumerate}
+
+Accordingly, any ordinal description is heuristic.  One may reasonably view the construction as adding a previous-family-sized hierarchy of meta-reflection operators above a dynamic-kind language, with a second previous-family-sized expansion of the scheduling syntax.  It would be unjustified to print an exact ordinal label without first formalizing a semantic interpretation, a well-ordering theorem for the schedule notation, and a correspondence theorem between that interpretation and the numerical reflector.
+
+This conservative stance is a strength, not a weakness.  The numerical comparison is fully formal and does not depend on speculative ordinal calibration.  The heuristic layer is isolated as a research program.
+
+\section{Threats to validity and adversarial review}
+
+\subsection{Could the definition hide the previous contender?}
+No.  The transitive closure audit rejects every earlier contender constant.  The equality \(\mathrm{family}_{13}(42)=\mathrm{contender}_{13}\) follows because both unfold to the same construction, not because the new definition references the constant.
+
+\subsection{Does the comparison rely on oracle monotonicity?}
+No.  The proof of \path{base_lt_stageLift} explicitly follows child zero into a splice and then applies strict inflation to that concrete coordinate.  Every later inequality reduces to this occurrence argument.
+
+\subsection{Is \code{Autonomous.hyper} semantically overclaimed?}
+No.  The code and article describe it as tree syntax inspired by ordinal operations.  The contender theorem uses only structural recursion and progressivity.  Even if two syntactically different trees represented the same ordinal under a future quotient, the Lean inequalities proved here would remain valid.
+
+\subsection{Does the huge rank cause nontermination of the definition checker?}
+No.  Lean checks a structurally recursive equation once; it does not evaluate \code{rank14 42}.  At runtime, evaluation terminates in principle because recursion decreases a natural-number argument.  Kernel checking and numeral evaluation are distinct tasks.
+
+\subsection{Is the family reflector merely adding the seed by a maximum?}
+The prefix maximum is deliberately present to establish progressivity, but the final family is not just that maximum.  It also bounds every dynamic-kind program and then enters a diagonal hierarchy whose each rank is a strict transformer amplification.  The theorem \path{raw_reflection_lt_F14} isolates this extra margin.
+
+\subsection{Could the proof be vacuous because the term enumeration is empty?}
+No.  The family domination and rank-growth theorems do not depend on the presence of any program in the enumeration.  Program domination is an additional theorem.  Moreover, the inherited enumerator contains ordinary variables, lambda terms, applications, type and kind abstractions/applications, packing constructs, and the oracle term at positive depth.
+
+\subsection{Are allowed axioms used computationally?}
+The reported axioms occur in semantic normalization infrastructure and extensional equality reasoning.  They do not supply a noncomputable natural-number oracle.  This matches the repository's existing accepted policy.
+
+\section{Integration plan}
+
+The archive is organized as an overlay rather than a replacement repository.  The four new modules should be copied into \code{BusyLean/}:
+\begin{enumerate}
+\item \code{HyperReflection.lean};
+\item \code{HyperReflectionFacts.lean};
+\item \code{Contender14.lean};
+\item \code{Comparison14.lean}.
+\end{enumerate}
+Then append imports for those modules to \code{BusyLean.lean}, copy \code{test/Contender14Audit.lean}, and optionally install the included validation workflow.  The integration directory contains a script and patch snippets.
+
+A repository maintainer may also update the global \code{scripts/check.py} constants from Contender 13 to Contender 14 and merge the new axiom/closure lines into \code{test/Audit.lean}.  Those edits are intentionally supplied as integration artifacts rather than silently applied to the default branch.
+
+The recommended commands are:
+\begin{lstlisting}[language={},caption={Reproduction commands after applying the overlay.}]
+lake build BusyLean.Comparison13
+/usr/bin/time -f '%e' lake build BusyLean.Contender14
+/usr/bin/time -f '%e' lake build BusyLean.Comparison14
+lake env lean test/Contender14Audit.lean
+\end{lstlisting}
+Never run \code{\#eval BusyLean.contender\_14}.
+
+\section{Further research questions}
+
+The present result opens several concrete directions.
+
+\subsection{Semantic calibration of diagonal hyperreflection}
+Construct a monotone surrogate semantics that records only explicit occurrence dependencies, then assign ordinal diagrams to \code{stageLift} and \code{diagonalLift}.  The central challenge is to account for branching oracle programs without falsely treating reflection as pointwise monotone.
+
+\subsection{Transfinite rather than natural rank syntax}
+Replace the natural rank $k$ with a W-tree-indexed or OTree-indexed recursion on transformer lifts.  A serious version should include a generic progressivity/strictness theorem and a well-founded recursor whose computational content remains transparent.  This could yield a genuine autonomous meta-meta-reflection closure rather than a previous-family-sized finite rank.
+
+\subsection{Internalizing family access in the object language}
+At present the countable family is encoded through a unary pairing function.  Extend dynamic-kind System F$\omega$ with a typed family oracle or a tree-valued oracle, prove strong normalization, and show that family selection is represented directly.  This may remove packing overhead and expose richer dynamic scheduling to reflected programs.
+
+\subsection{A predicative ladder of dynamic kinds}
+Contender 13 has one distinguished \code{dyn} kind containing all dyn-free operators.  Introduce \code{dyn 0}, \code{dyn 1}, $\ldots$, where each level may package operators over lower levels but not itself.  Prove normalization uniformly and diagonalize over the level index.  This would be a language-level advance rather than solely an amplifier advance.
+
+\subsection{Large elimination with realizability}
+The repository's roadmap points toward dependently typed languages with large elimination.  A realizability model that permits natural-number data to select types or kinds at runtime could produce a more qualitative jump than further fixed-language reflection.  The main deliverable would need to be a kernel-checked total interpreter and sound checker, not only a proposed syntax.
+
+\subsection{Compression and kernel performance}
+The current definitions check quickly, but future contenders may hit elaboration or reduction bottlenecks before mathematical limits.  Study defunctionalized transformer codes, proof irrelevance boundaries, and generated recursion lemmas that reduce kernel term size without weakening transparency.
+
+\subsection{Formal contest dominance beyond the immediate predecessor}
+Build a generic theorem that, given a chain of family equalities and pointwise inequalities, automatically derives domination over every earlier contender.  This would reduce repetitive comparison modules and make audit obligations more declarative.
+
+\subsection{Independent mechanization}
+Port the generic diagonal hierarchy to another proof assistant or to a small verified kernel model.  Agreement would be valuable evidence that no Lean-specific elaboration feature is carrying hidden mathematical content.
+
+\section{Conclusion}
+
+Contender 14 combines the repository's strongest language with a new, input-indexed hierarchy of reflection operators.  Its central recursion is concise, but the comparison is not superficial: the development proves progressivity, strict inflation, adjacent-rank growth, raw-reflection domination, program domination, pointwise domination of the entire previous family, and the required closed-number inequality.  The proof deliberately avoids oracle monotonicity and instead tracks explicit occurrences through spliced child transformers.
+
+The result is constructive, computable in principle, within the permitted axiom set, below the time budgets by a wide margin, and free of direct dependencies on earlier contender constants.  It is therefore suitable as a serious candidate for integration into BusyLean.  Its most important conceptual contribution is reusable: \emph{reflection can be lifted not only from functions to families and from families to transformers, but into a strictly growing hierarchy of the lifting operations themselves}.
+
+\appendix
+\section{Formal theorem inventory}
+
+\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.39\textwidth}>{\raggedright\arraybackslash}p{0.53\textwidth}@{}}
+\toprule
+Lean declaration & Mathematical role \\
+\midrule
+\endfirsthead
+\toprule
+Lean declaration & Mathematical role \\
+\midrule
+\endhead
+\path{stageLift_progressive} & A schedule built with a progressivity-preserving lift is progressive. \\
+\path{base_lt_stageLift} & A strict preserving lift places the base below every scheduled stage. \\
+\path{diagonalLift_preservesProgressive} & Every diagonal rank preserves progressivity. \\
+\path{diagonalLift_strictlyInflationary} & Every diagonal rank strictly exceeds its original base. \\
+\path{diagonalLift_rank_lt_succ} & Consecutive diagonal ranks are pointwise strictly increasing. \\
+\path{oracle_lt_reflectFdFamily} & Every visible oracle-family coordinate is below family reflection. \\
+\path{fvalue_lt_reflectFdFamily} & Every enumerated dynamic-kind program is below family reflection. \\
+\path{fdFamilyTransformer_progressive} & Dynamic-kind family reflection satisfies the generic contract. \\
+\path{fdTransformer_lt_diagonal} & Every diagonal rank exceeds raw family reflection. \\
+\path{fdDiagonal_rank_lt_succ} & The concrete dynamic-kind hierarchy has strict adjacent ranks. \\
+\path{family13_lt_F14} & The previous construction is dominated at every input. \\
+\path{raw_reflection_lt_F14} & A whole dynamic-kind reflection layer lies below $F_{14}$. \\
+\path{fvalue_lt_F14} & All current-budget dynamic-kind programs lie below $F_{14}$. \\
+\path{input_lt_F14} & $F_{14}$ grows past its numeric input. \\
+\path{contender_13_lt_contender_14} & Required contest comparison. \\
+\bottomrule
+\end{longtable}
+
+\section{Artifact map}
+
+\begin{description}
+\item[\code{article/}] LaTeX source and compiled PDF.
+\item[\code{overlay/BusyLean/}] Four Lean modules implementing the construction and proofs.
+\item[\code{overlay/test/}] Axiom, closure, theorem-signature, and small execution audit.
+\item[\code{overlay/.github/workflows/}] Reproducible Lean 4.34.0 validation workflow.
+\item[\code{integration/}] Application script, import patch, check-script guidance, and maintainer notes.
+\item[\code{validation/}] Machine logs, theorem summary, source scan, and branch metadata.
+\item[\code{SHA256SUMS}] Integrity hashes for the packaged files.
+\end{description}
+
+\begin{thebibliography}{9}
+
+\bibitem{busylean}
+V. Reshetnikov,
+\emph{BusyLean: name the biggest number, in Lean},
+GitHub repository, 2026.
+\url{https://github.com/VladimirReshetnikov/BusyLean}
+
+\bibitem{girard}
+J.-Y. Girard,
+\emph{Interpr\'etation fonctionnelle et \`elimination des coupures de l'arithm\'etique d'ordre sup\'erieur},
+Th\`ese d'\'Etat, Universit\'e Paris VII, 1972.
+
+\bibitem{donnelly-xi}
+K. Donnelly and H. Xi,
+``A Formalization of Strong Normalization for Simply-Typed Lambda-Calculus and System F,''
+\emph{Electronic Notes in Theoretical Computer Science} 174(5), 109--125, 2007.
+\url{https://doi.org/10.1016/j.entcs.2007.01.021}
+
+\bibitem{fernandezduque-joosten}
+D. Fern\'andez-Duque and J. J. Joosten,
+``Hyperations, Veblen Progressions and Transfinite Iterations of Ordinal Functions,''
+arXiv:1205.2036, 2012.
+\url{https://arxiv.org/abs/1205.2036}
+
+\bibitem{pakhomov-walsh}
+F. Pakhomov and J. Walsh,
+``Reflection Ranks and Ordinal Analysis,''
+\emph{Journal of Symbolic Logic} 86(4), 1350--1384, 2021.
+\url{https://doi.org/10.1017/jsl.2020.9}
+
+\bibitem{lean4}
+L. de Moura and S. Ullrich,
+``The Lean 4 Theorem Prover and Programming Language,''
+in \emph{Automated Deduction--CADE 28}, LNCS 12699, 625--635, 2021.
+\url{https://doi.org/10.1007/978-3-030-79876-5_37}
+
+\end{thebibliography}
+
+\end{document}

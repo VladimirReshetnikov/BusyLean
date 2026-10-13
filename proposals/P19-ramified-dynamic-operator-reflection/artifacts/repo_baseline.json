@@ -1,0 +1,18 @@
+{
+  "repository": "VladimirReshetnikov/BusyLean",
+  "branch": "main",
+  "commit": "1ee50c7d97bbed57a60709f661453c3e213f4db3",
+  "commit_date_utc": "2026-10-13T03:55:00Z",
+  "pinned_toolchain": "leanprover/lean4:v4.34.0",
+  "current_contender_at_baseline": 13,
+  "relevant_blob_sha256_or_git_sha": {
+    "README.md_git_blob": "b6db4c30bdac04fa540a88f01383f005db5a0008",
+    "BusyLean/Contender13.lean_git_blob": "67d296805249b190d3480dd26dae9e0e9818b86d",
+    "BusyLean/Comparison13.lean_git_blob": "e2c559db162ec9b3ccee233af584386c041556e60",
+    "BusyLean/MetaReflection.lean_git_blob": "d3926cca1be43254f93e25029ea575597cdc0dbc",
+    "BusyLean/MetaReflectionFacts.lean_git_blob": "8f30eee48c3341176f2b723dd181a7cc650acaa4",
+    "BusyLean/Autonomous.lean_git_blob": "3ee214d7443a9629c20609b52e2e1275efe7912e",
+    "lean-toolchain_git_blob": "12359f928f18e4a89ebd1444a0310b025931b17d"
+  },
+  "retrieved_utc": "2026-10-13T04:15:17Z"
+}

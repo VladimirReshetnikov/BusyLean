@@ -1,0 +1,25 @@
+digraph Contender14 {
+  rankdir=LR;
+  graph [fontname="DejaVu Sans", bgcolor="transparent", nodesep=0.45, ranksep=0.7];
+  node [shape=box, style="rounded", fontname="DejaVu Sans", fontsize=10];
+  edge [fontname="DejaVu Sans", fontsize=9];
+
+  C13 [label="family13(n) = F13(F13(n))\n(previous construction)"];
+  Rank [label="diagonalRank14(n)\n= family13(n) + 1"];
+  Sched [label="schedule14(n)\n= realize(hyper(rank, encode(tree12)))"];
+  Base [label="fdFamilyTransformer\nfamily-aware dynamic-kind reflection"];
+  RL [label="rankLift(schedule, rank)\nstrict anchored meta-rank hierarchy"];
+  RF [label="rankFamily14(n)\n= rankLift ... seed13"];
+  Final [label="F14(n)\n= reflectFamily(rankFamily14(n), n)"];
+  C14 [label="contender_14\n= F14(F14(42))", shape=doubleoctagon];
+
+  C13 -> Rank;
+  Rank -> Sched;
+  Rank -> RL;
+  Sched -> RL;
+  Base -> RL;
+  C13 -> RF [label="seed13"];
+  RL -> RF;
+  RF -> Final;
+  Final -> C14;
+}

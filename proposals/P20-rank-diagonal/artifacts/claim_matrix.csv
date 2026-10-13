@@ -1,0 +1,11 @@
+claim,status,evidence,qualification
+Closed Nat definition,source-complete,overlay/BusyLean/Contender14.lean,Lean kernel replay still required
+Computable in principle,proved by construction,all recursion is structural or on Nat and object evaluation reuses the repo's total normalizer,no feasibility claim
+Does not mention contender_13 in definition,static audit passed,artifacts/static_audit.json,kernel closure audit included for replay
+Pointwise family13 n < F14 n,complete Lean proof source,overlay/BusyLean/Comparison14.lean,not replayed in this sandbox
+Contender 13 < Contender 14,complete Lean proof source,overlay/BusyLean/Comparison14.lean,not replayed in this sandbox
+Every successor meta-rank is strictly larger at coordinate zero,complete Lean proof source,BusyLean.rankLift_step_lt,not replayed in this sandbox
+Every enumerated dynamic-kind program at final pointwise layer is below F14,complete Lean proof source,BusyLean.fvalue_lt_F14,relative to packed rankFamily14 oracle
+Allowed axioms only,audit scripted,overlay/test/Audit14.lean,requires Lean 4.34.0 replay
+Definition/proof time budgets,reproduction scripted,overlay/scripts/check14.py,not measured in this sandbox
+TeX article compiles and PDF renders,validated,article/contender14.tex and artifacts/pdf_validation.txt,23 pages rendered and visually inspected

@@ -1,0 +1,30 @@
+{
+  "path": "/mnt/data/BusyLean_Contender14_RDOR/article/contender14_rdor.pdf",
+  "pages": 17,
+  "encrypted": false,
+  "page_sizes": [
+    {
+      "width_pt": 612,
+      "height_pt": 792,
+      "count": 17
+    }
+  ],
+  "metadata": {
+    "/Producer": "pdfTeX-1.40.26",
+    "/Author": "",
+    "/Title": "Ramified Dynamic Operator Reflection: A Proposed Contender 14 for BusyLean",
+    "/Subject": "Lean 4 large-number construction and formal comparison",
+    "/Creator": "LaTeX with hyperref",
+    "/Keywords": "Lean 4, BusyLean, large numbers, reflection, System F omega, proof theory",
+    "/CreationDate": "D:20261013041454Z",
+    "/ModDate": "D:20261013041454Z",
+    "/Trapped": "/False",
+    "/PTEX.Fullbanner": "This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) kpathsea version 6.4.0/dev"
+  },
+  "outline_items": 38,
+  "form_fields": 0,
+  "attachments": 0,
+  "annotations": 60,
+  "poppler_pdfinfo": "Title:           Ramified Dynamic Operator Reflection: A Proposed Contender 14 for BusyLean\nSubject:         Lean 4 large-number construction and formal comparison\nKeywords:        Lean 4, BusyLean, large numbers, reflection, System F omega, proof theory\nAuthor:          \nCreator:         LaTeX with hyperref\nProducer:        pdfTeX-1.40.26\nCreationDate:    Tue Oct 13 04:14:54 2026 UTC\nModDate:         Tue Oct 13 04:14:54 2026 UTC\nCustom Metadata: yes\nMetadata Stream: no\nTagged:          no\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           17\nEncrypted:       no\nPage size:       612 x 792 pts (letter)\nPage rot:        0\nFile size:       443284 bytes\nOptimized:       no\nPDF version:     1.7",
+  "poppler_pdffonts": "name                                 type              encoding         emb sub uni object ID\n------------------------------------ ----------------- ---------------- --- --- --- ---------\nUCDUFD+LMRoman12-Bold                Type 1            Custom           yes yes yes    169  0\nPAOSQZ+LMRoman17-Regular             Type 1            Custom           yes yes yes    170  0\nGBGVYR+LMRoman12-Regular             Type 1            Custom           yes yes yes    171  0\nWIDHAC+LMRoman10-Regular             Type 1            Custom           yes yes yes    172  0\nHGGMHG+LMMono10-Regular              Type 1            Custom           yes yes yes    173  0\nLNZBMZ+LMRoman10-Bold                Type 1            Custom           yes yes yes    174  0\nRIAZKA+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    175  0\nUCINBL+LMMathItalic7-Regular         Type 1            Custom           yes yes yes    176  0\nWIDHAC+LMRoman10-Regular             Type 1            Custom           yes yes yes    177  0\nUMYEZP+LMRoman7-Regular              Type 1            Custom           yes yes yes    178  0\nAEQTDY+LMRoman8-Regular              Type 1            Custom           yes yes yes    215  0\nDRFRVI+LMSans10-Regular              Type 1            Custom           yes yes yes    216  0\nKZIAXW+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    226  0\nERUDJK+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    249  0\nSSTNHS+LMRoman10-Italic              Type 1            Custom           yes yes yes    255  0\nXLUQWP+LMRoman6-Regular              Type 1            Custom           yes yes yes    257  0\nHGGMHG+LMMono10-Regular              Type 1            Custom           yes yes yes    263  0\nTZYURE+MSBM10                        Type 1            Builtin          yes yes yes    264  0\nHLFPGW+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    265  0\nIUEUDB+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    267  0\nTQWGYE+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    269  0\nFQCMIJ+LMSans8-Regular               Type 1            Custom           yes yes yes    270  0\nOFICCI+LMMathItalic12-Regular        Type 1            Custom           yes yes yes    309  0\nESHULJ+LMMono10-Italic               Type 1            Custom           yes yes yes    338  0\nWIDHAC+LMRoman10-Regular             Type 1            Custom           yes yes yes    355  0\nAEQTDY+LMRoman8-Regular              Type 1            Custom           yes yes yes    369  0\nNXZKJW+LMSans12-Regular              Type 1            Custom           yes yes yes    374  0"
+}
