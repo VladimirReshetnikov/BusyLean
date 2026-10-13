@@ -100,6 +100,12 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.contender_14_lt_contender_15
 #print axioms BusyLean.fvalue_lt_F15
 #print axioms BusyLean.diagonalLift_strictlyInflationary
+#print axioms BusyLean.contender_16
+#print axioms BusyLean.contender_15_lt_contender_16
+#print axioms BusyLean.tvalue_lt_F16
+#print axioms BusyLean.FL.wfUniv
+#print axioms BusyLean.Ordinal.wf_sorted
+#print axioms BusyLean.Ordinal.omegaPow_wf
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -155,6 +161,11 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7
   BusyLean.contender_6 BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_16 :
+  BusyLean.contender_15 BusyLean.contender_14 BusyLean.contender_13 BusyLean.contender_12
+  BusyLean.contender_11 BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
+  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -171,6 +182,9 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_13_lt_contender_14
 #check @BusyLean.FL.sn_of_typed
 #check @BusyLean.contender_14_lt_contender_15
+#check @BusyLean.contender_15_lt_contender_16
+#check @BusyLean.FL.wfUniv
+#check @BusyLean.Ordinal.wf_sorted
 #check @BusyLean.Fk.sn_of_typed
 
 -- The final family is a genuine computable function (only input 0 is feasible).

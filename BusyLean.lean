@@ -27,3 +27,8 @@ import BusyLean.HyperReflection
 import BusyLean.HyperReflectionFacts
 import BusyLean.Contender15
 import BusyLean.Comparison15
+import BusyLean.SystemFL.Transfinite
+import BusyLean.Ordinal.SortedLex
+import BusyLean.Ordinal.OmegaPow
+import BusyLean.Contender16
+import BusyLean.Comparison16
