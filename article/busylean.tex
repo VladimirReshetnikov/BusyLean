@@ -76,7 +76,9 @@ universes, all normalized by one theorem that is parametric in the universe.
 A fourth batch of proposals contributes a rank hierarchy of transformer lifts,
 which Contender~15 applies to the ladder. Contender~16 makes the ladder
 transfinite: Lean builds a universe for every well-founded atom order, and
-Cantor normal forms give a ladder of length $\omega^\omega$.
+Cantor normal forms give a ladder of length $\omega^\omega$. Contender~17
+extends the ladder to length $\varepsilon_0$ by applying the same
+well-foundedness lemma hereditarily.
 \end{abstract}
 
 \tableofcontents
@@ -818,11 +820,45 @@ The opposite direction is rejected. The definitions check in 4.8\,s and the
 proofs in 2.8\,s.
 
 %======================================================================
+\section{Contender 17: a ladder of length $\varepsilon_0$}
+
+Notations below $\varepsilon_0$ are trees $\mathtt{node}\,[a_1,\dots,a_k]$
+denoting $\omega^{a_1}+\dots+\omega^{a_k}$. They are compared
+lexicographically, child by child, and a tree is normal when its children are
+normal and non-increasing. On arbitrary trees the lexicographic order is
+\emph{not} well-founded. For example, $t_{k+1}=\mathtt{node}\,[0, t_k]$
+descends forever starting from $t_1=\omega$. So the sorted-list lemma cannot be
+applied to all trees.
+
+The fix is to build normality into the Boolean element order,
+$\mathrm{lt}_P(a,b) := \mathrm{nf}(a)\wedge \mathrm{lt}(a,b)$, and apply the
+generic lemma \emph{to that order}. Two short lemmas then finish the
+proof:
+\begin{itemize}
+\item \lean{acc\_of\_children}: if the list of children of $t$ is accessible
+  (sorted-lexicographically), then $t$ is accessible. A smaller normal tree has
+  a smaller sorted list of children;
+\item \lean{acc\_nf}: every normal tree is accessible. By structural
+  recursion its \emph{head} child is accessible, so \lean{acc\_head} makes the
+  list of children accessible. The other children lie below the head and need
+  no recursion.
+\end{itemize}
+\lean{Ordinal.epsilon0\_wf} transfers this to the subtype of normal forms, and
+\lean{FL.wfUniv} supplies the universes unchanged. At depth $n$, programs use
+atoms of height $\le n$, i.e.\ levels up to towers $\omega^{\omega^{\cdots}}$ of
+height about~$n$. The contender has the same shape as before,
+\lean{F17 n := diagonalLift (schedule17 n) (family16 n + 1) eTransformer (fun \_ => family16) n n}.
+Proved: \lean{contender\_16\_lt\_\allowbreak contender\_17}, \lean{family16\_lt\_F17}
+and \lean{evalue\_lt\_F17}. The smoke test packs an operator over level
+$\omega$ into the level-$\omega^\omega$ universe (value~5), and the
+opposite direction is rejected. The definitions check in 2.0\,s and the proofs
+in 1.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
-prove well-founded. Applying the sorted-list lemma hereditarily gives
-$\varepsilon_0$. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
+prove well-founded, and $\varepsilon_0$ is done. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
 
@@ -853,6 +889,7 @@ Contender & idea & informal size\\
 14 (Lean) & ladder of universes, level $n$ at input $n$ & orders $\omega\cdot n$, diagonalized\\
 15 (Lean) & 14 with P17's rank hierarchy of lifts & $|\mathrm{FL}_n|\cdot\varepsilon(\tau)$\\
 16 (Lean) & 15 over a ladder of length $\omega^\omega$ & levels $<\omega^{n}$ at input $n$\\
+17 (Lean) & 15 over a ladder of length $\varepsilon_0$ & levels $<\omega_n$ (towers) at input $n$\\
 \bottomrule
 \end{tabular}
 \end{center}

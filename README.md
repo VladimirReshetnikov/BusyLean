@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 16
+## Current contender: Contender 17
+
+```lean
+def family16 (n : Nat) : Nat := F16 (F16 n)                  -- Contender 16 = family16 42
+def F17 (n : Nat) : Nat :=                                   -- BusyLean/Contender17.lean
+  diagonalLift (schedule17 n) (family16 n + 1) eTransformer (fun _ => family16) n n
+def contender_17 : Nat := F17 (F17 42)
+
+theorem contender_16_lt_contender_17 : contender_16 < contender_17   -- BusyLean/Comparison17.lean
+```
+
+The transfinite ladder of Contender 16 now has length **`ε₀`**. Its atoms are
+Cantor normal form trees `node [a₁, …, a_k] = ω^a₁ + ⋯ + ω^a_k`
+([`Ordinal/Epsilon0.lean`](BusyLean/Ordinal/Epsilon0.lean)).
+`Ordinal.epsilon0_wf` applies the sorted-list lemma hereditarily, with normality
+built into the element order, because the lexicographic order on non-normal
+trees has infinite descending chains. The universes are `FL.wfUniv` and
+normalization is `FL.sn_of_typed`, unchanged. At depth `n`, programs use levels
+up to ω-towers of height about `n`.
+
+| Theorem | Statement |
+|---|---|
+| `Ordinal.epsilon0_wf` | the order on Cantor normal forms below `ε₀` is well-founded |
+| `contender_16_lt_contender_17` | Contender 16 < Contender 17 |
+| `family16_lt_F17` | Contender 16's family is beaten at every input |
+| `evalue_lt_F17` | every ε₀-ladder program of depth ≤ `n` is below `F17 n` |
+
+## Contender 16
 
 ```lean
 def family15 (n : Nat) : Nat := F15 (F15 n)                  -- Contender 15 = family15 42
@@ -393,8 +420,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 16's definition modules take
-about 5 s and its proofs about 3 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 17's definition modules take
+about 2 s and its proofs about 2 s; the full clean build of all contenders
 takes about 49 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -427,8 +454,9 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender14.lean`](BusyLean/Contender14.lean), [`Comparison14.lean`](BusyLean/Comparison14.lean) | Contender 14 definitions and theorems |
 | [`BusyLean/HyperReflection.lean`](BusyLean/HyperReflection.lean), [`HyperReflectionFacts.lean`](BusyLean/HyperReflectionFacts.lean) | rank hierarchy of transformer lifts (adopted from P17) |
 | [`BusyLean/Contender15.lean`](BusyLean/Contender15.lean), [`Comparison15.lean`](BusyLean/Comparison15.lean) | Contender 15 definitions and theorems |
-| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded Cantor normal forms (sorted lists) and the atoms below `ω^ω` |
+| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded Cantor normal forms: sorted lists, atoms below `ω^ω` and below `ε₀` |
 | [`BusyLean/Contender16.lean`](BusyLean/Contender16.lean), [`Comparison16.lean`](BusyLean/Comparison16.lean) | Contender 16 definitions and theorems |
+| [`BusyLean/Contender17.lean`](BusyLean/Contender17.lean), [`Comparison17.lean`](BusyLean/Comparison17.lean) | Contender 17 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -452,6 +480,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 14 | Lean | this repository | a ladder of such universes, one SN proof for all levels; input `n` uses level `n` |
 | 15 | Lean | this repository | P17's rank hierarchy of transformer lifts over family-aware ladder reflection |
 | 16 | Lean | this repository | a transfinite ladder (length `ω^ω`) via a universe for every well-founded atom order |
+| 17 | Lean | this repository | the ladder extended to length `ε₀` (hereditary Cantor normal forms) |
 
 Proposals P1–P20 (four batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
