@@ -129,3 +129,36 @@ def primLangTree (P : List TL.Ty) (σ : TL.Env P) : CTree :=
   .lim fun m => .lim fun i => ((PTL.treesUpTo P σ m)[i]?).getD .zero
 
 end BusyLean.Ordinal
+
+namespace BusyLean.Ordinal
+
+namespace PTL
+
+/-- Closed programs of type `tree → tree` and size `≤ n` over the primitives, evaluated. -/
+def funsUpTo (P : List TL.Ty) (σ : TL.Env P) (n : Nat) : List (CTree → CTree) :=
+  (rawsUpTo P.length n).filterMap fun r =>
+    match infer P [] r with
+    | some ⟨.arr .tree .tree, t⟩ => some (t.eval σ ())
+    | _ => none
+
+end PTL
+
+/-- The closure of `b` under the language over the primitives `P` plus `b`, applied to `t`:
+every closed `tree → tree` program of every size. -/
+def ptlLift (P : List TL.Ty) (σ : TL.Env P) (b : CTree → CTree) (t : CTree) : CTree :=
+  .lim fun m => .lim fun i =>
+    (((PTL.funsUpTo (.arr .tree .tree :: P) (b, σ) m)[i]?).map (· t)).getD .zero
+
+/-- The type of a closure operator, `(tree → tree) → tree → tree`. -/
+def liftTy : TL.Ty := .arr (.arr .tree .tree) (.arr .tree .tree)
+
+/-- Languages over the primitives stacked along a tree: each successor level adds the
+previous level's closure as a first-class primitive `lift`. -/
+def ptlStack (P : List TL.Ty) (σ : TL.Env P) : CTree → (CTree → CTree) → CTree → CTree
+  | .zero => ptlLift P σ
+  | .succ a => ptlLift (liftTy :: P) (ptlStack P σ a, σ)
+  | .lim f => fun b t => .lim fun i => ptlStack P σ (f i) b t
+  | .supL _ => ptlLift P σ
+  | .supH _ => ptlLift P σ
+
+end BusyLean.Ordinal

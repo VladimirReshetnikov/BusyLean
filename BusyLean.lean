@@ -133,3 +133,5 @@ import BusyLean.Comparison50
 import BusyLean.Ordinal.PrimLanguage
 import BusyLean.Contender51
 import BusyLean.Comparison51
+import BusyLean.Contender52
+import BusyLean.Comparison52
