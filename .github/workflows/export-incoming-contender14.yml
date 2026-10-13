@@ -1,0 +1,25 @@
+name: Export incoming Contender 14
+
+on:
+  push:
+    branches:
+      - ai/contender14-validation-20261012
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Upload incoming proposal
+        uses: actions/upload-artifact@v4
+        with:
+          name: incoming-contender14-diagonal-hyperreflection
+          path: incoming/BusyLean_Contender14_DiagonalHyperreflection.zip
+          if-no-files-found: error
+          retention-days: 2
