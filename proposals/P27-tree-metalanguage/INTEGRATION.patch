@@ -1,0 +1,469 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index dcecff4..a85540a 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -89,3 +89,6 @@ import BusyLean.Comparison33
+ import BusyLean.Ordinal.TreeLanguage3
+ import BusyLean.Contender34
+ import BusyLean.Comparison34
++import BusyLean.Ordinal.TreeLanguage4
++import BusyLean.Contender35
++import BusyLean.Comparison35
+diff --git a/BusyLean/Comparison35.lean b/BusyLean/Comparison35.lean
+new file mode 100644
+index 0000000..999692c
+--- /dev/null
++++ b/BusyLean/Comparison35.lean
+@@ -0,0 +1,82 @@
++import BusyLean.Contender35
++import BusyLean.Comparison34
++
++/-! # Contender 35: comparison theorems -/
++
++namespace BusyLean
++
++open BusyLean.W
++
++/-- Any number bounded by the reflected maximum is strictly below the result. -/
++theorem lt_reflectMetaFamily {fs : Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN (prefixMax (fun i => fs i n) n)
++      (BigNumber.maximum (FL.metavalue n (packFamily fs) n)
++        (FL.metatreeLadderUpTo n))) :
++    m < reflectMetaFamily fs n := by
++  show m < n + 1 + _
++  have hM : ∀ M : Nat, M + 1 ≤ n + 1 + M := fun M => by
++    rw [Nat.add_comm M 1]
++    exact Nat.add_le_add_right (Nat.le_add_left 1 n) M
++  exact Nat.lt_of_le_of_lt h
++    (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (hM _))
++
++/-- Every visible coordinate of the oracle family is strictly reflected. -/
++theorem oracle_lt_reflectMetaFamily (fs : Family) {i n : Nat}
++    (hi : i ≤ n) : fs i n < reflectMetaFamily fs n :=
++  lt_reflectMetaFamily
++    (Nat.le_trans (le_prefixMax (fun j => fs j n) hi)
++      (BigNumber.le_maxN_left _ _))
++
++/-- Every enumerated program value is strictly reflected. -/
++theorem metavalue_lt_reflectMetaFamily (fs : Family) {n : Nat}
++    {t : FL.CTm (Ordinal.Addr (Ordinal.metaLanguageTree n))}
++    (ht : t ∈ FL.metatreeLadderUpTo n) :
++    FL.metavalue n (packFamily fs) n t < reflectMetaFamily fs n :=
++  lt_reflectMetaFamily
++    (Nat.le_trans
++      (le_maximum (FL.metavalue n (packFamily fs) n) ht)
++      (BigNumber.le_maxN_right _ _))
++
++/-- The metalanguage reflection transformer is progressive. -/
++theorem metaTransformer_progressive : Progressive metaTransformer :=
++  fun seed _ _ _ hi => oracle_lt_reflectMetaFamily seed hi
++
++/-- At every input, `F35` exceeds Contender 34's full family. -/
++theorem family34_lt_F35 (n : Nat) : family34 n < F35 n :=
++  ((wDiagonalLift_preservesProgressive (schedule35 n) (rank35 n))
++    metaTransformer metaTransformer_progressive)
++    (fun _ => family34) 0 n n (Nat.zero_le n)
++
++/-- One raw metalanguage-reflection step is below the W-ranked lift. -/
++theorem raw_meta_reflection_lt_F35 (n : Nat) :
++    reflectMetaFamily (fun _ => family34) n < F35 n :=
++  (wDiagonalLift_strictlyInflationary (schedule35 n) (rank35 n))
++    metaTransformer metaTransformer_progressive
++      (fun _ => family34) n n n (Nat.le_refl n)
++
++/-- Every enumerated metalanguage-tree program, run with the packed seed, is
++below `F35 n`. -/
++theorem metavalue_lt_F35 {n : Nat}
++    {t : FL.CTm (Ordinal.Addr (Ordinal.metaLanguageTree n))}
++    (ht : t ∈ FL.metatreeLadderUpTo n) :
++    FL.metavalue n (packFamily (fun _ => family34)) n t < F35 n :=
++  Nat.lt_trans (metavalue_lt_reflectMetaFamily (fun _ => family34) ht)
++    (raw_meta_reflection_lt_F35 n)
++
++/-- The input is below the seed family. -/
++theorem input_lt_family34 (n : Nat) : n < family34 n :=
++  Nat.lt_trans (input_lt_F34 n) (input_lt_F34 (F34 n))
++
++/-- `F35` is strictly inflationary on natural inputs. -/
++theorem input_lt_F35 (n : Nat) : n < F35 n :=
++  Nat.lt_trans (input_lt_family34 n) (family34_lt_F35 n)
++
++/-- **Required comparison:** Contender 34 is strictly below Contender 35. -/
++theorem contender_34_lt_contender_35 : contender_34 < contender_35 :=
++  Nat.lt_trans (family34_lt_F35 42) (input_lt_F35 (F35 42))
++
++/-- A useful transitive comparison with the preceding accepted contender. -/
++theorem contender_33_lt_contender_35 : contender_33 < contender_35 :=
++  Nat.lt_trans contender_33_lt_contender_34 contender_34_lt_contender_35
++
++end BusyLean
+diff --git a/BusyLean/Contender35.lean b/BusyLean/Contender35.lean
+new file mode 100644
+index 0000000..9fd8b27
+--- /dev/null
++++ b/BusyLean/Contender35.lean
+@@ -0,0 +1,90 @@
++import BusyLean.Ordinal.TreeLanguage4
++import BusyLean.Contender34
++
++/-!
++# Contender 35: metalanguages stacked along tree ordinals
++
++```
++contender_35 := F35 (F35 42)
++F35 n        := wDiagonalLift (schedule35 n) (rank35 n)
++                  metaTransformer (fun _ => family34) n n
++```
++
++Contender 34 iterated a first-order language-closure operator along a tree
++ordinal.  Contender 35 raises the closure operator itself to an object-language
++primitive and iterates the resulting metalanguages along Contender 34's tree.
++The numerical reflection layer then runs over addresses of the resulting tree
++and is seeded by the whole Contender 34 family.
++
++**Do not evaluate `contender_35`.**
++-/
++
++namespace BusyLean.FL
++
++open Ordinal
++
++/-- Every accepted System-F term over addresses of the metalanguage tree is
++strongly normalizing. -/
++theorem sn_erase_metatree {f : Nat → Nat} (L : Nat) {fuel : Nat}
++    {t : CTm (Addr (metaLanguageTree L))}
++    (h : infer fuel [] [] t = some Ty.nat) : F.SN f (erase t) :=
++  sn_of_typed (wfUniv f (addr_wf (metaLanguageTree L)))
++    (infer_sound fuel t (goodCtx_nil []) h).1
++
++/-- Value of a checked program over addresses of `metaLanguageTree L`, relative
++to oracle `f`. -/
++def metavalue (L : Nat) (f : Nat → Nat) (fuel : Nat)
++    (t : CTm (Addr (metaLanguageTree L))) : Nat :=
++  match h : infer fuel [] [] t with
++  | some A =>
++      if hA : A = Ty.nat then
++        F.decode
++          (F.nf f ⟨erase t, sn_erase_metatree L (h.trans (congrArg some hA))⟩)
++      else 0
++  | none => 0
++
++/-- Programs of depth at most `n` over addresses of `metaLanguageTree n`. -/
++def metatreeLadderUpTo (n : Nat) :
++    List (CTm (Addr (metaLanguageTree n))) :=
++  ctmsUpTo (addrUpTo (metaLanguageTree n) n) n
++
++end BusyLean.FL
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Family-aware reflection over the metalanguage tree. -/
++def reflectMetaFamily (fs : Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN (prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum (FL.metavalue n (packFamily fs) n)
++      (FL.metatreeLadderUpTo n))
++
++def metaTransformer : Transformer := fun fs _ n => reflectMetaFamily fs n
++
++/-- Contender 34's construction as a family.  In particular,
++`family34 42 = contender_34`, definitionally. -/
++def family34 (n : Nat) : Nat := F34 (F34 n)
++
++/-- A schedule strictly above the previous schedule, expanded by the whole
++Contender 34 family at the current input. -/
++def schedule35 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family34 n + 42) (Autonomous.encode (schedule34 n)))
++
++/-- A W-tree rank above the new schedule. -/
++def rank35 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family34 n + 42) (Autonomous.encode (schedule35 n)))
++
++/-- W-ranked hyperreflection over metalanguage address ladders, seeded with
++Contender 34's family. -/
++def F35 (n : Nat) : Nat :=
++  wDiagonalLift (schedule35 n) (rank35 n) metaTransformer
++    (fun _ => family34) n n
++
++/-- **Contender 35.**  Never evaluate it. -/
++def contender_35 : Nat := F35 (F35 42)
++
++end BusyLean
+diff --git a/BusyLean/Ordinal/TreeLanguage4.lean b/BusyLean/Ordinal/TreeLanguage4.lean
+new file mode 100644
+index 0000000..68216d2
+--- /dev/null
++++ b/BusyLean/Ordinal/TreeLanguage4.lean
+@@ -0,0 +1,204 @@
++import BusyLean.Ordinal.TreeLanguage3
++
++/-!
++# A metalanguage for tree-ordinal languages
++
++`TreeLanguage3` iterates the first-order language-closure operator `langLift`
++along a countable tree ordinal.  This module raises the construction by one
++functional type.  Its object language has two primitives:
++
++* `boost : tree -> tree`, an arbitrary tree transformer;
++* `lift : (tree -> tree) -> tree -> tree`, an arbitrary language-closure
++  operator acting on tree transformers.
++
++The language can therefore construct a transformer, pass it to the lower-level
++language-closure operator, and continue computing with the resulting tree.
++Closed programs of type `tree -> tree` are enumerated semantically, exactly as
++in `TreeLanguage2`.
++
++`metaLangLift L b` is the whole metalanguage over closure operator `L` and base
++transformer `b`.  `metaBoostT` then iterates this operation along a countable
++tree ordinal.  At input `n`, the height, base-transformer index, and argument
++are all built from Contender 34's tree.
++-/
++
++namespace BusyLean.Ordinal
++
++namespace MTL
++
++/-- Intrinsically typed metalanguage terms.  The type system is the same
++simply typed system used by `TL`; only the primitive operations are richer. -/
++inductive Tm : List TL.Ty → TL.Ty → Type where
++  | var : TL.Var Γ a → Tm Γ a
++  | lam : Tm (a :: Γ) b → Tm Γ (.arr a b)
++  | app : Tm Γ (.arr a b) → Tm Γ a → Tm Γ b
++  | zero : Tm Γ .nat
++  | succ : Tm Γ .nat → Tm Γ .nat
++  | natRec : Tm Γ a → Tm Γ (.arr a a) → Tm Γ .nat → Tm Γ a
++  | tzero : Tm Γ .tree
++  | tsucc : Tm Γ .tree → Tm Γ .tree
++  | tlim : Tm Γ (.arr .nat .tree) → Tm Γ .tree
++  | treeRec : Tm Γ a → Tm Γ (.arr a a) →
++      Tm Γ (.arr (.arr .nat a) a) → Tm Γ .tree → Tm Γ a
++  | boost : Tm Γ .tree → Tm Γ .tree
++  | lift : Tm Γ (.arr .tree .tree) → Tm Γ .tree → Tm Γ .tree
++
++/-- Semantic interpreter.  It is total by structural recursion on the typed
++term; no normalization theorem and no classical principle are needed. -/
++def Tm.eval
++    (liftF : (CTree → CTree) → CTree → CTree)
++    (boostF : CTree → CTree) :
++    Tm Γ a → TL.Env Γ → TL.Ty.den a
++  | .var v, ρ => TL.Var.get v ρ
++  | .lam t, ρ => fun x => t.eval liftF boostF (x, ρ)
++  | .app t u, ρ => (t.eval liftF boostF ρ) (u.eval liftF boostF ρ)
++  | .zero, _ => (0 : Nat)
++  | .succ t, ρ => Nat.succ (t.eval liftF boostF ρ)
++  | .natRec z s n, ρ =>
++      TL.natIter (z.eval liftF boostF ρ) (s.eval liftF boostF ρ)
++        (n.eval liftF boostF ρ)
++  | .tzero, _ => (Tre.zero : CTree)
++  | .tsucc t, ρ => (Tre.succ (t.eval liftF boostF ρ) : CTree)
++  | .tlim f, ρ => (Tre.lim (f.eval liftF boostF ρ) : CTree)
++  | .treeRec z s l t, ρ =>
++      TL.treeIter (z.eval liftF boostF ρ) (s.eval liftF boostF ρ)
++        (l.eval liftF boostF ρ) (t.eval liftF boostF ρ)
++  | .boost t, ρ => boostF (t.eval liftF boostF ρ)
++  | .lift b t, ρ =>
++      liftF (b.eval liftF boostF ρ) (t.eval liftF boostF ρ)
++
++/-! ## Raw terms and type checking -/
++
++/-- Raw syntax; lambdas carry their argument type. -/
++inductive Raw where
++  | var : Nat → Raw
++  | lam : TL.Ty → Raw → Raw
++  | app : Raw → Raw → Raw
++  | zero : Raw
++  | succ : Raw → Raw
++  | natRec : Raw → Raw → Raw → Raw
++  | tzero : Raw
++  | tsucc : Raw → Raw
++  | tlim : Raw → Raw
++  | treeRec : Raw → Raw → Raw → Raw → Raw
++  | boost : Raw → Raw
++  | lift : Raw → Raw → Raw
++
++/-- Cast an intrinsically typed term after decidable type equality. -/
++def cast? {Γ : List TL.Ty} {a : TL.Ty} (b : TL.Ty)
++    (t : Tm Γ a) : Option (Tm Γ b) :=
++  if h : a = b then some (h ▸ t) else none
++
++/-- Sound-by-construction type inference from raw terms. -/
++def infer (Γ : List TL.Ty) : Raw → Option (Σ a, Tm Γ a)
++  | .var n => (TL.lookup Γ n).map fun ⟨a, v⟩ => ⟨a, .var v⟩
++  | .lam a r =>
++      (infer (a :: Γ) r).map fun ⟨b, t⟩ => ⟨.arr a b, .lam t⟩
++  | .app r s => do
++      let ⟨ab, t⟩ ← infer Γ r
++      let ⟨_, u⟩ ← infer Γ s
++      match ab, t with
++      | .arr a b, t => do
++          let u' ← cast? a u
++          pure ⟨b, .app t u'⟩
++      | _, _ => none
++  | .zero => some ⟨.nat, .zero⟩
++  | .succ r => do
++      let ⟨_, t⟩ ← infer Γ r
++      let t' ← cast? .nat t
++      pure ⟨.nat, .succ t'⟩
++  | .natRec z s n => do
++      let ⟨a, tz⟩ ← infer Γ z
++      let ⟨_, ts⟩ ← infer Γ s
++      let ⟨_, tn⟩ ← infer Γ n
++      let ts' ← cast? (.arr a a) ts
++      let tn' ← cast? .nat tn
++      pure ⟨a, .natRec tz ts' tn'⟩
++  | .tzero => some ⟨.tree, .tzero⟩
++  | .tsucc r => do
++      let ⟨_, t⟩ ← infer Γ r
++      let t' ← cast? .tree t
++      pure ⟨.tree, .tsucc t'⟩
++  | .tlim r => do
++      let ⟨_, t⟩ ← infer Γ r
++      let t' ← cast? (.arr .nat .tree) t
++      pure ⟨.tree, .tlim t'⟩
++  | .treeRec z s l r => do
++      let ⟨a, tz⟩ ← infer Γ z
++      let ⟨_, ts⟩ ← infer Γ s
++      let ⟨_, tl⟩ ← infer Γ l
++      let ⟨_, tr⟩ ← infer Γ r
++      let ts' ← cast? (.arr a a) ts
++      let tl' ← cast? (.arr (.arr .nat a) a) tl
++      let tr' ← cast? .tree tr
++      pure ⟨a, .treeRec tz ts' tl' tr'⟩
++  | .boost r => do
++      let ⟨_, t⟩ ← infer Γ r
++      let t' ← cast? .tree t
++      pure ⟨.tree, .boost t'⟩
++  | .lift b r => do
++      let ⟨_, tb⟩ ← infer Γ b
++      let ⟨_, tr⟩ ← infer Γ r
++      let tb' ← cast? (.arr .tree .tree) tb
++      let tr' ← cast? .tree tr
++      pure ⟨.tree, .lift tb' tr'⟩
++
++/-! ## Enumeration -/
++
++/-- Raw metalanguage terms of size at most `n`, with variables below `n`. -/
++def rawsUpTo : Nat → List Raw
++  | 0 => []
++  | n + 1 =>
++      let rs := rawsUpTo n
++      let ts := TL.tysUpTo n
++      (List.range n).map .var ++ [.zero, .tzero] ++
++      ts.flatMap (fun a => rs.map (.lam a)) ++
++      rs.flatMap (fun r => rs.map (.app r)) ++
++      rs.map .succ ++ rs.map .tsucc ++ rs.map .tlim ++ rs.map .boost ++
++      rs.flatMap (fun b => rs.map fun r => .lift b r) ++
++      rs.flatMap (fun z => rs.flatMap fun s => rs.map (.natRec z s)) ++
++      rs.flatMap (fun z =>
++        rs.flatMap fun s => rs.flatMap fun l => rs.map (.treeRec z s l))
++
++/-- Closed metalanguage programs of type `tree -> tree` and size at most `m`,
++interpreted as actual total Lean functions. -/
++def funsUpTo
++    (liftF : (CTree → CTree) → CTree → CTree)
++    (boostF : CTree → CTree) (m : Nat) : List (CTree → CTree) :=
++  (rawsUpTo m).filterMap fun r =>
++    match infer [] r with
++    | some ⟨.arr .tree .tree, t⟩ => some (t.eval liftF boostF ())
++    | _ => none
++
++end MTL
++
++/-- The whole metalanguage over closure operator `liftF` and tree transformer
++`b`, applied to `t`.  Every closed `tree -> tree` program of every finite size
++occurs in the two nested limits. -/
++def metaLangLift
++    (liftF : (CTree → CTree) → CTree → CTree)
++    (b : CTree → CTree) (t : CTree) : CTree :=
++  .lim fun m => .lim fun i =>
++    (((MTL.funsUpTo liftF b m)[i]?).map fun p => p t).getD .zero
++
++/-- Metalanguages stacked along a countable tree ordinal.  The zero stage uses
++`langLift`; a successor closes a language that can invoke the entire previous
++closure operator; limits are pointwise limits. -/
++def metaBoostT : CTree → (CTree → CTree) → CTree → CTree
++  | .zero => langLift
++  | .succ a => metaLangLift (metaBoostT a)
++  | .lim f => fun b t => .lim fun i => metaBoostT (f i) b t
++  | .supL _ => langLift
++  | .supH _ => langLift
++
++/-- The input tree for Contender 35.  Branch zero retains Contender 34's tree.
++Every other branch iterates the metalanguage hierarchy to that same height,
++starting from a first-order language hierarchy also indexed by Contender 34's
++tree, and applies it to Contender 34's tree. -/
++def metaLanguageTree (n : Nat) : CTree :=
++  .lim fun i =>
++    if i = 0 then treeStackedTree n
++    else metaBoostT (treeStackedTree n)
++      (boostT (treeStackedTree n)) (treeStackedTree n)
++
++end BusyLean.Ordinal
+diff --git a/test/Contender35Audit.lean b/test/Contender35Audit.lean
+new file mode 100644
+index 0000000..0cfcb1e
+--- /dev/null
++++ b/test/Contender35Audit.lean
+@@ -0,0 +1,58 @@
++import BusyLean.Comparison35
++import Lean
++
++/-!
++# Isolated audit for Contender 35
++
++This file checks the axioms of the new declarations and verifies that the
++closure of `contender_35` does not contain any earlier contender constant.
++-/
++
++open Lean Elab Command
++
++private def constClosure35 (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++elab "#assert_not_in_closure35 " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := constClosure35 env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then
++      throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.Ordinal.MTL.Tm.eval
++#print axioms BusyLean.Ordinal.metaLangLift
++#print axioms BusyLean.Ordinal.metaBoostT
++#print axioms BusyLean.Ordinal.metaLanguageTree
++#print axioms BusyLean.contender_35
++#print axioms BusyLean.contender_34_lt_contender_35
++#print axioms BusyLean.metavalue_lt_F35
++
++#assert_not_in_closure35 BusyLean.contender_35 :
++  BusyLean.contender_34 BusyLean.contender_33 BusyLean.contender_32
++  BusyLean.contender_31 BusyLean.contender_30 BusyLean.contender_29
++  BusyLean.contender_28 BusyLean.contender_27 BusyLean.contender_26
++  BusyLean.contender_25 BusyLean.contender_24 BusyLean.contender_23
++  BusyLean.contender_22 BusyLean.contender_21 BusyLean.contender_20
++  BusyLean.contender_19 BusyLean.contender_18 BusyLean.contender_17
++  BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5

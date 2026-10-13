@@ -1,0 +1,8 @@
+'BusyLean.Ordinal.MTL.Tm.eval' does not depend on any axioms
+'BusyLean.Ordinal.metaLangLift' depends on axioms: [propext]
+'BusyLean.Ordinal.metaBoostT' depends on axioms: [propext]
+'BusyLean.Ordinal.metaLanguageTree' depends on axioms: [propext]
+'BusyLean.contender_35' depends on axioms: [propext, Quot.sound]
+'BusyLean.contender_34_lt_contender_35' depends on axioms: [propext, Quot.sound]
+'BusyLean.metavalue_lt_F35' depends on axioms: [propext, Quot.sound]
+BusyLean.contender_35: closure of 5534 constants avoids all 30 forbidden names

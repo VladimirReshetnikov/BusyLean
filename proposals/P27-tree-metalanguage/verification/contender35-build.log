@@ -1,0 +1,12 @@
++ /usr/bin/time -f 'TreeLanguage4: %e s, %M KiB' lake build BusyLean.Ordinal.TreeLanguage4
+✔ [22/22] Built BusyLean.Ordinal.TreeLanguage4 (445ms)
+Build completed successfully (22 jobs).
+TreeLanguage4: 0.53 s, 539256 KiB
++ /usr/bin/time -f 'Contender35: %e s, %M KiB' lake build BusyLean.Contender35
+✔ [84/84] Built BusyLean.Contender35 (219ms)
+Build completed successfully (84 jobs).
+Contender35: 0.33 s, 542344 KiB
++ /usr/bin/time -f 'Comparison35: %e s, %M KiB' lake build BusyLean.Comparison35
+✔ [121/121] Built BusyLean.Comparison35 (200ms)
+Build completed successfully (121 jobs).
+Comparison35: 0.33 s, 541764 KiB

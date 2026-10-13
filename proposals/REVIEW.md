@@ -560,3 +560,47 @@ staged along the index. Like P23, this is a third-order amplifier with finite
 rank, in the class of P22's W-tree-ranked hierarchy that Contender 23 already
 uses. It keeps Contender 19's language, so it is informally below Contenders
 20–24. Nothing new is adopted.
+
+# Late arrival: P27
+
+`BusyLean_Contender35_Metalanguage.zip` proposes a "Contender 35" over
+Contender 34 (base commit `4351340`).
+
+| | Definitions | Proofs | Axioms |
+|---|---|---|---|
+| P27 | compile | **compile** (worktree at `4351340`) | `propext, Quot.sound`; the closure (5,534 constants) avoids `contender_5` … `contender_34` |
+
+## What it builds
+
+`Ordinal/TreeLanguage4.lean` is System T over naturals and countable trees with
+two primitives: `boost : tree → tree` and **`lift : (tree → tree) → tree →
+tree`**, an arbitrary language-closure operator. Instantiated with `langLift`,
+programs can build tree transformers, close them under the whole lower
+language, and keep computing. Contender 34 iterated `langLift` along a tree
+*externally*. Here the iteration and any higher-type use of the closure
+operator are expressible *inside* the language. `metaBoostT` stacks the
+metalanguage along a tree.
+
+## Comparison and adoption
+
+Like Contenders 25–37, it feeds its tree into a ladder as atoms, so by the
+truncation argument (article, "A correction: what a ladder sees") its number
+grows only through the amplifier. The **tree construction is new and is
+adopted**: a first-class closure operator lets programs iterate language
+closure themselves. Used through the hierarchy `hier` of Contender 38, the
+tree's size counts.
+
+# Retired without import (2026-10-13)
+
+Six archives offered no idea that the repository does not already have, or
+that the truncation argument does not make void. They were reviewed, not
+imported, and deleted:
+
+| Archive | Target | Idea | Why retired |
+|---|---|---|---|
+| `Contender25_MetaRound_Reflection` | C24 | atoms from a meta-round tower of `limitAlong` rounds; seed an `F24` orbit | a larger atom order, which a depth-`n` ladder cannot see; orbit seeds are a number-level iteration, subsumed by `hier` |
+| `Contender25_SelfHeight_RoundTower` | C24 | `roundTower` of height given by an `F24` orbit | same: a taller atom order plus orbit seed |
+| `Contender26_SelfIndexed_CollapsedTree_Reflection` | C25 | `bigTree` at a self-indexed parameter | same: a larger atom tree plus orbit seed |
+| `Contender26_W2_Hyperreflection` | C25 | P22's W-ranked lift one type higher (`HyperLift`) | P26 with a W-tree rank; amplifier ranks are dominated by the trees `hier` already runs along |
+| `Contender35_SelfIndexed_TransfiniteLanguage` | C34 | `treeStackedTree` at a self-indexed depth, orbit seed | same: a larger atom tree plus orbit seed |
+| `Contender38_MetaLanguage` | C37 | System T with `langLift` as a first-class constant over `boost31` and a seed; self-rebased tower | the same idea as P27 (which is parametric in its primitives and was built); its own extra, the diagonal `t ↦ metaStack t t t`, is a tree-level diagonal of the kind already in `bootT`/`stackOver`; kernel check never run |

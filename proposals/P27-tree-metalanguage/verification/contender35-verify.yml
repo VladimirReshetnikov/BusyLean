@@ -1,0 +1,54 @@
+name: Contender 35 verification
+
+on:
+  push:
+    branches:
+      - research/contender35-metalanguage-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build accepted repository baseline
+        uses: leanprover/lean-action@v1.6.1
+        with:
+          build: true
+          test: false
+          lint: false
+          use-github-cache: false
+
+      - name: Kernel-check Contender 35 modules
+        shell: bash
+        run: |
+          set -euxo pipefail
+          {
+            /usr/bin/time -f 'TreeLanguage4: %e s, %M KiB' \
+              lake build BusyLean.Ordinal.TreeLanguage4
+            /usr/bin/time -f 'Contender35: %e s, %M KiB' \
+              lake build BusyLean.Contender35
+            /usr/bin/time -f 'Comparison35: %e s, %M KiB' \
+              lake build BusyLean.Comparison35
+          } 2>&1 | tee contender35-build.log
+
+      - name: Run axiom and dependency audit
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake env lean test/Contender35Audit.lean 2>&1 | tee contender35-audit.log
+
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender35-verification-log
+          path: |
+            contender35-build.log
+            contender35-audit.log
+          if-no-files-found: warn

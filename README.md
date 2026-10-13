@@ -1127,7 +1127,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 38 | Lean | this repository | fast-growing hierarchy along Contender 37's tree |
 | 39 | Lean | this repository | languages over the jump mixed with predicative collapse; hierarchy along them |
 
-Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
+Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
+further archives were retired without import as offering no new idea; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).

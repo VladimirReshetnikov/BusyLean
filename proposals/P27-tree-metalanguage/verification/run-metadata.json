@@ -1,0 +1,18 @@
+{
+  "repository": "VladimirReshetnikov/BusyLean",
+  "baseline_commit": "43513401d8929d60b2e3e40a4a20835a1271e94f",
+  "branch": "research/contender35-metalanguage-20261013",
+  "verified_commit": "f08df5f2a4cb21ec847d1fe3b9a95f7818a9e78e",
+  "workflow_run_id": 38440600428,
+  "workflow_conclusion": "success",
+  "artifact_id": 11834996628,
+  "artifact_digest": "sha256:c02ee252cba93bc89adbd3daba3ea846cd7aad11e3a8b0a586fb37c58d900331",
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "new_module_timings_seconds": {
+    "BusyLean.Ordinal.TreeLanguage4": 0.53,
+    "BusyLean.Contender35": 0.33,
+    "BusyLean.Comparison35": 0.33
+  },
+  "dependency_closure_size": 5534,
+  "forbidden_contender_constants_avoided": 30
+}

@@ -1,0 +1,25 @@
+Final package checks (2026-10-13 UTC)
+
+Lean source identity against the verified GitHub branch:
+  BusyLean/Ordinal/TreeLanguage4.lean
+    Git blob: 68216d28e1d4578131f97cfa782ad7d942a505dc
+  BusyLean/Contender35.lean
+    Git blob: 9fd8b27ac68db4074cfd5d13e7e5ab26fe7c575b
+  BusyLean/Comparison35.lean
+    Git blob: 999692cb2f7e27b8f8e550af8103c6611dc3ad92
+
+The local files have exactly these Git blob hashes.
+
+Integration tests against a reconstructed clean Contender-34 baseline:
+  git apply --check INTEGRATION.patch: PASS
+  git apply INTEGRATION.patch: PASS
+  apply_to_checkout.sh: PASS
+  installed source byte comparison: PASS
+
+PDF checks:
+  page count: 25
+  PyMuPDF open: PASS
+  encrypted: no
+  XFA: no
+  likely scanned: no
+  all 25 pages rendered at 160 dpi and visually inspected: PASS

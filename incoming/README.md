@@ -29,6 +29,16 @@ every step as a separate commit:
    new contender, with attribution in the source.
 5. **Delete.** The processed archive is removed from this directory.
 
+**Retirement.** `incoming/` is reviewed from time to time. An archive that is
+outdated and offers no idea the repository lacks is **retired**: it is read and
+screened, but not imported or built. A short entry in
+[`../proposals/REVIEW.md`](../proposals/REVIEW.md) says what it proposed and
+why it was retired, and the archive is deleted. Typical reasons are a
+superseded target, a duplicate of an imported idea, or a construction made void
+by a known limitation. For example, a larger atom order for a ladder adds
+nothing, because a depth-`n` ladder program sees only a finite truncation of it
+(see the article's section "A correction: what a ladder sees").
+
 So an empty `incoming/` (apart from this file) means every proposal received
 so far has been processed.
 
