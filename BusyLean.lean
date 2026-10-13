@@ -42,3 +42,7 @@ import BusyLean.Ordinal.SortedLexQ
 import BusyLean.Ordinal.LargeVeblen
 import BusyLean.Contender19
 import BusyLean.Comparison19
+import BusyLean.TreeHyperReflection
+import BusyLean.TreeHyperReflectionFacts
+import BusyLean.Contender20
+import BusyLean.Comparison20
