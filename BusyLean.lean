@@ -35,3 +35,6 @@ import BusyLean.Comparison16
 import BusyLean.Ordinal.Epsilon0
 import BusyLean.Contender17
 import BusyLean.Comparison17
+import BusyLean.Ordinal.Veblen
+import BusyLean.Contender18
+import BusyLean.Comparison18
