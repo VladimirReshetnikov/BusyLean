@@ -98,6 +98,8 @@ trees built by Buchholz-style collapsing functions defined by plain structural
 recursion, heuristically to $\psi_0(\varepsilon_{\Omega_\omega+n})$.
 Contender~26 indexes the collapsing levels by tree ordinals themselves,
 heuristically climbing toward the fixed points of $\alpha\mapsto\psi_0(\Omega_\alpha)$.
+Contender~27 stratifies level codes into universes, toward an inaccessible-like
+level.
 \end{abstract}
 
 \tableofcontents
@@ -1297,6 +1299,42 @@ Contender~25's family. Proved: \lean{contender\_25\_lt\_\allowbreak contender\_2
 4.4\,s and the proofs in 4.9\,s.
 
 %======================================================================
+\section{Contender 27: universes of level codes}
+
+In Contender~26 the levels are indexed by countable codes, so iterating
+$\Lambda\mapsto\psi_0(\Omega_\Lambda)$ stalls at a countable fixed point. To
+pass it, level codes must branch over \emph{uncountable} level elements. Doing
+that in one step would be an inductive--recursive definition, which Lean does
+not have. The stratified version is available (\lean{TreeUniverses.lean}):
+\begin{lstlisting}
+structure Univ : Type 1 where
+  Code : Type
+  Low : Code → Type                         -- everything below level c
+  sample : (c : Code) → ℕ → Option (Low c)  -- elements for diagonals
+  top : Code
+inductive NCode (U : Univ) : Type where      -- codes of the next universe
+  | zero | succ (t : NCode U) | lim (f : ℕ → NCode U)
+  | supAt (c : U.Code) (h : U.Low c → NCode U)
+\end{lstlisting}
+The next universe's \lean{Low} is defined by structural recursion on
+\lean{NCode U}, so its codes denote levels as large as the elements of the
+previous universe's levels. Iterating gives the tower \lean{univ k}. Each
+universe has its own collapse \lean{DN}, again by structural recursion.
+Successor codes diagonalize through the predecessor. Limit codes take limits.
+A code whose supremum ranges over an old \lean{Low c} diagonalizes along sample
+elements of \lean{Low c}. The samples are needed because these index types have
+no decidable equality, but the strength comes from the diagonal.
+\lean{universeLadderTree n} collapses $\varepsilon_{\Omega_{\mathrm{top}}+1}$ in
+universe $n{+}1$ and uses no axioms at all. Heuristically the nesting
+$\Omega_{\Omega_{\cdots}}$ deepens with~$n$, toward the first fixed point of
+$\alpha\mapsto\Omega_\alpha$, an inaccessible-like level.
+
+Input $n$ uses the ladder over \lean{Addr (universeLadderTree n)}, with the
+W-ranked lift hierarchy seeded with Contender~26's family. Proved:
+\lean{contender\_26\_lt\_\allowbreak contender\_27}, \lean{family26\_lt\_F27} and
+\lean{uvalue\_lt\_F27}. The definitions check in 2.8\,s and the proofs in 2.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1305,8 +1343,9 @@ done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
 collapsing (Contender~20), and $\psi_0(\Omega_\omega)$ in the limit of bounded
 Buchholz systems (Contender~21). Contender~22 iterates bounded systems over a
 base. Contender~25 sidesteps notations entirely: tree ordinals defined by
-structural recursion need no well-foundedness proof. Contender~26 adds tree-indexed levels. Beyond that
-lie inaccessible-like and Mahlo-like collapsing hierarchies, in which levels are
+structural recursion need no well-foundedness proof. Contender~26 adds tree-indexed levels, and Contender~27
+universes of level codes. Beyond that lie levels closed under codes for
+\emph{all} universes at once, and Mahlo-like collapsing hierarchies, in which levels are
 closed under level-forming operations. All of them are definable by structural
 recursion in Lean's inductive types. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
@@ -1350,6 +1389,7 @@ Contender & idea & informal size\\
 24 (Lean) & towers along well-founded indices, self-indexed rounds & fixed points of $x\mapsto\psi_0(\Omega_\omega x)$\\
 25 (Lean) & ladders over addresses in collapsed tree ordinals & $\psi_0(\varepsilon_{\Omega_\omega+n})$ at input $n$\\
 26 (Lean) & collapsing with tree-indexed levels & toward fixed points of $\alpha\mapsto\psi_0(\Omega_\alpha)$\\
+27 (Lean) & universes of level codes & toward the first fixed point of $\alpha\mapsto\Omega_\alpha$\\
 \bottomrule
 \end{tabular}
 \end{center}
