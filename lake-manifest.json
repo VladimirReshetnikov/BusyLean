@@ -1,0 +1,13 @@
+{"version": "1.2.0",
+ "packagesDir": ".lake/packages",
+ "packages":
+ [{"type": "path",
+   "scope": "",
+   "name": "big_number",
+   "manifestFile": "lake-manifest.json",
+   "inherited": false,
+   "dir": "proposals/P5-w-reflection/lean",
+   "configFile": "lakefile.toml"}],
+ "name": "busylean",
+ "lakeDir": ".lake",
+ "fixedToolchain": false}

@@ -1,0 +1,10 @@
+name = "busylean"
+defaultTargets = ["BusyLean"]
+
+# Proposal P5's W-language is a building block of Contender 6.
+[[require]]
+name = "big_number"
+path = "proposals/P5-w-reflection/lean"
+
+[[lean_lib]]
+name = "BusyLean"
