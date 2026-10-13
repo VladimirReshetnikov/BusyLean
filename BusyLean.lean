@@ -105,3 +105,6 @@ import BusyLean.SystemFT2.Trees
 import BusyLean.Ordinal.TreeLanguage4
 import BusyLean.Contender40
 import BusyLean.Comparison40
+import BusyLean.SystemFLT2.Trees
+import BusyLean.Contender41
+import BusyLean.Comparison41
