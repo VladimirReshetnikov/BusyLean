@@ -37,7 +37,12 @@ theorem contender7_branch_step_lt (k n : Nat) :
         match i with
         | 0 => contender7Branch k
         | _ + 1 => contender7RawBranch k)) n
-  exact stage_child_lt p5Family _ (Nat.zero_le n)
+  exact stage_child_lt p5Family
+    (fun i =>
+      match i with
+      | 0 => contender7Branch k
+      | _ + 1 => contender7RawBranch k)
+    (i := 0) (n := n) (Nat.zero_le n)
 
 /-- The autonomous payload at level `k` is child one of guarded branch `k+1`. -/
 theorem contender7_raw_lt_next (k : Nat) {n : Nat} (hn : 1 <= n) :
@@ -49,7 +54,12 @@ theorem contender7_raw_lt_next (k : Nat) {n : Nat} (hn : 1 <= n) :
         match i with
         | 0 => contender7Branch k
         | _ + 1 => contender7RawBranch k)) n
-  exact stage_child_lt p5Family _ hn
+  exact stage_child_lt p5Family
+    (fun i =>
+      match i with
+      | 0 => contender7Branch k
+      | _ + 1 => contender7RawBranch k)
+    (i := 1) (n := n) hn
 
 /-- Iterating the previous theorem gives a strict path from branch zero through
 any requested finite number of guarded branches. -/
