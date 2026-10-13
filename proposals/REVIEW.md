@@ -134,3 +134,87 @@ definition contains P5's family, and with it P5's seed guard
 a function of depth, not the constant `contender_5`. `test/Audit.lean`
 machine-checks that the definition never mentions `contender_5`, the `maxBy`
 winner, or either proposal-level contender constant.
+
+---
+
+# Second batch: P6–P10
+
+Five more archives arrived, all proposing a "Contender 7" on top of this
+repository's **Contender 6**, at base commit `86b3606`. That predates
+Contenders 7–11, so none of them knows about the System F, Fω or
+kind-polymorphic contenders.
+
+## Build and audit results
+
+Each proposal was built with Lean 4.34.0. P6 and P7 are overlays on a scratch
+git worktree at their base commit. P8 requires that commit through a GitHub
+`require`; its lakefile was pointed at the same local worktree, so nothing was
+fetched. P9 and P10 are standalone. P9 needed a one-line harness fix: its
+lakefile listed only `BusyLean.Contender6` as a root, so `BusyLean.Reflection`
+was never built. My own axiom checks were run; the proposals' scripts were not.
+
+| | Archive | Author's status | Definitions | Proofs | Axioms of `contender_7` / comparison | Clean build |
+|---|---|---|---|---|---|---:|
+| P6 | `BusyLean_Contender7.zip` | uncompiled | compile | **compile** | `propext` / `propext, Quot.sound` | 12.9 s |
+| P7 | `…_AutonomousReflection.zip` | CI-verified | compile | **compile** | `propext` / `propext` | 8.7 s |
+| P8 | `…_Ramified_Worlds.zip` | uncompiled | compile | fail (`Proofs.lean:174`, type mismatch) | n/a | n/a |
+| P9 | `…_Research.zip` | uncompiled | compile | fail (`Enumeration.lean`, 9 `omega` failures) | n/a | n/a |
+| P10 | `BusyLean_Semantic_Mirror.zip` | uncompiled | compile (`Mirror.Model`) | fail (`Growth.lean`, `Semantics.lean`) | n/a | n/a |
+
+P6 is correct as delivered, even though its author could not compile it. For
+P8–P10, the comparison theorems with Contender 6 are therefore unverified. I
+did not repair them, because the size comparison below does not depend on
+them.
+
+## What they build
+
+All five keep Contender 6's object language, P5's W-language with
+|L| ≈ ψ(Ω_ω), and add an amplifier.
+
+* **P6, operator reflection.** It lifts reflection from families to
+  *transformers* of families. `runTransformer op seed a` iterates a transformer
+  along a tree; `liftTransformer` runs it along Contender 6's index; and
+  `operatorStage` iterates the lift itself along another tree. Each lift
+  multiplies the number of reflection steps by the index height, so the
+  operator stage *exponentiates*: about |L|^|L|, against |L|·|L| for
+  Contender 6. All comparisons follow from one property, `Progressive op`
+  (every visible seed value lies below every output), so the machinery is
+  generic in the base reflection.
+* **P7, critical-point reflection.** Contender 6's index is a real Lean tree,
+  so explicit ordinal functions can be applied *on top of the language's own
+  ordinal*. It defines ω-powers, derivatives, a finite critical hierarchy, a
+  Γ-like common critical closure, and 42 higher derivatives above the encoded
+  index. The index height thus grows from |L| to a Γ-like closure above |L|.
+* **P8, P9, P10, worlds and models.** They expose a lower world's whole
+  hierarchy operator, or a model with its own tree generator, to the next
+  world's programs, then iterate or bootstrap along self-generated trees.
+  Each world can run the previous hierarchy along any tree it builds. The
+  trees themselves stay below |L|·ω, so each round multiplies by about |L|.
+  The bootstraps reach roughly |L|^ω, or an ε-type closure above |L|.
+
+## Comparison with the current contenders
+
+Every construction in this batch is an amplifier over a ψ(Ω_ω)-strength
+language. Their ordinals, from |L|^|L| up to Γ-type closures above |L|, lie far
+below the proof-theoretic ordinal of second-order arithmetic. By the "base
+language dominates" heuristic, all five are therefore **vastly smaller than
+Contender 7** (System F, ≈ f_{|Z₂|} at an input beyond Contender 6). They are
+smaller still than Contenders 8–11 (Fω, Fω reflected along trees,
+kind-polymorphic Fω, and its reflection). This comparison is informal: no
+theorem relates their constants to mine.
+
+## Ideas reused
+
+Two ideas are generic and compose with the stronger languages:
+
+1. **P6's operator-level reflection.** Instantiated with the kind-polymorphic
+   Fω reflection of Contender 11 as its base transformer, it is progressive by
+   the same one-line argument.
+2. **P7's explicit ordinal notations above the language-defined index.** They
+   serve as the tree along which the operator stage runs.
+
+Contender 12 combines both, with attribution in the source. The world/model
+constructions of P8–P10 require an object language that manipulates trees as
+data. The W-language qualifies, but System F, Fω and Fk do not, since they
+have no set-theoretic model. These ideas are recorded for a future
+tree-capable language.
