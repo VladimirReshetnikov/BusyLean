@@ -137,9 +137,13 @@ These are adapted from the [original rules](docs/name-the-biggest-number-master/
 3. **Axioms.** Only `propext` and `Quot.sound` (hence `funext`) are allowed.
    `Classical.choice`, `sorryAx` and custom axioms are not. Check with
    `#print axioms`. `native_decide` is not allowed either.
-4. **Time budgets.** From a clean build directory (the Lean core library
-   may be precompiled), the definition and everything it imports must check
-   in at most 15 s, and the proof in at most 60 s, on a reasonable machine.
+4. **Time budgets.** From a clean build directory, the new contender's
+   definition must check in at most 15 s and its proof in at most 60 s, on a
+   reasonable machine. The Lean core library may be precompiled, and so may
+   the modules of earlier accepted contenders, which were checked under their
+   own budgets. (Contenders build on their predecessors, so a fixed budget for
+   the whole stack would eventually be exhausted by history alone.) The check
+   script also reports the full clean-build time.
 5. **No laziness.** Do not use the constant `contender_N` itself to define
    `contender_(N+1)`, and beat it by a large margin. The previous contender's
    *construction* (for example its family of functions) may appear as an
@@ -159,10 +163,12 @@ With [elan](https://github.com/leanprover/elan) installed:
 python3 scripts/check.py
 ```
 
-This deletes the build directories, times the definition and proof phases
-against the budgets, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11) the definitions take about 12 s and the
-proofs about 7 s. Plain `lake build` also works, and
+This deletes the build directories, builds the previous contender, times the
+current contender's definition and proof phases against the budgets, reports
+the total, and runs [`test/Audit.lean`](test/Audit.lean).
+On an Intel i7-1355U (Windows 11), Contender 9's definition takes about 2 s
+and its proofs about 3 s; the full clean build of all contenders takes about
+28 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
