@@ -121,3 +121,5 @@ import BusyLean.Comparison45
 import BusyLean.Ordinal.RelUniverses
 import BusyLean.Contender46
 import BusyLean.Comparison46
+import BusyLean.Contender47
+import BusyLean.Comparison47
