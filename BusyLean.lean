@@ -108,3 +108,6 @@ import BusyLean.Comparison40
 import BusyLean.SystemFLT2.Trees
 import BusyLean.Contender41
 import BusyLean.Comparison41
+import BusyLean.Ordinal.RelCollapse
+import BusyLean.Contender42
+import BusyLean.Comparison42
