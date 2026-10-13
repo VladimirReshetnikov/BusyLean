@@ -1,0 +1,50 @@
+name: Contender 20 validation
+
+on:
+  push:
+    branches:
+      - research/contender20-autonomous-wtree-ladder
+  workflow_dispatch:
+
+jobs:
+  kernel-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Install Lean toolchain through elan
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          source "$HOME/.elan/env"
+          lean --version
+          lake --version
+
+      - name: Build Contender 20 definition
+        shell: bash
+        run: |
+          set -euxo pipefail
+          time lake build BusyLean.Contender20
+
+      - name: Build Contender 20 comparison
+        shell: bash
+        run: |
+          set -euxo pipefail
+          time lake build BusyLean.Comparison20
+
+      - name: Run W-tree ladder smoke test
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake env lean test/WTreeLadderSmoke.lean
+
+      - name: Run axiom and closure audit
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake env lean test/Contender20Audit.lean
