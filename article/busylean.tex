@@ -107,7 +107,9 @@ collapsed trees. Contender~32 turns the constructions into programs of a typed
 language over tree ordinals with a semantic interpreter, and takes all programs of
 bounded size. Contender~33 stacks the language on itself, and Contender~34 stacks
 it along tree ordinals. Contender~35 takes its trees from impredicative System~F
-programs, made well-founded by a reducibility candidate for trees.
+programs, made well-founded by a reducibility candidate for trees. Contender~36
+lets the ladder language build the trees, so each ladder defines the length of
+the next.
 \end{abstract}
 
 \tableofcontents
@@ -1541,6 +1543,44 @@ $\mathrm{family}_{34}$. Proved: \lean{contender\_34\_lt\_\allowbreak contender\_
 8.0\,s, which now includes compiling System~FT, and the proofs in 3.4\,s.
 
 %======================================================================
+\section{Contender 36: ladders that build their own length}
+
+Contender~35 takes trees from System~F. The ladder language over the
+addresses of a tree $t$ is much stronger than System~F, since it has a universe
+for every address. Contender~36 lets the ladder itself produce the next tree.
+
+\paragraph{The ladder over FT terms.} The kinds and types of the ladder
+language (\lean{SystemFL/Types.lean}) do not mention terms. So
+\lean{SystemFLT} reuses them and copies only typing, candidates, Church terms
+and the transfinite universes onto the terms of System~FT. No typing rule
+for the constructors is needed. A program of the Church tree type
+\[
+\mathsf{treeTy}=\forall X{:}\star.\ X\to(X\to X)\to((\mathsf{nat}\to X)\to X)\to X
+\]
+is applied, after erasure, to $\mathsf{con}_0,\mathsf{con}_1,\mathsf{con}_2$.
+Adequacy with $X$ interpreted by the tree candidate gives
+\lean{FLT.wt\_of\_treeTy}: the result is a well-founded tree, for every
+universe. This includes the universes \lean{wfUniv} over the addresses of any
+tree.
+
+\paragraph{Bootstrapping.} One step turns a tree into a longer one:
+\[
+\mathrm{ladderTree}(t)=\lim\bigl(t,\ \text{trees of all ladder programs of
+depth}\le n\text{ over }\mathrm{Addr}(t)\bigr).
+\]
+\lean{bootT} iterates the step along a tree index, with limits at limit
+nodes. At input $n$ the index and the start are both Contender~35's tree:
+$\mathrm{bootTree}(n)=\mathrm{bootT}_{\mathrm{ftTree}(n)}(\mathrm{ftTree}(n))$.
+The final ladder runs over its addresses, amplified by the W-ranked lift seeded
+with $\mathrm{family}_{35}$. Each ladder's programs thus define the length of
+the next ladder, so the construction approximates fixed points of the map
+from a tree to the trees definable over it.
+
+Proved: \lean{contender\_35\_lt\_\allowbreak contender\_36},
+\lean{family35\_lt\_F36} and \lean{btvalue\_lt\_F36}. The definitions check in
+9.7\,s and the proofs in 3.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1610,6 +1650,7 @@ Contender & idea & informal size\\
 33 (Lean) & the language stacked $n{+}1$ times on itself & languages over languages\\
 34 (Lean) & the language stacked along a collapsed tree & stacking height = tree\\
 35 (Lean) & trees built by System F programs (System FT) & impredicative trees\\
+36 (Lean) & ladder programs build the next ladder's tree, iterated along a tree & self-defined ladder lengths\\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 35
+## Current contender: Contender 36
+
+```lean
+def family35 (n : Nat) : Nat := F35 (F35 n)                  -- Contender 35 = family35 42
+def bootTree (n : Nat) : CTree := FLT.bootT family35 n (ftTree n) (ftTree n)
+def F36 (n : Nat) : Nat :=                                   -- BusyLean/Contender36.lean
+  wDiagonalLift (schedule36 n) (rank36 n) btTransformer (fun _ => family35) n n
+def contender_36 : Nat := F36 (F36 42)
+
+theorem contender_35_lt_contender_36 : contender_35 < contender_36   -- BusyLean/Comparison36.lean
+```
+
+**Ladders that build their own length.** [`SystemFLT/`](BusyLean/SystemFLT) is the
+ladder language over the terms of System FT. A ladder program of the Church tree
+type `∀X. X → (X → X) → ((nat → X) → X) → X`, applied to the inert constructors,
+is a well-founded tree (`FLT.wt_of_treeTy`). `FLT.ladderTree` joins a tree `t`
+with the trees of all ladder programs over `Addr t`, and `FLT.bootT` iterates this
+along a tree index. `bootTree n` iterates it along Contender 35's tree, and
+the final ladder runs over its addresses.
+
+| Theorem | Statement |
+|---|---|
+| `contender_35_lt_contender_36` | Contender 35 < Contender 36 |
+| `family35_lt_F36` | Contender 35's family is beaten at every input |
+| `btvalue_lt_F36` | every program of depth ≤ `n` over the addresses of `bootTree n` is below `F36 n` |
+| `FLT.wt_of_treeTy` | ladder programs of the Church tree type denote well-founded trees |
+
+## Contender 35
 
 ```lean
 def family34 (n : Nat) : Nat := F34 (F34 n)                  -- Contender 34 = family34 42
@@ -911,8 +938,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 35's definition modules take
-about 8 s (including System FT) and its proofs about 3.4 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 36's definition modules take
+about 10 s (including System FT and SystemFLT) and its proofs about 3 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -928,6 +955,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender6.lean`](BusyLean/Contender6.lean) | `index`, `p5Family`, `contender_6` (definitions) |
 | [`BusyLean/Comparison.lean`](BusyLean/Comparison.lean) | all Contender 6 theorems |
 | [`BusyLean/SystemF/`](BusyLean/SystemF) | System F: syntax, reduction, types, candidates (SN), Church terms, normalizer |
+| [`BusyLean/SystemFLT/`](BusyLean/SystemFLT) | the ladder language over System FT terms; `wt_of_treeTy` (Church-tree programs are well-founded trees) |
 | [`BusyLean/SystemFT/`](BusyLean/SystemFT) | System F with tree constructors: the tree candidate `WT`, `wt_of_typed`, tree extraction `toTree` |
 | [`BusyLean/Contender7.lean`](BusyLean/Contender7.lean) | `fvalue`, `reflectF`, `contender_7` (definitions) |
 | [`BusyLean/Comparison7.lean`](BusyLean/Comparison7.lean) | Contender 7 theorems |
@@ -968,6 +996,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender33.lean`](BusyLean/Contender33.lean), [`Comparison33.lean`](BusyLean/Comparison33.lean) | Contender 33 definitions and theorems |
 | [`BusyLean/Contender34.lean`](BusyLean/Contender34.lean), [`Comparison34.lean`](BusyLean/Comparison34.lean) | Contender 34 definitions and theorems |
 | [`BusyLean/Contender35.lean`](BusyLean/Contender35.lean), [`Comparison35.lean`](BusyLean/Comparison35.lean) | Contender 35 definitions and theorems |
+| [`BusyLean/Contender36.lean`](BusyLean/Contender36.lean), [`Comparison36.lean`](BusyLean/Comparison36.lean) | Contender 36 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1010,6 +1039,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 33 | Lean | this repository | the tree-ordinal language stacked on itself (each language is the next primitive) |
 | 34 | Lean | this repository | the language stacked along a collapsed tree ordinal |
 | 35 | Lean | this repository | ladder over trees built by impredicative System F programs |
+| 36 | Lean | this repository | ladder programs build the next ladder's tree, iterated along a tree |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
