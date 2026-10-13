@@ -58,3 +58,7 @@ import BusyLean.Comparison23
 import BusyLean.Ordinal.TowerAlong
 import BusyLean.Contender24
 import BusyLean.Comparison24
+import BusyLean.Ordinal.TreeAddress
+import BusyLean.Ordinal.TreeCollapse
+import BusyLean.Contender25
+import BusyLean.Comparison25
