@@ -15,6 +15,27 @@ theorem family41_lt_F42 (n : Nat) : family41 n < F42 n :=
     (Ordinal.le_hier (fun x => Nat.le_of_lt (input_lt_family41 x))
       (universalTree (family41 n)) (family41 n)).1
 
+/-- The positive universal-reflection branch is numerically live: its hierarchy
+value at the same base and index is a lower bound for `F42`.  Thus the new
+interpreter stack is not merely unreachable data hidden behind branch zero. -/
+theorem universal_stack_le_F42 (n : Nat) :
+    Ordinal.hier family41
+      (Ordinal.universalBoostT (readerTree (family41 n))
+        (base42 (family41 n)) (readerTree (family41 n)))
+      (family41 n) ≤ F42 n := by
+  unfold F42 universalTree
+  have h1 : 1 ≤ family41 n := by
+    exact Nat.succ_le_of_lt
+      (Nat.lt_of_le_of_lt (Nat.zero_le n) (input_lt_family41 n))
+  have h := Ordinal.le_maxUpTo
+    (fun i => Ordinal.hier family41
+      (if i = 0 then readerTree (family41 n)
+       else Ordinal.universalBoostT (readerTree (family41 n))
+         (base42 (family41 n)) (readerTree (family41 n)))
+      (family41 n))
+    h1
+  simpa using h
+
 /-- `F42` is strictly inflationary. -/
 theorem input_lt_F42 (n : Nat) : n < F42 n :=
   Nat.lt_trans (input_lt_family41 n) (family41_lt_F42 n)
