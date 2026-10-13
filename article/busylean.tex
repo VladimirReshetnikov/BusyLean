@@ -123,6 +123,8 @@ collapse a first-class closure inside the metalanguages. Contender~44 gives
 that closure collapsing levels indexed by trees.
 Contender~45 makes each stage of the construction the base primitive of the
 next, iterated along a tree.
+Contender~46 collapses the universes of codes of Contenders~27--31
+relative to the closure's operator.
 \end{abstract}
 
 \tableofcontents
@@ -1884,6 +1886,30 @@ $N=\mathrm{family}_{44}(n)$. Proved: \lean{family44\_lt\_F45} and
 1.3\,s and the proofs in 1.9\,s.
 
 %======================================================================
+\section{Contender 46: universes collapsed relative to the closure's operator}
+
+Contenders~27--31 build universes of level codes, universe operators and
+closure functionals of transfinite type. Until now they entered only through
+$\mathrm{boost}_{31}$, which finishes by collapsing $\varepsilon_{\Omega_{\mathrm{top}}+1}$
+of the next universe with fixed $\varepsilon$-steps. The countable level of
+that collapse is exactly the countable trees, so the collapse relativizes in
+the same way as $D$ and $D^L$ (\lean{RelUniverses.lean}): at level~0 the
+successor step is $\lim(\varepsilon^+x,\ J(\varepsilon^+x))$.
+$\mathrm{boost}^J_{31}(\Lambda)$ is Contender~31's construction over the index
+$\Lambda$, collapsed relative to $J$. The first-class closure becomes
+\[
+\mathrm{closeU}_N(J)(t)=\lim\bigl(\mathrm{closeL}_N(J)(t),\ \mathrm{boost}^J_{31}(t),\
+\mathrm{boost}^J_{31}(\Lambda^J_N(t))\bigr),
+\]
+so programs can collapse whole universes relative to operators they build.
+Contender~45's self-based iteration $\Theta$ is rerun with this closure along
+Contender~45's tree:
+$F_{46}(n)=h^{\mathrm{family}_{45}}_{\mathrm{univTree46}(N)}(N)$ with
+$N=\mathrm{family}_{45}(n)$. Proved: \lean{family45\_lt\_F46} and
+\lean{contender\_45\_lt\_\allowbreak contender\_46}. The definitions check in
+2.0\,s and the proofs in 2.4\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1963,6 +1989,7 @@ Contender & idea & informal size\\
 43 (Lean) & metalanguages whose closure collapses & $h_{\mathrm{collapseTree43}}$ over $F_{42}$\\
 44 (Lean) & closures with tree-indexed relative collapse & $h_{\mathrm{levelTree44}}$ over $F_{43}$\\
 45 (Lean) & the construction as its own base, iterated along a tree & $h_{\mathrm{thetaTree}}$ over $F_{44}$\\
+46 (Lean) & universes of codes collapsed relative to the operator & $h_{\mathrm{univTree46}}$ over $F_{45}$\\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 45
+## Current contender: Contender 46
+
+```lean
+def family45 (n : Nat) : Nat := F45 (F45 n)                  -- Contender 45 = family45 42
+def closeU (N : Nat) (J : CTree → CTree) (t : CTree) : CTree := -- BusyLean/Contender46.lean
+  .lim fun i => if i = 0 then closeL N J t
+    else if i = 1 then boost31J J t else boost31J J (relLevelRounds J N t)
+def thetaU (N : Nat) : CTree → CTree → CTree                 -- theta with closeU
+def univTree46 (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then thetaTree N else thetaU N (thetaTree N) (thetaTree N)
+def F46 (n : Nat) : Nat := hier family45 (univTree46 (family45 n)) (family45 n)
+def contender_46 : Nat := F46 (F46 42)
+
+theorem contender_45_lt_contender_46 : contender_45 < contender_46   -- BusyLean/Comparison46.lean
+```
+
+[`Ordinal/RelUniverses.lean`](BusyLean/Ordinal/RelUniverses.lean) collapses
+Contender 31's universe of codes relative to an operator `J`: the countable
+level of its final collapse applies `J` at every successor step
+(`U2.DNJ`, `boost31J`). The metalanguages' first-class closure gains this
+collapse, and Contender 45's self-based iteration is rerun with it.
+
+| Theorem | Statement |
+|---|---|
+| `contender_45_lt_contender_46` | Contender 45 < Contender 46 |
+| `family45_lt_F46` | Contender 45's family is beaten at every input |
+
+## Contender 45
 
 ```lean
 def family44 (n : Nat) : Nat := F44 (F44 n)                  -- Contender 44 = family44 42
@@ -1181,8 +1208,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 45's definition modules take
-about 1.3 s and its proofs about 1.9 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 46's definition modules take
+about 2.0 s and its proofs about 2.4 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1251,6 +1278,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender43.lean`](BusyLean/Contender43.lean), [`Comparison43.lean`](BusyLean/Comparison43.lean) | Contender 43 definitions and theorems |
 | [`BusyLean/Contender44.lean`](BusyLean/Contender44.lean), [`Comparison44.lean`](BusyLean/Comparison44.lean) | Contender 44 definitions and theorems |
 | [`BusyLean/Contender45.lean`](BusyLean/Contender45.lean), [`Comparison45.lean`](BusyLean/Comparison45.lean) | Contender 45 definitions and theorems |
+| [`BusyLean/Contender46.lean`](BusyLean/Contender46.lean), [`Comparison46.lean`](BusyLean/Comparison46.lean) | Contender 46 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1303,6 +1331,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 43 | Lean | this repository | metalanguages whose first-class closure also collapses |
 | 44 | Lean | this repository | closures with relative collapse over tree-indexed levels |
 | 45 | Lean | this repository | each stage of the construction is the base primitive of the next, along a tree |
+| 46 | Lean | this repository | universes of codes (Contenders 27–31) collapsed relative to the closure's operator |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
