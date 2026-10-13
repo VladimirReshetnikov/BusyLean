@@ -89,15 +89,19 @@ theorem transformer_lt_metaStep14 {op : Transformer}
     simpa [tree14, crown14] using hCrownRaw
   exact Nat.lt_trans hLeaf (by simpa [metaStep14] using hCrown)
 
-/-- The nontrivial autonomous core is also a visible child of every metastep.
-This makes the large schedule formally relevant rather than decorative. -/
-theorem coreStage_lt_metaStep14 {op : Transformer}
-    (hop : Progressive op) (seed : W.Family) {o n : Nat} (h1 : 1 ≤ n) :
-    operatorStage op coreTree14 seed 0 n < metaStep14 op seed o n := by
+/-- The nontrivial core of any crowned schedule is a visible child of the
+parent operator stage.  Instantiating `core := coreTree14` proves that the large
+autonomous schedule used by Contender 14 is mathematically relevant rather than
+decorative. -/
+theorem coreStage_lt_crowned14 {op : Transformer}
+    (hop : Progressive op) (core : BigNumber.WTree Nat) (seed : W.Family)
+    {o n : Nat} (h1 : 1 ≤ n) :
+    operatorStage op core seed 0 n <
+      operatorStage op (.node (crown14 core)) seed o n := by
   have hCore :=
-    operatorStage_child_lt op hop seed (crown14 coreTree14)
+    operatorStage_child_lt op hop seed (crown14 core)
       (i := 1) (o := o) (n := n) h1
-  simpa [tree14, metaStep14, crown14] using hCore
+  simpa [crown14] using hCore
 
 /-- Successive metalevels are strictly increasing at every visible input
 coordinate. -/
