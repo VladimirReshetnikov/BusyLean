@@ -1,0 +1,30 @@
+digraph Contender20 {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.2, nodesep=0.45, ranksep=0.65];
+  node [shape=box, style="rounded,filled", fillcolor="#f4f7fb", color="#34495e", fontname="DejaVu Sans", fontsize=10, margin="0.12,0.08"];
+  edge [color="#44546a", fontname="DejaVu Sans", fontsize=9, arrowsize=0.75];
+
+  family18 [label="family18\n(Contender 18 family)"];
+  F19 [label="F19\nfinite-rank large-Veblen\nhyperreflection"];
+  family19 [label="family19(n) = F19(F19 n)", fillcolor="#fff4d6"];
+  schedule19 [label="schedule19(n)"];
+  schedule20 [label="schedule20(n)\nautonomous hyper-closure", fillcolor="#eaf6ee"];
+  rank20 [label="rank20(n) : WTree Nat\nsecond autonomous hyper-closure", fillcolor="#e3f0ff"];
+  lTransformer [label="lTransformer\nlarge-Veblen ladder reflection"];
+  wdiag [label="wDiagonalLift\nW-ranked diagonal hyperreflection", fillcolor="#f6e8ff"];
+  F20 [label="F20(n)", fillcolor="#ffe5e5"];
+  C20 [label="contender_20 = F20(F20 42)", shape=doubleoctagon, fillcolor="#ffd1d1"];
+
+  family18 -> F19 [label="seed"];
+  schedule19 -> F19 [label="schedule"];
+  F19 -> family19 [label="double diagonal"];
+  schedule19 -> schedule20 [label="hyper(family19 n + 42)"];
+  schedule20 -> rank20 [label="hyper(family19 n + 42)"];
+  family19 -> wdiag [label="oracle family"];
+  lTransformer -> wdiag [label="base transformer"];
+  schedule20 -> wdiag [label="local schedule"];
+  rank20 -> wdiag [label="rank tree"];
+  wdiag -> F20 [label="evaluate at (n,n)"];
+  F20 -> C20 [label="outer diagonal"];
+
+  family19 -> F20 [label="formal: <", color="#a61b1b", fontcolor="#a61b1b", penwidth=1.5, constraint=false];
+}

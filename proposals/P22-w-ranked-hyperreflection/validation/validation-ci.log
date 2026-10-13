@@ -1,0 +1,106 @@
+commit: af98b262699f4d19712682fc9a0cffe2ed353217
+Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)
+Lake version 5.0.0-src+293d5d0 (Lean version 4.34.0)
+✔ [3/71] Built BusyLean.Ordinal.SortedLex (1.1s)
+✔ [4/71] Built BusyLean.Contender5 (1.1s)
+✔ [5/71] Built BusyLean.SystemF.Syntax (1.4s)
+✔ [6/71] Built BigNumber.Definitions (1.3s)
+✔ [7/71] Built BusyLean.Reflection (389ms)
+✔ [8/71] Built BigNumber.Proofs (564ms)
+✔ [9/71] Built BusyLean.Ordinal.SortedLexQ (769ms)
+✔ [10/71] Built BusyLean.Autonomous (685ms)
+✔ [11/71] Built BusyLean.SystemF.Types (608ms)
+✔ [12/71] Built BusyLean.Contender6 (402ms)
+✔ [13/71] Built BusyLean.SystemF.Reduction (712ms)
+✔ [14/71] Built BusyLean.ReflectionFacts (710ms)
+✔ [15/71] Built BusyLean.SystemF.Church (1.1s)
+✔ [16/71] Built BusyLean.MetaReflection (723ms)
+✔ [17/71] Built BusyLean.SystemFw.Types (2.1s)
+✔ [18/71] Built BusyLean.PortAgreement (1.9s)
+✔ [19/71] Built BusyLean.SystemF.Candidates (770ms)
+✔ [20/71] Built BusyLean.SystemF.Normalize (814ms)
+✔ [21/71] Built BusyLean.MetaReflectionFacts (618ms)
+✔ [22/71] Built BusyLean.HyperReflection (644ms)
+✔ [23/71] Built BusyLean.SystemFw.Typing (510ms)
+✔ [24/71] Built BusyLean.Comparison (737ms)
+✔ [25/71] Built BusyLean.Contender7 (924ms)
+✔ [26/71] Built BusyLean.SystemFk.Types (2.5s)
+✔ [27/71] Built BusyLean.HyperReflectionFacts (691ms)
+✔ [28/71] Built BusyLean.SystemFd.Types (3.8s)
+✔ [29/71] Built BusyLean.SystemFw.Candidates (1.1s)
+✔ [30/71] Built BusyLean.SystemFw.Church (1.5s)
+✔ [31/71] Built BusyLean.Comparison7 (514ms)
+✔ [32/71] Built BusyLean.SystemFk.Typing (563ms)
+✔ [33/71] Built BusyLean.SystemFd.Typing (592ms)
+✔ [34/71] Built BusyLean.SystemFL.Types (4.4s)
+✔ [35/71] Built BusyLean.Contender8 (547ms)
+✔ [36/71] Built BusyLean.SystemFk.Candidates (1.3s)
+✔ [37/71] Built BusyLean.SystemFk.Church (1.5s)
+✔ [38/71] Built BusyLean.Comparison8 (634ms)
+✔ [39/71] Built BusyLean.SystemFL.Typing (728ms)
+✔ [40/71] Built BusyLean.SystemFd.Candidates (1.9s)
+✔ [41/71] Built BusyLean.SystemFd.Church (2.1s)
+✔ [42/71] Built BusyLean.Contender9 (497ms)
+✔ [43/71] Built BusyLean.Contender10 (657ms)
+✔ [44/71] Built BusyLean.Comparison9 (757ms)
+✔ [45/71] Built BusyLean.Contender11 (427ms)
+✔ [46/71] Built BusyLean.Comparison10 (617ms)
+✔ [47/71] Built BusyLean.Contender12 (661ms)
+✔ [48/71] Built BusyLean.SystemFL.Church (2.3s)
+✔ [49/71] Built BusyLean.Comparison11 (720ms)
+✔ [50/71] Built BusyLean.Contender13 (593ms)
+✔ [51/71] Built BusyLean.Comparison12 (350ms)
+✔ [52/71] Built BusyLean.SystemFL.Candidates (3.0s)
+✔ [53/71] Built BusyLean.Comparison13 (270ms)
+✔ [54/71] Built BusyLean.SystemFL.Transfinite (412ms)
+✔ [55/71] Built BusyLean.Ordinal.OmegaPow (458ms)
+✔ [56/71] Built BusyLean.SystemFL.Ladder (835ms)
+✔ [57/71] Built BusyLean.Ordinal.Epsilon0 (664ms)
+✔ [58/71] Built BusyLean.Contender14 (526ms)
+✔ [59/71] Built BusyLean.Contender15 (440ms)
+✔ [60/71] Built BusyLean.Comparison14 (595ms)
+✔ [61/71] Built BusyLean.Contender16 (626ms)
+✔ [62/71] Built BusyLean.Comparison15 (582ms)
+✔ [63/71] Built BusyLean.Ordinal.Veblen (1.7s)
+✔ [64/71] Built BusyLean.Contender17 (530ms)
+✔ [65/71] Built BusyLean.Comparison16 (395ms)
+✔ [66/71] Built BusyLean.Comparison17 (398ms)
+✔ [67/71] Built BusyLean.Contender18 (440ms)
+✔ [68/71] Built BusyLean.Comparison18 (289ms)
+✔ [69/71] Built BusyLean.Ordinal.LargeVeblen (3.1s)
+✔ [70/71] Built BusyLean.Contender19 (296ms)
+✔ [71/71] Built BusyLean.Comparison19 (247ms)
+Build completed successfully (71 jobs).
+accepted base: 19.25 s
+✔ [56/58] Built BusyLean.TreeHyperReflection (244ms)
+✔ [57/58] Built BusyLean.TreeHyperReflectionFacts (248ms)
+✔ [58/58] Built BusyLean.Contender20 (237ms)
+Build completed successfully (58 jobs).
+definition phase: 0.84 s
+✔ [75/75] Built BusyLean.Comparison20 (242ms)
+Build completed successfully (75 jobs).
+proof phase: 0.35 s
+'BusyLean.spliceLifts' does not depend on any axioms
+'BusyLean.wDiagonalLift' depends on axioms: [propext]
+'BusyLean.wDiagonalLift_preservesProgressive' depends on axioms: [propext]
+'BusyLean.wDiagonalLift_strictlyInflationary' depends on axioms: [propext]
+'BusyLean.wDiagonalLift_child_lt' depends on axioms: [propext]
+'BusyLean.family19' depends on axioms: [propext, Quot.sound]
+'BusyLean.F20' depends on axioms: [propext, Quot.sound]
+'BusyLean.contender_20' depends on axioms: [propext, Quot.sound]
+'BusyLean.family19_lt_F20' depends on axioms: [propext, Quot.sound]
+'BusyLean.lvalue_lt_F20' depends on axioms: [propext, Quot.sound]
+'BusyLean.contender_19_lt_contender_20' depends on axioms: [propext, Quot.sound]
+BusyLean.contender_20: closure of 4186 constants avoids all 15 forbidden names
+BusyLean.wDiagonalLift_child_lt : ∀ (schedule : BigNumber.WTree Nat) (f : Nat → BigNumber.WTree Nat)
+  (base : BusyLean.Transformer),
+  BusyLean.Progressive base →
+    ∀ (seed : BusyLean.W.Family) {i o n : Nat},
+      i ≤ n →
+        BusyLean.wDiagonalLift schedule (f i) base seed 0 n <
+          BusyLean.wDiagonalLift schedule (BigNumber.WTree.node f) base seed o n
+BusyLean.family19_lt_F20 : ∀ (n : Nat), BusyLean.family19 n < BusyLean.F20 n
+@BusyLean.lvalue_lt_F20 : ∀ {n : Nat} {t : BusyLean.FL.CTm BusyLean.Ordinal.LargeVeblen},
+  t ∈ BusyLean.FL.lveblenLadderUpTo n →
+    BusyLean.FL.lvalue (BusyLean.packFamily fun x => BusyLean.family19) n t < BusyLean.F20 n
+BusyLean.contender_19_lt_contender_20 : BusyLean.contender_19 < BusyLean.contender_20

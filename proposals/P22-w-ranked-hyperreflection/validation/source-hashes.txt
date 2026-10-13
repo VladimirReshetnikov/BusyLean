@@ -1,0 +1,19 @@
+BusyLean Contender 20 source identity
+====================================
+
+Repository: VladimirReshetnikov/BusyLean
+Validated branch: research/w-ranked-contender20-20261013
+Validated commit: af98b262699f4d19712682fc9a0cffe2ed353217
+Workflow run: 38424692293
+
+The following are Git blob object IDs.  They match the validated branch exactly.
+
+1bc6d3e6499567b757da3a1e43cc1f2927fe335e  BusyLean/Comparison20.lean
+f574ed3e88341112d988951ef42520b4a14b8a10  BusyLean/Contender20.lean
+5b738c443e58a260b1e3e535a44064f19ee9d729  BusyLean/TreeHyperReflection.lean
+17010267d1a5c78edc92238ef00956d1337693c3  BusyLean/TreeHyperReflectionFacts.lean
+e40247b937121008e0c1e6b72ccc9ed4b209f4aa  test/Contender20Audit.lean
+
+Recompute locally from the packaged source with:
+
+  git hash-object lean/BusyLean/*.lean lean/test/Contender20Audit.lean

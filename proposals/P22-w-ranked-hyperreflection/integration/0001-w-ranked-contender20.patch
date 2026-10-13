@@ -1,0 +1,373 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index 0bf75e162614d0587feed4bce45d13467be706a2..3b6a0a5177a2d089dfeb50db8043754187c93ba4 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -42,3 +42,7 @@ import BusyLean.Ordinal.SortedLexQ
+ import BusyLean.Ordinal.LargeVeblen
+ import BusyLean.Contender19
+ import BusyLean.Comparison19
++import BusyLean.TreeHyperReflection
++import BusyLean.TreeHyperReflectionFacts
++import BusyLean.Contender20
++import BusyLean.Comparison20
+diff --git a/BusyLean/Comparison20.lean b/BusyLean/Comparison20.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..1bc6d3e6499567b757da3a1e43cc1f2927fe335e
+--- /dev/null
++++ b/BusyLean/Comparison20.lean
+@@ -0,0 +1,51 @@
++import BusyLean.Contender20
++import BusyLean.Comparison19
++
++/-! # Contender 20: comparison theorems -/
++
++namespace BusyLean
++
++open BusyLean.W
++
++/-- At every input, `F20` exceeds Contender 19's entire family. -/
++theorem family19_lt_F20 (n : Nat) : family19 n < F20 n :=
++  ((wDiagonalLift_preservesProgressive (schedule20 n) (rank20 n))
++    lTransformer lTransformer_progressive)
++    (fun _ => family19) 0 n n (Nat.zero_le n)
++
++/-- The single raw large-Veblen reflection step over the new seed is already
++strictly below the W-ranked construction. -/
++theorem raw_reflection_lt_F20 (n : Nat) :
++    reflectLFamily (fun _ => family19) n < F20 n :=
++  (wDiagonalLift_strictlyInflationary (schedule20 n) (rank20 n))
++    lTransformer lTransformer_progressive
++    (fun _ => family19) n n n (Nat.le_refl n)
++
++/-- Every large-Veblen-ladder program of depth `≤ n`, run with the packed
++Contender 19 family, is below `F20 n`. -/
++theorem lvalue_lt_F20 {n : Nat} {t : FL.CTm Ordinal.LargeVeblen}
++    (ht : t ∈ FL.lveblenLadderUpTo n) :
++    FL.lvalue (packFamily (fun _ => family19)) n t < F20 n :=
++  Nat.lt_trans (lvalue_lt_reflectLFamily (fun _ => family19) ht)
++    (raw_reflection_lt_F20 n)
++
++/-- Even the un-doubled function `F19` is pointwise below `F20`. -/
++theorem F19_lt_F20 (n : Nat) : F19 n < F20 n :=
++  Nat.lt_trans (input_lt_F19 (F19 n)) (family19_lt_F20 n)
++
++theorem input_lt_family19 (n : Nat) : n < family19 n :=
++  Nat.lt_trans (input_lt_F19 n) (input_lt_F19 (F19 n))
++
++theorem input_lt_F20 (n : Nat) : n < F20 n :=
++  Nat.lt_trans (input_lt_family19 n) (family19_lt_F20 n)
++
++/-- **The required comparison:** Contender 19 is strictly smaller than
++Contender 20. -/
++theorem contender_19_lt_contender_20 : contender_19 < contender_20 :=
++  Nat.lt_trans (family19_lt_F20 42) (input_lt_F20 (F20 42))
++
++/-- A convenient transitive comparison with the previous two contenders. -/
++theorem contender_18_lt_contender_20 : contender_18 < contender_20 :=
++  Nat.lt_trans contender_18_lt_contender_19 contender_19_lt_contender_20
++
++end BusyLean
+diff --git a/BusyLean/Contender20.lean b/BusyLean/Contender20.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..f574ed3e88341112d988951ef42520b4a14b8a10
+--- /dev/null
++++ b/BusyLean/Contender20.lean
+@@ -0,0 +1,58 @@
++import BusyLean.TreeHyperReflectionFacts
++import BusyLean.Contender19
++
++/-!
++# Contender 20: W-ranked hyperreflection over the large-Veblen ladder
++
++Contender 19 uses the finite rank hierarchy `diagonalLift schedule k`, with a
++rank `k` selected from Contender 18's family.  Here the hierarchy itself is
++indexed by an arbitrary well-founded `WTree Nat`.
++
++For input `n` we first turn Contender 19's construction into an oracle family
++
++```
++family19 n = F19 (F19 n).
++```
++
++We then build two autonomous trees above Contender 19's schedule.  The first is
++the local schedule traversed at every rank node.  The second is the rank tree
++of the new hierarchy.  Finally `wDiagonalLift` recursively splices all child
++ranks, pre-amplifies its base with that splice, and traverses the schedule using
++the same lower-rank lift.
++
++All definitions are closed and computable.  **Do not evaluate `contender_20`.**
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Contender 19's construction as a function of its input:
++`family19 42 = contender_19`. -/
++def family19 (n : Nat) : Nat := F19 (F19 n)
++
++/-- A local operator schedule placed autonomously above Contender 19's own
++schedule, with a self-fed number of higher derivatives. -/
++def schedule20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42)
++      (Autonomous.encode (schedule19 n)))
++
++/-- The W-valued rank of the lift hierarchy.  It is placed another autonomous
++closure above the local schedule rather than collapsed to a natural rank. -/
++def rank20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42)
++      (Autonomous.encode (schedule20 n)))
++
++/-- W-ranked hyperreflection of the large-Veblen ladder, seeded with Contender
++19's family. -/
++def F20 (n : Nat) : Nat :=
++  wDiagonalLift (schedule20 n) (rank20 n)
++    lTransformer (fun _ => family19) n n
++
++/-- **Contender 20.** Never evaluate it. -/
++def contender_20 : Nat := F20 (F20 42)
++
++end BusyLean
+diff --git a/BusyLean/TreeHyperReflection.lean b/BusyLean/TreeHyperReflection.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..5b738c443e58a260b1e3e535a44064f19ee9d729
+--- /dev/null
++++ b/BusyLean/TreeHyperReflection.lean
+@@ -0,0 +1,49 @@
++import BusyLean.HyperReflection
++
++/-!
++# W-ranked diagonal hyperreflection
++
++`diagonalLift schedule k` is indexed by a natural-number rank.  This module
++replaces that finite rank by an arbitrary well-founded `WTree Nat`.
++
++At a leaf we use the ordinary autonomous lift.  At a node, all immediate
++sub-ranks are assembled into a single lift by `spliceLifts`.  That lower-rank
++lift is then used twice, exactly as in one successor step of finite diagonal
++hyperreflection:
++
++* it pre-amplifies the base transformer; and
++* it is the local lifting operation at every node of the fixed schedule.
++
++The definition is structural recursion on the rank tree.  It is executable and
++uses no noncomputable features or axioms.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Assemble a countable family of transformer lifts into one lift.
++
++For an output coordinate `i`, the resulting transformed operator selects lift
++`i` and uses that transformer's canonical output coordinate `0`.  This is the
++lift-level analogue of `spliceTransformers`.
++-/
++def spliceLifts (lifts : Nat → TransformerLift) : TransformerLift :=
++  fun base => spliceTransformers (fun i => lifts i base)
++
++/-- Diagonal hyperreflection indexed by an arbitrary well-founded rank tree.
++
++A leaf is rank zero.  At a node, the family of all child-rank lifts is spliced
++into one lift `lower`; the parent then performs a full `stageLift` with `lower`,
++after first applying `lower` to the base.  Thus every child rank occurs both in
++the local operator family and in the pre-amplified seed.
++-/
++def wDiagonalLift (schedule : WTree Nat) : WTree Nat → TransformerLift
++  | .leaf => liftTransformer
++  | .node f =>
++      let lower : TransformerLift :=
++        spliceLifts (fun i => wDiagonalLift schedule (f i))
++      fun base => stageLift lower (lower base) schedule
++
++end BusyLean
+diff --git a/BusyLean/TreeHyperReflectionFacts.lean b/BusyLean/TreeHyperReflectionFacts.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..17010267d1a5c78edc92238ef00956d1337693c3
+--- /dev/null
++++ b/BusyLean/TreeHyperReflectionFacts.lean
+@@ -0,0 +1,109 @@
++import BusyLean.TreeHyperReflection
++import BusyLean.HyperReflectionFacts
++
++/-!
++# Growth theorems for W-ranked diagonal hyperreflection
++
++The arguments deliberately avoid monotonicity in oracle families.  Reflection
++is not monotone because programs may inspect and branch on oracle values.
++Every inequality is instead witnessed by an explicit child, splice coordinate,
++or occurrence of the base transformer.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Splicing lifts preserves progressivity when every component lift does. -/
++theorem spliceLifts_preservesProgressive {lifts : Nat → TransformerLift}
++    (hlifts : ∀ i, PreservesProgressive (lifts i)) :
++    PreservesProgressive (spliceLifts lifts) := by
++  intro base hbase
++  exact spliceTransformers_progressive (fun i => hlifts i base hbase)
++
++/-- Splicing strictly inflationary lifts is strictly inflationary.
++
++The requested output coordinate selects the corresponding component lift, so
++no monotonicity or comparison between distinct components is needed.
++-/
++theorem spliceLifts_strictlyInflationary {lifts : Nat → TransformerLift}
++    (hlifts : ∀ i, StrictlyInflationary (lifts i)) :
++    StrictlyInflationary (spliceLifts lifts) := by
++  intro base hbase seed i o n hi
++  exact hlifts o base hbase seed i 0 n hi
++
++/-- Every W-rank preserves progressivity. -/
++theorem wDiagonalLift_preservesProgressive (schedule : WTree Nat) :
++    (rank : WTree Nat) → PreservesProgressive (wDiagonalLift schedule rank)
++  | .leaf => liftTransformer_preservesProgressive
++  | .node f => by
++      let lower : TransformerLift :=
++        spliceLifts (fun i => wDiagonalLift schedule (f i))
++      have hlower : PreservesProgressive lower := by
++        apply spliceLifts_preservesProgressive
++        intro i
++        exact wDiagonalLift_preservesProgressive schedule (f i)
++      intro base hbase
++      change Progressive (stageLift lower (lower base) schedule)
++      exact stageLift_progressive lower hlower
++        (lower base) (hlower base hbase) schedule
++
++/-- Every W-rank strictly exceeds its original base transformer. -/
++theorem wDiagonalLift_strictlyInflationary (schedule : WTree Nat) :
++    (rank : WTree Nat) → StrictlyInflationary (wDiagonalLift schedule rank)
++  | .leaf => liftTransformer_strictlyInflationary
++  | .node f => by
++      let lower : TransformerLift :=
++        spliceLifts (fun i => wDiagonalLift schedule (f i))
++      have hlowerPres : PreservesProgressive lower := by
++        apply spliceLifts_preservesProgressive
++        intro i
++        exact wDiagonalLift_preservesProgressive schedule (f i)
++      have hlowerStrict : StrictlyInflationary lower := by
++        apply spliceLifts_strictlyInflationary
++        intro i
++        exact wDiagonalLift_strictlyInflationary schedule (f i)
++      intro base hbase seed i o n hi
++      change base seed i n <
++        stageLift lower (lower base) schedule seed o n
++      have hfirst : base seed i n < lower base seed i n :=
++        hlowerStrict base hbase seed i i n hi
++      have hbase' : Progressive (lower base) :=
++        hlowerPres base hbase
++      have hsecond : lower base seed i n <
++          stageLift lower (lower base) schedule seed o n :=
++        base_lt_stageLift lower hlowerPres hlowerStrict
++          (lower base) hbase' schedule seed i o n hi
++      exact Nat.lt_trans hfirst hsecond
++
++/-- Every visible child rank is strictly below its parent rank.
++
++Coordinate `i` of the spliced lower lift names child `i`; the parent stage then
++strictly exceeds that lower lift.  This theorem is the formal content behind
++treating `WTree Nat` as a transfinite rank notation rather than merely a data
++parameter.
++-/
++theorem wDiagonalLift_child_lt (schedule : WTree Nat)
++    (f : Nat → WTree Nat) (base : Transformer) (hbase : Progressive base)
++    (seed : Family) {i o n : Nat} (hi : i ≤ n) :
++    wDiagonalLift schedule (f i) base seed 0 n <
++      wDiagonalLift schedule (.node f) base seed o n := by
++  let lower : TransformerLift :=
++    spliceLifts (fun j => wDiagonalLift schedule (f j))
++  have hlowerPres : PreservesProgressive lower := by
++    apply spliceLifts_preservesProgressive
++    intro j
++    exact wDiagonalLift_preservesProgressive schedule (f j)
++  have hlowerStrict : StrictlyInflationary lower := by
++    apply spliceLifts_strictlyInflationary
++    intro j
++    exact wDiagonalLift_strictlyInflationary schedule (f j)
++  have hbase' : Progressive (lower base) :=
++    hlowerPres base hbase
++  change lower base seed i n <
++    stageLift lower (lower base) schedule seed o n
++  exact base_lt_stageLift lower hlowerPres hlowerStrict
++    (lower base) hbase' schedule seed i o n hi
++
++end BusyLean
+diff --git a/test/Contender20Audit.lean b/test/Contender20Audit.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..e40247b937121008e0c1e6b72ccc9ed4b209f4aa
+--- /dev/null
++++ b/test/Contender20Audit.lean
+@@ -0,0 +1,64 @@
++import BusyLean.Comparison20
++import Lean
++
++/-!
++# Contender 20 audit
++
++This focused audit checks the new definitions and comparison theorem, and
++verifies that `contender_20` uses Contender 19's construction but not the
++constant `contender_19` (or any earlier contender constant).
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through types and values. -/
++def contender20ConstClosure (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant is in the closure of the first one. -/
++elab "#contender20_assert_not_in_closure " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := contender20ConstClosure env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.spliceLifts
++#print axioms BusyLean.wDiagonalLift
++#print axioms BusyLean.wDiagonalLift_preservesProgressive
++#print axioms BusyLean.wDiagonalLift_strictlyInflationary
++#print axioms BusyLean.wDiagonalLift_child_lt
++#print axioms BusyLean.family19
++#print axioms BusyLean.F20
++#print axioms BusyLean.contender_20
++#print axioms BusyLean.family19_lt_F20
++#print axioms BusyLean.lvalue_lt_F20
++#print axioms BusyLean.contender_19_lt_contender_20
++
++#contender20_assert_not_in_closure BusyLean.contender_20 :
++  BusyLean.contender_19 BusyLean.contender_18 BusyLean.contender_17
++  BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.wDiagonalLift_child_lt
++#check @BusyLean.family19_lt_F20
++#check @BusyLean.lvalue_lt_F20
++#check @BusyLean.contender_19_lt_contender_20

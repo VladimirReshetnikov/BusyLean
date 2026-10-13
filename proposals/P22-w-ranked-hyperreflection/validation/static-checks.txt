@@ -1,0 +1,17 @@
+Static and packaging checks
+Date: 2026-10-13
+
+Forbidden Lean feature tokens after stripping comments and strings:
+  no matches
+
+Source line counts:
+    51  lean/BusyLean/Comparison20.lean
+    58  lean/BusyLean/Contender20.lean
+    49  lean/BusyLean/TreeHyperReflection.lean
+   109  lean/BusyLean/TreeHyperReflectionFacts.lean
+    64  lean/test/Contender20Audit.lean
+
+Patch application check: success
+Article PDF pages: 14
+Article PDF preflight: openable, unencrypted, non-scanned
+Article visual inspection: 14 rendered pages reviewed; no clipping or overlaps found after revision

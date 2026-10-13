@@ -1,0 +1,6 @@
+PDF: /mnt/data/BusyLean_Contender20_WRanked_Hyperreflection/article/contender20_w_ranked.pdf
+Pages: 14
+Encrypted: False
+Openable (PyMuPDF): True
+Likely scanned: False
+XFA present: False
