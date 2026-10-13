@@ -63,11 +63,10 @@ theorem acc_follow (root : WTree Nat) :
       | root =>
           simp [childLt] at hb
       | child q i =>
-          have hq : q = p :=
-            of_decide_eq_true (Bool.and_eq_true.mp hb).1
+          simp only [childLt, Bool.and_eq_true] at hb
+          have hq : q = p := of_decide_eq_true hb.1
           subst q
-          have hv : valid root (.child p i) = true :=
-            (Bool.and_eq_true.mp hb).2
+          have hv : valid root (.child p i) = true := hb.2
           simp [valid, follow, hp] at hv
   | .node f, p, hp => by
       refine Acc.intro p ?_
@@ -76,8 +75,8 @@ theorem acc_follow (root : WTree Nat) :
       | root =>
           simp [childLt] at hb
       | child q i =>
-          have hq : q = p :=
-            of_decide_eq_true (Bool.and_eq_true.mp hb).1
+          simp only [childLt, Bool.and_eq_true] at hb
+          have hq : q = p := of_decide_eq_true hb.1
           subst q
           exact acc_follow root (f i) (.child p i) (by
             simp [follow, hp])
@@ -85,7 +84,7 @@ theorem acc_follow (root : WTree Nat) :
 /-- The immediate-valid-child relation is well-founded for every `WTree`. -/
 theorem childLt_wf (root : WTree Nat) :
     WellFounded (fun b a => childLt root b a = true) := by
-  intro p
+  refine ⟨fun p => ?_⟩
   cases hp : follow root p with
   | none =>
       refine Acc.intro p ?_
@@ -94,11 +93,10 @@ theorem childLt_wf (root : WTree Nat) :
       | root =>
           simp [childLt] at hb
       | child q i =>
-          have hq : q = p :=
-            of_decide_eq_true (Bool.and_eq_true.mp hb).1
+          simp only [childLt, Bool.and_eq_true] at hb
+          have hq : q = p := of_decide_eq_true hb.1
           subst q
-          have hv : valid root (.child p i) = true :=
-            (Bool.and_eq_true.mp hb).2
+          have hv : valid root (.child p i) = true := hb.2
           simp [valid, follow, hp] at hv
   | some cur =>
       exact acc_follow root cur p hp
