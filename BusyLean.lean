@@ -130,3 +130,6 @@ import BusyLean.Comparison49
 import BusyLean.SystemFLT2.Numbers
 import BusyLean.Contender50
 import BusyLean.Comparison50
+import BusyLean.Ordinal.PrimLanguage
+import BusyLean.Contender51
+import BusyLean.Comparison51
