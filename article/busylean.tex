@@ -60,8 +60,9 @@ that one proposal's re-implementation of the old language agrees with the exact
 port. We then construct Contender~7: System~F with Contender~6 as an oracle.
 Its strong normalization is proved inside Lean by Girard's reducibility
 candidates, which is possible because Lean's \texttt{Prop} is impredicative,
-and normalization runs as a certified total function. The next rungs of the
-ladder are System~F$_\omega$ and the Calculus of Constructions.
+and normalization runs as a certified total function. Contender~8 adds type
+operators (System~F$_\omega$), with candidates lifted to kinds and a sound,
+fuel-bounded type checker. The next rung is the Calculus of Constructions.
 \end{abstract}
 
 \tableofcontents
@@ -324,25 +325,77 @@ Nobody has computed it, but it lies far beyond every ordinal named in this
 article.
 
 %======================================================================
-\section{Roadmap}
+\section{Contender 8: type operators}
 
-\paragraph{System F$_\omega$.} Adding type operators (kinds
-$\kappa::=*\mid\kappa\to\kappa$) gives the strength of higher-order arithmetic.
-The candidate method extends: a type constructor of kind $\kappa\to\kappa'$ is
-interpreted as a function between candidate spaces, defined by recursion on
-kinds. Type equality now includes $\beta$-conversion of type operators, so
-Church-style checking needs type normalization, which is itself the
-normalization of the simply typed $\lambda$-calculus.
+System~F$_\omega$ adds \emph{type operators}. Kinds are
+$\kappa::=\star\mid\kappa\to\kappa$; type constructors are simply typed
+$\lambda$-terms over kinds, with $\to$ and $\forall\kappa$ as constants of
+kind~$\star$. Programs may now abstract over type operators. A typical example
+is $\Lambda F{:}\star\to\star.\,\lambda x{:}F\,\mathtt{nat}.\,x$. The numeric
+functions definable in F$_\omega$ are those provably total in higher-order
+arithmetic, beyond second-order arithmetic.
+
+\subsection{Candidates over kinds}
+The semantic domain is defined by recursion on kinds:
+$\mathrm{Sem}(\star)=\mathrm{Cand}$ and
+$\mathrm{Sem}(\kappa_1\to\kappa_2)=\mathrm{Sem}(\kappa_1)\to\mathrm{Sem}(\kappa_2)$,
+with the arrow on the right being an ordinary Lean function type. A type
+operator therefore \emph{denotes a function on candidates}, and type-level
+$\beta$-reduction is literally function application. The interpretation
+recurses on syntax at an \emph{expected kind}, returning a default element on
+kind mismatch. This is the same dynamic-cast idea as the raw interpreters of
+Contenders 5 and~6, and it keeps the definition structural. Type application
+records its argument's kind for this purpose. The substitution lemma, the
+instantiation lemma and the invariance of the interpretation under
+$\beta$-conversion are proved for well-kinded types. The beta case of
+invariance is one line: function application plus the instantiation lemma.
+
+\begin{theorem}[\lean{Fw.sn\_of\_typed}]
+Every term typable in System~F$_\omega$ with the oracle is strongly normalizing,
+using only \lean{propext} and \lean{Quot.sound}.
+\end{theorem}
+
+\subsection{Deciding type equality, soundly}
+Church-style checking must compare types up to $\beta$. Instead of proving a
+second normalization theorem for the type level, the checker compares
+\emph{fuel-bounded} normal forms. Every normal-order step is a genuine
+$\beta$-step, so equal results witness joinability, and \lean{Fw.infer\_sound}
+inserts the corresponding conversions. A program needing more fuel is merely
+rejected. That loses programs but never admits an ill-typed one, and
+Contender~8 uses the syntax budget as the fuel. The smoke test checks
+$(\lambda x{:}(\lambda X{:}\star.X)\,\mathtt{nat}.\,x)\,\overline{3}\mapsto 3$
+(rejected with fuel~0), and quantification over an operator,
+$(\Lambda F{:}\star{\to}\star.\lambda x{:}F\,\mathtt{nat}.x)\,[\lambda X.X]\,\overline5\mapsto5$.
+
+\subsection{The contender}
+\begin{lstlisting}
+def family7 (n : ℕ) : ℕ := F7 (F7 n)      -- family7 42 = contender_7
+def F8 (n : ℕ) : ℕ := reflectFw family7 n
+def contender_8 : ℕ := F8 (F8 42)
+\end{lstlisting}
+A first attempt used \lean{F7} itself as the oracle and tried to compare
+\lean{F7 (F7 42)} with \lean{F8 (F8 42)}. That needs monotonicity of
+reflection, which fails. Taking Contender~7's whole construction as the
+family makes the comparison immediate:
+\lean{family7 42 < F8 42 < F8 (F8 42)}.
+
+%======================================================================
+\section{Roadmap}
 
 \paragraph{The Calculus of Constructions.} Dependent types on top of
 F$_\omega$ is the system behind Loader's number, the largest well-known
-computable googologism. Its normalization proof (Coquand, Geuvers) also uses
-candidates, now indexed by the dependent structure.
+computable googologism. Its normalization proof (Coquand; Geuvers) also uses
+candidates, now indexed by the dependent structure. Type checking requires
+term normalization inside types, which the fuel-bounded approach of
+Contender~8 handles soundly in the same way.
 
-\paragraph{Amplifiers.} The reflection machinery of Contender~6 applies to any
-total language with an oracle. A forest reflection along trees definable in
-System~F would add a multiplicative factor. That is modest compared to the
-next rung of the ladder, which remains the priority.
+\paragraph{Universes and inductive types.} Beyond CoC lie predicative
+universes and inductive families. Lean's own type theory is the far horizon of
+this ladder, since Lean cannot prove its own normalization.
+
+\paragraph{Amplifiers.} Reflection along language-definable trees
+(Contender~6) applies to any total language with an oracle, at a
+multiplicative gain. The next rung of the ladder remains the priority.
 
 %======================================================================
 \section{Status}
@@ -355,7 +408,8 @@ Contender & idea & informal size\\
 5 (Coq) & System T, depth 42 & $f_{<\varepsilon_0}(42)$\\
 6 (Lean) & W-language, reflected along its own trees & $f_{\psi(\Omega_\omega)^2}(42)$\\
 7 (Lean) & System F with Contender 6 as oracle & $f_{|\mathsf{Z}_2|}(>\!C_6)$\\
-8 (planned) & System F$_\omega$ & higher-order arithmetic\\
+8 (Lean) & System F$_\omega$ with Contender 7 as oracle & $f_{|\mathsf{Z}_\omega|}(>\!C_7)$\\
+9 (planned) & Calculus of Constructions & Loader-class\\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -9,7 +9,38 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 7
+## Current contender: Contender 8
+
+```lean
+def family7 (n : Nat) : Nat := F7 (F7 n)                  -- Contender 7 = family7 42
+def F8 (n : Nat) : Nat := Fw.reflectFw family7 n          -- BusyLean/Contender8.lean
+def contender_8 : Nat := F8 (F8 42)
+
+theorem contender_7_lt_contender_8 : contender_7 < contender_8   -- BusyLean/Comparison8.lean
+```
+
+`reflectFw f n` exceeds `f n` and the value of every closed **System Fω**
+program of enumeration depth `≤ n` with the Church numeral type. Fω adds
+*type operators* (kinds `★ | κ → κ`) to System F, reaching the strength of
+higher-order arithmetic.
+
+* **Normalization** (`Fw.sn_of_typed`): Girard's candidates lifted to kinds.
+  The semantic domain of kind `κ₁ → κ₂` is the type of Lean functions between
+  domains, so type-level β is literally function application.
+* **Type checking** (`Fw.infer_sound`) decides type equality by comparing
+  fuel-bounded type normal forms. It is sound (accepted programs are typable)
+  and uses the syntax budget as fuel.
+* The oracle is Contender 7's family, which Fω can amplify.
+
+| Theorem | Statement |
+|---|---|
+| `Fw.sn_of_typed` | every System Fω term (with oracle) is strongly normalizing |
+| `Fw.infer_sound` | the fuel-bounded type checker is sound |
+| `contender_7_lt_contender_8` | Contender 7 < Contender 8 |
+| `family7_lt_F8` | Contender 7's family is beaten at every input |
+| `fvalue_lt_contender_8` | every Fω program of depth ≤ `F8 42` is exceeded |
+
+## Contender 7
 
 ```lean
 def F7 (n : Nat) : Nat := F.reflectF finalFamily n        -- BusyLean/Contender7.lean
@@ -130,8 +161,8 @@ python3 scripts/check.py
 
 This deletes the build directories, times the definition and proof phases
 against the budgets, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11) the definitions take about 11 s and the
-proofs about 9 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11) the definitions take about 12 s and the
+proofs about 7 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -148,6 +179,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/SystemF/`](BusyLean/SystemF) | System F: syntax, reduction, types, candidates (SN), Church terms, normalizer |
 | [`BusyLean/Contender7.lean`](BusyLean/Contender7.lean) | `fvalue`, `reflectF`, `contender_7` (definitions) |
 | [`BusyLean/Comparison7.lean`](BusyLean/Comparison7.lean) | Contender 7 theorems |
+| [`BusyLean/SystemFw/`](BusyLean/SystemFw) | System Fω: kinds and type β, typing, candidates over kinds (SN), sound checker |
+| [`BusyLean/Contender8.lean`](BusyLean/Contender8.lean), [`Comparison8.lean`](BusyLean/Comparison8.lean) | Contender 8 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the five reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -161,6 +194,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 5 | Coq | samuelgruetter | largest STLC + natural recursion (System T) numeral of depth 42 |
 | 6 | Lean | this repository | forest reflection over System T + finite-type W-types, along the language's own trees; it combines ideas from proposals P5, P2 and P4 |
 | 7 | Lean | this repository | System F (impredicative polymorphism) with Contender 6 as oracle; strong normalization proved in Lean |
+| 8 | Lean | this repository | System Fω (type operators) with Contender 7 as oracle; candidates over kinds |
 
 Proposals P1–P5 were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
