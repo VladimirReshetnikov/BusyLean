@@ -1,0 +1,10 @@
+# Build harness added during review (not part of the original submission).
+name = "reflection_tree_contender"
+defaultTargets = ["ReflectionTree"]
+
+[[lean_lib]]
+name = "ReflectionTree"
+srcDir = "lean"
+roots = ["Baseline", "Trees", "Oracle", "Hierarchy", "Enumeration", "Diagonal",
+         "OracleFacts", "TreeGrowth", "NumericTreeGrowth", "TreeMargin",
+         "Comparison", "Checks", "Main"]

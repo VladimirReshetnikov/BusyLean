@@ -1,0 +1,9 @@
+# Build harness added during review (not part of the original submission).
+name = "lean_contender_6"
+defaultTargets = ["Contender6"]
+
+[[lean_lib]]
+name = "Contender6"
+srcDir = "lean"
+roots = ["Original", "Trees", "Reflection", "Hierarchy", "Arboreal", "Forest",
+         "Preliminary", "ForestHierarchy", "Contender", "Smoke", "Audit"]
