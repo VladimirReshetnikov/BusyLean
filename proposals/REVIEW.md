@@ -450,3 +450,42 @@ The transfinite rank is a genuine improvement of the amplifier, and it composes
 with any ladder. **Adopted** in Contender 23: `TreeHyperReflection` and its
 facts are taken unchanged, with attribution, and applied to Contender 22's
 tower ladders.
+
+# Late arrival: P23
+
+`BusyLean_Contender20_ThirdOrder_Hyperreflection.zip` proposes a "Contender
+20" over Contender 19 (base commit `64d31a0`). It arrived after this
+repository's Contenders 20–24.
+
+## Build and audit
+
+| | Author's status | Definitions | Proofs | Axioms (`contender_20`, comparison, every new constant) |
+|---|---|---|---|---|
+| P23 | scripted, kernel replay claimed by harness | compile, 2.4 s | fail at `SuperReflectionFacts.lean:202` | n/a as submitted |
+
+The failure has the same pattern as P18's. `simpa using
+superIterate_step_lt … 0 …` normalizes `superIterate schedule 0 initial`
+differently from the goal's `initial`, although the two are definitionally
+equal. Using the term directly (tested on the scratch worktree only; the
+imported sources are unmodified) makes the whole development compile. The
+audit then passes: axioms `propext, Quot.sound`, and the closure (4,196
+constants) avoids `contender_5` … `contender_19`.
+
+## What it builds
+
+A third type level: `LiftTransformer := TransformerLift → TransformerLift`.
+`promoteLift schedule lift` is one step of the diagonal lift hierarchy.
+`superClosure` traverses the schedule *at the level of lifts*, applying that
+step at every node. `superIterate` repeats this `family19 n + 1` times,
+starting from a self-ranked `diagonalLift`. The result is applied to
+large-Veblen ladder reflection, and a final reflection is taken over the whole
+family.
+
+## Comparison
+
+It proves `contender_19 < contender_20` for its own number. Traversing the
+schedule at the level of lifts gives a lift hierarchy of rank about the
+schedule's ordinal, iterated finitely. That is the same class of amplifier as
+P22's W-tree rank, which Contender 23 already uses with a rank *above* the
+schedule. It keeps Contender 19's language, so it is informally below this
+repository's Contenders 20–24. Nothing new is adopted.
