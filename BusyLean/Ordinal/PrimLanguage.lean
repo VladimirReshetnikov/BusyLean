@@ -162,3 +162,18 @@ def ptlStack (P : List TL.Ty) (σ : TL.Env P) : CTree → (CTree → CTree) → 
   | .supH _ => ptlLift P σ
 
 end BusyLean.Ordinal
+
+namespace BusyLean.Ordinal
+
+namespace PTL
+
+/-- Closed programs of type `nat` and size `≤ n` over the primitives, evaluated. -/
+def natsUpTo (P : List TL.Ty) (σ : TL.Env P) (n : Nat) : List Nat :=
+  (rawsUpTo P.length n).filterMap fun r =>
+    match infer P [] r with
+    | some ⟨.nat, t⟩ => some (t.eval σ ())
+    | _ => none
+
+end PTL
+
+end BusyLean.Ordinal
