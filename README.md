@@ -9,7 +9,36 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 17
+## Current contender: Contender 18
+
+```lean
+def family17 (n : Nat) : Nat := F17 (F17 n)                  -- Contender 17 = family17 42
+def F18 (n : Nat) : Nat :=                                   -- BusyLean/Contender18.lean
+  diagonalLift (schedule18 n) (family17 n + 1) gTransformer (fun _ => family17) n n
+def contender_18 : Nat := F18 (F18 42)
+
+theorem contender_17_lt_contender_18 : contender_17 < contender_18   -- BusyLean/Comparison18.lean
+```
+
+The ladder of universes now has length **`Γ₀`**. Its atoms are hereditarily
+sorted binary Veblen terms ([`Ordinal/Veblen.lean`](BusyLean/Ordinal/Veblen.lean)),
+compared by Veblen's rule (`φ(a,b) < φ(c,d)` iff `a<c ∧ b<φ(c,d)`, or
+`a=c ∧ b<d`, or otherwise `φ(a,b) ≤ d`).
+
+`Veblen.acc_phi` is Schütte's argument, reorganized to follow only the case
+split of the Boolean comparison, with no transitivity or ordinal arithmetic. It
+inducts on `a`, then `b`, then the size of the predecessor. The universes are
+`FL.wfUniv` and normalization is `FL.sn_of_typed`, unchanged.
+
+| Theorem | Statement |
+|---|---|
+| `Ordinal.Veblen.acc_phi` | `φ(a,b)` is accessible when `a` and `b` are |
+| `Ordinal.gamma0_wf` | the order on normal Veblen terms is well-founded |
+| `contender_17_lt_contender_18` | Contender 17 < Contender 18 |
+| `family17_lt_F18` | Contender 17's family is beaten at every input |
+| `gvalue_lt_F18` | every Γ₀-ladder program of depth ≤ `n` is below `F18 n` |
+
+## Contender 17
 
 ```lean
 def family16 (n : Nat) : Nat := F16 (F16 n)                  -- Contender 16 = family16 42
@@ -420,9 +449,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 17's definition modules take
-about 2 s and its proofs about 2 s; the full clean build of all contenders
-takes about 49 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 18's definition modules take
+about 2.5 s and its proofs about 2 s; the full clean build of all contenders
+takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -454,9 +483,10 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender14.lean`](BusyLean/Contender14.lean), [`Comparison14.lean`](BusyLean/Comparison14.lean) | Contender 14 definitions and theorems |
 | [`BusyLean/HyperReflection.lean`](BusyLean/HyperReflection.lean), [`HyperReflectionFacts.lean`](BusyLean/HyperReflectionFacts.lean) | rank hierarchy of transformer lifts (adopted from P17) |
 | [`BusyLean/Contender15.lean`](BusyLean/Contender15.lean), [`Comparison15.lean`](BusyLean/Comparison15.lean) | Contender 15 definitions and theorems |
-| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded Cantor normal forms: sorted lists, atoms below `ω^ω` and below `ε₀` |
+| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded ordinal notations: sorted lists, atoms below `ω^ω`, `ε₀` and `Γ₀` |
 | [`BusyLean/Contender16.lean`](BusyLean/Contender16.lean), [`Comparison16.lean`](BusyLean/Comparison16.lean) | Contender 16 definitions and theorems |
 | [`BusyLean/Contender17.lean`](BusyLean/Contender17.lean), [`Comparison17.lean`](BusyLean/Comparison17.lean) | Contender 17 definitions and theorems |
+| [`BusyLean/Contender18.lean`](BusyLean/Contender18.lean), [`Comparison18.lean`](BusyLean/Comparison18.lean) | Contender 18 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -481,6 +511,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 15 | Lean | this repository | P17's rank hierarchy of transformer lifts over family-aware ladder reflection |
 | 16 | Lean | this repository | a transfinite ladder (length `ω^ω`) via a universe for every well-founded atom order |
 | 17 | Lean | this repository | the ladder extended to length `ε₀` (hereditary Cantor normal forms) |
+| 18 | Lean | this repository | the ladder extended to length `Γ₀` (binary Veblen terms, case-split Schütte proof) |
 
 Proposals P1–P20 (four batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

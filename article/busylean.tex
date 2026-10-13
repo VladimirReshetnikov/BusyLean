@@ -78,7 +78,9 @@ which Contender~15 applies to the ladder. Contender~16 makes the ladder
 transfinite: Lean builds a universe for every well-founded atom order, and
 Cantor normal forms give a ladder of length $\omega^\omega$. Contender~17
 extends the ladder to length $\varepsilon_0$ by applying the same
-well-foundedness lemma hereditarily.
+well-foundedness lemma hereditarily, and Contender~18 to length $\Gamma_0$ with a
+Schütte-style proof for binary Veblen terms that follows only the comparison's
+case split.
 \end{abstract}
 
 \tableofcontents
@@ -855,10 +857,68 @@ opposite direction is rejected. The definitions check in 2.0\,s and the proofs
 in 1.9\,s.
 
 %======================================================================
+\section{Contender 18: a ladder of length \texorpdfstring{$\Gamma_0$}{Gamma0}}
+
+\subsection{Veblen terms and a case-split proof}
+Terms are sums $\mathtt{node}\,[\varphi(a_1,b_1),\dots,\varphi(a_k,b_k)]$ of
+principal terms (a mutual, nested inductive). Sums are compared
+lexicographically, and principal terms by Veblen's rule. The rule is
+implemented as a Boolean function by mutual well-founded recursion on sizes:
+\begin{lstlisting}
+def ltP : P → P → Bool
+  | .phi a b, .phi c d =>
+      if ltV a c then ltVP b c d          -- b < φ(c,d)
+      else if decide (a = c) then ltV b d
+      else leVP a b d                     -- φ(a,b) ≤ d
+\end{lstlisting}
+A term is normal when every sum is non-increasing, hereditarily. No
+fixed-point condition is imposed, so non-canonical terms such as
+$\varphi(0,\varepsilon_0)$ are allowed. They simply sit somewhere in the
+order. The genuine Veblen normal forms are among the normal terms, so the order
+type is at least $\Gamma_0$.
+
+\begin{theorem}[\lean{Veblen.acc\_phi}, \lean{gamma0\_wf}]
+If $a$ and $b$ are accessible, so is $\varphi(a,b)$. Hence every normal term
+is accessible, and the order on normal terms is well-founded.
+\end{theorem}
+The proof is Schütte's, reorganized so that it only follows the
+\emph{definitional} case split of \lean{ltP}. It inducts on $a$, then on $b$,
+then on the size of a predecessor $\varphi(e,f)$:
+\begin{itemize}
+\item $e<a$ and $f<\varphi(a,b)$. Then $f$ is $0$ or headed by a smaller
+  principal term below $\varphi(a,b)$, accessible by the size induction, so
+  \lean{acc\_head} makes $f$ accessible. The induction on $a$ applies to $e$;
+\item $e=a$ and $f<b$: by the induction on $b$;
+\item otherwise $\varphi(e,f)\le b$: then the one-term sum $\varphi(e,f)$ is
+  below or equal to $b$, hence accessible (\lean{accP\_of\_le}).
+\end{itemize}
+Transitivity, trichotomy and ordinal arithmetic are never needed. Sums are
+handled by \lean{SortedLex} as for $\varepsilon_0$.
+
+One engineering note. The first version depended on
+\lean{Classical.choice}. \lean{omega} had been called on a goal of the form
+\lean{AccP q}, after deriving an arithmetic contradiction. Because that goal is not decidable, \lean{omega}
+used \lean{Classical.byContradiction}. Writing \lean{absurd hqs (by omega)}
+gives \lean{omega} a decidable goal, and the axioms return to \lean{propext} and
+\lean{Quot.sound}.
+
+\subsection{The contender}
+\lean{F18 n := diagonalLift (schedule18 n) (family17 n + 1) gTransformer (fun \_ => family17) n n},
+with $\mathtt{family17}\,n = F_{17}(F_{17}\,n)$ and reflection over the ladder
+whose atoms are \lean{Gamma0}. Proved:
+\lean{contender\_17\_lt\_\allowbreak contender\_18}, \lean{family17\_lt\_F18} and
+\lean{gvalue\_lt\_F18}. The smoke test packs an operator over level
+$\varepsilon_0$ into the level-$\varphi(\varepsilon_0,0)$ universe (value~6).
+The definitions check in 2.4\,s and the proofs in 1.8\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
-prove well-founded, and $\varepsilon_0$ is done. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
+prove well-founded; $\varepsilon_0$ and $\Gamma_0$ are done. The case-split
+technique should extend to finitary Veblen functions (the small Veblen ordinal).
+Collapsing functions need genuine normal forms: in Buchholz's raw order,
+$D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
 
@@ -890,6 +950,7 @@ Contender & idea & informal size\\
 15 (Lean) & 14 with P17's rank hierarchy of lifts & $|\mathrm{FL}_n|\cdot\varepsilon(\tau)$\\
 16 (Lean) & 15 over a ladder of length $\omega^\omega$ & levels $<\omega^{n}$ at input $n$\\
 17 (Lean) & 15 over a ladder of length $\varepsilon_0$ & levels $<\omega_n$ (towers) at input $n$\\
+18 (Lean) & 15 over a ladder of length $\Gamma_0$ & $\varphi$-towers of height $n$ at input $n$\\
 \bottomrule
 \end{tabular}
 \end{center}
