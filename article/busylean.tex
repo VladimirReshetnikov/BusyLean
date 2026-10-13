@@ -80,7 +80,9 @@ Cantor normal forms give a ladder of length $\omega^\omega$. Contender~17
 extends the ladder to length $\varepsilon_0$ by applying the same
 well-foundedness lemma hereditarily, and Contender~18 to length $\Gamma_0$ with a
 Schütte-style proof for binary Veblen terms that follows only the comparison's
-case split.
+case split. Contender~19 extends the same technique to Schütte's Klammersymbole,
+whose argument positions are themselves terms, giving a ladder of
+large-Veblen length.
 \end{abstract}
 
 \tableofcontents
@@ -912,12 +914,63 @@ $\varepsilon_0$ into the level-$\varphi(\varepsilon_0,0)$ universe (value~6).
 The definitions check in 2.4\,s and the proofs in 1.8\,s.
 
 %======================================================================
+\section{Contender 19: a ladder of large-Veblen length}
+
+\subsection{Klammersymbole}
+Binary Veblen generalizes to $\varphi$ applied to an \emph{argument array}: a
+finite list of entries (position, value), sorted by decreasing position. In
+Schütte's Klammersymbole the positions are themselves terms. Terms are now a
+three-way mutual inductive (sums, principal terms $\varphi(A)$, entries).
+Arrays are compared lexicographically by entries, with entries ordered by
+position and then value. This is exactly the order "first difference at the
+most significant position". Principal terms follow the generalized rule:
+\[
+\varphi(A)<\varphi(B)\iff
+\begin{cases}
+A<B \text{ and every value of } A \text{ is } <\varphi(B), \text{ or}\\
+A\ne B,\ A\not<B, \text{ and } \varphi(A)\le \text{some value of } B.
+\end{cases}
+\]
+Binary Veblen is the case of positions $0$ and $1$: $\varphi(1@1)=\varepsilon_0$
+and $\varphi(1@2)=\Gamma_0$. With positions ranging over the notation itself,
+the normal forms reach the large Veblen ordinal.
+
+\subsection{Well-foundedness}
+The proof still follows only the comparison's case split. Two new ingredients
+are needed:
+\begin{itemize}
+\item \lean{SortedLexQ}: the sorted-list lemma restricted to a Prop-valued
+  predicate. An entry is \emph{good} when it is normal and its position and
+  value are accessible. Good entries are accessible (\lean{accE}: induction on
+  the position, then the value). Hence sorted arrays of good entries are
+  accessible (\lean{accQ\_sorted}).
+\item \lean{posAcc}: if $\Gamma<A$ as sorted arrays, every position of
+  $\Gamma$ lies below or at a position of $A$, so it is accessible when
+  $A$'s positions are.
+\end{itemize}
+\lean{LVeblen.acc\_phi} inducts on the array, then on the size of the
+predecessor $\varphi(\Gamma)$. In the first case the values of $\Gamma$ are
+below $\varphi(A)$ and accessible by the size induction, and the positions by
+\lean{posAcc}. So $\Gamma$ is a smaller good array and the array induction
+applies. In the second case $\varphi(\Gamma)$ lies below a value of $A$. The
+whole module checks in about 2\,s, and the axioms are \lean{propext} and
+\lean{Quot.sound}.
+
+\subsection{The contender}
+\lean{F19 n := diagonalLift (schedule19 n) (family18 n + 1) lTransformer (fun \_ => family18) n n},
+with reflection over the ladder whose atoms are \lean{LargeVeblen}. Proved:
+\lean{contender\_18\_lt\_\allowbreak contender\_19}, \lean{family18\_lt\_F19}
+and \lean{lvalue\_lt\_F19}. The smoke test packs an operator over level
+$\varepsilon_0$ into the universe at the small Veblen ordinal
+$\varphi(1@\omega)$ (value~7). The definitions check in 4.3\,s and the proofs
+in 1.8\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
-prove well-founded; $\varepsilon_0$ and $\Gamma_0$ are done. The case-split
-technique should extend to finitary Veblen functions (the small Veblen ordinal).
-Collapsing functions need genuine normal forms: in Buchholz's raw order,
+prove well-founded; $\varepsilon_0$, $\Gamma_0$ and the large Veblen ordinal are
+done, the last by Klammersymbole. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
@@ -951,6 +1004,7 @@ Contender & idea & informal size\\
 16 (Lean) & 15 over a ladder of length $\omega^\omega$ & levels $<\omega^{n}$ at input $n$\\
 17 (Lean) & 15 over a ladder of length $\varepsilon_0$ & levels $<\omega_n$ (towers) at input $n$\\
 18 (Lean) & 15 over a ladder of length $\Gamma_0$ & $\varphi$-towers of height $n$ at input $n$\\
+19 (Lean) & 15 over a ladder of large-Veblen length & Klammersymbole of height $n$ at input $n$\\
 \bottomrule
 \end{tabular}
 \end{center}
