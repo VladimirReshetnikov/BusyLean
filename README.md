@@ -9,7 +9,31 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 38
+## Current contender: Contender 39
+
+```lean
+def mixed (N : Nat) (t : CTree) : CTree :=                   -- BusyLean/Contender39.lean
+  .lim fun i => if i = 0 then jump N t else boost31 (jump N t)
+def mixTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then jumpTree N else stackOver (mixed N) (jumpTree N) (jumpTree N)
+def family38 (n : Nat) : Nat := F38 (F38 n)                  -- Contender 38 = family38 42
+def F39 (n : Nat) : Nat := hier family38 (mixTree (family38 n)) (family38 n)
+def contender_39 : Nat := F39 (F39 42)
+
+theorem contender_38_lt_contender_39 : contender_38 < contender_39   -- BusyLean/Comparison39.lean
+```
+
+The stacked tree languages get a primitive that applies both the impredicative
+jump and Contender 31's predicative collapse operator `boost31`, so every level
+interleaves them. The enumeration depth inside the tree is `family38 n`, and the
+number is read off with Contender 38's hierarchy.
+
+| Theorem | Statement |
+|---|---|
+| `contender_38_lt_contender_39` | Contender 38 < Contender 39 |
+| `family38_lt_F39` | Contender 38's family is beaten at every input |
+
+## Contender 38
 
 ```lean
 def family37 (n : Nat) : Nat := F37 (F37 n)                  -- Contender 37 = family37 42
@@ -994,8 +1018,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 38's definition modules take
-about 1.6 s and its proofs about 3 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 39's definition modules take
+about 1.1 s and its proofs about 2.6 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1055,6 +1079,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender36.lean`](BusyLean/Contender36.lean), [`Comparison36.lean`](BusyLean/Comparison36.lean) | Contender 36 definitions and theorems |
 | [`BusyLean/Contender37.lean`](BusyLean/Contender37.lean), [`Comparison37.lean`](BusyLean/Comparison37.lean) | Contender 37 definitions and theorems |
 | [`BusyLean/Contender38.lean`](BusyLean/Contender38.lean), [`Comparison38.lean`](BusyLean/Comparison38.lean) | Contender 38 definitions and theorems |
+| [`BusyLean/Contender39.lean`](BusyLean/Contender39.lean), [`Comparison39.lean`](BusyLean/Comparison39.lean) | Contender 39 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1100,6 +1125,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 36 | Lean | this repository | ladder programs build the next ladder's tree, iterated along a tree |
 | 37 | Lean | this repository | tree languages stacked over the ladder jump |
 | 38 | Lean | this repository | fast-growing hierarchy along Contender 37's tree |
+| 39 | Lean | this repository | languages over the jump mixed with predicative collapse; hierarchy along them |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

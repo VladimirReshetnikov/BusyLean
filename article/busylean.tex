@@ -113,7 +113,8 @@ the next. Contender~37 stacks the tree languages over this jump. A correction
 (Section~\ref{sec:truncation}): a ladder program of depth $n$ sees only a finite
 truncation of its atom order, so Contenders~15--37 grew through their
 amplifiers, not through the size of their atoms. Contender~38 runs a
-fast-growing hierarchy along the trees themselves.
+fast-growing hierarchy along the trees themselves, and Contender~39 interleaves
+the impredicative jump with predicative collapse.
 \end{abstract}
 
 \tableofcontents
@@ -1662,6 +1663,28 @@ argument whenever the base is inflationary. This gives
 The definitions check in 1.6\,s and the proofs in 3.1\,s.
 
 %======================================================================
+\section{Contender 39: the jump mixed with collapse}
+
+In Contender~37 the stacked languages had only the impredicative jump as a
+primitive, so no level could call Contender~31's predicative operator
+\lean{boost31}. That operator handles collapsing with tree-indexed levels,
+universes of codes, and closure functionals of transfinite type. System~T over
+countable trees cannot express it, because collapsing needs higher tree
+classes. Contender~39's primitive applies both:
+\[
+\mathrm{mixed}_N(t)=\lim\bigl(\mathrm{jump}_N(t),\ \mathrm{boost}_{31}(\mathrm{jump}_N(t))\bigr),
+\qquad
+\mathrm{mixTree}(N)=\lim\bigl(J,\ \mathrm{S}^{\mathrm{mixed}_N}_{J}(J)\bigr),\ J=\mathrm{jumpTree}(N).
+\]
+Every language level now interleaves the impredicative jump with predicative
+collapse. The depth parameter of all enumerations inside the tree is
+$N=\mathrm{family}_{38}(n)$, so the trees contain programs of that size. The
+number is read off with the hierarchy of Contender~38:
+$F_{39}(n)=h^{\mathrm{family}_{38}}_{\mathrm{mixTree}(N)}(N)$. Proved:
+\lean{family38\_lt\_F39} and \lean{contender\_38\_lt\_\allowbreak contender\_39}.
+The definitions check in 1.1\,s and the proofs in 2.6\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1734,6 +1757,7 @@ Contender & idea & informal size\\
 36 (Lean) & ladder programs build the next ladder's tree, iterated along a tree & self-defined ladder lengths\\
 37 (Lean) & tree languages stacked over the ladder jump & transfinite iterates of the jump\\
 38 (Lean) & fast-growing hierarchy along Contender 37's tree & $h_{\mathrm{jumpTree}(n)}$ over $F_{37}$\\
+39 (Lean) & languages over jump and collapse, depth $F_{38}$ & $h_{\mathrm{mixTree}}$ over $F_{38}$\\
 \bottomrule
 \end{tabular}
 \end{center}
