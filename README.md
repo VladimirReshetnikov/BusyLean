@@ -324,7 +324,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender13.lean`](BusyLean/Contender13.lean), [`Comparison13.lean`](BusyLean/Comparison13.lean) | Contender 13 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
-| [`proposals/`](proposals) | the ten reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`proposals/`](proposals) | the sixteen reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`incoming/`](incoming) | drop zone for new proposal archives ([how they are processed](incoming/README.md)) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
 
 ## History
@@ -342,7 +343,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 12 | Lean | this repository | operator-level reflection (from P6) along notations above the index (from P7), over kind-polymorphic Fω |
 | 13 | Lean | this repository | dynamic-kind Fω: a predicative universe of operators, with two levels of kind variables |
 
-Proposals P1–P10 (two batches) were reviewed, rebuilt and ranked; see
+Proposals P1–P16 (three batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).

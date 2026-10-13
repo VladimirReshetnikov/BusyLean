@@ -602,6 +602,17 @@ Proved: \lean{contender\_12\_lt\_\allowbreak contender\_13},
 \lean{fvalue\_lt\_\allowbreak contender\_13}. The new definition modules check
 in about 7.5\,s.
 
+\subsection{A third batch of proposals}
+Six more proposals (P11--P16) arrived, written against Contender~10 (and one
+against Contender~6). Three compile completely (P11, P14, P15). The other three
+fail in their proofs, all through the same trap: a proof step that makes Lean
+compare or unfold a term containing a contender-sized number. P13's proof module
+did not terminate within minutes. Their amplifiers (self-fed iteration counts,
+crowns above the index, finite diagonal ranks of the autonomous lift) each add
+about a factor of $\omega$ to the index ordinal. Contender~12's tree-indexed
+operator stage subsumes them, and Contender~13's language exceeds them. P15
+independently rediscovered Contender~11's exact construction.
+
 %======================================================================
 \section{Roadmap}
 
