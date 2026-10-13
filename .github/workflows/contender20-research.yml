@@ -1,0 +1,28 @@
+name: Contender 20 research validation
+
+on:
+  push:
+    branches:
+      - research/w-ranked-contender20-20261013
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+      - name: Precompile accepted base
+        run: lake build BusyLean.Comparison19
+      - name: Check Contender 20 definitions
+        run: /usr/bin/time -f 'definition phase: %e s' lake build BusyLean.Contender20
+      - name: Check Contender 20 proofs
+        run: /usr/bin/time -f 'proof phase: %e s' lake build BusyLean.Comparison20
+      - name: Run focused axiom and closure audit
+        run: lake env lean test/Contender20Audit.lean
