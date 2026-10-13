@@ -9,7 +9,41 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 13
+## Current contender: Contender 14
+
+```lean
+def family13 (n : Nat) : Nat := F13 (F13 n)               -- Contender 13 = family13 42
+def F14 (n : Nat) : Nat := FL.reflectFL family13 n        -- BusyLean/Contender14.lean
+def contender_14 : Nat := F14 (F14 42)
+
+theorem contender_13_lt_contender_14 : contender_13 < contender_14   -- BusyLean/Comparison14.lean
+```
+
+`reflectFL f n` exceeds `f n` and the value of every closed program of the
+**level-`n` ladder language** of depth `≤ n` with the Church numeral type.
+The level-`ℓ` language is Contender 13's dynamic-kind Fω plus atomic kinds
+`dyn₀, …, dyn_{ℓ-1}`:
+
+* atom `dyn_i` denotes the `dyn` of the level-`i` language;
+* `apack a K A : a` and `aunpack a K X : K` move operators into and out of an
+  atom from the kinds strictly below it, with `aunpack (apack A) ≡ A`. For
+  example, an operator of kind `dyn₀ → ★` can be packed into `dyn₁`.
+
+The syntax and the SN proof are parametric in a `Universe` of atoms (domains,
+packing, reading, and the law `rd (pk v) = v`). So **one** theorem,
+`FL.sn_of_typed`, normalizes every level. `FL.Univ f ℓ` builds level `ℓ` by
+recursion ([`SystemFL/Ladder.lean`](BusyLean/SystemFL/Ladder.lean)). Input `n`
+uses level `n`, so the reflection diagonalizes over the ladder itself.
+
+| Theorem | Statement |
+|---|---|
+| `FL.sn_of_typed` | for every universe, every ladder term (with oracle) is strongly normalizing |
+| `FL.infer_sound` | the checker is sound, for every atom type |
+| `contender_13_lt_contender_14` | Contender 13 < Contender 14 |
+| `family13_lt_F14` | Contender 13's family is beaten at every input |
+| `fvalue_lt_contender_14` | every level-`F14 42` program of depth ≤ `F14 42` is exceeded |
+
+## Contender 13
 
 ```lean
 def family12 (n : Nat) : Nat := F12 (F12 n)               -- Contender 12 = family12 42
@@ -292,9 +326,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 13's definition modules take
-about 7.5 s and its proofs about 2 s; the full clean build of all contenders
-takes about 33 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 14's definition modules take
+about 10 s and its proofs about 2 s; the full clean build of all contenders
+takes about 40 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -322,6 +356,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender12.lean`](BusyLean/Contender12.lean), [`Comparison12.lean`](BusyLean/Comparison12.lean) | Contender 12 definitions and theorems |
 | [`BusyLean/SystemFd/`](BusyLean/SystemFd) | dynamic-kind Fω: syntax, typing, candidates with `dyn = Σ k, Sem k` (SN), sound checker |
 | [`BusyLean/Contender13.lean`](BusyLean/Contender13.lean), [`Comparison13.lean`](BusyLean/Comparison13.lean) | Contender 13 definitions and theorems |
+| [`BusyLean/SystemFL/`](BusyLean/SystemFL) | the ladder language, parametric in its atoms: syntax, typing, candidates over a `Universe` (SN), sound checker, the ladder of universes |
+| [`BusyLean/Contender14.lean`](BusyLean/Contender14.lean), [`Comparison14.lean`](BusyLean/Comparison14.lean) | Contender 14 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the sixteen reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -342,6 +378,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 11 | Lean | this repository | kind-polymorphic Fω reflected along the W-language's trees |
 | 12 | Lean | this repository | operator-level reflection (from P6) along notations above the index (from P7), over kind-polymorphic Fω |
 | 13 | Lean | this repository | dynamic-kind Fω: a predicative universe of operators, with two levels of kind variables |
+| 14 | Lean | this repository | a ladder of such universes, one SN proof for all levels; input `n` uses level `n` |
 
 Proposals P1–P16 (three batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

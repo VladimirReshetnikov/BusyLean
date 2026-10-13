@@ -70,7 +70,9 @@ at run time, beyond higher-order arithmetic. A second batch of five proposals is
 reviewed; two of its ideas, operator-level reflection and ordinal notations
 above a language-defined index, are adopted in Contender~12. Contender~13 adds a predicative universe of
 operators, a kind $\mathtt{dyn}$ interpreted as $\sum_k\mathrm{Sem}(k)$, with
-level-1 kind variables that range over it.
+level-1 kind variables that range over it. Contender~14 climbs a ladder of
+such universes: at input $n$ it reflects over the language with $n$ stacked
+universes, all normalized by one theorem that is parametric in the universe.
 \end{abstract}
 
 \tableofcontents
@@ -614,15 +616,100 @@ operator stage subsumes them, and Contender~13's language exceeds them. P15
 independently rediscovered Contender~11's exact construction.
 
 %======================================================================
+\section{Contender 14: the ladder of universes}
+
+\subsection{The idea}
+$\mathtt{dyn}$ collects the operators of every dyn-free kind, but it never
+contains itself, and nothing collects operators whose kinds mention
+$\mathtt{dyn}$. The predicative answer is a ladder. The level-$\ell$ language
+has atomic kinds $\mathtt{dyn}_0,\dots,\mathtt{dyn}_{\ell-1}$, and atom
+$\mathtt{dyn}_i$ denotes the $\mathtt{dyn}$ of the level-$i$ language. Two
+type-level constructs move operators into and out of an atom:
+\[
+\frac{A:K\qquad K\ \text{fits}\ a}{\mathtt{apack}\,a\,K\,A : a}
+\qquad
+\frac{X:a\qquad K\ \text{fits}\ a}{\mathtt{aunpack}\,a\,K\,X : K}
+\qquad
+\mathtt{aunpack}\,a\,K\,(\mathtt{apack}\,a\,K\,A)\ \longrightarrow\ A,
+\]
+where $K$ \emph{fits} $a$ when $K$ is built from $\star$, $\to$ and atoms
+strictly older than~$a$. The top-level $\mathtt{dyn}$ and both sorts of kind
+variables stay as in Contender~13. So a program can pack an operator of kind
+$\mathtt{dyn}_0\to\star$ into $\mathtt{dyn}_1$ and read it back.
+
+\subsection{One normalization proof for every level}
+Writing a new model for each level would never finish, so the language and
+its model are \emph{parametric}. The syntax (\lean{SystemFL}) is parametric in
+a type $\alpha$ of atoms with decidable equality and an order
+(\lean{AtomOrder}). The model takes a \lean{Universe}: a domain
+$\mathrm{El}(a)$ for each atom, a packing map from the base kinds that fit~$a$,
+a reading map, and the law
+\[\mathrm{rd}_a\,k\,(\mathrm{pk}_a\,k\,v) = v .\]
+Base kinds are $\star$, $\to$ and atoms, interpreted with
+$\mathrm{Sem}(a)=\mathrm{El}(a)$. $\mathtt{dyn}$ is the sum over base kinds,
+and $\mathtt{apack}$/$\mathtt{aunpack}$ are $\mathrm{pk}$/$\mathrm{rd}$ through
+the decoding cast. The read-back law is exactly what the new conversion needs.
+\begin{theorem}[\lean{FL.sn\_of\_typed}]
+For every universe $U$, every term typable in the ladder language over $U$'s
+atoms (with the oracle) is strongly normalizing.
+\end{theorem}
+The ladder itself (\lean{SystemFL/Ladder.lean}) instantiates this theorem at
+every level:
+\begin{itemize}
+\item atoms are $\mathtt{Atom}\,0=\mathtt{Empty}$ and
+  $\mathtt{Atom}\,(\ell+1)=\mathtt{Option}\,(\mathtt{Atom}\,\ell)$. The new
+  atom $\mathtt{none}$ lies above all older atoms $\mathtt{some}\,a$;
+\item \lean{nextUniv} interprets the new atom as \lean{BVal} of the previous
+  universe, i.e.\ as its $\mathtt{dyn}$, and keeps the older atoms;
+\item packing and reading go through \lean{lower}, which recognizes the
+  level-$(\ell+1)$ base kinds that avoid the new atom and turns them into
+  level-$\ell$ base kinds. Semantic domains agree along it, so the read-back
+  law at level $\ell+1$ reduces to the law at level~$\ell$.
+\end{itemize}
+One engineering point matters. $\mathrm{pk}$ receives a proof that the kind
+fits, so the lowered kind is extracted with \lean{Option.get} rather than a
+dependent \lean{match}. The law then needs no rewriting under a dependent
+match, the usual source of ill-typed motives.
+
+\subsection{The contender}
+\begin{lstlisting}
+def ladderUpTo (n : ℕ) := ctmsUpTo (Atom.all n) n     -- level-n programs
+def reflectFL (f : ℕ → ℕ) (n : ℕ) : ℕ :=
+  n + 1 + maxN (f n) (maximum (fvalue n f n) (ladderUpTo n))
+def family13 (n : ℕ) : ℕ := F13 (F13 n)    -- family13 42 = contender_13
+def F14 (n : ℕ) : ℕ := reflectFL family13 n
+def contender_14 : ℕ := F14 (F14 42)
+\end{lstlisting}
+The value of a level-$\ell$ program is computed by the certified normalizer
+with the SN proof \lean{FL.sn\_of\_typed} applied to the level-$\ell$ universe
+\lean{Univ f}. The reflection
+diagonalizes \emph{at the meta level}. Input $n$ uses the level-$n$ language,
+so no fixed rung keeps up with $F_{14}$. Proved:
+\lean{contender\_13\_lt\_\allowbreak contender\_14},
+\lean{family13\_lt\_F14} at every input, and
+\lean{fvalue\_lt\_\allowbreak contender\_14}. The smoke test packs
+$\lambda\_{:}\mathtt{dyn}_0.\,\mathtt{nat}$ into $\mathtt{dyn}_1$ and applies its
+read-back to a packed $\mathtt{nat}$, which evaluates to~4. It also confirms that
+an atom cannot hold its own kind.
+
+The first budget run hit the 15\,s definition limit (16.0\,s on a loaded
+machine). Profiling showed the kind checker's soundness proof taking 2.4\,s,
+with $6\times6$ case splits inside nested matches. Factoring the checker into
+small result functions (\lean{arrK}, \lean{appK}, \lean{apackK}, \dots) with
+standalone inversion lemmas cut that module from 5.8\,s to 3.2\,s. The
+definitions now check in about 10\,s.
+
+%======================================================================
 \section{Roadmap}
 
-\paragraph{A ladder of dynamic kinds.} $\mathtt{dyn}$ is the first universe of
-a ladder. A kind $\mathtt{dyn}_{j+1}$ would collect operators of every kind
-built from $\mathtt{dyn}_0,\dots,\mathtt{dyn}_j$. Its domain is a dependent sum
-over those lower kinds, and the sorts of kind variables are indexed by level.
-A contender that lets programs of depth $n$ use $n$ levels would climb the
-whole ladder, reaching orders $\omega\cdot n$ uniformly and order $\omega^2$
-in the limit.
+\paragraph{Levels inside the language.} Contender~14 fixes the level per
+program and diagonalizes outside. Level variables, in the style of universe
+polymorphism, would let one program quantify over rungs and climb a run-time
+number of them. That gives orders $\omega\cdot n$ uniformly in one program,
+and the reflection would then diagonalize at $\omega^2$.
+
+\paragraph{Reflection along trees.} As with Contenders~9 and~11, reflecting
+the ladder along the W-language's trees is a cheap multiplicative step.
 
 \paragraph{Large elimination and trees.} Runtime-to-type dependency with large
 elimination remains the route to a CIC-like system. A language able to hand
@@ -645,6 +732,7 @@ Contender & idea & informal size\\
 11 (Lean) & 10, reflected along W-trees & multiplicative gain over 10\\
 12 (Lean) & 10, operator-level reflection (P6, P7 ideas) & exponential index over 11\\
 13 (Lean) & dynamic kind: a universe of operators & uniform orders $\omega+n$\\
+14 (Lean) & ladder of universes, level $n$ at input $n$ & orders $\omega\cdot n$, diagonalized\\
 \bottomrule
 \end{tabular}
 \end{center}
