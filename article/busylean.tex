@@ -119,7 +119,8 @@ over an input tree, which makes the jump a genuine operator, and Contender~40
 places it under a metalanguage with first-class language closure. Contender~41
 gives the ladder language the same recursor over its input tree, and
 Contender~42 collapses relative to these jumps, and Contender~43 makes the
-collapse a first-class closure inside the metalanguages.
+collapse a first-class closure inside the metalanguages. Contender~44 gives
+that closure collapsing levels indexed by trees.
 \end{abstract}
 
 \tableofcontents
@@ -1836,6 +1837,32 @@ Proved: \lean{family42\_lt\_F43} and \lean{contender\_42\_lt\_\allowbreak conten
 The definitions check in 1.4\,s and the proofs in 2.2\,s.
 
 %======================================================================
+\section{Contender 44: collapsing closures with tree-indexed levels}
+
+Contender~43's closure collapses relative to an operator with finitely many
+levels $\Omega_k$. Contender~26's collapse $D^L$ has levels indexed by trees.
+\lean{RelLevels.lean} relativizes it to an operator $J$ in the same way: the
+level-0 successor step applies $J$, and Buchholz's diagonal at every supremum
+returns to level~0. One round collapses $\varepsilon_{\Omega_\Lambda+1}$ with
+the previous tree $\Lambda$ as the level index:
+\[
+\Lambda_0=t,\qquad \Lambda_{k+1}=\lim\bigl(\Lambda_k,\ \psi^J_0(\varepsilon_{\Omega_{\Lambda_k}+1})\bigr),
+\]
+which climbs toward the fixed points of $\alpha\mapsto\psi^J_0(\Omega_\alpha)$
+relative to $J$. The closure of Contender~44 joins Contender~43's closure with
+$N$ such rounds started above the finite-level collapse:
+\[
+\mathrm{closeL}_N(J)(t)=\lim\bigl(\mathrm{closeC}_N(J)(t),\
+\Lambda^{J}_N\bigl(\mathrm{relCollapse}(J)(t)\bigr)\bigr).
+\]
+Metalanguages with this closure are stacked to the height of Contender~43's tree
+over the meta-jump, and
+$F_{44}(n)=h^{\mathrm{family}_{43}}_{\mathrm{levelTree44}(N)}(N)$ with
+$N=\mathrm{family}_{43}(n)$. Proved: \lean{family43\_lt\_F44} and
+\lean{contender\_43\_lt\_\allowbreak contender\_44}. The definitions check in
+2.3\,s and the proofs in 3.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1913,6 +1940,7 @@ Contender & idea & informal size\\
 41 (Lean) & ladder reader programs (FLT2) under metalanguages & $h_{\mathrm{readerTree}}$ over $F_{40}$\\
 42 (Lean) & Buchholz collapse relative to the meta-jump & $h_{\mathrm{collapseTree}}$ over $F_{41}$\\
 43 (Lean) & metalanguages whose closure collapses & $h_{\mathrm{collapseTree43}}$ over $F_{42}$\\
+44 (Lean) & closures with tree-indexed relative collapse & $h_{\mathrm{levelTree44}}$ over $F_{43}$\\
 \bottomrule
 \end{tabular}
 \end{center}
