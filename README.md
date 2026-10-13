@@ -9,7 +9,43 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 10
+## Current contender: Contender 12
+
+```lean
+def fkTransformer : Transformer := fun fs _ n => reflect11 fs n        -- BusyLean/Contender12.lean
+def tree12 := Autonomous.realize (Autonomous.hyper 42 (Autonomous.encode index))
+def F12 (n : Nat) : Nat := operatorStage fkTransformer tree12 (fun _ => family11) n n
+def contender_12 : Nat := F12 (F12 42)                                  -- family11 n = F11 (F11 n)
+
+theorem contender_11_lt_contender_12 : contender_11 < contender_12     -- BusyLean/Comparison12.lean
+```
+
+This contender reuses two ideas from the second batch of proposals (see
+[the review](proposals/REVIEW.md)), with attribution, on top of this
+repository's strongest language:
+
+* **P6's operator stage**: reflection lifted to *transformers* of families,
+  iterated along the index, with the lift itself iterated along a tree. It
+  exponentiates where forest reflection multiplies.
+* **P7's ordinal notations**: explicit Veblen-style closures stacked *above*
+  Contender 6's language-defined index.
+* The base transformer is Contender 11's reflection over **kind-polymorphic
+  System Fω**.
+
+| Theorem | Statement |
+|---|---|
+| `contender_11_lt_contender_12` | Contender 11 < Contender 12 |
+| `family11_lt_F12` | Contender 11's family is beaten at every input |
+| `fkTransformer_progressive` | kind-polymorphic Fω reflection is a progressive transformer |
+
+## Contender 11
+
+`F11 n = stage11 (fun _ => family10) index n`, `contender_11 = F11 (F11 42)`:
+Contender 9's amplifier (forest reflection along the W-language's index)
+applied to Contender 10's kind-polymorphic language. Theorems:
+`contender_10_lt_contender_11`, `family10_lt_F11`, `defined_tree_eventually_lt11`.
+
+## Contender 10
 
 ```lean
 def family9 (n : Nat) : Nat := F9 (F9 n)                  -- Contender 9 = family9 42
@@ -224,9 +260,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 10's definition modules take
-about 12 s and its proofs about 3 s; the full clean build of all contenders
-takes about 39 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 12's definition modules take
+about 4 s and its proofs about 7 s; the full clean build of all contenders
+takes about 38 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -248,9 +284,13 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender9.lean`](BusyLean/Contender9.lean), [`Comparison9.lean`](BusyLean/Comparison9.lean) | Contender 9 definitions and theorems |
 | [`BusyLean/SystemFk/`](BusyLean/SystemFk) | kind-polymorphic Fω: syntax, typing, candidates with kind valuations (SN), sound checker |
 | [`BusyLean/Contender10.lean`](BusyLean/Contender10.lean), [`Comparison10.lean`](BusyLean/Comparison10.lean) | Contender 10 definitions and theorems |
+| [`BusyLean/Contender11.lean`](BusyLean/Contender11.lean), [`Comparison11.lean`](BusyLean/Comparison11.lean) | Contender 11 definitions and theorems |
+| [`BusyLean/MetaReflection.lean`](BusyLean/MetaReflection.lean), [`MetaReflectionFacts.lean`](BusyLean/MetaReflectionFacts.lean) | operator-level reflection (adopted from P6) |
+| [`BusyLean/Autonomous.lean`](BusyLean/Autonomous.lean) | ordinal notations above a tree (adopted from P7) |
+| [`BusyLean/Contender12.lean`](BusyLean/Contender12.lean), [`Comparison12.lean`](BusyLean/Comparison12.lean) | Contender 12 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
-| [`proposals/`](proposals) | the five reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`proposals/`](proposals) | the ten reviewed proposals and [the review](proposals/REVIEW.md) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
 
 ## History
@@ -264,8 +304,10 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 8 | Lean | this repository | System Fω (type operators) with Contender 7 as oracle; candidates over kinds |
 | 9 | Lean | this repository | System Fω reflected along the W-language's own trees, seeded with Contender 8 |
 | 10 | Lean | this repository | kind-polymorphic System Fω (unbounded orders at run time), seeded with Contender 9 |
+| 11 | Lean | this repository | kind-polymorphic Fω reflected along the W-language's trees |
+| 12 | Lean | this repository | operator-level reflection (from P6) along notations above the index (from P7), over kind-polymorphic Fω |
 
-Proposals P1–P5 were reviewed, rebuilt and ranked; see
+Proposals P1–P10 (two batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).

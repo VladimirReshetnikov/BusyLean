@@ -66,7 +66,9 @@ fuel-bounded type checker. Contender~9 reflects
 F$_\omega$ along the W-language's trees, and we explain why the Calculus of
 Constructions is not a growth-rate jump. Contender~10 makes the jump
 cheaply: kind polymorphism lets one program reach kinds of unbounded order
-at run time, beyond higher-order arithmetic.
+at run time, beyond higher-order arithmetic. A second batch of five proposals is
+reviewed; two of its ideas, operator-level reflection and ordinal notations
+above a language-defined index, are adopted in Contender~12.
 \end{abstract}
 
 \tableofcontents
@@ -485,24 +487,79 @@ every input), and \lean{fvalue\_lt\_\allowbreak contender\_10}. The new definiti
 four for the language plus the contender, check in about 12\,s.
 
 %======================================================================
+\section{Contender 11: reflecting the kind-polymorphic language}
+
+Contender~11 applies Contender~9's amplifier to Contender~10's language:
+forest reflection of kind-polymorphic F$_\omega$ along Contender~6's index,
+with oracle families packed into the unary oracle as before.
+\begin{lstlisting}
+def F11 (n : ℕ) : ℕ := stage11 (fun _ => family10) index n
+def contender_11 : ℕ := F11 (F11 42)      -- family10 n = F10 (F10 n)
+\end{lstlisting}
+As with Contender~9, the gain is multiplicative, of about
+$|\mathrm{F}_\omega^{\kappa}|\cdot\psi(\Omega_\omega)^2$, where
+$\mathrm{F}_\omega^{\kappa}$ denotes Contender~10's kind-polymorphic language.
+
+%======================================================================
+\section{A second batch of proposals, and Contender 12}
+
+\subsection{Five more proposals}
+Five more archives arrived, all proposing a ``Contender~7'' on top of this
+repository's Contender~6, written before Contenders 7--11 existed. All five
+definitions compile under Lean~4.34. Two proposals compile completely: P6
+(operator reflection), whose author had not compiled it, and P7
+(critical-point reflection). The other three (P8 ramified worlds, P9 model
+ramification, P10 semantic mirror) fail in their proofs.
+
+All five amplify the W-language, of strength about $\psi(\Omega_\omega)$.
+P6 lifts reflection to \emph{transformers} of families and iterates the lift,
+which exponentiates the index height. P7 stacks explicit Veblen-style
+critical-point notations above the language-defined index. P8--P10 iterate
+world or model constructions in which a lower world's whole hierarchy is
+exposed to the next world's programs. The resulting ordinals range from
+$|L|^{|L|}$ to $\Gamma$-type closures above $|L|$, all far below second-order
+arithmetic. Informally, the whole batch is vastly smaller than Contender~7
+(System~F), let alone Contenders 8--11.
+
+\subsection{Reusing the generic ideas}
+Two of the ideas are generic and compose with stronger languages. P6's
+operator stage needs only that its base transformer be \emph{progressive}:
+every visible seed value lies below every output. P7's notations apply above
+any Lean tree. Contender~12 adopts both, with attribution in the source, over
+the kind-polymorphic F$_\omega$ reflection:
+\begin{lstlisting}
+def fkTransformer : Transformer := fun fs _ n => reflect11 fs n
+def tree12 := realize (hyper 42 (encode index))   -- P7 notations
+def F12 (n : ℕ) : ℕ :=
+  operatorStage fkTransformer tree12 (fun _ => family11) n n   -- P6
+def contender_12 : ℕ := F12 (F12 42)
+\end{lstlisting}
+The base is progressive by one line (\lean{oracle\_lt\_reflect11}), and P6's
+theorem \lean{operatorStage\_\allowbreak progressive} then gives \lean{family11\_lt\_F12}
+at every input, with no structural facts about \lean{tree12} required. The
+gain over Contender~11 is again inside the language's ordinal: the index factor
+grows from $\psi(\Omega_\omega)^2$ to roughly
+$|L|^{\Gamma\text{-closure above }|L|}$. The world and model constructions of
+P8--P10 need an object language that manipulates trees as data, which the
+impredicative languages lack. They are recorded for a future tree-capable
+language.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{A ladder of kind universes.} Kind polymorphism is the first rung
 of a predicative ladder. Kinds may quantify over kinds if the result lives
-one level \emph{higher}, giving universes of kinds
-$\Box_0\subset\Box_1\subset\cdots$ over the impredicative~$\star$. That
-reproduces the stratification that keeps Agda and Lean consistent, now at the
-kind level of an impredicative system. Each level is modeled by a dependent
-function space over countable syntax, which stays inside Lean's \lean{Type}.
-A contender that diagonalizes over the number of levels would climb the whole
-ladder.
+one level higher. Each level is modeled by a dependent function space over
+countable syntax, defined by recursion on levels with environments of
+lower-level semantics. Type operators of polymorphic kind require type-level
+kind abstraction and its $\beta$-rule. A contender that diagonalizes over the
+number of levels would climb the whole ladder.
 
-\paragraph{Large elimination.} Runtime-to-type dependency with large
-elimination remains the route to a CIC-like system, through a realizability
-model with Lean types and untyped realizers.
-
-\paragraph{Amplifiers.} Forest reflection along language-definable trees
-applies to each new language.
+\paragraph{Large elimination and trees.} Runtime-to-type dependency with large
+elimination remains the route to a CIC-like system. A language able to hand
+well-founded trees back to Lean, whether through a realizability model or a
+candidate-based well-foundedness argument, would also unlock the world and
+model constructions of P8--P10 at impredicative strength.
 
 %======================================================================
 \section{Status}
@@ -518,6 +575,8 @@ Contender & idea & informal size\\
 8 (Lean) & System F$_\omega$ with Contender 7 as oracle & $f_{|\mathsf{Z}_\omega|}(>\!C_7)$\\
 9 (Lean) & F$_\omega$ reflected along W-trees & $f_{|\mathsf{Z}_\omega|\cdot\psi(\Omega_\omega)^2}(>\!C_8)$\\
 10 (Lean) & kind-polymorphic F$_\omega$ & beyond higher-order arithmetic\\
+11 (Lean) & 10, reflected along W-trees & multiplicative gain over 10\\
+12 (Lean) & 10, operator-level reflection (P6, P7 ideas) & exponential index over 11\\
 \bottomrule
 \end{tabular}
 \end{center}
