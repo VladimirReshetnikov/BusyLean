@@ -38,6 +38,7 @@ elab "#assert_not_in_closure42 " root:ident " : " bad:ident* : command => do
 #print axioms BusyLean.universalTree
 #print axioms BusyLean.contender_42
 #print axioms BusyLean.family41_lt_F42
+#print axioms BusyLean.universal_stack_le_F42
 #print axioms BusyLean.contender_41_lt_contender_42
 
 #assert_not_in_closure42 BusyLean.contender_42 :
