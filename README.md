@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 8
+## Current contender: Contender 9
+
+```lean
+def stage9 (seed : Family) : WTree ℕ → ℕ → ℕ               -- BusyLean/Contender9.lean
+  | .leaf   => reflect9 seed
+  | .node g => reflect9 (fun i => stage9 seed (g i))
+def F9 (n : Nat) : Nat := stage9 (fun _ => family8) index n
+def contender_9 : Nat := F9 (F9 42)                        -- family8 n = F8 (F8 n)
+
+theorem contender_8_lt_contender_9 : contender_8 < contender_9   -- BusyLean/Comparison9.lean
+```
+
+Contender 6's forest reflection, with **System Fω** as the reflected language,
+along Contender 6's index (every tree the W-language defines). A node's family
+of child stages reaches Fω through the unary oracle as
+`orc (2^i·(2m+1)) = fs i m` (`unpair2_code` proves the decoding). Informally
+this is about f<sub>|Z_ω|·ψ(Ω_ω)²</sub>: a multiplicative step. The article
+explains why the Calculus of Constructions would *not* be a growth-rate jump
+over Fω, and why the next qualitative jump needs large elimination.
+
+| Theorem | Statement |
+|---|---|
+| `contender_8_lt_contender_9` | Contender 8 < Contender 9 |
+| `family8_lt_F9` | Contender 8's family is beaten at every input |
+| `defined_tree_eventually_lt9` | every W-definable tree is eventually dominated |
+| `unpair2_code` | the oracle-family code is decoded correctly |
+
+## Contender 8
 
 ```lean
 def family7 (n : Nat) : Nat := F7 (F7 n)                  -- Contender 7 = family7 42
@@ -187,6 +214,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Comparison7.lean`](BusyLean/Comparison7.lean) | Contender 7 theorems |
 | [`BusyLean/SystemFw/`](BusyLean/SystemFw) | System Fω: kinds and type β, typing, candidates over kinds (SN), sound checker |
 | [`BusyLean/Contender8.lean`](BusyLean/Contender8.lean), [`Comparison8.lean`](BusyLean/Comparison8.lean) | Contender 8 definitions and theorems |
+| [`BusyLean/Contender9.lean`](BusyLean/Contender9.lean), [`Comparison9.lean`](BusyLean/Comparison9.lean) | Contender 9 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the five reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -201,6 +229,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 6 | Lean | this repository | forest reflection over System T + finite-type W-types, along the language's own trees; it combines ideas from proposals P5, P2 and P4 |
 | 7 | Lean | this repository | System F (impredicative polymorphism) with Contender 6 as oracle; strong normalization proved in Lean |
 | 8 | Lean | this repository | System Fω (type operators) with Contender 7 as oracle; candidates over kinds |
+| 9 | Lean | this repository | System Fω reflected along the W-language's own trees, seeded with Contender 8 |
 
 Proposals P1–P5 were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

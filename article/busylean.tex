@@ -62,7 +62,9 @@ Its strong normalization is proved inside Lean by Girard's reducibility
 candidates, which is possible because Lean's \texttt{Prop} is impredicative,
 and normalization runs as a certified total function. Contender~8 adds type
 operators (System~F$_\omega$), with candidates lifted to kinds and a sound,
-fuel-bounded type checker. The next rung is the Calculus of Constructions.
+fuel-bounded type checker. Contender~9 reflects
+F$_\omega$ along the W-language's trees, and we explain why the Calculus of
+Constructions is not a growth-rate jump, whereas large elimination is.
 \end{abstract}
 
 \tableofcontents
@@ -380,22 +382,72 @@ family makes the comparison immediate:
 \lean{family7 42 < F8 42 < F8 (F8 42)}.
 
 %======================================================================
+\section{Contender 9: reflecting F$_\omega$ along the W-language's trees}
+
+\subsection{Why not the Calculus of Constructions}
+The natural next rung, the Calculus of Constructions, turns out \emph{not} to
+be a growth-rate jump. In pure CoC, term dependencies can be erased into
+F$_\omega$ (Geuvers and Nederhof), so the numeric functions CoC represents on
+Church numerals are essentially those of F$_\omega$. This is why Loader's number
+sits in the F$_\omega$/CoC class, and Contender~8 already lives there. A genuine
+jump beyond higher-order arithmetic requires \emph{runtime-to-type dependency
+with large elimination}: types computed by recursion on input numbers, so that
+a single program uses types of unbounded order. That is the realm of the
+Calculus of Inductive Constructions, whose normalization needs a realizability
+model with universes. It is a much larger project, described in the roadmap.
+
+\subsection{A multiplicative step}
+While that project is pending, Contender~6's amplifier applies to any total
+language with an oracle. Contender~9 reflects F$_\omega$ along Contender~6's
+self-referential index, the join of every tree the W-language defines:
+\begin{lstlisting}
+def stage9 (seed : Family) : WTree ℕ → ℕ → ℕ
+  | .leaf   => reflect9 seed
+  | .node g => reflect9 (fun i => stage9 seed (g i))
+def F9 (n : ℕ) : ℕ := stage9 (fun _ => family8) index n
+def contender_9 : ℕ := F9 (F9 42)      -- family8 n = F8 (F8 n)
+\end{lstlisting}
+\lean{reflect9 fs n} exceeds the visible oracle values $fs(i,n)$, $i\le n$, and
+every F$_\omega$ program of depth $\le n$. F$_\omega$'s oracle is unary, so the
+family is packed as $\mathtt{orc}\,(2^i(2m+1)) = fs(i,m)$. Programs can compute
+these codes and so call any child at any input; the theorem
+\lean{unpair2\_code} shows that the decoder inverts the code. The index trees
+must still come from the W-language: F$_\omega$ has no set-theoretic model, so
+its programs cannot hand trees back to Lean. By the multiplication heuristic,
+Contender~9 is about $f_{|\mathsf{Z}_\omega|\cdot\psi(\Omega_\omega)^2}$.
+Proved: \lean{contender\_8\_lt\_contender\_9}, \lean{family8\_lt\_F9} (at every
+input) and \lean{defined\_tree\_eventually\_lt9}.
+
+\subsection{Budgets for a growing stack}
+Each contender seeds itself with its predecessor's family, so its definition
+transitively imports the whole history. The full chain took 16--30\,s under
+parallel load on the reference laptop. A fixed budget for the whole stack would
+eventually be exhausted by history alone. The rules now treat earlier accepted
+contenders like the precompiled core library: the 15\,s/60\,s budgets apply to
+the new contender. Contender~9's definition checks in about 2\,s and its proofs
+in about 3\,s, and the full clean build of all contenders takes about 28\,s.
+
+%======================================================================
 \section{Roadmap}
 
-\paragraph{The Calculus of Constructions.} Dependent types on top of
-F$_\omega$ is the system behind Loader's number, the largest well-known
-computable googologism. Its normalization proof (Coquand; Geuvers) also uses
-candidates, now indexed by the dependent structure. Type checking requires
-term normalization inside types, which the fuel-bounded approach of
-Contender~8 handles soundly in the same way.
+\paragraph{Large elimination.} The next qualitative jump is a dependently typed
+language with an inductive type of natural numbers whose recursor eliminates
+into \emph{types}, together with impredicative propositions: a fragment of the
+Calculus of Inductive Constructions. Its normalization can be modeled by
+realizability. Types are interpreted as Lean types paired with sets of
+realizers, the untyped terms of Contender~7. Propositions are interpreted as
+saturated sets, and large elimination is just Lean recursion into
+\lean{Type}. Lean is strong enough to host such a model for any fixed number of
+universes, even though it cannot model itself.
 
-\paragraph{Universes and inductive types.} Beyond CoC lie predicative
-universes and inductive families. Lean's own type theory is the far horizon of
-this ladder, since Lean cannot prove its own normalization.
+\paragraph{Universes.} Each additional predicative universe in the object
+language is modeled by one more Lean universe. The far horizon of the ladder
+is Lean's own type theory, the one system whose normalization Lean cannot
+prove.
 
-\paragraph{Amplifiers.} Reflection along language-definable trees
-(Contender~6) applies to any total language with an oracle, at a
-multiplicative gain. The next rung of the ladder remains the priority.
+\paragraph{Amplifiers.} Forest reflection along language-definable trees
+applies to every new language with an oracle, as Contender~9 shows, at a
+multiplicative gain.
 
 %======================================================================
 \section{Status}
@@ -409,7 +461,8 @@ Contender & idea & informal size\\
 6 (Lean) & W-language, reflected along its own trees & $f_{\psi(\Omega_\omega)^2}(42)$\\
 7 (Lean) & System F with Contender 6 as oracle & $f_{|\mathsf{Z}_2|}(>\!C_6)$\\
 8 (Lean) & System F$_\omega$ with Contender 7 as oracle & $f_{|\mathsf{Z}_\omega|}(>\!C_7)$\\
-9 (planned) & Calculus of Constructions & Loader-class\\
+9 (Lean) & F$_\omega$ reflected along W-trees & $f_{|\mathsf{Z}_\omega|\cdot\psi(\Omega_\omega)^2}(>\!C_8)$\\
+10 (planned) & dependent types with large elimination & beyond higher-order arithmetic\\
 \bottomrule
 \end{tabular}
 \end{center}
