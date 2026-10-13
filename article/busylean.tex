@@ -137,6 +137,8 @@ Contender~53 iterates the reflection along the tree, each level an oracle of
 the next.
 Contender~54 makes that reflection a primitive of the language, applicable
 to any tree a program builds.
+Contender~55 stacks the number languages along the tree, each level a
+first-class closure for the next.
 \end{abstract}
 
 \tableofcontents
@@ -2085,6 +2087,29 @@ $N=\mathrm{family}_{53}(n)$ and $T=\mathrm{stackTree}(N)$. Proved:
 The definitions check in 1.9\,s and the proofs in 2.5\,s.
 
 %======================================================================
+\section{Contender 55: number languages stacked along the tree}
+
+Contender~54 closes a number oracle once under every program over its
+primitives, which include reflection over program-built trees. Contender~55
+stacks such closures along a tree, as \lean{ptlStack} stacks the tree languages:
+\[
+\mathrm{numLift}_{P}(g)(m)=m+1+\max\bigl(g(m),\ \max\{\,v : v\ \text{a closed nat program over }P+g\text{ of size}\le m\,\}\bigr),
+\]
+\[
+S_0=\mathrm{numLift}_P,\qquad S_{a+1}=\mathrm{numLift}_{P+[\mathsf{lift}\,:=\,S_a]},\qquad
+S_{\lim f}(g)(m)=\max_{i\le m}S_{f\,i}(g)(m).
+\]
+Each successor level can call the previous level's whole closure as a
+first-class $\mathsf{lift}:(\mathsf{nat}\to\mathsf{nat})\to\mathsf{nat}\to\mathsf{nat}$,
+and iterate and compose it at higher types. \lean{lt\_numStack} shows that
+every level strictly dominates its oracle and argument, with no assumption on
+the oracle. The stack runs along Contender~52's stacked tree $T$ with
+Contender~54's primitives, and $F_{55}(n)=h^{S_T(\mathrm{family}_{54})}_T(N)$ with
+$N=\mathrm{family}_{54}(n)$. Proved: \lean{family54\_lt\_F55} and
+\lean{contender\_54\_lt\_\allowbreak contender\_55}. The definitions check in
+1.8\,s and the proofs in 2.3\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2182,6 +2207,7 @@ Contender & idea & informal size\\
 52 (Lean) & the languages of Contender 51 stacked along a tree & ladder reflection along the stacked tree\\
 53 (Lean) & ladder reflection iterated along the tree & hyperreflection along the stacked tree\\
 54 (Lean) & reflection over any program-built tree as a primitive & closed nat programs over reflection\\
+55 (Lean) & number languages (with reflection) stacked along the tree & $h_T$ over the stacked number closure\\
 \bottomrule
 \end{tabular}
 \end{center}
