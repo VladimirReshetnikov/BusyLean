@@ -604,3 +604,10 @@ imported, and deleted:
 | `Contender26_W2_Hyperreflection` | C25 | P22's W-ranked lift one type higher (`HyperLift`) | P26 with a W-tree rank; amplifier ranks are dominated by the trees `hier` already runs along |
 | `Contender35_SelfIndexed_TransfiniteLanguage` | C34 | `treeStackedTree` at a self-indexed depth, orbit seed | same: a larger atom tree plus orbit seed |
 | `Contender38_MetaLanguage` | C37 | System T with `langLift` as a first-class constant over `boost31` and a seed; self-rebased tower | the same idea as P27 (which is parametric in its primitives and was built); its own extra, the diagonal `t ↦ metaStack t t t`, is a tree-level diagonal of the kind already in `bootT`/`stackOver`; kernel check never run |
+
+# Retired without import (2026-10-13, second batch)
+
+| Archive | Target | Idea | Why retired |
+|---|---|---|---|
+| `Contender42_ReaderTree_HyperHierarchy` | C41 | `hyperHier`: iterate the hierarchy-forming operator `g ↦ hier g T` along a second tree (here `succ T`) | a hierarchy along roughly `T·2`. Ordinal arithmetic on the index adds nothing: the trees `hier` runs along (Contender 38 on) are already closed under such operations, and later contenders' trees dwarf it |
+| `Contender42_StratifiedSemanticRayo` | C41 | a first-order language with arithmetic, iteration, an oracle, and rank-lowering semantic reflection; diagonal over ranks ≤ `n` | number-level reflection over a weak base language, the pattern of Contenders 6–14 over much stronger languages (System F, Fω, ladders); no kernel replay was run |
