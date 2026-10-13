@@ -153,6 +153,10 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.contender_25_lt_contender_26
 #print axioms BusyLean.lvalue26_lt_F26
 #print axioms BusyLean.Ordinal.DL
+#print axioms BusyLean.contender_27
+#print axioms BusyLean.contender_26_lt_contender_27
+#print axioms BusyLean.uvalue_lt_F27
+#print axioms BusyLean.Ordinal.universeLadderTree
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -278,6 +282,15 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
   BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_27 :
+  BusyLean.contender_26
+  BusyLean.contender_25 BusyLean.contender_24 BusyLean.contender_23 BusyLean.contender_22
+  BusyLean.contender_21 BusyLean.contender_20 BusyLean.contender_19 BusyLean.contender_18
+  BusyLean.contender_17 BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
+  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11 BusyLean.contender_10
+  BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
+  BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -305,6 +318,7 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_23_lt_contender_24
 #check @BusyLean.contender_24_lt_contender_25
 #check @BusyLean.contender_25_lt_contender_26
+#check @BusyLean.contender_26_lt_contender_27
 #check @BusyLean.Ordinal.addr_wf
 #check @BusyLean.Ordinal.roundTower_wf
 #check @BusyLean.Ordinal.tower_wf
