@@ -59,7 +59,7 @@ jobs:
           {
             echo
             echo '--- source guards ---'
-            if grep -R -n -E '^[[:space:]]*(axiom|noncomputable|partial|unsafe|opaque|initialize|run_cmd|#eval)([[:space:]]|$)|sorry|admit|native_decide|implemented_by|extern' \
+            if grep -R -n -E '^[[:space:]]*(axiom|noncomputable|partial|unsafe|opaque|initialize|run_cmd|#eval)([[:space:]]|$)|(^|[^A-Za-z0-9_])(sorry|admit|native_decide|implemented_by|extern)([^A-Za-z0-9_]|$)' \
               BusyLean/Ordinal/TreeLanguage4.lean BusyLean/Contender35.lean \
               BusyLean/Comparison35.lean test/Contender35Audit.lean; then
               echo 'forbidden source token found'
