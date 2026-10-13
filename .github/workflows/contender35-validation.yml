@@ -1,0 +1,76 @@
+name: Contender 35 operator-meta-language validation
+
+on:
+  push:
+    branches:
+      - research/contender35-operator-meta-language-20261013
+    paths:
+      - 'BusyLean/Ordinal/TreeLanguage4.lean'
+      - 'BusyLean/Contender35.lean'
+      - 'BusyLean/Comparison35.lean'
+      - 'test/Contender35Audit.lean'
+      - '.github/workflows/contender35-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: 'false'
+          build: 'false'
+          test: 'false'
+          lint: 'false'
+          use-github-cache: 'false'
+      - name: Record toolchain
+        run: |
+          set -o pipefail
+          {
+            echo "commit: $GITHUB_SHA"
+            lake env lean --version
+            lake --version
+          } 2>&1 | tee validation-ci.log
+      - name: Precompile accepted base
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "accepted base: %e s" lake build BusyLean.Comparison34; } \
+            2>&1 | tee -a validation-ci.log
+      - name: Check Contender 35 definitions
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "definition phase: %e s" lake build BusyLean.Contender35; } \
+            2>&1 | tee -a validation-ci.log
+      - name: Check Contender 35 proofs
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "proof phase: %e s" lake build BusyLean.Comparison35; } \
+            2>&1 | tee -a validation-ci.log
+      - name: Run focused audit
+        run: |
+          set -o pipefail
+          lake env lean test/Contender35Audit.lean 2>&1 | tee -a validation-ci.log
+      - name: Source guards
+        if: always()
+        run: |
+          {
+            echo
+            echo '--- source guards ---'
+            if grep -R -n -E '^[[:space:]]*(axiom|noncomputable|partial|unsafe|opaque|initialize|run_cmd|#eval)([[:space:]]|$)|sorry|admit|native_decide|implemented_by|extern' \
+              BusyLean/Ordinal/TreeLanguage4.lean BusyLean/Contender35.lean \
+              BusyLean/Comparison35.lean test/Contender35Audit.lean; then
+              echo 'forbidden source token found'
+              exit 1
+            else
+              echo 'no forbidden source tokens found'
+            fi
+          } 2>&1 | tee -a validation-ci.log
+      - name: Upload validation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender35-validation
+          path: validation-ci.log
