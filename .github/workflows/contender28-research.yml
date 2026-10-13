@@ -1,0 +1,54 @@
+name: Contender 28 research validation
+
+on:
+  push:
+    branches:
+      - research/reflection-indexed-universe-contender28-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: "false"
+          build: "false"
+          test: "false"
+          lint: "false"
+          use-github-cache: "false"
+      - name: Record toolchain
+        run: |
+          set -o pipefail
+          {
+            echo "base snapshot: 1f58dc375ac0f23ed8e13449ec60be1bed1701c4"
+            echo "commit: $GITHUB_SHA"
+            lake env lean --version
+            lake --version
+          } 2>&1 | tee validation-ci.log
+      - name: Precompile accepted base
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "accepted base: %e s" lake build BusyLean.Comparison27; } 2>&1 | tee -a validation-ci.log
+      - name: Check Contender 28 definitions
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "definition phase: %e s" lake build BusyLean.Contender28; } 2>&1 | tee -a validation-ci.log
+      - name: Check Contender 28 proofs
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "proof phase: %e s" lake build BusyLean.Comparison28; } 2>&1 | tee -a validation-ci.log
+      - name: Run focused axiom and closure audit
+        run: |
+          set -o pipefail
+          lake env lean test/Contender28Audit.lean 2>&1 | tee -a validation-ci.log
+      - name: Upload validation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender28-validation
+          path: validation-ci.log
