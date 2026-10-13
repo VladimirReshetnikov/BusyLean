@@ -25,26 +25,8 @@ jobs:
           lean --version
           lake --version
 
-      - name: Build Contender 20 definition
+      - name: Run clean budget and axiom audit
         shell: bash
         run: |
           set -euxo pipefail
-          time lake build BusyLean.Contender20
-
-      - name: Build Contender 20 comparison
-        shell: bash
-        run: |
-          set -euxo pipefail
-          time lake build BusyLean.Comparison20
-
-      - name: Run W-tree ladder smoke test
-        shell: bash
-        run: |
-          set -euxo pipefail
-          lake env lean test/WTreeLadderSmoke.lean
-
-      - name: Run axiom and closure audit
-        shell: bash
-        run: |
-          set -euxo pipefail
-          lake env lean test/Contender20Audit.lean
+          python3 scripts/check_contender20.py
