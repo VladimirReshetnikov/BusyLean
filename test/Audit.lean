@@ -208,6 +208,11 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.contender_39
 #print axioms BusyLean.contender_38_lt_contender_39
 #print axioms BusyLean.mixTree
+#print axioms BusyLean.contender_40
+#print axioms BusyLean.contender_39_lt_contender_40
+#print axioms BusyLean.metaTree
+#print axioms BusyLean.FT2.jumpF
+#print axioms BusyLean.FT2.trec_mem
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -528,6 +533,28 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
   BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_40 :
+  BusyLean.contender_39
+  BusyLean.contender_38
+  BusyLean.contender_37
+  BusyLean.contender_36
+  BusyLean.contender_35
+  BusyLean.contender_34
+  BusyLean.contender_33
+  BusyLean.contender_32
+  BusyLean.contender_31
+  BusyLean.contender_30
+  BusyLean.contender_29
+  BusyLean.contender_28
+  BusyLean.contender_27
+  BusyLean.contender_26
+  BusyLean.contender_25 BusyLean.contender_24 BusyLean.contender_23 BusyLean.contender_22
+  BusyLean.contender_21 BusyLean.contender_20 BusyLean.contender_19 BusyLean.contender_18
+  BusyLean.contender_17 BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
+  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11 BusyLean.contender_10
+  BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
+  BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -570,6 +597,8 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_36_lt_contender_37
 #check @BusyLean.contender_37_lt_contender_38
 #check @BusyLean.contender_38_lt_contender_39
+#check @BusyLean.contender_39_lt_contender_40
+#check @BusyLean.FT2.wt_of_typed
 #check @BusyLean.Ordinal.addr_wf
 #check @BusyLean.Ordinal.roundTower_wf
 #check @BusyLean.Ordinal.tower_wf
