@@ -92,3 +92,6 @@ import BusyLean.Comparison34
 import BusyLean.SystemFT.Trees
 import BusyLean.Contender35
 import BusyLean.Comparison35
+import BusyLean.SystemFLT.Trees
+import BusyLean.Contender36
+import BusyLean.Comparison36

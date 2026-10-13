@@ -231,19 +231,24 @@ theorem cs_mem : (arrCand (treeCand f) (treeCand f)).P (Tm.con 1) := by
       (fun b' e => by cases e; exact WT.mk hsn hred hs hl)
       (fun _ e => by cases e)
 
-theorem cl_mem (ρ : Nat → Cand f) :
-    (arrCand (arrCand (interp ρ Ty.nat) (treeCand f)) (treeCand f)).P (Tm.con 2) := by
+/-- `con 2` belongs to `(N → tree) → tree` for any candidate `N` containing the numerals. -/
+theorem cl_mem_of (N : Cand f) (hN : ∀ k, N.P (num k)) :
+    (arrCand (arrCand N (treeCand f)) (treeCand f)).P (Tm.con 2) := by
   intro g hg
   show WT f (Tm.app (Tm.con 2) g)
-  have hsn : SN f g := (arrCand (interp ρ Ty.nat) (treeCand f)).cr1 hg
+  have hsn : SN f g := (arrCand N (treeCand f)).cr1 hg
   induction hsn with
   | intro g _ ih =>
     have hred' : ∀ u, Step f (Tm.app (Tm.con 2) g) u → WT f u := fun u s => by
       obtain ⟨g', rfl, s'⟩ := Step.con_inv s
-      exact ih g' s' ((arrCand (interp ρ Ty.nat) (treeCand f)).cr2 hg s')
+      exact ih g' s' ((arrCand N (treeCand f)).cr2 hg s')
     exact WT.mk (SN.intro fun u s => (hred' u s).sn) hred'
       (fun _ e => by cases e)
-      (fun g' e k => by cases e; exact hg _ (num_mem ρ k))
+      (fun g' e k => by cases e; exact hg _ (hN k))
+
+theorem cl_mem (ρ : Nat → Cand f) :
+    (arrCand (arrCand (interp ρ Ty.nat) (treeCand f)) (treeCand f)).P (Tm.con 2) :=
+  cl_mem_of _ (num_mem ρ)
 
 /-- The oracle belongs to `nat → nat` in every valuation. -/
 def OrcOK (f : Nat → Nat) : Prop := ∀ ρ : Nat → Cand f, (interp ρ (arr Ty.nat Ty.nat)).P Tm.orc
