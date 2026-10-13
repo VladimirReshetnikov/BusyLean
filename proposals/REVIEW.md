@@ -507,3 +507,39 @@ contender_20` for its own number. It keeps Contender 19's language, so it is
 informally below this repository's Contenders 20–24, and Contender 23 already
 uses the transfinite-rank hierarchy. Nothing new is adopted; it corroborates
 P22.
+
+# Late arrival: P25
+
+`BusyLean_Contender20_Autonomous_WTree_Reflection.zip` proposes a "Contender
+20" over Contender 19 (base commit `64d31a0`; validated on a research branch).
+
+| | Definitions | Proofs | Axioms |
+|---|---|---|---|
+| P25 | compile, 1.8 s | **compile**, 1.0 s | `propext, Quot.sound`; the closure (4,235 constants) avoids `contender_5` … `contender_19` |
+
+## What it builds
+
+A new kind of atom: **finite addresses in a computable W-tree**
+(`Ordinal/WTreeLadder.lean`). An address is valid when following it reaches a
+subtree, which is decidable by evaluating the tree. `childLt t b a` says `b` is
+a valid immediate child of `a`. This relation is well-founded *structurally*:
+accessibility of an address is proved by recursion on the subtree it reaches.
+No ordinal-notation theory is needed. The tree is `tree12` joined with all
+finite autonomous hyper-closures above it. The ladder language of Contender 14
+runs over these atoms, with an `F19` orbit as seed and `diagonalLift` as
+amplifier.
+
+## Comparison and adoption
+
+It proves `contender_19 < contender_20` for its own number. Its ladder length
+is the rank of `tree12`'s hyper-closures, about the W-language's index ordinal.
+That is below the Bachmann–Howard and Buchholz-length ladders of Contenders
+20–24, so it is informally below them.
+
+The **idea is adopted**, and it is the most consequential one received. If
+atoms are addresses in a Lean-defined tree, the ladder length is the tree's
+rank, and well-foundedness is free. Contender 25 uses it with the *descendant*
+order, which is also structurally well-founded, over trees produced by
+Buchholz-style collapsing functions on tree ordinals. Those functions are
+defined by plain structural recursion, with no normal forms and no
+well-foundedness proofs.

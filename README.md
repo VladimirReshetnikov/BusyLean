@@ -674,7 +674,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender24.lean`](BusyLean/Contender24.lean), [`Comparison24.lean`](BusyLean/Comparison24.lean) | Contender 24 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
-| [`proposals/`](proposals) | the twenty-four reviewed proposals and [the review](proposals/REVIEW.md) |
+| [`proposals/`](proposals) | the twenty-five reviewed proposals and [the review](proposals/REVIEW.md) |
 | [`incoming/`](incoming) | drop zone for new proposal archives ([how they are processed](incoming/README.md)) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
 
@@ -704,7 +704,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 23 | Lean | this repository | 22 with P22's transfinite (W-tree) rank for the lift hierarchy |
 | 24 | Lean | this repository | towers along well-founded indices, each round indexed by the previous one |
 
-Proposals P1–P24 (four batches and four late arrivals) were reviewed, rebuilt and ranked; see
+Proposals P1–P25 (four batches and five late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
 ([`docs/.../LICENSE`](docs/name-the-biggest-number-master/LICENSE)); this
 repository is MIT-0 ([`LICENSE`](LICENSE)).
