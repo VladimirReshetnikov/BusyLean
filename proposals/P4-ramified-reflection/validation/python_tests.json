@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "assertions": 62065,
+  "elapsed_seconds": 0.4218709500000841,
+  "legacy": [
+    {
+      "depth": 1,
+      "term_count": 2,
+      "type_count": 1,
+      "maximum": 0
+    },
+    {
+      "depth": 2,
+      "term_count": 10,
+      "type_count": 2,
+      "maximum": 1
+    },
+    {
+      "depth": 3,
+      "term_count": 146,
+      "type_count": 5,
+      "maximum": 2
+    },
+    {
+      "depth": 4,
+      "term_count": 24976,
+      "type_count": 26,
+      "maximum": 3
+    }
+  ],
+  "extended": [
+    {
+      "depth": 1,
+      "term_count": 5,
+      "type_count": 2,
+      "maxima": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "depth": 2,
+      "term_count": 62,
+      "type_count": 6,
+      "maxima": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "depth": 3,
+      "term_count": 6167,
+      "type_count": 38,
+      "maxima": [
+        2,
+        8,
+        17
+      ]
+    }
+  ],
+  "scope": "Finite Python model only. No Lean kernel or giant numeral evaluated."
+}

@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "pages": 21,
+  "pdf_compiled": true,
+  "overfull_boxes": 0,
+  "undefined_references": false,
+  "inspection": "Full-document MuPDF contact sheets plus selected full-size pages; Poppler renders of witness and final pages.",
+  "scope": "PDF layout only; unrelated to Lean certification."
+}

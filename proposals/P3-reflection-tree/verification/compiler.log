@@ -1,0 +1,312 @@
+[compiler_version] exit=0 elapsed=0.033365063s
+Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)
+
+[Baseline] exit=0 elapsed=0.579113142s
+
+[Oracle] exit=0 elapsed=0.434345766s
+
+[Trees] exit=0 elapsed=0.257398752s
+
+[Hierarchy] exit=0 elapsed=0.133768071s
+
+[Checks] exit=0 elapsed=0.413775664s
+CHECK type_counts = [0, 1, 2, 5, 26]
+CHECK term_counts = [0, 2, 10, 146, 24976]
+CHECK baseline_values = [0, 0, 1, 2, 3]
+CHECK expression_counts = [0, 4, 28, 914]
+CHECK raw_samples = [0, 0, 0, 1, 0, 1, 5, 7, 8]
+CHECK quote_samples = [0, 0, 0, 1, 0, 1, 5, 7, 8]
+CHECK oracle_samples = [7, 73, 3, 0]
+CHECK reflect_samples = [4, 16, 64]
+CHECK hierarchy_successor_samples = [4, 16, 64]
+'Biggest.Sanity.quote_preserves' does not depend on any axioms
+
+[OracleFacts] exit=0 elapsed=0.162682075s
+
+[Comparison] exit=0 elapsed=0.131289078s
+'Biggest.contender_5' does not depend on any axioms
+'Biggest.contender_6' does not depend on any axioms
+'Biggest.contender_5_lt_contender_6' does not depend on any axioms
+
+[Enumeration] exit=0 elapsed=0.296731815s
+
+[Diagonal] exit=0 elapsed=0.233490554s
+
+[TreeGrowth] exit=0 elapsed=0.149520001s
+
+[TreeMargin] exit=0 elapsed=0.178268932s
+
+[NumericTreeGrowth] exit=0 elapsed=0.147161524s
+
+[Main] exit=0 elapsed=0.161101453s
+Biggest.contender_6 : Nat
+'Biggest.contender_5' does not depend on any axioms
+'Biggest.contender_6' does not depend on any axioms
+'Biggest.contender_5_lt_contender_6' does not depend on any axioms
+'Biggest.contender_6_fivefold_margin' does not depend on any axioms
+'Biggest.no_fixed_program_defines_reflect' does not depend on any axioms
+'Biggest.no_program_eventually_defines_reflect' does not depend on any axioms
+'Biggest.numeric_finalStage_growth' does not depend on any axioms
+
+[GeneratedAxiomAudit] exit=0 elapsed=0.311608020s
+'Biggest.Expr' does not depend on any axioms
+'Biggest.InterpTy' does not depend on any axioms
+'Biggest.MarginPath' does not depend on any axioms
+'Biggest.Sanity.addByRecursion' does not depend on any axioms
+'Biggest.Sanity.applyTwo' does not depend on any axioms
+'Biggest.Sanity.chooseInner' does not depend on any axioms
+'Biggest.Sanity.chooseOuter' does not depend on any axioms
+'Biggest.Sanity.incrementAccumulator' does not depend on any axioms
+'Biggest.Sanity.numeral' does not depend on any axioms
+'Biggest.Sanity.quote_preserves' does not depend on any axioms
+'Biggest.Sanity.sampleOracle' does not depend on any axioms
+'Biggest.Sanity.sampleTerms' does not depend on any axioms
+'Biggest.Stage' does not depend on any axioms
+'Biggest.Term' does not depend on any axioms
+'Biggest.TreeLevel' does not depend on any axioms
+'Biggest.Ty' does not depend on any axioms
+'Biggest.Value' does not depend on any axioms
+'Biggest.baseline' does not depend on any axioms
+'Biggest.baseline_eq_maximum' does not depend on any axioms
+'Biggest.baseline_le_oracle_max' does not depend on any axioms
+'Biggest.baseline_lt_reflect' does not depend on any axioms
+'Biggest.baseline_mono' does not depend on any axioms
+'Biggest.baseline_power_le_reflect' does not depend on any axioms
+'Biggest.cast' does not depend on any axioms
+'Biggest.castError' does not depend on any axioms
+'Biggest.castImpl' does not depend on any axioms
+'Biggest.closureOrbit' does not depend on any axioms
+'Biggest.closureRound' does not depend on any axioms
+'Biggest.commonClose' does not depend on any axioms
+'Biggest.commonDerivative' does not depend on any axioms
+'Biggest.contender_5' does not depend on any axioms
+'Biggest.contender_5_lt_contender_6' does not depend on any axioms
+'Biggest.contender_6' does not depend on any axioms
+'Biggest.contender_6_fivefold_margin' does not depend on any axioms
+'Biggest.criticalLift' does not depend on any axioms
+'Biggest.derivative' does not depend on any axioms
+'Biggest.descendLevel' does not depend on any axioms
+'Biggest.enumerateClosure' does not depend on any axioms
+'Biggest.error' does not depend on any axioms
+'Biggest.eval' does not depend on any axioms
+'Biggest.evalExpr' does not depend on any axioms
+'Biggest.eval_le_baseline' does not depend on any axioms
+'Biggest.eval_quote' does not depend on any axioms
+'Biggest.eval_succ' does not depend on any axioms
+'Biggest.exponent_margin' does not depend on any axioms
+'Biggest.exprDepth' does not depend on any axioms
+'Biggest.exprDepth_pos' does not depend on any axioms
+'Biggest.exprsUpTo' does not depend on any axioms
+'Biggest.exprsUpTo_complete' does not depend on any axioms
+'Biggest.exprsUpTo_correct' does not depend on any axioms
+'Biggest.exprsUpTo_sound' does not depend on any axioms
+'Biggest.finalStage' does not depend on any axioms
+'Biggest.finalStage_exceeds_gammaTree' does not depend on any axioms
+'Biggest.finalStage_five_successors' does not depend on any axioms
+'Biggest.gammaTree' does not depend on any axioms
+'Biggest.hierarchy' does not depend on any axioms
+'Biggest.higherTower' does not depend on any axioms
+'Biggest.higherTower_increases' does not depend on any axioms
+'Biggest.interpExpr' does not depend on any axioms
+'Biggest.interpTerm' does not depend on any axioms
+'Biggest.largestOfDepth' does not depend on any axioms
+'Biggest.leMaxLeft' does not depend on any axioms
+'Biggest.leMaxRight' does not depend on any axioms
+'Biggest.le_maximum_of_mem' does not depend on any axioms
+'Biggest.levelLimit' does not depend on any axioms
+'Biggest.levelSeed' does not depend on any axioms
+'Biggest.levelSucc' does not depend on any axioms
+'Biggest.listProd' does not depend on any axioms
+'Biggest.lookup' does not depend on any axioms
+'Biggest.lower_bound_power_le_reflect' does not depend on any axioms
+'Biggest.marginStep' does not depend on any axioms
+'Biggest.marginTower' does not depend on any axioms
+'Biggest.margin_limit0_le' does not depend on any axioms
+'Biggest.margin_path_bound' does not depend on any axioms
+'Biggest.margin_step_mono' does not depend on any axioms
+'Biggest.margin_successor_step' does not depend on any axioms
+'Biggest.margin_zero_mem' does not depend on any axioms
+'Biggest.maxAssoc' does not depend on any axioms
+'Biggest.maxBy' does not depend on any axioms
+'Biggest.maxBy_value' does not depend on any axioms
+'Biggest.maxLe' does not depend on any axioms
+'Biggest.maxLeft' does not depend on any axioms
+'Biggest.maxRight' does not depend on any axioms
+'Biggest.maxZero' does not depend on any axioms
+'Biggest.maximum' does not depend on any axioms
+'Biggest.maximum_le' does not depend on any axioms
+'Biggest.maximum_mono' does not depend on any axioms
+'Biggest.memAppendLeft' does not depend on any axioms
+'Biggest.memAppendRight' does not depend on any axioms
+'Biggest.memMap' does not depend on any axioms
+'Biggest.mem_listProd' does not depend on any axioms
+'Biggest.natDepth' does not depend on any axioms
+'Biggest.natsUpTo' does not depend on any axioms
+'Biggest.natsUpTo_complete' does not depend on any axioms
+'Biggest.natsUpTo_correct' does not depend on any axioms
+'Biggest.natsUpTo_sound' does not depend on any axioms
+'Biggest.no_fixed_program_defines_reflect' does not depend on any axioms
+'Biggest.no_program_eventually_defines_reflect' does not depend on any axioms
+'Biggest.numeric_finalStage_growth' does not depend on any axioms
+'Biggest.numeric_higherTower_growth' does not depend on any axioms
+'Biggest.numeric_limit_zero_growth' does not depend on any axioms
+'Biggest.numeric_promoted_growth' does not depend on any axioms
+'Biggest.numeric_promotion_growth' does not depend on any axioms
+'Biggest.numeric_successor_growth' does not depend on any axioms
+'Biggest.ofMemAppend' does not depend on any axioms
+'Biggest.ofMemListProd' does not depend on any axioms
+'Biggest.ofMemMap' does not depend on any axioms
+'Biggest.omegaAmplifier' does not depend on any axioms
+'Biggest.omegaClose' does not depend on any axioms
+'Biggest.omegaPow' does not depend on any axioms
+'Biggest.oracle_power_le_reflect' does not depend on any axioms
+'Biggest.promoteTreeFunction' does not depend on any axioms
+'Biggest.promoteTreeFunction_increases' does not depend on any axioms
+'Biggest.promotedTreeFunction' does not depend on any axioms
+'Biggest.promotedTreeFunction_increases' does not depend on any axioms
+'Biggest.quote_mem' does not depend on any axioms
+'Biggest.reflect' does not depend on any axioms
+'Biggest.reflect_dominates_program' does not depend on any axioms
+'Biggest.reflect_gt_max' does not depend on any axioms
+'Biggest.reflect_gt_member' does not depend on any axioms
+'Biggest.reflect_gt_oracle' does not depend on any axioms
+'Biggest.stageAdd' does not depend on any axioms
+'Biggest.stageIter' does not depend on any axioms
+'Biggest.stageIter_extensive' does not depend on any axioms
+'Biggest.stageMul' does not depend on any axioms
+'Biggest.stageNat' does not depend on any axioms
+'Biggest.stageOmega' does not depend on any axioms
+'Biggest.startingTreeFunction' does not depend on any axioms
+'Biggest.termDepth' does not depend on any axioms
+'Biggest.termDepth_pos' does not depend on any axioms
+'Biggest.termsUpTo' does not depend on any axioms
+'Biggest.termsUpTo_complete' does not depend on any axioms
+'Biggest.termsUpTo_correct' does not depend on any axioms
+'Biggest.termsUpTo_sound' does not depend on any axioms
+'Biggest.treeIter' does not depend on any axioms
+'Biggest.typeDepth' does not depend on any axioms
+'Biggest.typeDepth_pos' does not depend on any axioms
+'Biggest.typeEqb' does not depend on any axioms
+'Biggest.typesUpTo' does not depend on any axioms
+'Biggest.typesUpTo_complete' does not depend on any axioms
+'Biggest.typesUpTo_correct' does not depend on any axioms
+'Biggest.typesUpTo_sound' does not depend on any axioms
+'Biggest.veblenTree' does not depend on any axioms
+'Biggest.zeroMax' does not depend on any axioms
+
+[GeneratedDependencyAudit] exit=0 elapsed=0.555427897s
+DEPENDENCY visited_count = 444
+DEPENDENCY contender_5_reachable = false
+DEPENDENCY baseline_reachable = false
+DEPENDENCY project_constant = Biggest.contender_6
+DEPENDENCY project_constant = Biggest.hierarchy
+DEPENDENCY project_constant = Biggest.natsUpTo
+DEPENDENCY project_constant = Biggest.typesUpTo.match_2
+DEPENDENCY project_constant = Biggest.Stage
+DEPENDENCY project_constant = Biggest.Stage.zero
+DEPENDENCY project_constant = Biggest.Stage.lim
+DEPENDENCY project_constant = Biggest.Stage.succ
+DEPENDENCY project_constant = Biggest.maximum
+DEPENDENCY project_constant = Biggest.maxBy.match_1
+DEPENDENCY project_constant = Biggest.hierarchy.match_1
+DEPENDENCY project_constant = Biggest.Stage.casesOn
+DEPENDENCY project_constant = Biggest.Stage.rec
+DEPENDENCY project_constant = Biggest.Stage.brecOn
+DEPENDENCY project_constant = Biggest.Stage.below
+DEPENDENCY project_constant = Biggest.reflect
+DEPENDENCY project_constant = Biggest.Expr
+DEPENDENCY project_constant = Biggest.Expr.var
+DEPENDENCY project_constant = Biggest.Expr.oracle
+DEPENDENCY project_constant = Biggest.Expr.lam
+DEPENDENCY project_constant = Biggest.Ty
+DEPENDENCY project_constant = Biggest.Ty.nat
+DEPENDENCY project_constant = Biggest.Ty.arr
+DEPENDENCY project_constant = Biggest.Expr.quote
+DEPENDENCY project_constant = Biggest.Term
+DEPENDENCY project_constant = Biggest.Term.app
+DEPENDENCY project_constant = Biggest.Term.lam
+DEPENDENCY project_constant = Biggest.Term.var
+DEPENDENCY project_constant = Biggest.Term.zero
+DEPENDENCY project_constant = Biggest.Term.natRec
+DEPENDENCY project_constant = Biggest.Term.succ
+DEPENDENCY project_constant = Biggest.Expr.succ
+DEPENDENCY project_constant = Biggest.Expr.input
+DEPENDENCY project_constant = Biggest.Expr.app
+DEPENDENCY project_constant = Biggest.Expr.natRec
+DEPENDENCY project_constant = Biggest.Expr.zero
+DEPENDENCY project_constant = Biggest.exprsUpTo
+DEPENDENCY project_constant = Biggest.typesUpTo
+DEPENDENCY project_constant = Biggest.typesUpTo.match_1
+DEPENDENCY project_constant = Biggest.listProd
+DEPENDENCY project_constant = Biggest.listProd.match_1
+DEPENDENCY project_constant = Biggest.exprsUpTo.match_2
+DEPENDENCY project_constant = Biggest.termsUpTo
+DEPENDENCY project_constant = Biggest.termsUpTo.match_2
+DEPENDENCY project_constant = Biggest.termsUpTo.match_1
+DEPENDENCY project_constant = Biggest.exprsUpTo.match_1
+DEPENDENCY project_constant = Biggest.exprsUpTo.match_3
+DEPENDENCY project_constant = Biggest.evalExpr
+DEPENDENCY project_constant = Biggest.Value
+DEPENDENCY project_constant = Biggest.InterpTy
+DEPENDENCY project_constant = Biggest.Ty.brecOn
+DEPENDENCY project_constant = Biggest.Ty.rec
+DEPENDENCY project_constant = Biggest.Ty.below
+DEPENDENCY project_constant = Biggest.Ty.casesOn
+DEPENDENCY project_constant = Biggest.interpExpr.match_2
+DEPENDENCY project_constant = Biggest.interpExpr
+DEPENDENCY project_constant = Biggest.Expr.brecOn
+DEPENDENCY project_constant = Biggest.Expr.below
+DEPENDENCY project_constant = Biggest.Expr.rec
+DEPENDENCY project_constant = Biggest.lookup
+DEPENDENCY project_constant = Biggest.interpTerm
+DEPENDENCY project_constant = Biggest.Term.below
+DEPENDENCY project_constant = Biggest.Term.rec
+DEPENDENCY project_constant = Biggest.error
+DEPENDENCY project_constant = Biggest.interpTerm.match_2
+DEPENDENCY project_constant = Biggest.interpTerm.match_1
+DEPENDENCY project_constant = Biggest.cast
+DEPENDENCY project_constant = Biggest.castImpl
+DEPENDENCY project_constant = Biggest.castError
+DEPENDENCY project_constant = Biggest.typeEqb
+DEPENDENCY project_constant = Biggest.typeEqb.match_1
+DEPENDENCY project_constant = Biggest.Term.brecOn
+DEPENDENCY project_constant = Biggest.Term.casesOn
+DEPENDENCY project_constant = Biggest.Expr.casesOn
+DEPENDENCY project_constant = Biggest.interpExpr.match_1
+DEPENDENCY project_constant = Biggest.finalStage
+DEPENDENCY project_constant = Biggest.promotedTreeFunction
+DEPENDENCY project_constant = Biggest.promoteTreeFunction
+DEPENDENCY project_constant = Biggest.higherTower
+DEPENDENCY project_constant = Biggest.descendLevel
+DEPENDENCY project_constant = Biggest.TreeLevel
+DEPENDENCY project_constant = Biggest.stageNat.match_1
+DEPENDENCY project_constant = Biggest.levelSeed
+DEPENDENCY project_constant = Biggest.levelSeed.match_1
+DEPENDENCY project_constant = Biggest.omegaAmplifier
+DEPENDENCY project_constant = Biggest.treeIter
+DEPENDENCY project_constant = Biggest.treeIter.match_1
+DEPENDENCY project_constant = Biggest.levelLimit
+DEPENDENCY project_constant = Biggest.levelLimit.match_1
+DEPENDENCY project_constant = Biggest.levelSucc
+DEPENDENCY project_constant = Biggest.levelSucc.match_1
+DEPENDENCY project_constant = Biggest.stageIter
+DEPENDENCY project_constant = Biggest.stageIter.match_1
+DEPENDENCY project_constant = Biggest.startingTreeFunction
+DEPENDENCY project_constant = Biggest.omegaPow
+DEPENDENCY project_constant = Biggest.stageAdd.match_1
+DEPENDENCY project_constant = Biggest.stageMul
+DEPENDENCY project_constant = Biggest.stageAdd
+DEPENDENCY project_constant = Biggest.stageOmega
+DEPENDENCY project_constant = Biggest.stageNat
+DEPENDENCY project_constant = Biggest.criticalLift
+DEPENDENCY project_constant = Biggest.veblenTree
+DEPENDENCY project_constant = Biggest.commonDerivative
+DEPENDENCY project_constant = Biggest.commonClose
+DEPENDENCY project_constant = Biggest.closureOrbit
+DEPENDENCY project_constant = Biggest.closureRound
+DEPENDENCY project_constant = Biggest.closureRound.match_1
+DEPENDENCY project_constant = Biggest.enumerateClosure
+DEPENDENCY project_constant = Biggest.derivative
+DEPENDENCY project_constant = Biggest.omegaClose
+DEPENDENCY project_constant = Biggest.gammaTree
+

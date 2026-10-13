@@ -1,0 +1,15 @@
+Baseline: 0.579 s
+Oracle: 0.434 s
+Trees: 0.257 s
+Hierarchy: 0.134 s
+Checks: 0.414 s
+OracleFacts: 0.163 s
+Comparison: 0.131 s
+Enumeration: 0.297 s
+Diagonal: 0.233 s
+TreeGrowth: 0.150 s
+TreeMargin: 0.178 s
+NumericTreeGrowth: 0.147 s
+Main: 0.161 s
+Evidence: /workspace/scratch/88266698fd36/package/verification/results.json
+Verification passed; 144 declarations are axiom-free.

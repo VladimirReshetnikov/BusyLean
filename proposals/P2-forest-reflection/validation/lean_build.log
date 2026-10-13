@@ -1,0 +1,391 @@
+MODULE Original
+
+MODULE Trees
+'treeIndex' does not depend on any axioms
+'BTree.fast_inflationary' does not depend on any axioms
+'BTree.fast_base_le' does not depend on any axioms
+'BTree.fast_succ_gt' does not depend on any axioms
+
+MODULE Reflection
+
+MODULE Hierarchy
+
+MODULE Arboreal
+
+MODULE Forest
+'Forest.reflect' does not depend on any axioms
+'Forest.termsUpTo_correct' does not depend on any axioms
+'Forest.Arboreal_Rw_lt_reflect' does not depend on any axioms
+'Forest.contender5_lt_reflect' does not depend on any axioms
+'Forest.reflect_not_representable' does not depend on any axioms
+
+MODULE Preliminary
+
+MODULE ForestHierarchy
+
+MODULE Contender
+
+MODULE Smoke
+'Smoke.semanticChecks' does not depend on any axioms
+'Smoke.originalBadArrowCast' does not depend on any axioms
+'Smoke.originalBadNatCast' does not depend on any axioms
+'Smoke.originalOutermostBinder' does not depend on any axioms
+'Smoke.originalInnermostBinder' does not depend on any axioms
+'Smoke.arborealApplyTree' does not depend on any axioms
+'Smoke.arborealOldIsClosed' does not depend on any axioms
+'Smoke.forestSemanticChecks' does not depend on any axioms
+
+MODULE Audit
+'Original.Ty' does not depend on any axioms
+'Original.typeEqb' does not depend on any axioms
+'Original.typeDepth' does not depend on any axioms
+'Original.interpType' does not depend on any axioms
+'Original.Term' does not depend on any axioms
+'Original.natDepth' does not depend on any axioms
+'Original.termDepth' does not depend on any axioms
+'Original.lookup' does not depend on any axioms
+'Original.error' does not depend on any axioms
+'Original.castError' does not depend on any axioms
+'Original.castImpl' does not depend on any axioms
+'Original.cast' does not depend on any axioms
+'Original.Value' does not depend on any axioms
+'Original.interpTerm' does not depend on any axioms
+'Original.listProd' does not depend on any axioms
+'Original.typesUpTo' does not depend on any axioms
+'Original.natsUpTo' does not depend on any axioms
+'Original.termsUpTo' does not depend on any axioms
+'Original.eval' does not depend on any axioms
+'Original.maxBy' does not depend on any axioms
+'Original.largestOfDepth' does not depend on any axioms
+'Original.largestSTLCNatRecNatOfDepth' does not depend on any axioms
+'Original.contender5' does not depend on any axioms
+'Original.foldMax' does not depend on any axioms
+'Original.natMax_eq_left' does not depend on any axioms
+'Original.le_natMax_left' does not depend on any axioms
+'Original.le_natMax_right' does not depend on any axioms
+'Original.maxBy_value' does not depend on any axioms
+'Original.largestSTLCNatRecNatOfDepth_eq_foldMax' does not depend on any axioms
+'Original.current_le_foldMax' does not depend on any axioms
+'Original.le_foldMax_of_mem' does not depend on any axioms
+'Original.eval_le_largest_of_mem' does not depend on any axioms
+'Original.map_mem' does not depend on any axioms
+'Original.of_map_mem' does not depend on any axioms
+'Original.of_append_mem' does not depend on any axioms
+'Original.flatMap_mem' does not depend on any axioms
+'Original.of_flatMap_mem' does not depend on any axioms
+'Original.listProd_mem' does not depend on any axioms
+'Original.of_listProd_mem' does not depend on any axioms
+'Original.typeDepth_pos' does not depend on any axioms
+'Original.termDepth_pos' does not depend on any axioms
+'Original.typesUpTo_complete' does not depend on any axioms
+'Original.natsUpTo_complete' does not depend on any axioms
+'Original.termsUpTo_complete' does not depend on any axioms
+'Original.natMax_le' does not depend on any axioms
+'Original.typesUpTo_sound' does not depend on any axioms
+'Original.natsUpTo_sound' does not depend on any axioms
+'Original.termsUpTo_sound' does not depend on any axioms
+'Original.typesUpTo_correct' does not depend on any axioms
+'Original.termsUpTo_correct' does not depend on any axioms
+'Original.termsUpTo_mono' does not depend on any axioms
+'BTree' does not depend on any axioms
+'BTree.fold' does not depend on any axioms
+'BTree.iterate' does not depend on any axioms
+'BTree.finite' does not depend on any axioms
+'BTree.omega' does not depend on any axioms
+'BTree.add' does not depend on any axioms
+'BTree.mul' does not depend on any axioms
+'BTree.power' does not depend on any axioms
+'BTree.omegaPow' does not depend on any axioms
+'BTree.closure' does not depend on any axioms
+'BTree.derivative' does not depend on any axioms
+'BTree.common' does not depend on any axioms
+'BTree.veblenFrom' does not depend on any axioms
+'BTree.veblenBase' does not depend on any axioms
+'BTree.veblenDiagonal' does not depend on any axioms
+'BTree.Stage' does not depend on any axioms
+'BTree.stageLimit' does not depend on any axioms
+'BTree.stageDiagonal' does not depend on any axioms
+'BTree.liftStage' does not depend on any axioms
+'BTree.levelSeed' does not depend on any axioms
+'BTree.collapse' does not depend on any axioms
+'BTree.collapse_one' does not depend on any axioms
+'BTree.collapse_two' does not depend on any axioms
+'BTree.universeStep' does not depend on any axioms
+'BTree.index' does not depend on any axioms
+'BTree.fast' does not depend on any axioms
+'BTree.iterate_ge' does not depend on any axioms
+'BTree.iterate_gt' does not depend on any axioms
+'BTree.fast_inflationary' does not depend on any axioms
+'BTree.fast_base_le' does not depend on any axioms
+'BTree.fast_succ_gt' does not depend on any axioms
+'treeIndex' does not depend on any axioms
+'Reflection.Expr' does not depend on any axioms
+'Reflection.depth' does not depend on any axioms
+'Reflection.interp' does not depend on any axioms
+'Reflection.eval' does not depend on any axioms
+'Reflection.termsUpTo' does not depend on any axioms
+'Reflection.R' does not depend on any axioms
+'Reflection.eval_base' does not depend on any axioms
+'Reflection.eval_input' does not depend on any axioms
+'Reflection.eval_oracle_input' does not depend on any axioms
+'Reflection.self_lt_R' does not depend on any axioms
+'Reflection.input_lt_R' does not depend on any axioms
+'Reflection.eval_lt_R_of_mem' does not depend on any axioms
+'Reflection.foldMax_le' does not depend on any axioms
+'Reflection.base_mem' does not depend on any axioms
+'Reflection.depth_pos' does not depend on any axioms
+'Reflection.termsUpTo_complete' does not depend on any axioms
+'Reflection.natMax_le' does not depend on any axioms
+'Reflection.termsUpTo_sound' does not depend on any axioms
+'Reflection.termsUpTo_mono' does not depend on any axioms
+'Reflection.eval_lt_R_of_depth_le' does not depend on any axioms
+'Reflection.eventually_lt_R' does not depend on any axioms
+'Reflection.application_eventually_lt_R' does not depend on any axioms
+'Reflection.R_not_representable' does not depend on any axioms
+'Reflection.source_largest_le_fold' does not depend on any axioms
+'Reflection.source_largest_lt_R' does not depend on any axioms
+'Reflection.contender5_lt_R' does not depend on any axioms
+'Hierarchy.Unary' does not depend on any axioms
+'Hierarchy.Transformer' does not depend on any axioms
+'Hierarchy.prefixMax' does not depend on any axioms
+'Hierarchy.le_prefixMax' does not depend on any axioms
+'Hierarchy.stage' does not depend on any axioms
+'Hierarchy.stage_succ_gt' does not depend on any axioms
+'Hierarchy.stage_child_lt_limit' does not depend on any axioms
+'Hierarchy.lower_bound_at' does not depend on any axioms
+'Hierarchy.uniform_lower_bound' does not depend on any axioms
+'Hierarchy.pad' does not depend on any axioms
+'Hierarchy.reflectIter' does not depend on any axioms
+'Hierarchy.pad_stage_eq_reflectIter' does not depend on any axioms
+'Hierarchy.pad_stage_apply' does not depend on any axioms
+'Hierarchy.diagonalTree' does not depend on any axioms
+'Hierarchy.reflectIter_lt_diagonal' does not depend on any axioms
+'Hierarchy.zero_lt_constant_zero_limit' does not depend on any axioms
+'Hierarchy.pad_growth' does not depend on any axioms
+'Hierarchy.reflectIter_mono' does not depend on any axioms
+'Hierarchy.fixed_reflection_lt_diagonal' does not depend on any axioms
+'Hierarchy.diagonal_gap' does not depend on any axioms
+'Hierarchy.diagonal_gap_at' does not depend on any axioms
+'Hierarchy.lower_bound_diagonal_gap' does not depend on any axioms
+'Hierarchy.lower_bound_diagonal_gap_at' does not depend on any axioms
+'Hierarchy.Step' does not depend on any axioms
+'Hierarchy.step_growth' does not depend on any axioms
+'Hierarchy.Path' does not depend on any axioms
+'Hierarchy.path_growth' does not depend on any axioms
+'Arboreal.Ty' does not depend on any axioms
+'Arboreal.typeEqb' does not depend on any axioms
+'Arboreal.typeDepth' does not depend on any axioms
+'Arboreal.interpType' does not depend on any axioms
+'Arboreal.error' does not depend on any axioms
+'Arboreal.castError' does not depend on any axioms
+'Arboreal.castImpl' does not depend on any axioms
+'Arboreal.cast' does not depend on any axioms
+'Arboreal.Value' does not depend on any axioms
+'Arboreal.natRecTy' does not depend on any axioms
+'Arboreal.treeRecTy' does not depend on any axioms
+'Arboreal.Term' does not depend on any axioms
+'Arboreal.depth' does not depend on any axioms
+'Arboreal.natRecValue' does not depend on any axioms
+'Arboreal.treeRecValue' does not depend on any axioms
+'Arboreal.interp' does not depend on any axioms
+'Arboreal.eval' does not depend on any axioms
+'Arboreal.typesUpTo' does not depend on any axioms
+'Arboreal.termsUpTo' does not depend on any axioms
+'Arboreal.Rw' does not depend on any axioms
+'Arboreal.eval_old' does not depend on any axioms
+'Arboreal.self_lt_Rw' does not depend on any axioms
+'Arboreal.input_lt_Rw' does not depend on any axioms
+'Arboreal.eval_lt_Rw_of_mem' does not depend on any axioms
+'Arboreal.foldMax_le' does not depend on any axioms
+'Arboreal.old_mem' does not depend on any axioms
+'Arboreal.legacy_le_fold' does not depend on any axioms
+'Arboreal.legacy_lt_Rw' does not depend on any axioms
+'Arboreal.contender5_lt_Rw' does not depend on any axioms
+'Arboreal.typeDepth_pos' does not depend on any axioms
+'Arboreal.typesUpTo_complete' does not depend on any axioms
+'Arboreal.depth_pos' does not depend on any axioms
+'Arboreal.primitive_mem' does not depend on any axioms
+'Arboreal.termsUpTo_complete' does not depend on any axioms
+'Arboreal.typesUpTo_sound' does not depend on any axioms
+'Arboreal.primitive_depth' does not depend on any axioms
+'Arboreal.termsUpTo_sound' does not depend on any axioms
+'Arboreal.typesUpTo_correct' does not depend on any axioms
+'Arboreal.termsUpTo_correct' does not depend on any axioms
+'Arboreal.eval_lt_Rw_of_depth_le' does not depend on any axioms
+'Arboreal.eventually_lt_Rw' does not depend on any axioms
+'Arboreal.application_eventually_lt_Rw' does not depend on any axioms
+'Arboreal.Rw_not_representable' does not depend on any axioms
+'Forest.Oracles' does not depend on any axioms
+'Forest.Expr' does not depend on any axioms
+'Forest.depth' does not depend on any axioms
+'Forest.interp' does not depend on any axioms
+'Forest.eval' does not depend on any axioms
+'Forest.termsUpTo' does not depend on any axioms
+'Forest.reflect' does not depend on any axioms
+'Forest.eval_base' does not depend on any axioms
+'Forest.eval_oracle_input' does not depend on any axioms
+'Forest.eval_family_input' does not depend on any axioms
+'Forest.oracle_lt_reflect' does not depend on any axioms
+'Forest.input_lt_reflect' does not depend on any axioms
+'Forest.eval_lt_reflect_of_mem' does not depend on any axioms
+'Forest.base_mem' does not depend on any axioms
+'Forest.depth_pos' does not depend on any axioms
+'Forest.termsUpTo_complete' does not depend on any axioms
+'Forest.termsUpTo_sound' does not depend on any axioms
+'Forest.termsUpTo_correct' does not depend on any axioms
+'Forest.termsUpTo_mono' does not depend on any axioms
+'Forest.eval_lt_reflect_of_depth_le' does not depend on any axioms
+'Forest.eventually_lt_reflect' does not depend on any axioms
+'Forest.application_eventually_lt_reflect' does not depend on any axioms
+'Forest.reflect_not_representable' does not depend on any axioms
+'Forest.arboreal_max_le' does not depend on any axioms
+'Forest.Arboreal_Rw_lt_reflect' does not depend on any axioms
+'Forest.contender5_lt_reflect' does not depend on any axioms
+'contestTree' does not depend on any axioms
+'contenderFamily' does not depend on any axioms
+'preliminaryContender' does not depend on any axioms
+'contender_5_lt_stage' does not depend on any axioms
+'contender_5_lt_preliminaryContender' does not depend on any axioms
+'visible_reflections_lt_contenderFamily' does not depend on any axioms
+'diagonal_reflections_lt_contenderFamily' does not depend on any axioms
+'fixed_reflection_lt_contenderFamily' does not depend on any axioms
+'visible_reflections_lt_preliminaryContender' does not depend on any axioms
+'forty_three_reflections_lt_preliminaryContender' does not depend on any axioms
+'seed_plus_44_le_preliminaryContender' does not depend on any axioms
+'contender_5_plus_45_le_preliminaryContender' does not depend on any axioms
+'rank_zero_presentations_differ' does not depend on any axioms
+'ForestHierarchy.step' does not depend on any axioms
+'ForestHierarchy.self_lt_step' does not depend on any axioms
+'ForestHierarchy.stage' does not depend on any axioms
+'ForestHierarchy.stage_succ_gt' does not depend on any axioms
+'ForestHierarchy.stage_child_lt_limit' does not depend on any axioms
+'ForestHierarchy.contender5_lt_stage' does not depend on any axioms
+'ForestHierarchy.pad_stage_eq_reflectIter' does not depend on any axioms
+'ForestHierarchy.pad_stage_apply' does not depend on any axioms
+'ForestHierarchy.reflectIter_lt_diagonal' does not depend on any axioms
+'ForestHierarchy.fixed_reflection_lt_diagonal' does not depend on any axioms
+'ForestHierarchy.step_growth' does not depend on any axioms
+'ForestHierarchy.path_growth' does not depend on any axioms
+'ForestHierarchy.rank_zero_presentations_differ' does not depend on any axioms
+'finalOracles' does not depend on any axioms
+'finalFamily' does not depend on any axioms
+'contender_6' does not depend on any axioms
+'preliminary_lt_finalFamily' does not depend on any axioms
+'preliminary_lt_contender_6' does not depend on any axioms
+'contender_5_lt_contender_6' does not depend on any axioms
+'contender_5_lt_contender_6_direct' does not depend on any axioms
+'forest_padding_lt_finalFamily' does not depend on any axioms
+'forest_reflections_lt_finalFamily' does not depend on any axioms
+'forest_stage_41_lt_contender_6' does not depend on any axioms
+'forty_one_forest_reflections_lt_contender_6' does not depend on any axioms
+'forty_three_arboreal_reflections_lt_contender_6' does not depend on any axioms
+'finalFamily_not_representable' does not depend on any axioms
+'Smoke.reversedLookup0' does not depend on any axioms
+'Smoke.reversedLookup1' does not depend on any axioms
+'Smoke.reversedLookup2' does not depend on any axioms
+'Smoke.reversedLookup3' does not depend on any axioms
+'Smoke.originalUnbound' does not depend on any axioms
+'Smoke.originalApplyNumber' does not depend on any axioms
+'Smoke.originalBadArgument' does not depend on any axioms
+'Smoke.originalBadArrowCast' does not depend on any axioms
+'Smoke.originalBadNatCast' does not depend on any axioms
+'Smoke.originalNumeral' does not depend on any axioms
+'Smoke.originalOutermostBinder' does not depend on any axioms
+'Smoke.originalInnermostBinder' does not depend on any axioms
+'Smoke.numeral' does not depend on any axioms
+'Smoke.treeTwo' does not depend on any axioms
+'Smoke.treeLimit' does not depend on any axioms
+'Smoke.treeSuccNat' does not depend on any axioms
+'Smoke.treeLimitNat' does not depend on any axioms
+'Smoke.treeToNat' does not depend on any axioms
+'Smoke.treeRecNatSuccessor' does not depend on any axioms
+'Smoke.treeRecNatLimit' does not depend on any axioms
+'Smoke.fnTy' does not depend on any axioms
+'Smoke.treeSuccFn' does not depend on any axioms
+'Smoke.treeLimitFn' does not depend on any axioms
+'Smoke.treeToFn' does not depend on any axioms
+'Smoke.treeRecFunctionSuccessor' does not depend on any axioms
+'Smoke.treeRecFunctionLimit' does not depend on any axioms
+'Smoke.treeSuccTree' does not depend on any axioms
+'Smoke.treeLimitTree' does not depend on any axioms
+'Smoke.treeToTree' does not depend on any axioms
+'Smoke.treeRecTreeSuccessor' does not depend on any axioms
+'Smoke.treeRecTreeLimit' does not depend on any axioms
+'Smoke.arborealApplyTree' does not depend on any axioms
+'Smoke.arborealOldIsClosed' does not depend on any axioms
+'Smoke.indexedOracles' does not depend on any axioms
+'Smoke.dynamicFamilyCall' does not depend on any axioms
+'Smoke.familySelectsBeyondPrefix' does not depend on any axioms
+'Smoke.familyUnderLambda' does not depend on any axioms
+'Smoke.familyReceivesBaseVariable' does not depend on any axioms
+'Smoke.forestSuccessor' does not depend on any axioms
+'Smoke.forestTreeRec' does not depend on any axioms
+'Smoke.familyWithinTreeRecSuccessor' does not depend on any axioms
+'Smoke.familyWithinTreeRecLimit' does not depend on any axioms
+'Smoke.forestSemanticChecks' does not depend on any axioms
+'Smoke.semanticChecks' does not depend on any axioms
+
+DEPENDENCY AUDIT
+DEPENDENCY_AUDIT PASS: contender_6
+Logical closure: 502 declarations; 169 package declarations.
+Forbidden previous-number constants absent: [Original.contender5,
+ preliminaryContender,
+ contender_1,
+ contender_2,
+ contender_3,
+ contender_4,
+ contender_5,
+ Original.contender_1,
+ Original.contender_2,
+ Original.contender_3,
+ Original.contender_4,
+ Original.contender_5].
+Axioms: []; unsafe: []; partial: []; package noncomputable: []; package implemented_by: [].
+Lean-core implemented_by substitutions: [(Nat.repr, _private.Init.Data.Repr.0.Nat.reprFast)].
+Lean-core noncomputable tags: [Nat.modCore, Nat.modCore.go].
+
+SOURCE CROSS-CHECK
+{
+  "status": "PASS",
+  "description": "Every enumerated original term value and enumeration count matches through depth 4.",
+  "scope": "Finite independent regression evidence; no cross-prover equivalence theorem is claimed.",
+  "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "python_version": "3.12.14",
+  "depth_results": [
+    {
+      "depth": 0,
+      "types": 0,
+      "terms": 0,
+      "largest_value": 0
+    },
+    {
+      "depth": 1,
+      "types": 1,
+      "terms": 2,
+      "largest_value": 0
+    },
+    {
+      "depth": 2,
+      "types": 2,
+      "terms": 10,
+      "largest_value": 1
+    },
+    {
+      "depth": 3,
+      "types": 5,
+      "terms": 146,
+      "largest_value": 2
+    },
+    {
+      "depth": 4,
+      "types": 26,
+      "terms": 24976,
+      "largest_value": 3
+    }
+  ],
+  "term_values_compared": 25134,
+  "trace_lines_compared": 25149,
+  "trace_sha256": "8399b9141afa9fcaab48315607da627fd4c0fda83c7cd9a7a93e0d82268783ae",
+  "contender5_evaluated": false,
+  "reflector_evaluated": false
+}

@@ -1,0 +1,25 @@
+{
+  "repository": "https://github.com/codyroux/name-the-biggest-number",
+  "commit": "d56dce013e6264292533efdc5e1de71863c6fb86",
+  "retrieval_date_local": "2026-10-12",
+  "files": [
+    {
+      "path": "Contender.v",
+      "bytes": 23739,
+      "git_blob_sha1": "f92db72deb0f3a4d4e3b575b4949eda73b1417a0",
+      "sha256": "a809222145e3063b742af7f35e4e6ec41ca37d60ef32140958a5f09ccd21d04b"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1969,
+      "git_blob_sha1": "b2a2642114e50e86f4432f59aebf439617f78d18",
+      "sha256": "a20f2a1c951ce7558e771bb935c849bc391ec22075cd97ca3765b52e7ec7e09e"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1065,
+      "git_blob_sha1": "0b94a2da98e6411a69cf8c29300c90c3175e61af",
+      "sha256": "446274637183a0a96b3ff8de2da9929baedaa83ea1e640b62c9922c77510b80a"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "columns": [
+    "depth",
+    "types",
+    "raw_terms",
+    "maximum"
+  ],
+  "rows": [
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      2,
+      0
+    ],
+    [
+      2,
+      2,
+      10,
+      1
+    ],
+    [
+      3,
+      5,
+      146,
+      2
+    ],
+    [
+      4,
+      26,
+      24976,
+      3
+    ]
+  ],
+  "higher_type_recursion": 8,
+  "reversed_indices": [
+    1,
+    2
+  ]
+}

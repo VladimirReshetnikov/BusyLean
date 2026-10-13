@@ -1,0 +1,14 @@
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Phase & Measured seconds & Budget (seconds)\\
+\midrule
+All custom definitions & 1.408 & 15\\
+All custom proofs & 1.363 & 60\\
+Proofs plus axiom/dependency audits & 2.520 & 60\\
+Additional stored-body kernel check & 2.458 & separate\\
+\bottomrule
+\end{tabular}
+\end{center}
+The required eight source modules contain 697 lines and 25,777 UTF-8 bytes. Compiler processes used one thread on an AMD EPYC 9V74 host running Ubuntu 24.04.3. The peak resident memory during definition/proof compilation was 428.3 MiB; including the extra checks, the peak was 927.9 MiB.
+The additional check resubmitted 264 safe stored custom definition and theorem bodies directly to the C++ kernel under fresh names. It retained the imported standard-library declarations and inductive metadata; it is a body check, not a separate proof of the Lean implementation. Compiler-generated unsafe execution helpers were excluded, while the corresponding safe logical definitions were checked. The recorded scripts explain the precise scope.

@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "pdf_file": "article/reflection_tree_contender.pdf",
+  "pdf_sha256": "7333540ad1c34244eee880a59656de863150e9c3cd8335fe1e39e3640590b0f2",
+  "pages": 22,
+  "engine": "XeLaTeX / latexmk",
+  "rendering": "Poppler pdftoppm at 120 dpi",
+  "visual_review": "All 22 final pages inspected through rendered images; no clipping, missing glyphs, or collisions found.",
+  "tex_warnings_and_layout_diagnostics": [],
+  "unresolved_reference_markers": false,
+  "article_source_files": [
+    "reflection_tree_contender.tex",
+    "tree_construction.tex",
+    "proofs_and_verification.tex",
+    "verification_metrics.tex"
+  ]
+}

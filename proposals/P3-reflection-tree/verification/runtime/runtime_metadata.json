@@ -1,0 +1,40 @@
+{
+  "version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "official_release_url": "https://github.com/leanprover/lean4/releases/tag/v4.19.0",
+  "official_download_url": "https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-linux.tar.zst",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "logical_cpu_count": 9,
+  "binary": "/workspace/scratch/88266698fd36/runtime_probe/lean-4.19.0-linux/bin/lean",
+  "procfs_compatibility_shim": "/workspace/scratch/88266698fd36/runtime_probe/proc_self_compat.so",
+  "checksums_sha256": {
+    "lean-4.19.0-linux/bin/lean": "92c3d35b5bfaa5e0fea413a775d504cf46cd95e1345df61c2274f76779e7e023",
+    "lean-4.19.0-linux/lib/lean/libInit_shared.so": "44bc5837306f8e24a5db0db56d56ca3114415bd65e3b107426d3c93e21d20098",
+    "lean-4.19.0-linux/lib/lean/libLake_shared.so": "41d978bb36ca6e187a24688c92a047b9293c43b0562049e1d6407cc0b3d39208",
+    "lean-4.19.0-linux/lib/lean/libleanshared.so": "2ab605c74c78f9ba4431a7b5305a4b28a9071d8a826f223eb14fe5530f78e14d",
+    "lean-4.19.0-linux/lib/lean/libleanshared_1.so": "44bc5837306f8e24a5db0db56d56ca3114415bd65e3b107426d3c93e21d20098",
+    "proc_self_compat.c": "1d470bab266c45a5a9f4ef9773976b15ca3094b46c3754645354d1f1c416d72c",
+    "proc_self_compat.so": "f9d97611cfbbab4b36bfa7a33d0812a38f7f35384683c5fcab0954f7008bbcc1"
+  },
+  "smoke_runs": [
+    {
+      "elapsed_seconds": 0.12025834000087343,
+      "returncode": 0,
+      "stdout": "'contender' does not depend on any axioms\n'contender_eq' does not depend on any axioms\n",
+      "stderr": ""
+    },
+    {
+      "elapsed_seconds": 0.11851669500174467,
+      "returncode": 0,
+      "stdout": "'contender' does not depend on any axioms\n'contender_eq' does not depend on any axioms\n",
+      "stderr": ""
+    },
+    {
+      "elapsed_seconds": 0.10959004100004677,
+      "returncode": 0,
+      "stdout": "'contender' does not depend on any axioms\n'contender_eq' does not depend on any axioms\n",
+      "stderr": ""
+    }
+  ],
+  "max_child_rss_kib": 279188,
+  "installed_scope": "Original lean executable, original shared runtime libraries, original Init .olean files, original Lean source files. Native code-generation libraries and full Lean/Std .oleans omitted to fit disk capacity. Additionally, 39 original object files (29.23 MiB) for Lean.Environment and Lean.Util.FoldConsts support the external compiled-dependency audit."
+}

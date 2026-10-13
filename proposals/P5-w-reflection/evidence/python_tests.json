@@ -1,0 +1,96 @@
+{
+  "enumeration": [
+    {
+      "depth": 0,
+      "language": "T",
+      "types": 0,
+      "terms": 0,
+      "maximum": 0
+    },
+    {
+      "depth": 0,
+      "language": "W",
+      "types": 0,
+      "terms": 0,
+      "maximum": 0
+    },
+    {
+      "depth": 1,
+      "language": "T",
+      "types": 1,
+      "terms": 2,
+      "maximum": 0
+    },
+    {
+      "depth": 1,
+      "language": "W",
+      "types": 1,
+      "terms": 2,
+      "maximum": 0
+    },
+    {
+      "depth": 2,
+      "language": "T",
+      "types": 2,
+      "terms": 10,
+      "maximum": 1
+    },
+    {
+      "depth": 2,
+      "language": "W",
+      "types": 3,
+      "terms": 13,
+      "maximum": 1
+    },
+    {
+      "depth": 3,
+      "language": "T",
+      "types": 5,
+      "terms": 146,
+      "maximum": 2
+    },
+    {
+      "depth": 3,
+      "language": "W",
+      "types": 13,
+      "terms": 308,
+      "maximum": 2
+    },
+    {
+      "depth": 4,
+      "language": "T",
+      "types": 26,
+      "terms": 24976,
+      "maximum": 3
+    },
+    {
+      "depth": 4,
+      "language": "W",
+      "types": 183,
+      "terms": 147129,
+      "maximum": 3
+    }
+  ],
+  "binary_numerals_checked": [
+    0,
+    256
+  ],
+  "double_depth": 11,
+  "row_identities_checked": {
+    "ranks": [
+      1,
+      2
+    ],
+    "inputs": [
+      0,
+      6
+    ]
+  },
+  "tests_run": 6,
+  "failures": 0,
+  "errors": 0,
+  "successful": true,
+  "elapsed_seconds": 2.3239244290000443,
+  "python": "3.13.5",
+  "scope": "finite Python regression tests; not Lean kernel verification"
+}

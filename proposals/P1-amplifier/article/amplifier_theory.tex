@@ -1,0 +1,557 @@
+\section{A constructive amplifier on well-founded trees}
+\label{amp:construction}
+
+The amplification mechanism is independent of the benchmark enumerator.  Its
+input is an explicitly defined function $b:\mathbb N\to\mathbb N$ satisfying
+$b(n)\geq n+1$.  Its output is a closed natural number $N_b$.  The construction
+has two complementary features.  Countably branching well-founded trees and
+operators on higher function spaces provide a substantial supply of recursive
+structure.  A separate feedback mechanism supplies a quantitative growth
+certificate that does not require assigning ordinal names to those trees.
+The result is an exact definition together with an independently checkable
+lower bound.
+
+Throughout this section, iteration means ordinary finite iteration:
+\[
+ f^{[0]}(x)=x,
+ \qquad f^{[r+1]}(x)=f^{[r]}(f(x)).
+\]
+This convention exposes the first application of $f$.  It defines the same
+iterate as the familiar recurrence $f^{[r+1]}(x)=f(f^{[r]}(x))$.
+The brackets distinguish iteration from exponentiation.
+
+\subsection{Trees, evaluation, and substitution}
+\label{amp:trees}
+
+Let $\mathcal T$ be the inductively generated type with constructors
+\[
+ 0_{\mathcal T},\qquad
+ S(a)\quad(a\in\mathcal T),\qquad
+ L(f)\quad(f:\mathbb N\to\mathcal T).
+\]
+The third constructor packages a countable family of immediate subtrees.
+The word ``inductively'' is essential: these are well-founded trees, and their
+eliminator permits structural recursion on a tree, including recursive calls
+to any member $f(r)$ of a family appearing at a limit node.  They are not
+coinductive trees, and a cyclic equation does not introduce a new inhabitant.
+We use $0_{\mathcal T}$ rather than the numeral $0$ when its type might be
+ambiguous.
+
+For a base $b:\mathbb N\to\mathbb N$, define
+\begin{align}
+ F_b(0_{\mathcal T};n)&=b(n),\label{amp:eq:fastzero}\\
+ F_b(S(a);n)&=\bigl(F_b(a;\mathord\cdot)\bigr)^{[n+1]}(n),
+ \label{amp:eq:fastsucc}\\
+ F_b(L(f);n)&=F_b(f(n);n).
+ \label{amp:eq:fastlimit}
+\end{align}
+Thus a successor node turns the function supplied by its child into a finite
+iterator.  A limit node selects its $n$th child.  The argument $n$ is allowed
+to change inside a successor iteration; consequently the evaluator genuinely
+uses the functions associated with subtrees, rather than merely counting
+nodes along one fixed path.
+
+For $a,t\in\mathcal T$, define the substitution $a\star t$ by replacing every
+zero leaf of $t$ with $a$:
+\begin{align*}
+ a\star0_{\mathcal T}&=a,\\
+ a\star S(t)&=S(a\star t),\\
+ a\star L(f)&=L(r\mapsto a\star f(r)).
+\end{align*}
+The orientation matters: the first argument is inserted into the second.
+The Lean implementation calls this operation \texttt{graft}.
+
+The evaluator returns a function of a natural argument at each tree.  Its
+successor equation can therefore reuse the child function with increasingly
+large arguments, although the recursive call defining that function is
+still to a smaller tree.  This distinction is useful when reading the
+termination argument: the natural arguments to child functions need not
+decrease.  Structural recursion decreases the tree argument, while the
+separate iteration operation decreases its finite iteration counter.
+The construction never asks the evaluator to recurse on a tree that it has
+just generated from itself.
+
+\begin{lemma}[Inflationarity and the base bound]
+\label{amp:lem:base}
+If $b(n)\geq n$ for every $n$, then for every $a\in\mathcal T$ and every $n$,
+\[
+ n\leq b(n)\leq F_b(a;n).
+\]
+If instead $b(n)\geq n+1$ for every $n$, then
+$F_b(a;n)\geq n+1$ for every $a,n$.
+No monotonicity hypothesis on $b$ is required.
+\end{lemma}
+
+\begin{proof}
+First observe that $g(x)\geq x$ implies $g^{[r]}(x)\geq x$ for all $r,x$;
+this follows by induction on $r$.  Now use structural induction on $a$.
+The zero case is equality.  In the successor case, put
+$g(x)=F_b(a;x)$.  The induction hypothesis gives $g(x)\geq b(x)\geq x$.
+Therefore
+\[
+ F_b(S(a);n)=g^{[n]}(g(n))\geq g(n)\geq b(n).
+\]
+At a limit node, use the induction hypothesis for the selected child $f(n)$.
+This proves the weak statement.  The strict statement follows by first
+weakening $b(n)\geq n+1$ to $b(n)\geq n$ and then retaining the stronger first
+inequality in $F_b(a;n)\geq b(n)\geq n+1$.
+\end{proof}
+
+The absence of a monotonicity assumption is more than a simplification of
+the statement.  An inflationary function may take a smaller value at a
+larger argument; nevertheless its own orbit is nondecreasing, because each
+successive orbit value is at least its immediate predecessor.  The proof
+uses precisely this orbit property.  It does not replace $b(x)$ by $b(y)$
+merely because $x\leq y$.  This makes the interface applicable to bases
+assembled from finite searches whose dependence on their search parameter
+has not separately been proved monotone.
+
+\begin{theorem}[Substitution law]
+\label{amp:thm:graft}
+For every base $b$, without an inflationarity assumption, every $a,t$, and
+every $n$,
+\[
+ F_b(a\star t;n)=F_{F_b(a;\mathord\cdot)}(t;n).
+\]
+\end{theorem}
+
+\begin{proof}
+Proceed by structural induction on $t$.  At a zero leaf both sides are
+$F_b(a;n)$.  For a successor node, the induction hypothesis identifies the
+two child functions at every natural argument.  Pointwise equal functions
+have pointwise equal finite iterates: prove this auxiliary assertion by
+induction on the iteration count, replacing the first application and then
+the remaining iterate.  Applying it with count $n+1$ gives the successor
+case.  At a limit node, both evaluators select the child indexed by $n$, and
+the induction hypothesis for that child applies directly.  The proof uses
+pointwise equalities throughout.  In particular, the Lean proof does not
+invoke function extensionality.
+\end{proof}
+
+\begin{proposition}
+\label{amp:cor:graftlower}
+If $b(n)\geq n$ everywhere, then
+\[
+ F_b(a\star t;n)\geq F_b(a;n)
+ \qquad(a,t\in\mathcal T).
+\]
+\end{proposition}
+
+\begin{proof}
+Lemma~\ref{amp:lem:base} says that $F_b(a;\mathord\cdot)$ is an inflationary
+base.  Apply the same lemma to that base and to $t$, and then use
+Theorem~\ref{amp:thm:graft}.
+\end{proof}
+
+The substitution law is the main algebraic safeguard in the construction.
+It permits an elaborate tree to be attached to an existing tree while
+preserving a proved evaluation bound.  The later operators need not satisfy
+an unproved comparison principle for ordinal notations.
+
+More specifically, $t$ acts as a program transforming the initial unary
+function supplied at its zero leaves.  Substituting $a$ into those leaves
+replaces that initial function by the already constructed function
+$F_b(a;\mathord\cdot)$.  The theorem identifies these two operations exactly,
+not merely up to a lower bound.  The tree $t$ may depend on $a$, on an
+evaluation of $a$, or on other previously defined data.  Once those data
+have been supplied, the same substitution theorem applies to the resulting
+pair of trees.  That flexibility is what permits the later feedback
+construction without weakening its proof obligation.
+
+\begin{proposition}[The zero argument and successor gain]
+\label{amp:prop:gain}
+For every base $b$ and tree $a$,
+\[
+ F_b(a;0)=b(0).
+\]
+If $b(n)\geq n+1$ everywhere, then
+\[
+ F_b(S(a);n)\geq F_b(a;n)+n.
+\]
+\end{proposition}
+
+\begin{proof}
+The first assertion follows by tree induction.  A successor performs exactly
+one child application at argument zero, and a limit selects its zeroth
+child, so both cases reduce to the corresponding induction hypothesis.
+For the second assertion, an induction on $r$ gives
+$g^{[r]}(x)\geq x+r$ whenever $g(x)\geq x+1$ for all $x$.
+Apply this to $g=F_b(a;\mathord\cdot)$, which has the required property by
+Lemma~\ref{amp:lem:base}, and calculate
+\[
+ F_b(S(a);n)=g^{[n]}(g(n))\geq g(n)+n.
+\]
+The gain vanishes at $n=0$, exactly as the first assertion requires.
+\end{proof}
+
+For a small concrete calibration, take $b(n)=n+1$ and finite successor trees
+$a_0=0_{\mathcal T}$, $a_{r+1}=S(a_r)$.  Directly from the definition,
+\[
+ F_b(a_0;n)=n+1,\qquad F_b(a_1;n)=2n+1,
+\]
+and
+\[
+ F_b(a_2;n)=2^{n+1}(n+1)-1.
+\]
+Indeed, the $r$fold iterate of $x\mapsto2x+1$ at $n$ is
+$2^r(n+1)-1$, as an induction on $r$ verifies.  Substituting $r=n+1$ gives
+the displayed formula.  These elementary calculations concern the
+successor-only fragment; they do not supply an ordinal interpretation of
+the general limit constructor.
+The next tree iterates the last function $n+1$ times.  These identities
+explain the basic acceleration before countable branching or higher
+function spaces enter the definition.  They also show why the evaluation
+argument is part of the construction, rather than an incidental input.
+
+\subsection{Explicit tree operators}
+\label{amp:operators}
+
+We now specify the entire additional tree payload.  The following definitions
+are syntactic operations on $\mathcal T$.  Their resemblance to familiar
+ordinal constructions guides the design, but no identification with a
+Veblen ordinal or an ordinal collapsing function is assumed in any proof.
+
+For a tree transformation $f:\mathcal T\to\mathcal T$, set
+\[
+ O_f(a)=L\bigl(r\mapsto f^{[r+1]}(a)\bigr).
+\]
+This \emph{orbit-limit constructor} packages successively longer finite
+orbits.  The name does not assert that it produces a fixed point of an
+arbitrary $f$.
+
+Define a tree transformation $W$ by
+\begin{align*}
+ W(0_{\mathcal T})&=S(0_{\mathcal T}),\\
+ W(S(a))&=L\bigl(r\mapsto(x\mapsto W(a)\star x)^{[r]}(0_{\mathcal T})\bigr),\\
+ W(L(f))&=L(r\mapsto W(f(r))).
+\end{align*}
+The implementation names this transformation \texttt{omegaPower}.  In
+particular, its successor clause iterates substitution into a zero tree;
+it is not an appeal to an externally supplied ordinal exponentiation
+operation.
+
+For a supplied transformation $c:\mathcal T\to\mathcal T$, define
+\begin{align*}
+ E_c(0_{\mathcal T})&=c(0_{\mathcal T}),\\
+ E_c(S(a))&=c(S(E_c(a))),\\
+ E_c(L(f))&=L(r\mapsto E_c(f(r))).
+\end{align*}
+This is an enumeration constructor generated by $c$.  For a countable family
+$\boldsymbol f=(f_0,f_1,\ldots)$ of tree transformations, also define finite
+prefix applications and repeated sweeps:
+\begin{align*}
+ P_{\boldsymbol f}(0,a)&=a,&
+ P_{\boldsymbol f}(r+1,a)&=f_r(P_{\boldsymbol f}(r,a)),\\
+ Q_{\boldsymbol f}(0,a)&=a,&
+ Q_{\boldsymbol f}(r+1,a)&=
+ P_{\boldsymbol f}(r+1,Q_{\boldsymbol f}(r,a)).
+\end{align*}
+The common-limit constructor is
+\[
+ C_{\boldsymbol f}(a)=L(r\mapsto Q_{\boldsymbol f}(r+1,a)).
+\]
+Repeated sweeps deliberately revisit earlier members of the family.  This
+choice is more structured than applying each $f_r$ once and then discarding
+it.  However, our correctness argument only needs the explicit recurrence;
+it does not require a fixed-point theorem for $C_{\boldsymbol f}$.
+
+Define a two-argument transformation $V$ by recursion on its first tree:
+\begin{align*}
+ V(0_{\mathcal T},a)&=W(a),\\
+ V(S(t),a)&=E_{O_{V(t,\mathord\cdot)}}(a),\\
+ V(L(f),a)&=
+ E_{C_{(V(f(r),\mathord\cdot))_{r\in\mathbb N}}}(a).
+\end{align*}
+Here $O_{V(t,\mathord\cdot)}$ is the transformation
+$x\mapsto O_{V(t,\mathord\cdot)}(x)$, and similarly for the common-limit
+constructor in the last line.  The recursive calls $V(t,\mathord\cdot)$ and
+$V(f(r),\mathord\cdot)$ involve immediate subtrees of the first argument.
+Finally, set
+\[
+ \gamma=O_{a\mapsto V(a,0_{\mathcal T})}(0_{\mathcal T}).
+\]
+The symbol $\gamma$ denotes this particular tree.  It is not a claim that
+the tree has been proved to represent $\Gamma_0$.
+
+These definitions produce one explicit transformation rather than leaving
+a black-box ``large ordinal'' in the candidate.  Every tree used below is
+built from the three constructors and the recurrences just displayed.
+Their role in the size certificate is equally explicit: a resulting tree
+is placed in the second argument of substitution, where
+Proposition~\ref{amp:cor:graftlower} applies regardless of its further behavior.
+
+The dependency order also explains totality of this part of the definition.
+Substitution is available before $W$ is defined.  The orbit, enumeration,
+prefix, and sweep operations are available before $V$ is defined.  In the
+successor clause of $V$, the transformation associated with the smaller
+first tree has already been supplied by structural recursion; enumeration
+then acts on the second tree using that transformation as a parameter.
+The limit clause receives the analogous family of transformations for the
+children of its first tree.  There is no recursive call to $V$ on a newly
+constructed first argument in these clauses.
+
+\subsection{A dynamically chosen tower of function spaces}
+\label{amp:levels}
+
+The next layer iterates operators at successively higher function types.
+Define
+\[
+ \mathcal L_0=\mathcal T,
+ \qquad \mathcal L_{k+1}=\mathcal L_k\to\mathcal L_k.
+\]
+Thus an element of $\mathcal L_{k+2}$ transforms endomorphisms of
+$\mathcal L_k$.  Each index is a natural number, and the family itself is
+defined by natural-number recursion.  No operation indexed by an infinite
+natural number is being introduced.
+
+Successor and countable branching extend pointwise through these spaces.
+For $x\in\mathcal L_k$ and $f:\mathbb N\to\mathcal L_k$, define
+\begin{align*}
+ s_0(x)&=S(x),&
+ s_{k+1}(g)(x)&=s_k(g(x)),\\
+ \ell_0(f)&=L(f),&
+ \ell_{k+1}(f)(x)&=\ell_k(r\mapsto f(r)(x)).
+\end{align*}
+If $g\in\mathcal L_{k+1}$, put
+\[
+ \Omega_k(g)(x)=
+ \ell_k\bigl(r\mapsto g^{[r+1]}(s_k(x))\bigr).
+\]
+The successor $s_k(x)$ is inserted before the finite orbit.  This detail is
+part of the exact definition and is retained at every function level.
+The operator $\Omega_k$ belongs to $\mathcal L_{k+2}$.
+
+Let
+\[
+ B_0=W,\qquad B_{k+1}=\Omega_k.
+\]
+In both cases $B_k\in\mathcal L_{k+1}$.  A lowering operation converts the
+result back into a transformation of trees:
+\[
+ D_0(f)=f,\qquad
+ D_{k+1}(f)=D_k(f(B_k)).
+\]
+The types match at each step: if $f\in\mathcal L_{k+2}$, then
+$f(B_k)\in\mathcal L_{k+1}$.  Define the seed family
+\[
+ \Sigma_k=D_k(B_k)(\gamma).
+\]
+This family is defined for every natural $k$.  Later, $k$ will itself be an
+earlier evaluation score plus $64$.  The dependent type family therefore
+provides a compact description of a finite function-space tower whose
+height is determined by the construction, rather than fixed by a long
+list of manually written arrow types.
+
+The first three seeds make the difference between levels concrete:
+\begin{align*}
+ \Sigma_0&=W(\gamma),\\
+ \Sigma_1&=\Omega_0(W)(\gamma)
+   =L(r\mapsto W^{[r+1]}(S(\gamma))),\\
+ \Sigma_2&=\Omega_1(\Omega_0)(W)(\gamma).
+\end{align*}
+In the last expression, $\Omega_0$ is itself the function being iterated by
+the next operator.  Expanded one step further, it is
+\[
+ \Sigma_2=L\bigl(r\mapsto
+   [\Omega_0^{[r+1]}(x\mapsto S(W(x)))](\gamma)\bigr).
+\]
+Thus the second increase of level is not just another application of $W$.
+It iterates the operation that constructs an orbit-limit transformation.
+Higher levels continue this same typed pattern.  The recurrence for $D_k$
+ensures that every such operator is eventually applied to appropriate
+arguments and produces an ordinary member of $\mathcal T$.
+
+\subsection{Feedback and the final number}
+\label{amp:feedback}
+
+Fix the evaluation argument $64$, and abbreviate
+\[
+ \sigma_b(a)=F_b(a;64),\qquad
+ t_b(a)=\Sigma_{\sigma_b(a)+64}.
+\]
+The elementary advancement operation is
+\begin{equation}
+ A_b(a)=S(a)\star
+ V\bigl(a\star t_b(a),\ t_b(a)\star a\bigr).
+ \label{amp:eq:advance}
+\end{equation}
+Both orders of substitution occur in the payload.  The outer substitution
+has first argument $S(a)$; that choice makes the successor gain available
+before any properties of the payload are investigated.
+
+Let $T$ be the tower of twos with the following exact height convention:
+\[
+ T(0)=1,\qquad T(r+1)=2^{T(r)}.
+\]
+One complete stage performs a number of advancement operations given by a
+tower whose height is the current score plus one:
+\begin{equation}
+ G_b(a)=A_b^{[T(\sigma_b(a)+1)]}(a).
+ \label{amp:eq:stage}
+\end{equation}
+Starting with $a_0=\Sigma_{64}$, define
+\[
+ a_{r+1}=G_b(a_r),\qquad s_b=\sigma_b(a_0).
+\]
+The proposed output of the amplifier is
+\begin{equation}
+ \boxed{N_b=\sigma_b(a_{s_b})=F_b(a_{s_b};64).}
+ \label{amp:eq:candidate}
+\end{equation}
+The actual score of the initial tree is therefore also the number of
+complete feedback stages.  At each stage, scores additionally control both
+a tower height and the level of a function-space construction.
+
+There is no circular definition here.  First define tree evaluation and
+the tree operators.  Then define $A_b$ using the already available evaluator
+on its input tree.  Finite iteration defines $G_b$, natural-number recursion
+defines $a_r$, and the already defined initial score supplies the final
+finite index.  During iteration, successive trees can become more complex;
+termination of that iteration is nevertheless justified by its decreasing
+natural-number counter.  A defining term need not reduce its enormous
+numeric arguments during type checking.
+
+There are two distinct uses of a score inside a stage.  Its total iteration
+count $T(\sigma_b(a)+1)$ is fixed from the input tree before that stage
+begins.  Within each advancement, the current tree determines a new
+function-space index for $t_b$.  Recomputing that index does not reset the
+iteration counter.  Likewise, the total number $s_b$ of complete stages is
+fixed by the initial seed.  These distinctions rule out an interpretation
+as an open-ended loop whose stopping condition continually moves away.
+Every iteration count is a finite natural number supplied to an ordinary
+recursor.
+
+\subsection{A quantitative certificate independent of calibration}
+\label{amp:bounds}
+
+Assume for the remainder of this section that $b(n)\geq n+1$ everywhere.
+Equation~\eqref{amp:eq:advance}, Proposition~\ref{amp:cor:graftlower}, and
+Proposition~\ref{amp:prop:gain} give, for every evaluation argument $n$,
+\begin{equation}
+ F_b(A_b(a);n)\geq F_b(S(a);n)\geq F_b(a;n)+n.
+ \label{amp:eq:advancegain}
+\end{equation}
+The payload in $A_b$ uses the score at $64$, but the displayed comparison
+holds at every $n$.  Induction on the number of advancements now yields
+\[
+ F_b(A_b^{[r]}(a);n)\geq F_b(a;n)+rn.
+\]
+Writing $m=\sigma_b(a)$ and applying this inequality to one complete stage
+gives the sharper intermediate estimate
+\begin{equation}
+ \sigma_b(G_b(a))\geq m+64T(m+1).
+ \label{amp:eq:rawstage}
+\end{equation}
+
+The elementary inequalities $2^q\geq q+1$ imply by induction that
+$T(r)\geq r+1$.  They also imply that $T$ is increasing.  Consequently
+\eqref{amp:eq:rawstage} has two useful consequences:
+\begin{align}
+ \sigma_b(G_b(a))&\geq T(m+1),
+ \label{amp:eq:stage-tower}\\
+ \sigma_b(G_b(a))+1&\geq65(m+1).
+ \label{amp:eq:stage-scale}
+\end{align}
+The first follows because $m\geq0$ and $64\geq1$.  For the second, use
+$T(m+1)\geq m+1$ to obtain
+$m+64T(m+1)+1\geq m+64(m+1)+1=65(m+1)$.
+
+Define a purely numerical comparison function by
+\[
+ \Theta(s,0)=s,\qquad
+ \Theta(s,r+1)=T(\Theta(s,r)+1).
+\]
+This repeatedly replaces the previous number by a tower of twos whose
+height is that number plus one.  Its recursion is useful for communicating
+a guaranteed lower bound: it requires none of the tree operators or higher
+function spaces.
+
+For example, the first two numerical feedback values are
+\[
+ \Theta(s,1)=T(s+1),\qquad
+ \Theta(s,2)=T(T(s+1)+1).
+\]
+The second expression uses the entire first tower value as part of a new
+tower height.  The final bound uses $s$ such replacements.  It is therefore
+substantially more explicit than saying only that the candidate contains
+many iterations: it gives a familiar recursively defined natural function
+that the actual candidate is proved to exceed.
+
+\begin{theorem}[Certified feedback growth]
+\label{amp:thm:quantitative}
+For every $r\in\mathbb N$,
+\begin{align*}
+ \sigma_b(a_r)&\geq\Theta(s_b,r),\\
+ \sigma_b(a_r)+1&\geq65^r(s_b+1).
+\end{align*}
+In particular,
+\[
+ \boxed{N_b\geq\Theta(s_b,s_b)},\qquad
+ \boxed{N_b+1\geq65^{s_b}(s_b+1)}.
+\]
+\end{theorem}
+
+\begin{proof}
+Both claims are proved by induction on $r$.  At $r=0$, the first is equality
+by the definition of $s_b$, and the second uses $65^0=1$.  Suppose the first
+claim holds at $r$.  Monotonicity of $T$, followed by
+\eqref{amp:eq:stage-tower}, gives
+\[
+ \Theta(s_b,r+1)
+ =T(\Theta(s_b,r)+1)
+ \leq T(\sigma_b(a_r)+1)
+ \leq\sigma_b(a_{r+1}).
+\]
+For the second claim, multiply its induction hypothesis by $65$ and apply
+\eqref{amp:eq:stage-scale}.  Associativity of multiplication and the
+successor equation for powers give the required factor $65^{r+1}$.
+Finally specialize both inequalities to $r=s_b$.
+\end{proof}
+
+\begin{proposition}[Transferring a benchmark into the bound]
+\label{amp:prop:transfer}
+The function $\Theta$ is nondecreasing in each argument.  Hence, whenever
+$c\leq s_b$,
+\[
+ \Theta(c,c)\leq N_b.
+\]
+Also $b(64)\leq s_b$ and $b(64)\leq N_b$.
+\end{proposition}
+
+\begin{proof}
+Monotonicity in the first argument follows by induction on the second,
+using monotonicity of $T$.  Since $T(q+1)\geq q+2$, each step of the
+second argument increases the value, proving its monotonicity as well.
+Thus $c\leq s_b$ gives
+$\Theta(c,c)\leq\Theta(s_b,c)\leq\Theta(s_b,s_b)\leq N_b$.
+The two base comparisons are instances of Lemma~\ref{amp:lem:base}, first
+for $a_0$ and then for $a_{s_b}$.
+\end{proof}
+
+The proof distinguishes a guaranteed quantitative margin from a proposed
+ordinal interpretation.  The entire payload appears in the concrete
+definition of $N_b$, but the displayed lower bounds remain valid even if
+its ordinal calibration is left unresolved.  They follow from structural
+recursion, substitution, inflationarity, and explicit finite iteration.
+This makes the benchmark comparison robust while leaving room for further
+analysis of how much additional growth the higher operators contribute.
+
+There is a useful modular consequence of the argument.  Suppose a later
+investigation supplies a different explicit total tree transformation
+$R_b(a)$.  Replacing the payload in~\eqref{amp:eq:advance} by $R_b(a)$ while
+retaining the outer form $S(a)\star R_b(a)$ preserves
+\eqref{amp:eq:advancegain}.  The induction giving the raw stage estimate and
+both final bounds then applies without changing its reasoning.  The
+substitution interface therefore isolates a stable mathematical obligation
+from the choice of additional tree-generating operators.  Such a replacement
+would still require its own well-typed definition and resource checks; the
+present candidate is the fully specified payload above, rather than an
+unspecified member of that wider family.
+
+Conversely, the numerical bound alone does not identify the exact value of
+$N_b$.  The raw stage inequality already discards most information about
+the generated payload, and the tower comparison discards the additional
+factor $64$ and the previous score.  These are deliberate weakenings in a
+proof of a lower bound.  They make the certificate easy to state and
+transport to a benchmark, while the exact recurrences retain all the
+additional structure in the proposed number.

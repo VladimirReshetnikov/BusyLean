@@ -1,0 +1,314 @@
+{
+  "timestamp_utc": "2026-10-12T23:49:28.159295+00:00",
+  "host": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "python": "3.12.14",
+    "cpu_count": 9,
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.3 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.3 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+  },
+  "definition_order": [
+    "BigNumber.BaselineDefs",
+    "BigNumber.BaseDefs",
+    "BigNumber.AmplifierDefs",
+    "BigNumber.CandidateDefs"
+  ],
+  "proof_order": [
+    "BigNumber.Baseline",
+    "BigNumber.Amplifier",
+    "BigNumber.Base",
+    "BigNumber.Candidate"
+  ],
+  "audit_declarations": [
+    "BigNumber.Baseline.contender_5",
+    "BigNumber.Baseline.envelope",
+    "BigNumber.Baseline.largest_eq_envelope",
+    "BigNumber.Baseline.contender_5_eq_envelope",
+    "BigNumber.Baseline.eval_maxBy",
+    "BigNumber.Baseline.envelope_bound",
+    "BigNumber.base",
+    "BigNumber.base_inflationary",
+    "BigNumber.envelope_lt_base",
+    "BigNumber.contender_5_lt_base64",
+    "BigNumber.Amplifier.candidate",
+    "BigNumber.Amplifier.base_le_fast",
+    "BigNumber.Amplifier.fast_at_zero",
+    "BigNumber.Amplifier.fast_succ_gain",
+    "BigNumber.Amplifier.fast_graft",
+    "BigNumber.Amplifier.graft_lower",
+    "BigNumber.Amplifier.advance_gain",
+    "BigNumber.Amplifier.stage_raw_gain",
+    "BigNumber.Amplifier.stage_scale",
+    "BigNumber.Amplifier.ladder_scale",
+    "BigNumber.Amplifier.candidate_bound",
+    "BigNumber.Amplifier.stage_tower",
+    "BigNumber.Amplifier.ladder_tower",
+    "BigNumber.Amplifier.candidate_tower",
+    "BigNumber.Amplifier.towerFeedback_diagonal_mono",
+    "BigNumber.Amplifier.candidate_tower_from",
+    "BigNumber.contender_6",
+    "BigNumber.contender_5_lt_seedScore",
+    "BigNumber.contender_5_lt_contender_6",
+    "BigNumber.contender_6_exponential_bound",
+    "BigNumber.contender_6_tower_bound",
+    "BigNumber.contender_6_seed_tower_bound"
+  ],
+  "dependency_root": "BigNumber.contender_6",
+  "forbidden_dependencies": [
+    "BigNumber.Baseline.contender_5",
+    "BigNumber.Baseline.largestOfDepth",
+    "BigNumber.Baseline.largestSTLCNatRecNatOfDepth"
+  ],
+  "definitions_budget_seconds": 15.0,
+  "proofs_budget_seconds": 60.0,
+  "compiler_flags": [
+    "-j1"
+  ],
+  "timing_policy": "Fresh custom .olean files; cumulative custom-dependency wall time; official standard-library .oleans reused; no numeric evaluation",
+  "runs": [
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/BaselineDefs.olean",
+        "BigNumber/BaselineDefs.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.6726820599942585,
+      "user_seconds": 0.560672,
+      "system_seconds": 0.109013,
+      "max_rss_kib": 437100,
+      "output": "",
+      "module": "BigNumber.BaselineDefs",
+      "phase": "definitions"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/BaseDefs.olean",
+        "BigNumber/BaseDefs.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.19406981200154405,
+      "user_seconds": 0.142005,
+      "system_seconds": 0.042534999999999996,
+      "max_rss_kib": 418084,
+      "output": "",
+      "module": "BigNumber.BaseDefs",
+      "phase": "definitions"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/AmplifierDefs.olean",
+        "BigNumber/AmplifierDefs.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.3561228129983647,
+      "user_seconds": 0.295991,
+      "system_seconds": 0.058445,
+      "max_rss_kib": 290200,
+      "output": "",
+      "module": "BigNumber.AmplifierDefs",
+      "phase": "definitions"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/CandidateDefs.olean",
+        "BigNumber/CandidateDefs.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.1831819400031236,
+      "user_seconds": 0.137968,
+      "system_seconds": 0.039497,
+      "max_rss_kib": 413012,
+      "output": "",
+      "module": "BigNumber.CandidateDefs",
+      "phase": "definitions"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/Baseline.olean",
+        "BigNumber/Baseline.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.427066829004616,
+      "user_seconds": 0.34912,
+      "system_seconds": 0.071614,
+      "max_rss_kib": 438608,
+      "output": "",
+      "module": "BigNumber.Baseline",
+      "phase": "proofs"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/Amplifier.olean",
+        "BigNumber/Amplifier.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.49671173399838153,
+      "user_seconds": 0.411319,
+      "system_seconds": 0.09548799999999999,
+      "max_rss_kib": 349316,
+      "output": "",
+      "module": "BigNumber.Amplifier",
+      "phase": "proofs"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/Base.olean",
+        "BigNumber/Base.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.2031079110020073,
+      "user_seconds": 0.167036,
+      "system_seconds": 0.029609999999999997,
+      "max_rss_kib": 427220,
+      "output": "",
+      "module": "BigNumber.Base",
+      "phase": "proofs"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "BigNumber/Candidate.olean",
+        "BigNumber/Candidate.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 0.23443631100235507,
+      "user_seconds": 0.201752,
+      "system_seconds": 0.035401999999999996,
+      "max_rss_kib": 434772,
+      "output": "",
+      "module": "BigNumber.Candidate",
+      "phase": "proofs"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "-o",
+        "AxiomAudit.olean",
+        "AxiomAudit.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 1.156850963998295,
+      "user_seconds": 0.992632,
+      "system_seconds": 0.155738,
+      "max_rss_kib": 928884,
+      "output": "AXIOM_AUDIT BigNumber.Baseline.contender_5: []\nAXIOM_AUDIT BigNumber.Baseline.envelope: []\nAXIOM_AUDIT BigNumber.Baseline.largest_eq_envelope: []\nAXIOM_AUDIT BigNumber.Baseline.contender_5_eq_envelope: []\nAXIOM_AUDIT BigNumber.Baseline.eval_maxBy: []\nAXIOM_AUDIT BigNumber.Baseline.envelope_bound: []\nAXIOM_AUDIT BigNumber.base: []\nAXIOM_AUDIT BigNumber.base_inflationary: []\nAXIOM_AUDIT BigNumber.envelope_lt_base: []\nAXIOM_AUDIT BigNumber.contender_5_lt_base64: []\nAXIOM_AUDIT BigNumber.Amplifier.candidate: []\nAXIOM_AUDIT BigNumber.Amplifier.base_le_fast: []\nAXIOM_AUDIT BigNumber.Amplifier.fast_at_zero: []\nAXIOM_AUDIT BigNumber.Amplifier.fast_succ_gain: []\nAXIOM_AUDIT BigNumber.Amplifier.fast_graft: []\nAXIOM_AUDIT BigNumber.Amplifier.graft_lower: []\nAXIOM_AUDIT BigNumber.Amplifier.advance_gain: []\nAXIOM_AUDIT BigNumber.Amplifier.stage_raw_gain: []\nAXIOM_AUDIT BigNumber.Amplifier.stage_scale: []\nAXIOM_AUDIT BigNumber.Amplifier.ladder_scale: []\nAXIOM_AUDIT BigNumber.Amplifier.candidate_bound: []\nAXIOM_AUDIT BigNumber.Amplifier.stage_tower: []\nAXIOM_AUDIT BigNumber.Amplifier.ladder_tower: []\nAXIOM_AUDIT BigNumber.Amplifier.candidate_tower: []\nAXIOM_AUDIT BigNumber.Amplifier.towerFeedback_diagonal_mono: []\nAXIOM_AUDIT BigNumber.Amplifier.candidate_tower_from: []\nAXIOM_AUDIT BigNumber.contender_6: []\nAXIOM_AUDIT BigNumber.contender_5_lt_seedScore: []\nAXIOM_AUDIT BigNumber.contender_5_lt_contender_6: []\nAXIOM_AUDIT BigNumber.contender_6_exponential_bound: []\nAXIOM_AUDIT BigNumber.contender_6_tower_bound: []\nAXIOM_AUDIT BigNumber.contender_6_seed_tower_bound: []\nDEPENDENCY_AUDIT BigNumber.contender_6: does not use BigNumber.Baseline.contender_5\nDEPENDENCY_AUDIT BigNumber.contender_6: does not use BigNumber.Baseline.largestOfDepth\nDEPENDENCY_AUDIT BigNumber.contender_6: does not use BigNumber.Baseline.largestSTLCNatRecNatOfDepth\n'BigNumber.Baseline.contender_5' does not depend on any axioms\n'BigNumber.Baseline.envelope' does not depend on any axioms\n'BigNumber.Baseline.largest_eq_envelope' does not depend on any axioms\n'BigNumber.Baseline.contender_5_eq_envelope' does not depend on any axioms\n'BigNumber.Baseline.eval_maxBy' does not depend on any axioms\n'BigNumber.Baseline.envelope_bound' does not depend on any axioms\n'BigNumber.base' does not depend on any axioms\n'BigNumber.base_inflationary' does not depend on any axioms\n'BigNumber.envelope_lt_base' does not depend on any axioms\n'BigNumber.contender_5_lt_base64' does not depend on any axioms\n'BigNumber.Amplifier.candidate' does not depend on any axioms\n'BigNumber.Amplifier.base_le_fast' does not depend on any axioms\n'BigNumber.Amplifier.fast_at_zero' does not depend on any axioms\n'BigNumber.Amplifier.fast_succ_gain' does not depend on any axioms\n'BigNumber.Amplifier.fast_graft' does not depend on any axioms\n'BigNumber.Amplifier.graft_lower' does not depend on any axioms\n'BigNumber.Amplifier.advance_gain' does not depend on any axioms\n'BigNumber.Amplifier.stage_raw_gain' does not depend on any axioms\n'BigNumber.Amplifier.stage_scale' does not depend on any axioms\n'BigNumber.Amplifier.ladder_scale' does not depend on any axioms\n'BigNumber.Amplifier.candidate_bound' does not depend on any axioms\n'BigNumber.Amplifier.stage_tower' does not depend on any axioms\n'BigNumber.Amplifier.ladder_tower' does not depend on any axioms\n'BigNumber.Amplifier.candidate_tower' does not depend on any axioms\n'BigNumber.Amplifier.towerFeedback_diagonal_mono' does not depend on any axioms\n'BigNumber.Amplifier.candidate_tower_from' does not depend on any axioms\n'BigNumber.contender_6' does not depend on any axioms\n'BigNumber.contender_5_lt_seedScore' does not depend on any axioms\n'BigNumber.contender_5_lt_contender_6' does not depend on any axioms\n'BigNumber.contender_6_exponential_bound' does not depend on any axioms\n'BigNumber.contender_6_tower_bound' does not depend on any axioms\n'BigNumber.contender_6_seed_tower_bound' does not depend on any axioms\n",
+      "module": "AxiomAudit",
+      "phase": "audit"
+    },
+    {
+      "command": [
+        "/workspace/scratch/e698db747b72/tooling/lean-4.19.0-linux/bin/lean",
+        "-j1",
+        "--trust=0",
+        "-o",
+        "KernelRecheck.olean",
+        "KernelRecheck.lean"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "wall_seconds": 2.4578059150007903,
+      "user_seconds": 2.315513,
+      "system_seconds": 0.133518,
+      "max_rss_kib": 950196,
+      "output": "KERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_30._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.pointLimit._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.cast: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.succ.inj: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_9._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.below: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.noConfusionType: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typeEqb._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.var.injEq: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_16._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iteration_gain: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.ladder: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typesUpTo.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.envelope_bound: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.veblenTree.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.lower._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.termsUpTo._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.natRec.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.interpTy._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.largestSTLCNatRecNatOfDepth: passed\nKERNEL_BODY_RECHECK BigNumber.prefix_mono: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.binductionOn: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.interpTerm._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iterate_congr: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.reprTerm.match_1._@.BigNumber.BaselineDefs._hyg.602: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.tower2_step: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.seedScore: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_25._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_20._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_26._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_18._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree._sizeOf_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.ibelow: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.listProd.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.tower2_mono: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.noConfusionType: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.var.inj: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.omegaIteration: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.towerFeedback_step: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.termsUpTo: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_38._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.prefixEnvelope: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.graft: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.veblenTree: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty._sizeOf_inst: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.interpTy: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.noConfusion: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Value: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.error: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.enumClosure._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.prefixApply._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iterate.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.higherSeed: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.largestOfDepth: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_39._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.gammaSeed: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty._sizeOf_1: passed\nKERNEL_BODY_RECHECK BigNumber.envelope_lt_base: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_32._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.contender_6_seed_tower_bound: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.towerFeedback: passed\nKERNEL_BODY_RECHECK BigNumber.contender_6: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.app.sizeOf_spec: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_19._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.candidate_bound: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_33._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy._proof_5._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typeDepth._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_29._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.tower2: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_22._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.reprTy.\u00ab_@\u00bb.BigNumber.BaselineDefs._hyg.28._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.lam.sizeOf_spec: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.reprTerm._@.BigNumber.BaselineDefs._hyg.602: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.eval_maxBy: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iterate_ge: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.towerFeedback_diagonal_mono: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.envelope: passed\nKERNEL_BODY_RECHECK BigNumber.contender_5_lt_base64: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.stage_raw_gain: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.app.inj: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_28._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_44._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.enumClosure: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.succ.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.contender_6_tower_bound: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.eval: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typeEqb: passed\nKERNEL_BODY_RECHECK BigNumber.prefix_lt_base: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.below: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.contender_5: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.stage_scale: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.natsUpTo: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.limit.inj: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iterate: passed\nKERNEL_BODY_RECHECK BigNumber.contender_5_lt_seedScore: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.maxBy: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_8._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.base_inflationary: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.recOn: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.mul_assoc_pure: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.error._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.sweep: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.castImpl: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.natRec.injEq: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.limit.injEq: passed\nKERNEL_BODY_RECHECK BigNumber.contender_6_exponential_bound: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_6._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.casesOn: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_36._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.prefixEnvelope._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_15._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.lower.match_1: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_43._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree._sizeOf_inst: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.advance_gain: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.interpTerm.match_2: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.maxBy.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.graft.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.binductionOn: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.advance: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.termDepth._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.ibelow: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.casesOn: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.reprTy._@.BigNumber.BaselineDefs._hyg.28: passed\nKERNEL_BODY_RECHECK BigNumber.base_weak: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term._sizeOf_inst: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.succ.injEq: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.stage_tower: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.towerFeedback_seed_mono: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.le_max_right_pure: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.max_eq_left_pure: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Level._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_40._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.ibelow: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_37._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.arr.injEq: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.stage_gain: passed\nKERNEL_BODY_RECHECK BigNumber.envelope_le_prefix: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.pointSucc._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm.match_1._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast_strict: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.candidate: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typeEqb.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.brecOn: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.limit.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.arr.inj: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.tower_transfer: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.instReprTy: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_21._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.castError: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.maxBy._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.succ.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.prefixEnvelope.match_1: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_7._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.baseOperator: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.natsUpTo._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_27._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.noConfusion: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.casesOn: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.reprTerm.\u00ab_@\u00bb.BigNumber.BaselineDefs._hyg.602._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.listProd._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_42._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.brecOn: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_11._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typeDepth: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.pointLimit: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.sweep._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.scale_identity: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_12._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typesUpTo._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.candidate_tower_from: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.noConfusionType: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.zero.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.omegaPower._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.var.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.base_le_fast: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.brecOn: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.interpTerm: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast_at_zero: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.nat.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iterate_add_le: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.tower2._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.towerFeedback_rounds_mono: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.veblenTree._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.omegaPower: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Level.match_1: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_35._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.arr.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.initial_le_foldMax: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_41._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_14._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.exponential_transfer: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.listProd: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_31._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm.\u00ab_@\u00bb.BigNumber.BaselineDefs._hyg.894._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.lam.injEq: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.pointSucc: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.graft._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.base: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.le_max_left_pure: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast_graft: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.candidate_tower: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.zero.sizeOf_spec: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast_succ_gain: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.castImpl._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy.\u00ab_@\u00bb.BigNumber.BaselineDefs._hyg.140._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.towerFeedback._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Ty.recOn: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_10._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.iterate._sunfold: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.below: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy._proof_3._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_17._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.graft_lower: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.stage: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_23._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy.match_1._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.recOn: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.pointLimit.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.natDepth: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.contender_5_eq_envelope: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy._proof_1._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.prefixApply.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.orbitLimit: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.lookup: passed\nKERNEL_BODY_RECHECK BigNumber.contender_5_lt_contender_6: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.instDecidableEqTerm: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_24._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy._proof_4._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.binductionOn: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.ladder_scale: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.typesUpTo: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_13._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.commonLimit: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast_inflationary: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.lower: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Level: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.base_le_candidate: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term._sizeOf_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.prefixApply: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.instReprTerm: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.natRec.inj: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.ladder_tower: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.termDepth: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.largest_eq_envelope: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.app.injEq: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.instDecidableEqTy: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.pointSucc.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.ladder._sunfold: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTy._proof_2._@.BigNumber.BaselineDefs._hyg.140: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.Term.lam.inj: passed\nKERNEL_BODY_RECHECK BigNumber.base_strict: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.interpTerm.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.tower2_lower: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.Tree.noConfusion: passed\nKERNEL_BODY_RECHECK BigNumber.Amplifier.fast.match_1: passed\nKERNEL_BODY_RECHECK BigNumber.Baseline.member_le_foldMax: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.reprTy.match_1._@.BigNumber.BaselineDefs._hyg.28: passed\nKERNEL_BODY_RECHECK _private.BigNumber.BaselineDefs.0.BigNumber.Baseline.decEqTerm._proof_34._@.BigNumber.BaselineDefs._hyg.894: passed\nKERNEL_BODY_RECHECK_COUNT 264\n",
+      "module": "KernelRecheck",
+      "phase": "kernel_recheck"
+    }
+  ],
+  "passed": true,
+  "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "lean_githash": "6caaee842e9495688c1567e78c0e68dbb96942aa",
+  "sources_sha256": {
+    "BigNumber/BaselineDefs.lean": "c2a48d64e06f20e002dcd225ed822d8af163c537cc3c869a08f76eb3af426eaa",
+    "BigNumber/BaseDefs.lean": "a66c50ee626a52d59a56220362547ccef566139527e104facfc64309ae442e60",
+    "BigNumber/AmplifierDefs.lean": "ec6aad6f279bf29e2466abe852a0be4e9a89e615ae0121ca2e2dd7e2327b9382",
+    "BigNumber/CandidateDefs.lean": "5a8c40b8c1345ef4c74189b7506e16cf69da654a6b2447b02af584bf3bb8386d",
+    "BigNumber/Baseline.lean": "cd03f141ca8b30da8506e1dcd7cc98d896636b631363f77e36681835e4f1ed6e",
+    "BigNumber/Amplifier.lean": "b9a3d0c605cb7a234fd37d6e8f959f8ecd2533c6f213c364557118caf0981a4e",
+    "BigNumber/Base.lean": "7413f3fb9d23dd9cabece31cef932a6af2941dd105b13b86a20b71bcd89bdfd1",
+    "BigNumber/Candidate.lean": "914af04dc748c3bb21afe9a70b7c6658b16750827adf79439c3c685dba6473b9"
+  },
+  "source_counts": {
+    "BigNumber/BaselineDefs.lean": {
+      "utf8_bytes": 5470,
+      "lines": 164
+    },
+    "BigNumber/BaseDefs.lean": {
+      "utf8_bytes": 391,
+      "lines": 13
+    },
+    "BigNumber/AmplifierDefs.lean": {
+      "utf8_bytes": 3873,
+      "lines": 112
+    },
+    "BigNumber/CandidateDefs.lean": {
+      "utf8_bytes": 225,
+      "lines": 9
+    },
+    "BigNumber/Baseline.lean": {
+      "utf8_bytes": 3636,
+      "lines": 93
+    },
+    "BigNumber/Amplifier.lean": {
+      "utf8_bytes": 8810,
+      "lines": 213
+    },
+    "BigNumber/Base.lean": {
+      "utf8_bytes": 1107,
+      "lines": 36
+    },
+    "BigNumber/Candidate.lean": {
+      "utf8_bytes": 2265,
+      "lines": 57
+    }
+  },
+  "total_source_lines": 697,
+  "total_source_utf8_bytes": 25777,
+  "definitions_wall_seconds": 1.40764273100649,
+  "definitions_within_budget": true,
+  "proofs_wall_seconds": 1.3629542790004052,
+  "proofs_within_budget": true,
+  "axiom_audit_passed": true,
+  "dependency_audit_passed": true,
+  "proofs_and_audit_wall_seconds": 2.5198052429987,
+  "proofs_and_audit_within_budget": true,
+  "kernel_recheck_passed": true,
+  "kernel_recheck_method": "Explicit Kernel.Environment.addDeclCore on renamed copies of all safe custom definition/theorem/opaque bodies, preserving original types and universe parameters. Imported standard-library and inductive metadata retained. The --trust=0 flag alone is not treated as rechecking imports.",
+  "max_rss_kib": 950196,
+  "max_rss_compilation_kib": 438608,
+  "kernel_recheck_body_count": 264
+}

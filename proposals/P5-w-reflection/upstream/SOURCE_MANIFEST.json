@@ -1,0 +1,18 @@
+{
+  "repository": "codyroux/name-the-biggest-number",
+  "commit": "d56dce013e6264292533efdc5e1de71863c6fb86",
+  "commit_author_date": "2022-01-09T21:25:52Z",
+  "inspected_on": "2026-10-12",
+  "files": {
+    "Contender.v": {
+      "git_blob_sha1": "f92db72deb0f3a4d4e3b575b4949eda73b1417a0",
+      "url": "https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/Contender.v"
+    },
+    "LICENSE": {
+      "git_blob_sha1": "0b94a2da98e6411a69cf8c29300c90c3175e61af",
+      "copyright": "2019 codyroux"
+    }
+  },
+  "credit": "Contender 5 is attributed to samuelgruetter in Contender.v; the Lean core and Python model adapt its interpreter and enumerators.",
+  "note": "The full upstream source is not bundled. Git blob hashes are not raw-file SHA-1 checksums. The correspondence is a documented mathematical port audit, not a cross-kernel translation certificate."
+}

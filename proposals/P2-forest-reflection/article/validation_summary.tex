@@ -1,0 +1,59 @@
+The complete source build passed with Lean 4.19.0. Rebuilding all eight
+modules in the final entry's dependency graph, including their proofs, took
+\textbf{2.962 seconds}. Rebuilding all eleven delivered mathematical modules,
+including the companion reflection module, smoke checks, and the full axiom
+audit, took \textbf{4.247 seconds} wall-clock time. Both are below the
+original 15-second definition target on this host; the entire check is also
+below the one-minute proof target. These are observed wall-clock timings,
+not hardware-independent guarantees.
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Source module & Seconds\\
+\midrule
+\code{Original.lean} & 0.706\\
+\code{Trees.lean} & 0.262\\
+\code{Reflection.lean} & 0.336\\
+\code{Hierarchy.lean} & 0.261\\
+\code{Arboreal.lean} & 0.884\\
+\code{Forest.lean} & 0.381\\
+\code{Preliminary.lean} & 0.158\\
+\code{ForestHierarchy.lean} & 0.161\\
+\code{Contender.lean} & 0.150\\
+\code{Smoke.lean} & 0.318\\
+\code{Audit.lean} & 0.629\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+All \textbf{288 explicitly declared definitions, inductive types, and theorems}
+in the delivered mathematical and smoke-test modules were audited;
+\textbf{all 288 axiom dependency lists were empty}. A separate traversal of
+the elaborated dependency graph found 502 reachable declarations, including
+169 from this package. Neither the original \code{contender5} constant nor
+the intermediate named number appears in the final number's definition
+closure. There are no axioms, unsafe or partial declarations, or package
+implementation overrides in that closure. The ordinary core tags for
+\code{Nat.modCore} and its helper, and the core representation optimization
+for \code{Nat.repr}, are reported explicitly in the audit output; they are
+not package additions or proof-certification assumptions.
+
+The independent Python/Lean regression comparison passed for
+\textbf{25,134 original term values} in enumeration order:
+\begin{center}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Depth & Types & Terms & Maximum\\
+\midrule
+0 & 0 & 0 & 0\\
+1 & 1 & 2 & 0\\
+2 & 2 & 10 & 1\\
+3 & 5 & 146 & 2\\
+4 & 26 & 24,976 & 3\\
+\bottomrule
+\end{tabular}
+\end{center}
+The model comparison and the declaration-closure inspection are supplementary
+validation. The numerical comparison theorem itself is checked by Lean's
+kernel. Neither large contender was evaluated.

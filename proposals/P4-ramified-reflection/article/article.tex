@@ -1,0 +1,1371 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{microtype}
+\usepackage{stmaryrd}
+\usepackage{booktabs,longtable,array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black,
+ pdftitle={A Constructive Lean Contender Beyond Contender 5},pdfauthor={OpenAI; prepared for Vladimir Reshetnikov}}
+\usepackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small Constructive large numbers in Lean}
+\fancyhead[R]{\small Research proposal, 12 October 2026}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\setlist{itemsep=2pt,topsep=4pt}
+\emergencystretch=2em
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\N}{\mathbb N}
+\newcommand{\W}{\mathcal W}
+\newcommand{\Sup}{\mathsf{sup}}
+\newcommand{\leaf}{\mathbf 0}
+\newcommand{\tyN}{\mathsf N}
+\newcommand{\tyW}{\mathsf W}
+\newcommand{\val}{\operatorname{val}}
+\newcommand{\depth}{\operatorname{depth}}
+\newcommand{\td}{\operatorname{td}}
+\newcommand{\bits}{\operatorname{bits}}
+\newcommand{\Qte}{\mathsf{quote}}
+\newcommand{\Sc}{\mathsf S}
+\newcommand{\Rc}{\mathsf{rec}}
+\newcommand{\Oc}{\mathsf{oracle}}
+\newcommand{\Boost}{\mathsf{Boost}}
+\newcommand{\Step}{\mathsf{Step}}
+\newcommand{\Entry}{\mathfrak N}
+\newcommand{\Cfive}{C_5}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\sem}[1]{\llbracket #1\rrbracket}
+\lstset{basicstyle=\ttfamily\small,columns=fullflexible,keepspaces=true,breaklines=true,
+ frame=single,framerule=.3pt,rulecolor=\color{black!25},showstringspaces=false,
+ xleftmargin=5pt,xrightmargin=5pt,aboveskip=8pt,belowskip=8pt}
+
+\title{A Constructive Lean Contender\texorpdfstring{\\}{ }Beyond Contender 5\\[7pt]
+\large Ramified W-reflection, higher-type feedback,\\and an explicit tower-height separation}
+\author{Research prepared for Vladimir Reshetnikov\\\small OpenAI}
+\date{12 October 2026}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We propose a natural number $\Entry=R_\Theta(64)$ for a Lean adaptation of the
+\emph{name-the-biggest-number} contest. Its definition combines a finite
+maximum over a total language, recursion on countably branching well-founded
+trees, diagonalization through arbitrary finite function types, and feedback
+from previously defined numerical values into type-level indices. The
+construction does not refer to the preceding winning constant and does not use
+a halting oracle, unrestricted semantic maximization, or an assumed universal
+Lean evaluator.
+
+We give an exact semantic port of the upstream Contender 5, including its
+behavior on malformed raw terms. A short quotation argument proves
+$\Cfive<\Entry$. A stronger argument, using a depth-20 oracle-iteration term,
+proves $E_{\Cfive+1}(64)<\Entry$, where $E_0(x)=x$ and
+$E_{j+1}(x)=2^{E_j(x)}$. We also establish explicit child-stage comparisons,
+a $2^{28}$-branch visibility bound at input 64, and eventual domination of
+every fixed numerical program in a stage's own language.
+
+The accompanying artifact contains Lean definition and proof source, a
+strict axiom/timing gate, and a Python small-instance model with 62,065 passing
+assertions. \textbf{The Lean source has not been compiler-checked: the
+preparation environment had no Lean toolchain and attempted downloads failed.}
+Consequently, kernel acceptance, the empty-axiom audit, and the contest's
+15-second/60-second timing requirements remain unverified. The mathematical
+proposal and proofs are not presented as an already accepted contest entry.
+\end{abstract}
+
+\clearpage
+\setcounter{tocdepth}{1}
+\tableofcontents
+\clearpage
+
+\section{What is being proposed, and what is being claimed}
+
+The user asks for a serious constructive contender after replacing Coq with
+Lean in Cody Roux's contest. The source repository attributes Contender 5 to
+Samuel Gr\"utter and defines it as the largest numerical output at weighted
+syntax depth 42 in a totalized simply typed language with natural-number
+recursion~\cite{repo,contender}. The original rules concern \emph{typechecking
+time}, not the time required to evaluate the resulting natural number.
+They also prohibit axioms and defining the next entry from the previous
+winning constant~\cite{rules}.
+
+Our proposed declaration is
+\begin{equation}\label{eq:entry}
+ \boxed{\Entry=R_\Theta(64).}
+\end{equation}
+Every symbol in this equation will receive a constructive definition. In
+particular, $R$ is a tree recursor, not an appeal to a vaguely specified
+fast-growing hierarchy. The central numerical comparison is
+\begin{equation}\label{eq:headline}
+ \boxed{E_{\Cfive+1}(64)<\Entry,\qquad
+ E_0(x)=x,\quad E_{j+1}(x)=2^{E_j(x)}.}
+\end{equation}
+The role of $\Cfive$ in \eqref{eq:headline} is \emph{only in the theorem}; it
+is absent from the definition of $\Entry$.
+
+There is no claim of a mathematically greatest constructive natural number.
+Any fixed total definition admits further amplification. Nor do we assert a
+sharp proof-theoretic ordinal for this construction. The contribution is a
+particular ambitious, fully specified proposal with provable separation,
+carefully delimited formalization status, and reproducible artifacts.
+The general finite-language-maximization idea is inherited from the upstream
+entry. Our proposed combination of W-recursive object-language operations,
+ramified numerical oracles, type-index feedback, and explicit budgeted
+comparison witnesses is developed here; a comprehensive priority claim is
+not made.
+
+\subsection{A precise Lean adaptation of the rules}
+
+We retain the mathematical intent of the original contest and propose the
+following operational interpretation. The pinned target is Lean 4.35.0;
+pinning is necessary for reproducibility, not a claim that this source was
+successfully checked on that version~\cite{leanrelease}.
+
+\begin{enumerate}[label=\arabic*.]
+\item The entry is a closed definition of type \code{Nat}, using only total
+computational definitions. It must not depend on a custom axiom, a proof
+placeholder, classical choice, noncomputable selection, an unsafe replacement,
+or an external numerical oracle.
+\item The new definition dependency closure must compile in at most 15
+seconds, and the comparison proof in at most 60 seconds, on a disclosed
+reasonable machine. Distributed standard-library artifacts may be prebuilt;
+new contestant modules may not be hidden in a precompiled cache.
+\item The entry's definition must not refer to the previous winning
+\emph{number}. Reusing an explicitly charged source language and its evaluator
+is allowed. The comparison proof may name the previous entry.
+\item The transitive axiom reports for the entry and required comparison
+must be empty. Importing a library that contains unused axioms is not itself
+an axiom dependency; using one is.
+\end{enumerate}
+
+Lean distinguishes computational definitions from additional principles such
+as classical choice and propositional extensionality. These distinctions make
+an actual transitive audit important~\cite{leanaxioms}. The package's gate
+intentionally does not whitelist such principles. The surrounding explanatory
+mathematics occasionally uses extensional descriptions of functions; those
+analysis-only identities are not imported into the strict Lean proof path.
+
+\subsection{Validation boundary}
+
+Three different statements must not be conflated: a complete mathematical
+proof, proposed formal proof source, and a successful kernel run. This report
+provides the first two for the basic strict comparison. It does not provide
+the third. The stronger tower theorem, the binary budget bounds, and the
+higher-type extensional identities are proved in this article and tested in
+small instances where appropriate; they are not claimed as completed Lean
+formalizations. Section~\ref{sec:validation} records the exact evidence.
+
+\section{The upstream number, without changing its semantics}
+\label{sec:legacy}
+
+\subsection{Types, raw terms, and weighted depth}
+
+Let the old types be generated by
+\[
+ A,B ::= \tyN \mid A\to B,
+ \qquad \sem{\tyN}=\N,\qquad \sem{A\to B}=\sem A\to\sem B.
+\]
+Their depth is $\td(\tyN)=1$ and
+$\td(A\to B)=1+\max(\td A,\td B)$.
+The raw terms are
+\[
+ t ::= \mathsf{var}(i)\mid\lambda_{A,B}t\mid t\,u
+       \mid\mathsf 0\mid\Sc\mid\Rc_A .
+\]
+The recursor has semantic type
+\[
+ \Rc_A:\sem A\to(\N\to\sem A\to\sem A)\to\N\to\sem A.
+\]
+The weighted term depth is
+\begin{align*}
+ \depth(\mathsf{var}(i))&=i+2,\\
+ \depth(\lambda_{A,B}t)&=1+\max(\td A,\td B,\depth t),\\
+ \depth(tu)&=1+\max(\depth t,\depth u),\\
+ \depth(\mathsf0)=\depth(\Sc)&=1,\qquad
+ \depth(\Rc_A)=1+\td A.
+\end{align*}
+In particular, depth counts type annotations and variable labels. It is not
+ordinary node count or source-byte length.
+
+\subsection{The significance of malformed terms}
+
+The upstream evaluator does \emph{not} first discard terms that fail a typing
+judgment. It returns a tagged semantic value for every raw term. This is
+visible directly in \code{interp\_term}, \code{cast\_impl}, and
+\code{error} in the source~\cite{contender}. Replacing this evaluator with a
+well-typed-term enumerator would silently change the target of comparison.
+
+For each type define its default value by
+\[
+ \bot_{\tyN}=0,\qquad \bot_{A\to B}(x)=\bot_B.
+\]
+A computational cast pair between two types is identity at matching natural
+types. At matching arrow shapes with syntactically equal component types it
+uses recursively defined contravariant input and covariant output maps. If
+these tests fail, both maps return the appropriate default value. Thus no
+opaque equality proof is needed to run a cast.
+
+An environment is a list of tagged values. Variable labels are absolute
+binder levels: label 0 refers to the outermost binder, not the newest one.
+For an environment of length $l$, lookup of $i<l$ uses position $l-1-i$ in the
+cons-based list; otherwise lookup fails and produces the tagged value
+$(\tyN,0)$. A lambda creates a semantic function, evaluates its body under a
+new tagged argument, and casts the body's result to its stated codomain.
+Application of a tagged function casts its argument to the function's domain.
+Application of a nonfunction produces $(\tyN,0)$.
+
+Finally, $\val_0(t)$ evaluates $t$ in the empty environment and returns its
+natural component if its tag is $\tyN$; otherwise it returns zero. This
+includes raw terms with free variable labels: ``empty-environment
+interpretation'' is not a promise of syntactic closedness. For example,
+$\val_0(\Sc\,\Sc)=1$, since the function-valued argument is cast to natural
+zero rather than rejected.
+
+\subsection{The finite enumerator and the selected maximum}
+
+Let $U_0=[]$ and
+\[
+ U_{d+1}=[\tyN]\mathbin{+\!+}[A\to B\mid A,B\in U_d].
+\]
+Let $T_0=[]$. The list $T_{d+1}$ concatenates, in the upstream order,
+\begin{align*}
+ &[\mathsf{var}(i)\mid i=d-1,d-2,\ldots,0],\\
+ &[\lambda_{A,B}t\mid A,B\in U_d,\ t\in T_d],\\
+ &[tu\mid t,u\in T_d],\quad [\mathsf0],\quad[\Sc],\quad
+ [\Rc_A\mid A\in U_d].
+\end{align*}
+The variable list is empty for $d=0$. Induction establishes that membership in
+$T_d$ is equivalent to having depth at most $d$; the upstream source proves
+this exact characterization~\cite{contender}.
+
+For fidelity, the Lean baseline uses the original argmax algorithm, not just
+an independently specified maximum. Start with current value 0 and current
+best term $\mathsf0$, scan the list, and replace the best term exactly when a
+strictly larger value appears. Write the resulting selected term as
+\[
+ t_* = \mathsf{maxBy}(\val_0,0,\mathsf0,T_{42}),\qquad
+ \Cfive=\val_0(t_*).
+\]
+
+\begin{lemma}[Selection and maximum]\label{lem:selection}
+The term $t_*$ belongs to $T_{42}$, and
+$\Cfive=\max(\{0\}\cup\{\val_0(t):t\in T_{42}\})$.
+\end{lemma}
+\begin{proof}
+At each scan step the selected term is either the old seed or a term already
+visited. The seed $\mathsf0$ belongs to $T_{42}$, so the final selection is in
+that list. The invariant ``current value equals the selected value and is the
+maximum of the seed value and all visited values'' holds initially and is
+preserved by either branch of the strict comparison. It yields the displayed
+identity after the final element.
+\end{proof}
+
+\begin{proposition}[Mathematical fidelity of the port]\label{prop:port}
+The computational definitions in \code{Legacy.lean}, together with
+\code{Baseline.lean}, denote the same natural number as the pinned upstream
+\code{contender\_5}.
+\end{proposition}
+\begin{proof}
+Match type constructors, raw constructors, natural numbers, and lists
+componentwise. Relate semantic natural values by equality and arrow values
+by preservation of this relation on related inputs. Structural induction on
+types shows that defaults are related and that both components of each cast
+pair preserve the relation. The same Boolean comparisons select the same
+cast branches. The variable lookup functions use identical lengths,
+subtraction, and zero-based list positions.
+
+Now induct on the raw term, with the induction hypothesis quantified over
+related environments. The lambda case extends those environments by related
+arguments and uses the codomain cast lemma. The application case first uses
+the two term hypotheses, then the domain cast lemma. Natural recursion
+preserves the relation by induction on its natural argument. Constants and
+failed lookups are immediate. Thus empty-environment numerical observations
+agree for every raw term. The two list enumerators agree by induction on the
+depth. Finally, the argmax scans use the same strict comparison on equal
+natural values, start from corresponding seeds, and make corresponding
+choices. Their numerical results therefore agree.
+\end{proof}
+
+This is a semantic port argument, not a claim of a machine-checked
+Coq-to-Lean translation certificate. The upstream Coq project was not compiled
+in this environment. The checked-in provenance pins both its commit and the
+exact source blob.
+
+\section{A stronger, but still total, finite language}
+\label{sec:language}
+
+\subsection{The tree type}
+
+Define the strictly positive inductive type
+\begin{equation}\label{eq:tree}
+ \W ::= \leaf \mid \Sup(\N\to\W).
+\end{equation}
+An element is a countably branching well-founded tree. Its branch function
+may be represented by a finite program; it is not an explicitly stored
+infinite list. The constructor $\Sup$ is \emph{not} an ordinal supremum and we
+impose no quotient identifying trees of equal ordinal rank.
+
+For any result type $X$, its recursor satisfies
+\begin{align}
+ \mathsf{fold}_X(z,s,\leaf)&=z,\label{eq:wfold}\\
+ \mathsf{fold}_X(z,s,\Sup f)&=
+ s\bigl(f,\ i\mapsto\mathsf{fold}_X(z,s,f(i))\bigr).
+\end{align}
+The recursive values are supplied as a function of the child index, not
+computed by eager traversal of every child. Strict positivity and recursors
+are the relevant Lean mechanisms~\cite{leaninductive,leanrecursive}.
+
+\subsection{Types and primitives}
+
+The new type language is
+\[
+ A,B ::= \tyN\mid\tyW\mid A\to B,
+ \qquad\sem{\tyW}=\W.
+\]
+There is a natural recursor and a tree recursor at \emph{every} result type
+in this finite grammar. For a fixed binary function $q:\N\to\N\to\N$, the
+additional primitives are
+\begin{align*}
+ \mathsf{treeZero}&:\W,&
+ \mathsf{treeSup}&:(\N\to\W)\to\W,\\
+ \Oc&:\N\to\N\to\N,&\sem{\Oc}&=q,\\
+ \mathsf{treeRec}_A&:\sem A\to
+ ((\N\to\W)\to(\N\to\sem A)\to\sem A)\to\W\to\sem A.
+\end{align*}
+The ordinary zero, successor, variables, lambdas, applications, and natural
+recursors are retained. Defaults and computational casts are extended to
+$\tyW$ by $\bot_{\tyW}=\leaf$ and identity on matching tree types.
+Nonfunction application again gives tagged natural zero.
+
+There is also a constructor $\Qte(t)$ for \emph{any raw old term} $t$.
+It evaluates $t$ in the old empty environment and returns the tagged natural
+$\val_0(t)$. Its depth charge is $1+\depth(t)$. This is an explicit embedding
+of the old numerical semantics, not a constant for the old winning number,
+not a call to the old maximum, and not a free abbreviation for an arbitrarily
+large source file.
+
+Let $\val_q(e)$ denote the new empty-environment natural observation. Every
+raw new term has an observation; no undecidable validity filter is inserted.
+The only oracle during this section is a \emph{parameter}. In the eventual
+entry every such parameter is replaced by an already structurally smaller,
+total function.
+
+\subsection{Depth and exact finite enumeration}
+
+Both ground types have type depth 1; arrow depth is unchanged. Ordinary term
+depths are unchanged, all five unannotated constants
+$\mathsf0,\Sc,\mathsf{treeZero},\mathsf{treeSup},\Oc$ have depth 1, each
+recursor annotated by $A$ has depth $1+\td A$, and
+\[
+ \depth(\Qte(t))=1+\depth(t).
+\]
+The new type list is
+\[
+ V_0=[],\qquad V_{d+1}=[\tyN,\tyW]
+       \mathbin{+\!+}[A\to B\mid A,B\in V_d].
+\]
+The new term list $\mathcal T_0=[]$ and $\mathcal T_{d+1}$ is the concatenation
+of the following eight blocks:
+\begin{equation}\label{eq:enum}
+\begin{split}
+ &\mathcal T_d;\quad
+ [\mathsf0,\Sc,\mathsf{treeZero},\mathsf{treeSup},\Oc];\quad
+ [\mathsf{var}(i):i<d];\\
+ &[\lambda_{A,B}e:A,B\in V_d,\ e\in\mathcal T_d];\quad
+ [ef:e,f\in\mathcal T_d];\\
+ &[\Rc_A:A\in V_d];\quad
+ [\mathsf{treeRec}_A:A\in V_d];\quad
+ [\Qte(t):t\in T_d].
+\end{split}
+\end{equation}
+The order of variable labels in the implementation is descending; the other
+products use list order. The first block deliberately makes the enumerator
+cumulative. Repetition changes execution cost but never changes a maximum.
+
+\begin{lemma}[Coverage]\label{lem:coverage}
+The list $\mathcal T_d$ is finite and its elements are exactly the raw terms
+of depth at most $d$. Moreover, $\mathcal T_d$ is included, with occurrences,
+in $\mathcal T_{d+1}$.
+\end{lemma}
+\begin{proof}
+Finiteness follows by induction, since each step uses finite products,
+maps, and concatenations. For types, induction gives
+$A\in V_d\iff\td A\le d$. For terms at step $d+1$, inspect the outer
+constructor. An application has both children in $\mathcal T_d$ exactly when
+its depth is at most $d+1$; a lambda additionally needs both annotations in
+$V_d$. The analogous equivalences handle recursors, variable labels, and
+quotation via the old enumerator. Constants occur at every positive step.
+The carried-over block cannot introduce a term of excessive depth. These
+observations prove both directions of coverage inductively. The last claim
+is immediate from the first block.
+\end{proof}
+
+The strict Lean comparison uses direct occurrence lemmas for the particular
+constructors it needs, so it does not depend on a formalized converse to this
+coverage lemma.
+
+\begin{definition}[Finite semantic envelope]\label{def:envelope}
+For a total binary $q$, define
+\begin{equation}\label{eq:envelope}
+ M_q(d)=\max\bigl(\{0\}\cup
+       \{\val_q(e):e\in\mathcal T_d\}\bigr).
+\end{equation}
+The implementation uses a recursive list maximum, not classical selection.
+\end{definition}
+
+\begin{proposition}[Totality and monotonicity]
+For every total computable $q$, $M_q$ is total computable, and
+$M_q(d)\le M_q(d+1)$. Every occurrence $e\in\mathcal T_d$ satisfies
+$\val_q(e)\le M_q(d)$.
+\end{proposition}
+\begin{proof}
+The interpreter recurses on raw syntax. Semantic recursion inside its
+primitive constants is natural recursion or the tree recursor
+\eqref{eq:wfold}. Both have total input functions of the indicated types.
+Thus every list element has a natural observation. A finite maximum of these
+observations is computed by list recursion. Occurrence bounds follow by
+induction on the maximum computation, and monotonicity follows from the
+cumulative block in \eqref{eq:enum}.
+\end{proof}
+
+The theorem is a totality statement, not an efficiency statement. In
+particular, evaluating $M_q(68)$ is not part of the proposed validation run.
+
+\section{Short witnesses and escaping a fixed language}
+\label{sec:diagonal}
+
+\subsection{Unary witnesses}
+
+Write $\overline n=\Sc^n\mathsf0$ for the unary numeral. Then
+$\depth(\overline n)=n+1$ and $\val_q(\overline n)=n$.
+For $i\le n$, the raw term
+\begin{equation}\label{eq:unarywitness}
+ w_{i,n}=\Sc\bigl(\Oc\,\overline i\,\overline n\bigr)
+\end{equation}
+has depth
+$\max(i+4,n+3)\le n+4$ and value $q(i,n)+1$. Therefore
+\begin{equation}\label{eq:oraclebasic}
+ q(i,n)<M_q(n+4)\quad(i\le n).
+\end{equation}
+Likewise, the numeral $\overline{n+1}$ proves
+\begin{equation}\label{eq:inputgrowth}
+ n<M_q(n+4).
+\end{equation}
+These statements need no monotonicity assumption on $q$.
+
+\subsection{Binary numerals with an explicit syntax cost}
+
+Because variable names are absolute binder levels, embedding a term below
+new binders requires care. At top level define the depth-8 term
+\begin{equation}\label{eq:double}
+ D=\Rc_{\tyN}\,\mathsf0\,
+       (\lambda_{\tyN,\tyN\to\tyN}
+         \lambda_{\tyN,\tyN}\Sc(\Sc(\mathsf{var}(1)))).
+\end{equation}
+It denotes the function $x\mapsto2x$. The outer step argument has level 0;
+the accumulator has level 1. The natural-recursion equations prove the
+claim by induction on the input.
+
+Let $b(0)=\mathsf0$. For $n>0$, start with $\mathsf0$ and read the ordinary
+binary digits of $n$ from left to right, replacing the current term $e$ by
+$De$ for digit 0 and by $\Sc(De)$ for digit 1. These occurrences of $D$ are
+all in the empty environment. With $\bits(0)=0$ and
+$\bits(n)=\lfloor\log_2 n\rfloor+1$ for $n>0$, we have
+\begin{equation}\label{eq:binary}
+ \val_q(b(n))=n,\qquad \depth(b(n))\le8+2\bits(n).
+\end{equation}
+The value claim follows from binary positional notation. The first digit
+creates depth at most 10; every later digit increases depth by at most two.
+The displayed bound also covers zero.
+
+\begin{theorem}[Explicit escape from a fixed oracle language]
+\label{thm:escape}
+Fix $q$. Let $p$ be any fixed raw term whose empty-environment interpretation
+has type $\tyN\to\tyN$ and denotes a function $f:\N\to\N$. Put
+$c=\depth(p)$. Then
+\begin{equation}\label{eq:escape}
+ f(n)<M_q(n)\qquad\text{for every }n\ge\max(c+2,32).
+\end{equation}
+Consequently, $M_q$ is not denoted by any such fixed unary term in its own
+$q$-language.
+\end{theorem}
+\begin{proof}
+The term $\Sc(p\,b(n))$ has value $f(n)+1$ and depth at most
+$2+\max(c,8+2\bits(n))$. For $n\ge32$,
+\[
+ 10+2\bits(n)\le n.
+\]
+Indeed, on the block $2^r\le n<2^{r+1}$ with $r\ge5$, its left side is
+$12+2r\le2^r\le n$. The inequality at $r=5$ holds, and its preservation
+when $r$ increases is immediate. The assumption $n\ge c+2$ handles the
+other term in the maximum. The witness therefore belongs to
+$\mathcal T_n$, proving \eqref{eq:escape}. If a fixed $p$ denoted $M_q$,
+\eqref{eq:escape} would assert $M_q(n)<M_q(n)$ for sufficiently large $n$.
+\end{proof}
+
+The conclusion concerns the specified finite object language, not all Lean
+programs. The host can define $M_q$ because it can interpret the whole type
+code family and recurse on syntax. An object-language term has one fixed
+finite type. No internal global reflection principle is inferred.
+
+\subsection{Binary visibility at a fixed budget}
+
+Replacing both unary numerals in \eqref{eq:unarywitness} by binary numerals
+gives depth at most
+\begin{equation}\label{eq:binarybudget}
+ \max\bigl(11+2\bits(i),\ 10+2\bits(n)\bigr).
+\end{equation}
+This follows by counting the two curried applications and the outer
+successor: the exact cost is
+$\max(\depth(b(i))+3,\depth(b(n))+2)$.
+At $n=64$, every $i<2^{28}$ fits within depth 68, since the two upper bounds
+are at most 67 and 24. Thus
+\begin{equation}\label{eq:binaryvisible}
+ q(i,64)<M_q(68)\qquad(0\le i<2^{28}).
+\end{equation}
+This is a sufficient bound, not an optimal coding claim. Some larger labels
+also fit because their binary expansions contain fewer 1s.
+
+\section{Ramified reflection on trees}
+\label{sec:reflection}
+
+\begin{definition}[Stage functions]
+Define $R:\W\to\N\to\N$ by the tree recursor:
+\begin{align}
+ R_{\leaf}(n)&=M_{q_0}(n+4),&q_0(i,x)&=0,\label{eq:reflect0}\\
+ R_{\Sup f}(n)&=M_{q_f}(n+4),&q_f(i,x)&=R_{f(i)}(x).
+ \label{eq:reflectsup}
+\end{align}
+\end{definition}
+The recursive clause is exactly the step algebra for \eqref{eq:wfold} with
+result type $\N\to\N$. The tree children need not have a uniform numerical
+height bound. Their structural accessibility is supplied by the inductive
+type itself.
+
+\begin{theorem}[Constructive totality]\label{thm:totalR}
+Every $R_a$ is total. For any closed computably constructed $a:\W$, the
+function $R_a:\N\to\N$ is computable in principle.
+\end{theorem}
+\begin{proof}
+The leaf algebra in \eqref{eq:reflect0} is total. Given the recursive
+functions $i\mapsto R_{f(i)}$, the step algebra merely supplies them as the
+binary oracle to a total finite envelope. Hence it is a total function
+$\N\to\N$. Applying the tree recursor gives the result. All operations
+involved are computational recursors or structural definitions, so a closed
+constructive input yields a closed computational function.
+\end{proof}
+
+The phrase ``computably constructed'' matters when interpreting the theorem
+in ordinary set-theoretic semantics: arbitrary mathematical functions
+$\N\to\W$ can carry noncomputable information. Our entry uses only the
+explicit closed constructions below; it does not select arbitrary semantic
+trees from a full set-theoretic function space.
+
+\begin{theorem}[Visible-child separation]\label{thm:child}
+For every $f:\N\to\W$ and every $i\le n$,
+\[
+ R_{f(i)}(n)<R_{\Sup f}(n).
+\]
+Also $n<R_a(n)$ for every tree $a$ and natural $n$.
+\end{theorem}
+\begin{proof}
+Apply \eqref{eq:oraclebasic} to $q_f$ and use
+\eqref{eq:reflectsup}. For the second statement, apply
+\eqref{eq:inputgrowth} to the oracle at $a$, treating the leaf and supremum
+constructors separately.
+\end{proof}
+
+\begin{corollary}[Many visible branches at input 64]\label{cor:many}
+For every $i<2^{28}$,
+$R_{f(i)}(64)<R_{\Sup f}(64)$.
+\end{corollary}
+\begin{proof}
+Use \eqref{eq:binaryvisible} with $q=q_f$.
+\end{proof}
+
+At each fixed tree $a$, Theorem~\ref{thm:escape} shows that $R_a$ eventually
+outgrows every fixed unary program in the language using the local oracle
+assigned to $a$. This applies at the leaf as well as at nonleaf stages. It
+is a uniform syntactic phenomenon, not an assertion derived only from a
+suggested ordinal rank.
+
+\section{A quantitative amplification: oracle-fed iteration}
+\label{sec:towerengine}
+
+A single reflection step can do substantially more than add one to a child
+value. We now prove the numerical amplification that yields
+\eqref{eq:headline}.
+
+\subsection{A depth-14 power-of-two program}
+
+Let $D^{[l]}$ be the doubling program \eqref{eq:double} with its accumulator
+variable changed from level 1 to level $l+1$, so it denotes doubling when
+evaluated in an environment of length $l$. Its depth is $l+8$. Define the
+closed program
+\begin{equation}\label{eq:powprogram}
+ P=\Rc_{\tyN}\,(\Sc\mathsf0)\,
+ \bigl(\lambda_{\tyN,\tyN\to\tyN}
+       \lambda_{\tyN,\tyN}
+       (D^{[2]}\,\mathsf{var}(1))\bigr).
+\end{equation}
+It has depth 14 and denotes $x\mapsto2^x$. The change to level 3 inside
+$D^{[2]}$ is essential: simply inserting the original $D$ below two new
+binders would capture the wrong accumulator under the upstream convention.
+
+To verify the depth, $\depth(D^{[2]})=10$, application to
+$\mathsf{var}(1)$ gives 11, the two outer lambdas give 13, and the final
+application of the partially applied recursor gives 14. Its value follows
+from the natural-recursion equations: start at one and double the
+accumulator at each step.
+
+\begin{lemma}[Uniform exponential lower bound]\label{lem:exponential}
+For every tree $a$ and every $x\ge32$,
+\[
+ 2^x\le R_a(x).
+\]
+\end{lemma}
+\begin{proof}
+The program $P\,b(x)$ is independent of the local oracle and has value $2^x$.
+Its depth is at most $1+\max(14,8+2\bits(x))\le x+4$ for $x\ge32$, by the
+binary inequality proved in Section~\ref{sec:diagonal}. It therefore occurs
+in the envelope defining $R_a(x)$.
+\end{proof}
+
+\subsection{The feedback witness}
+
+For a fixed binary $q$, write $g(x)=q(0,x)$. In the empty environment, let
+\[
+ A_q=\lambda_{\tyN,\tyN\to\tyN}\lambda_{\tyN,\tyN}
+      (\Oc\,\mathsf0\,\mathsf{var}(1)).
+\]
+The syntax $A_q$ uses the oracle constant, not the semantic function $q$ as
+an extra constructor. Its depth is 6, and it ignores its first argument
+while applying $g$ to its accumulator. Define
+\begin{equation}\label{eq:feedbackwitness}
+ F_n=\Sc\Bigl(
+    \Rc_{\tyN}\,b(n)\,A_q\,
+         (\Oc\,\mathsf0\,b(n))\Bigr).
+\end{equation}
+Writing $g^{[j]}$ for $j$-fold iteration, the recursor equations give
+\begin{equation}\label{eq:feedbackvalue}
+ \val_q(F_n)=g^{[g(n)]}(n)+1.
+\end{equation}
+The two occurrences of $b(n)$ remain at top level; the only variable within
+the step function is the correctly scoped accumulator at level 1.
+
+\begin{lemma}[Feedback witness cost]\label{lem:feedbackcost}
+The term $F_n$ has depth at most
+$\max(9,12+2\bits(n))$. For $n\ge32$ this is at most $n+4$.
+For the specified binary encoding, $F_{64}$ has exact depth 20.
+\end{lemma}
+\begin{proof}
+Put $d=\depth(b(n))$. The recursor applied to its initial value has depth
+$1+\max(2,d)$. Applying it to the depth-6 step gives depth
+$\max(7,d+2)$. The iteration-count term
+$\Oc\,\mathsf0\,b(n)$ has depth $\max(3,d+1)$. The next application and
+outer successor give total depth $\max(9,d+4)$. Insert
+\eqref{eq:binary}. For $n\ge32$, the blockwise estimate used earlier gives
+the required bound. The binary representation of 64 is $1000000$: its
+numeral has depth 16, so $\max(9,16+4)=20$.
+\end{proof}
+
+\begin{theorem}[Oracle-fed iteration separation]\label{thm:feedback}
+For every $f:\N\to\W$, set $g=R_{f(0)}$. Then for every $n\ge32$,
+\begin{equation}\label{eq:feedbackseparation}
+ g^{[g(n)]}(n)<R_{\Sup f}(n).
+\end{equation}
+\end{theorem}
+\begin{proof}
+Use $q(i,x)=R_{f(i)}(x)$ in \eqref{eq:feedbackwitness}. The witness has
+value one more than the left side by \eqref{eq:feedbackvalue}, and fits the
+stage's $n+4$ budget by Lemma~\ref{lem:feedbackcost}. The envelope bounds
+its value.
+\end{proof}
+
+\begin{corollary}[Tower separation from the zeroth child]\label{cor:tower}
+For $n\ge32$ and $m=R_{f(0)}(n)$,
+\[
+ E_m(n)<R_{\Sup f}(n).
+\]
+\end{corollary}
+\begin{proof}
+Lemma~\ref{lem:exponential} shows $g(x)\ge2^x$ on $x\ge32$. Induction on
+$j$ gives $g^{[j]}(n)\ge E_j(n)$: the base is equality, and at a successor
+the induction hypothesis ensures the input remains at least 32, after which
+$g(g^{[j]}(n))\ge2^{g^{[j]}(n)}\ge2^{E_j(n)}$. Set $j=m$ and apply
+Theorem~\ref{thm:feedback}.
+\end{proof}
+
+These proofs use explicit finite terms rather than guesses about growth-rate
+classifications. The critical cost is the small \emph{description} of the
+iteration count $g(n)$, not the size of that count.
+
+\section{Higher-type countable iteration}
+\label{sec:higher}
+
+We next construct the tree index $\Theta$. This adds substantial structure
+beyond what is needed for the basic comparison theorem.
+
+\subsection{Finite levels and pointwise suprema}
+
+Define a family of types
+\begin{equation}\label{eq:levels}
+ L_0=\W,\qquad L_{k+1}=L_k\to L_k.
+\end{equation}
+Define a countable-supremum operation at each level by
+\begin{align}
+ S_0(f)&=\Sup(f),\label{eq:suplevel}\\
+ S_{k+1}(f)(x)&=S_k(j\mapsto f(j)(x)).
+\end{align}
+For $u:L_k\to L_k$, let $u^{[0]}(x)=x$ and
+$u^{[j+1]}(x)=u(u^{[j]}(x))$. The countable-iteration operator is
+\begin{equation}\label{eq:omega}
+ \Omega_k(u)(x)=S_k(j\mapsto u^{[j]}(x)),
+ \qquad \Omega_k:L_{k+2}.
+\end{equation}
+The family $L_k$ is a natural-number-indexed family of types. It is not a
+sequence of stronger logical axioms. Every member lies in the same small
+universe, and Lean can express the family by natural recursion.
+
+For a starting tree $a$ and an operation $s:\W\to\W$, set
+\begin{equation}\label{eq:seed}
+ \sigma_0=a,\qquad\sigma_1=s,\qquad
+ \sigma_{k+2}=\Omega_k.
+\end{equation}
+These seeds have types $\sigma_k:L_k$. Define evaluation down the levels by
+\begin{equation}\label{eq:collapse}
+ C_0(x)=x,\qquad C_{k+1}(u)=C_k(u(\sigma_k)),
+\end{equation}
+with dependence on $a,s$ understood. Finally let
+\begin{equation}\label{eq:high}
+ H_k(a;s)=C_{k+2}(\Omega_k).
+\end{equation}
+Every operation here is a structural recursion on a natural number, a finite
+function iteration, or a tree constructor.
+
+\subsection{Structural identities and their meaning}
+
+\begin{lemma}[Commutation with countable suprema]\label{lem:commute}
+In extensional mathematical notation, for every $f:\N\to L_k$,
+\[
+ C_k(S_k(f))=\Sup(j\mapsto C_k(f(j))).
+\]
+\end{lemma}
+\begin{proof}
+For $k=0$ the two sides are identical. At level $k+1$, apply
+\eqref{eq:collapse} and then \eqref{eq:suplevel} to obtain
+$C_k(S_k(j\mapsto f(j)(\sigma_k)))$. The induction hypothesis identifies
+this with $\Sup(j\mapsto C_k(f(j)(\sigma_k)))$, which is the claimed
+expression by the definition of $C_{k+1}$.
+\end{proof}
+
+\begin{proposition}[Visible predecessor in adjacent levels]\label{prop:adjacent}
+One has
+\begin{align}
+ H_0(a;s)&=\Sup(j\mapsto s^{[j]}(a)),\label{eq:high0}\\
+ H_k(a;s)&=\Sup(j\mapsto C_k(\sigma_{k+1}^{[j]}(\sigma_k))).
+ \label{eq:highroot}
+\end{align}
+In the root presentation of $H_{k+1}(a;s)$ in \eqref{eq:highroot}, child 1 is
+$H_k(a;s)$. Consequently, for $n\ge1$,
+\[
+ R_{H_k(a;s)}(n)<R_{H_{k+1}(a;s)}(n).
+\]
+\end{proposition}
+\begin{proof}
+Expanding two steps of collapse in \eqref{eq:high} gives
+$C_k(\Omega_k(\sigma_{k+1})(\sigma_k))$. Expand \eqref{eq:omega} and apply
+Lemma~\ref{lem:commute} to obtain \eqref{eq:highroot}. Its $k=0$ instance
+is \eqref{eq:high0}. At level $k+1$, the child at index 1 is
+\[
+ C_{k+1}(\sigma_{k+2}(\sigma_{k+1}))
+ =C_{k+1}(\Omega_k(\sigma_{k+1}))=H_k(a;s).
+\]
+Theorem~\ref{thm:child} now applies with child index 1.
+\end{proof}
+
+The general equality statements in this subsection are analysis-only
+extensional identities. The Lean proof source includes \eqref{eq:high0},
+which is definitional, but does not claim a completed empty-axiom
+formalization of Lemma~\ref{lem:commute} or the general adjacent-level
+identity. A pointwise logical relation is one possible way to formalize
+these statements without adding functional extensionality as a dependency.
+None of these analysis-only equalities is needed to prove the entry's
+required strict comparison.
+
+\section{Numerical feedback into type-level indices}
+\label{sec:grand}
+
+Define a simple tree successor operation
+\[
+ \Step(a)=\Sup(i\mapsto a).
+\]
+Unlike a quotient ordinal successor, this is merely an explicit tree with
+the same child at every index. The name serves as a structural mnemonic.
+
+\begin{definition}[Feedback boost]\label{def:boost}
+Define
+\begin{equation}\label{eq:boost}
+ \Boost(a)=\Sup(b_a),\qquad
+ b_a(0)=a,\quad
+ b_a(k+1)=H_{R_a(k+64)}(a;\Step).
+\end{equation}
+\end{definition}
+The construction feeds a reflected \emph{number} into the height of the
+finite-type family \eqref{eq:levels}. This is stronger structurally than
+choosing a larger fixed literal in a single envelope. It does not rely on
+an assumption that this type height has a particular ordinal name.
+
+There is no circular definition. The operation $R$ was completed in
+Section~\ref{sec:reflection} before $\Boost$ was introduced. The body of
+$\Boost$ calls that already defined operation on its input $a$. The
+functions $H_k$ were likewise defined for all natural $k$ before any
+$R_a(k+64)$ was used as their index.
+
+\begin{theorem}[Feedback comparisons]\label{thm:boost}
+For every $a$ and every $n$,
+\[
+ R_a(n)<R_{\Boost(a)}(n).
+\]
+For $n\ge1$ one also has
+\[
+ R_{H_{R_a(64)}(a;\Step)}(n)<R_{\Boost(a)}(n).
+\]
+\end{theorem}
+\begin{proof}
+The retained branch at index 0 gives the first inequality via
+Theorem~\ref{thm:child}. Branch 1 is exactly
+$H_{R_a(64)}(a;\Step)$, giving the second. No comparison between the
+numerical oracles as pointwise functions is required.
+\end{proof}
+
+\begin{definition}[The grand index and proposed entry]
+Set
+\begin{equation}\label{eq:grand}
+ \Theta=\Sup(k\mapsto H_k(\leaf;\Boost)),\qquad
+ \Entry=R_\Theta(64).
+\end{equation}
+\end{definition}
+
+\begin{theorem}[Some explicit stages exceeded by the entry]\label{thm:grand}
+For $k\le n$,
+\[
+ R_{H_k(\leaf;\Boost)}(n)<R_\Theta(n).
+\]
+For $j\le n$,
+\[
+ R_{\Boost^{[j]}(\leaf)}(n)<R_\Theta(n).
+\]
+At $n=64$, both conclusions hold for every $k<2^{28}$ and every $j<2^{28}$,
+respectively.
+\end{theorem}
+\begin{proof}
+The first statement uses child $k$ of \eqref{eq:grand}. The second uses
+child $j$ of $H_0(\leaf;\Boost)$ in \eqref{eq:high0}, followed by child 0
+of $\Theta$, and composes the two strict inequalities. For input 64, use
+Corollary~\ref{cor:many} instead of the unary-index version at the indicated
+child selections.
+\end{proof}
+
+The word ``all'' in ``all finite levels'' describes the index construction:
+$\Theta$ contains a child for each natural level. A fixed numerical input
+has a fixed syntax budget. The theorem carefully states which branch
+comparisons that budget proves, rather than claiming that one fixed output
+exceeds an unbounded sequence of natural outputs at that input.
+
+\section{The exact comparison with Contender 5}
+\label{sec:comparison}
+
+\begin{theorem}[Uniform comparison with the upstream baseline]
+\label{thm:baseline}
+For every total binary oracle $q$,
+\[
+ \Cfive<M_q(68).
+\]
+Consequently, for every tree $a$,
+\[
+ \Cfive<R_a(64).
+\]
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:selection}, $t_*\in T_{42}$. The quotation block of
+\eqref{eq:enum} places $\Qte(t_*)$ in $\mathcal T_{43}$. Both this term
+and $\Sc$ therefore occur at depth 43, so the application
+\[
+ e_* = \Sc(\Qte(t_*))
+\]
+occurs in $\mathcal T_{44}$. Cumulativity puts it in $\mathcal T_{68}$.
+Its value is $\val_0(t_*)+1=\Cfive+1$, independently of $q$. Thus
+$\Cfive+1\le M_q(68)$. For any tree $a$, its stage at 64 is exactly such
+an envelope, since $64+4=68$; distinguish the two constructors in
+\eqref{eq:reflect0}--\eqref{eq:reflectsup}.
+\end{proof}
+
+\begin{corollary}[Required strict inequality]\label{cor:entry}
+The proposed number is strictly greater than the pinned upstream Contender 5:
+$\Cfive<\Entry$.
+\end{corollary}
+\begin{proof}
+Take $a=\Theta$ in Theorem~\ref{thm:baseline}.
+\end{proof}
+
+This proof does not evaluate the old maximum or the new one. It proves that
+a particular \emph{description} occurs in the relevant finite list. The
+successor operation appears in that proof witness, not as the definition of
+the new entry. Neither the literal 42, the old maximum function, nor the
+constant \code{contender\_5} occurs in \code{Hierarchy.lean} or
+\code{Contender.lean}.
+
+\begin{theorem}[Tower-height separation]\label{thm:towerentry}
+Let $E_0(x)=x$ and $E_{j+1}(x)=2^{E_j(x)}$. Then
+\begin{equation}\label{eq:towerfinal}
+ E_{\Cfive+1}(64)<\Entry.
+\end{equation}
+In particular, the separation is far stronger than a fixed number of
+successor steps or a single exponential in $\Cfive$.
+\end{theorem}
+\begin{proof}
+Write $a_0=H_0(\leaf;\Boost)$ for the zeroth child of $\Theta$, and set
+$m=R_{a_0}(64)$. By Theorem~\ref{thm:baseline}, $m>\Cfive$, hence
+$m\ge\Cfive+1$. Corollary~\ref{cor:tower} applied to the root of $\Theta$
+gives
+\[
+ E_m(64)<R_\Theta(64)=\Entry.
+\]
+For $x\ge1$, the sequence $E_j(x)$ is increasing: $E_1(x)=2^x>x$, and
+successive exponentiations preserve the strict inequality. Therefore
+$E_{\Cfive+1}(64)\le E_m(64)<\Entry$.
+\end{proof}
+
+The tower theorem uses only a small part of the grand index; it is a robust
+lower bound, not an estimate of the entry's actual size. Most of the
+higher-type and feedback construction is deliberately not unfolded by the
+comparison proof.
+
+\section{Why the construction is constructive rather than a loophole}
+\label{sec:safety}
+
+\subsection{No Busy Beaver and no unrestricted Lean evaluator}
+
+Busy-Beaver-style maximization selects outputs of programs whose termination
+cannot in general be determined by a total evaluator. Here every raw term
+in each finite list already has a total denotation, established before the
+maximum is defined. The evaluator does not run arbitrary Lean source,
+search for consistency proofs, assume reflection for Lean itself, or
+recognize a set of all total computable functions. The fixed-language escape
+result is exactly why a universal self-maximizing interpretation would be
+inappropriate.
+
+\subsection{Infinite branching does not mean nontermination}
+
+The only infinite object is a function giving children on demand. The tree
+fold receives a function of recursive results and may inspect finitely many
+children along a particular computation. A program supplied to the fold can
+make the number of such inspections extraordinarily large, but its type and
+recursor-based construction are what justify totality. There is no infinite
+while-loop hidden behind a supposedly finite search bound.
+
+\subsection{Avoiding an invalid oracle-monotonicity argument}
+
+An object program can react nonmonotonically to its oracle inputs. Therefore
+one should not infer, merely from $q\le q'$ pointwise, that every program's
+output under $q$ is at most its output under $q'$. The proof strategy here
+never needs such a statement. Envelope monotonicity is in the \emph{syntax
+cutoff}, and stage comparisons use a specific term that calls the specified
+child oracle. The tower theorem likewise uses a known program, not a global
+monotonicity claim about interpreting every raw term.
+
+\subsection{No unwarranted ordinal comparison}
+
+The constructor $\Sup$ retains its branch order and syntactic presentation.
+Two trees with equal externally assigned ordinal ranks may expose different
+children at low numerical costs. Pointwise stage inequalities are proved
+from those accessible children. An ordinal-ranking theorem, if developed,
+would be additional work and would not replace the explicit coding
+estimates needed for this contest.
+
+\subsection{No claim of absolute optimality}
+
+One can always define a successor or another reflection layer after a fixed
+entry. The contest's computational time bounds and its prohibition of lazy
+references shape a practical research problem, not a canonical greatest
+natural number. Our proposal fixes a substantial language extension and
+repeated higher-type amplification, and supplies a proof of a large margin.
+It does not pretend that no more effective idea could be found with further
+research.
+
+\section{Lean artifact architecture}
+\label{sec:implementation}
+
+The definition path is deliberately separate from the baseline used in the
+proof:
+\[
+\begin{gathered}
+ \code{ListKit}\longrightarrow\code{Legacy}\longrightarrow\code{Language}
+ \longrightarrow\code{Hierarchy}\longrightarrow\code{Contender},\\
+ \code{Legacy}\longrightarrow\code{Baseline},\qquad
+ (\code{Contender},\code{Baseline})\longrightarrow\code{Proofs}.
+\end{gathered}
+\]
+\code{Audit} and \code{Smoke} are downstream validation modules.
+\code{Legacy} supplies the old raw evaluator, not its winning constant;
+\code{Baseline} alone supplies that constant.
+
+\begin{center}
+\begin{tabular}{p{.23\linewidth}p{.69\linewidth}}
+\toprule
+Module & Responsibility\\
+\midrule
+\code{ListKit.lean} & Elementary list operations, lookup, maximum, argmax.\\
+\code{Legacy.lean} & Computational Coq-semantics port, weighted depth, raw enumerators.\\
+\code{Language.lean} & Tree type, total extended interpreter, quotation, cumulative enumeration.\\
+\code{Hierarchy.lean} & $R$, finite type levels, pointwise suprema, collapse, feedback, $\Theta$.\\
+\code{Contender.lean} & The single proposed entry $R_\Theta(64)$.\\
+\code{Baseline.lean} & The exact selected-term definition of $\Cfive$.\\
+\code{Proofs.lean} & Occurrence lemmas, basic child and feedback inequalities, strict baseline proof.\\
+\code{Audit.lean} & Transitive axiom queries for the entry and central theorems.\\
+\code{Smoke.lean} & Tiny definitional examples, not giant-number evaluation.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The maximum proof uses an explicit inductive list-occurrence predicate.
+This avoids dependence on extensional finite-set APIs and makes the needed
+membership derivations short. The final proof is intended to elaborate to
+an application of the uniform baseline theorem, rather than normalize
+$\Theta$ or run a maximum. The definition itself uses structural recursors
+and does not employ a noncomputable semantic supremum.
+
+The code's size is not evidence that the time limits are met. In particular,
+Lean elaboration, generated code for recursors, imported theorem dependencies,
+and conversion checking all require an actual toolchain run. These are
+precisely what the acceptance script is designed to test.
+
+\section{Validation performed and validation still required}
+\label{sec:validation}
+
+\subsection{Executed small-instance checks}
+
+The Python model is an independent executable rendition of the raw
+semantics, with explicit resource guards. It refuses large enumerations
+rather than substituting bounded or approximate values into the mathematical
+definition. It is not a Lean checker and does not certify totality.
+
+The recorded run passed \textbf{62,065 assertions}. The old-language
+enumeration results were:
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+Depth & Raw terms & Types & Maximum numerical output\\
+\midrule
+1 & 2 & 1 & 0\\
+2 & 10 & 2 & 1\\
+3 & 146 & 5 & 2\\
+4 & 24,976 & 26 & 3\\
+\bottomrule
+\end{tabular}
+\end{center}
+For the new language, take $q_0(i,n)=0$,
+$q_1(i,n)=3i+n+7$, and $q_2(i,n)=\max(17-i-n,0)$:
+\begin{center}
+\begin{tabular}{rrrrrr}
+\toprule
+Depth & Raw terms & Types & $M_{q_0}$ & $M_{q_1}$ & $M_{q_2}$\\
+\midrule
+1 & 5 & 2 & 0 & 0 & 0\\
+2 & 62 & 6 & 1 & 1 & 1\\
+3 & 6,167 & 38 & 2 & 8 & 17\\
+\bottomrule
+\end{tabular}
+\end{center}
+The tiny results are not approximations to $\Cfive$ or $\Entry$.
+
+The tests additionally cover argmax/maximum agreement, selection membership,
+quotation and successor semantics, all enumerated depth bounds, cumulative
+inclusion, absolute binder levels, malformed applications and casts, binary
+numerals, the explicit depth-8 doubling and depth-14 exponentiation programs,
+the depth-20 feedback witness at input 64, oracle-witness semantics, and
+finite observations of higher-type branch identities. Binary inequalities
+are checked through 9,999 in addition to their general mathematical proof.
+The model tests power-of-two semantics only at small inputs and feedback
+semantics only for small simple oracles; it never evaluates a giant stage.
+
+\subsection{Unexecuted Lean validation}
+
+There was no \code{lean}, \code{lake}, or \code{elan} executable in the
+preparation container. Attempts to obtain a toolchain did not succeed.
+The validation report therefore records
+\begin{lstlisting}
+"kernel_checked": false,
+"timing_qualified": false,
+"status": "not_run_compiler_unavailable"
+\end{lstlisting}
+A preliminary lexical source screen found no prohibited tokens in code after
+stripping comments and strings. This is only a source screen. It cannot
+establish elaboration, kernel acceptance, or the transitive axiom set of a
+compiled theorem. The intended strict comparison proof contains no
+placeholder, but unobserved syntax, API, termination-elaboration, simplifier,
+or code-generation issues may remain.
+
+\begin{center}
+\begin{tabular}{p{.56\linewidth}p{.34\linewidth}}
+\toprule
+Claim or check & Delivered status\\
+\midrule
+Constructive mathematical definition & Fully specified\\
+Mathematical proof $\Cfive<\Entry$ & Provided\\
+Mathematical tower-height separation & Provided\\
+Exact computational port argument & Provided; no cross-kernel certificate\\
+Lean source for basic comparison & Provided; uncompiled\\
+Lean source for tower/escape theorems & Not formalized in this package\\
+Finite Python model & 62,065 assertions passed\\
+Source placeholder screen & Passed, limited scope\\
+Lean kernel and empty-axiom audit & Not run\\
+15-second definition / 60-second proof & Unverified\\
+Accepted contest submission & Not claimed\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Reproduction and acceptance gates}
+
+From the extracted archive root, the model and document are reproducible by
+\begin{lstlisting}
+python python/test_model.py
+bash scripts/build_article.sh
+\end{lstlisting}
+On a machine with the pinned Lean toolchain installed, run
+\begin{lstlisting}
+python scripts/verify_lean.py
+\end{lstlisting}
+The script removes this package's generated Lean module artifacts, checks
+its source screen, and compiles the five definition modules against the
+prebuilt standard distribution under an aggregate 15-second budget. It then
+compiles the baseline, proof, audit, and smoke modules under an aggregate
+60-second budget. It records compiler output, elapsed times, and axiom
+reports. Any compiler error, missing empty-axiom result, or time-budget
+failure prevents an accepted status.
+
+The required audit includes both the entry and its strict comparison:
+\begin{lstlisting}
+BigNumber.contender_6
+BigNumber.contender_5_lt_contender_6
+\end{lstlisting}
+An empty dependency list is
+required, not merely absence of a user-written \code{axiom} declaration.
+The script's parser and timing policy are themselves ordinary validation
+utilities, not a security-certified sandbox. A contest judge should also
+review the source, compiler provenance, and machine description.
+
+Do not run \code{\#eval contender\_6}, and do not attempt to print its decimal
+expansion. The problem asks for a checked total definition and comparison,
+not feasible normalization of the output.
+
+\section{Further research questions}
+\label{sec:future}
+
+\paragraph{Complete and independently replay the strict formalization.}
+The immediate concrete task is to run the pinned compiler, repair any
+elaboration issues without weakening the mathematical specification, and
+obtain empty axiom reports and disclosed timings. Rechecking with an
+independent kernel implementation would strengthen the trust story. The
+cross-language port should ultimately receive a machine-checked semantic
+simulation rather than remain a paper argument plus finite tests.
+
+\paragraph{Formalize the tower engine and the binary coding theorem.}
+The strongest quantitative result is presently proved on paper. A systematic
+library of context-aware quotation and depth certificates would make the
+power-of-two and feedback witnesses straightforward to verify without
+normalizing their outputs. Absolute binder levels make capture-avoiding
+lifting an especially important component.
+
+\paragraph{Optimize visible-child coding.}
+The bound $2^{28}$ is deliberately conservative. Exact depth depends on both
+bit length and population count in our binary encoding. Better addition
+chains, shared descriptions, or a different explicitly charged numeral
+language could improve it. The relevant optimization target is guaranteed
+witness depth, not an informal textual abbreviation.
+
+\paragraph{Replace extensional tree equalities by logical relations.}
+Formalize the higher-type supremum/collapse identities in a way compatible
+with the strict empty-axiom rule. A family of pointwise relations indexed by
+finite type codes may prove observational equality without appealing to
+functional extensionality as an axiom. One must also prove the evaluator
+preserves that relation.
+
+\paragraph{Determine genuine growth classifications.}
+How does the finite-language envelope with W-recursion compare with named
+fast-growing hierarchies under a specified coding? What are sharp lower and
+upper bounds for the finite-type diagonal and feedback operation? An answer
+requires precise ordinal notation or another semantic ranking together with
+coding estimates. No identification with a famous ordinal is assumed here.
+
+\paragraph{Investigate stronger constructive object languages.}
+The upstream repository also includes work toward a System F evaluator
+\cite{systemf}. Possible directions include a carefully stratified
+polymorphic language, inductive families, or richer tree constructors, but
+each extension must retain a total executable interpreter and satisfy the
+actual definition-time gate. A larger semantic language is useful only when
+its interpreter is genuinely specified and justified.
+
+\paragraph{Separate semantic improvement from packaging tricks.}
+A useful research standard would compare constructors, available recursion
+principles, and budgeted embedding theorems, rather than reward hidden
+precompiled definitions or unconstrained source abbreviation. The present
+entry suggests measuring language inclusion and explicit stage simulation
+alongside the traditional numerical comparison.
+
+\section{Conclusion}
+
+The proposed number is a closed constructive expression with a substantial
+structural design: finite-language maximization, tree-indexed reflection,
+arbitrary finite higher-type iteration, and feedback of semantic values
+into type-level indices. Its relation to the actual upstream entry is not
+left to growth-rate intuition. The successor-quotation witness proves
+$\Cfive<\Entry$, and a separate depth-20 iteration witness proves the much
+stronger inequality $E_{\Cfive+1}(64)<\Entry$.
+
+The package makes the remaining boundary explicit. It provides mathematical
+proofs, proposed Lean source, tests, and acceptance tooling. It does not
+provide a successful Lean kernel run or a timing certificate. Thus it is a
+serious research contender ready for the stated validation work, rather than
+an already certified winner.
+
+\appendix
+\section{The central Lean definition, in ASCII notation}
+
+The following is a readable ASCII rendering of the central definitions;
+the actual source files are authoritative. It uses the interpreter and
+finite envelope from \code{Language.lean}.
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+def reflect : Tree -> Nat -> Nat :=
+  Tree.rec
+    (fun n => Language.envelope (fun _ _ => 0) (n + 4))
+    (fun _ ih n =>
+      Language.envelope (fun i x => ih i x) (n + 4))
+
+def Level : Nat -> Type
+  | 0 => Tree
+  | n + 1 => Level n -> Level n
+
+def supLevel : (k : Nat) -> (Nat -> Level k) -> Level k
+  | 0, f => Tree.sup f
+  | k + 1, f => fun x => supLevel k (fun n => f n x)
+
+def omegaLevel (k : Nat) : Level (k + 2) :=
+  fun f x => supLevel k (fun n => iterate f n x)
+
+def seed (a : Tree) (s : Tree -> Tree) : (k : Nat) -> Level k
+  | 0 => a
+  | 1 => s
+  | k + 2 => omegaLevel k
+
+def collapse (a : Tree) (s : Tree -> Tree) :
+    (k : Nat) -> Level k -> Tree
+  | 0, x => x
+  | k + 1, f => collapse a s k (f (seed a s k))
+
+def high (a : Tree) (s : Tree -> Tree) (k : Nat) : Tree :=
+  collapse a s (k + 2) (omegaLevel k)
+
+def step (a : Tree) : Tree := Tree.sup (fun _ => a)
+
+def boost (a : Tree) : Tree :=
+  Tree.sup (fun
+    | 0 => a
+    | k + 1 => high a step (reflect a (k + 64)))
+
+def grandIndex : Tree :=
+  Tree.sup (fun k => high Tree.zero boost k)
+
+def contender_6 : Nat := reflect grandIndex 64
+\end{lstlisting}
+Here \code{iterate} is ordinary natural-number recursion on the iteration
+count. There is no call to the previous winning number in this definition.
+
+\section{Provenance and reproducibility notes}
+
+The upstream snapshot is pinned by:
+\begin{description}[leftmargin=0pt,labelindent=0pt]
+\item[Repository commit] \path{d56dce013e6264292533efdc5e1de71863c6fb86}.
+\item[Contender.v blob] \path{f92db72deb0f3a4d4e3b575b4949eda73b1417a0}.
+\item[README.md blob] \path{b2a2642114e50e86f4432f59aebf439617f78d18}.
+\end{description}
+The ported computational material retains attribution under the upstream
+MIT license; its complete notice is in
+\path{provenance/UPSTREAM_LICENSE.txt}. The package includes source metadata,
+not a complete upstream repository mirror. No toolchain executable, font
+file, or giant decimal numeral is included.
+
+The article's test counts correspond to
+\path{validation/python_tests.json}. The unverified Lean status is recorded
+in \path{validation/lean_validation.json}. Re-running the scripts overwrites
+these reports with the new observed results; such a run should be archived
+with its machine details if used for contest adjudication.
+
+\begin{thebibliography}{9}
+\small\raggedright
+\bibitem{repo}
+Cody Roux and contributors, \emph{name-the-biggest-number}, source repository,
+accessed 12 October 2026.
+\url{https://github.com/codyroux/name-the-biggest-number}.
+
+\bibitem{rules}
+Cody Roux, \emph{name-the-biggest-number: README and contest rules}, pinned
+snapshot described in Appendix B.
+\url{https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/README.md}.
+
+\bibitem{contender}
+Cody Roux, Samuel Gr\"utter, and contributors, \emph{Contender.v}, especially
+\code{cast\_impl}, \code{interp\_term}, \code{termsUpTo}, \code{maxBy}, and
+\code{contender\_5}, pinned snapshot.
+\url{https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/Contender.v}.
+
+\bibitem{systemf}
+Cody Roux, \emph{System\_F.v}, source in the same repository. Only the opening
+normalization/evaluator development was inspected for this report.
+\url{https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/System_F.v}.
+
+\bibitem{leaninductive}
+Lean contributors, \emph{The Lean Language Reference: Inductive Types},
+accessed 12 October 2026.
+\url{https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/}.
+
+\bibitem{leanrecursive}
+Lean contributors, \emph{The Lean Language Reference: Recursive Definitions},
+accessed 12 October 2026.
+\url{https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/}.
+
+\bibitem{leanaxioms}
+Jeremy Avigad, Leonardo de Moura, Soonho Kong, and Sebastian Ullrich,
+\emph{Theorem Proving in Lean 4: Axioms and Computation},
+accessed 12 October 2026.
+\url{https://lean-lang.org/theorem_proving_in_lean4/Axioms-and-Computation/}.
+
+\bibitem{leanrelease}
+Lean contributors, \emph{Lean v4.35.0 release}, selected toolchain target;
+not executed in the preparation environment.
+\url{https://github.com/leanprover/lean4/releases/tag/v4.35.0}.
+
+\bibitem{aaronson}
+Scott Aaronson, \emph{Who Can Name the Bigger Number?}, background essay
+linked by the contest repository.
+\url{https://www.scottaaronson.com/writings/bignumbers.html}.
+\end{thebibliography}
+\end{document}

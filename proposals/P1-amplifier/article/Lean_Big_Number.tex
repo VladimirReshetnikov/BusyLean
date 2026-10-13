@@ -1,0 +1,757 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in,headheight=15pt]{geometry}
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{DejaVu Sans Mono}[Scale=0.78]
+\usepackage{amsmath,amssymb,mathtools,amsthm}
+\usepackage{microtype}
+\usepackage{xcolor,booktabs,tabularx,longtable,array,enumitem}
+\usepackage{fvextra}
+\usepackage{fancyhdr,titlesec}
+\usepackage{hyperref,bookmark}
+\definecolor{ink}{HTML}{18364A}
+\definecolor{accent}{HTML}{176B78}
+\definecolor{muted}{HTML}{52616B}
+\hypersetup{colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent,
+ pdftitle={A Constructive Lean Contender Beyond Contender 5},
+ pdfauthor={ChatGPT}}
+\titleformat{\section}{\Large\sffamily\bfseries\color{ink}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{ink}}{\thesubsection}{0.7em}{}
+\setlist{itemsep=3pt,topsep=5pt}
+\setlength{\emergencystretch}{2em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily Constructive Lean Contender}
+\fancyhead[R]{\small\sffamily Research and checked implementation}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\N}{\mathbb N}
+\newcommand{\llbracket}{\mathopen{[\![}}
+\newcommand{\rrbracket}{\mathclose{]\!]}}
+\newcommand{\Cfive}{\ensuremath{C_5}}
+\newcommand{\Cnew}{\ensuremath{N_\star}}
+\newcommand{\eval}{\operatorname{eval}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\artifact}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\verified}{\textsf{Lean checked}}
+\begin{document}
+\begin{titlepage}
+\vspace*{1.0cm}
+{\sffamily\color{accent}\Large NAME THE BIGGEST NUMBER\par}
+\vspace{0.7cm}
+{\sffamily\bfseries\color{ink}\Huge A Constructive Lean Contender\\[0.25cm]Beyond Contender 5\par}
+\vspace{0.6cm}
+{\Large Total interpretation, well-founded trees, and feedback through power towers\par}
+\vspace{1.0cm}
+{\large A reproducible Lean 4 contest entry\par}
+{\large 12 October 2026\par}
+\vspace{1.1cm}
+\noindent\rule{\textwidth}{0.5pt}
+\begin{abstract}
+We adapt Cody Roux's constructive largest-number contest from Coq to Lean 4 and
+supply a concrete, executable-in-principle natural number, \Cnew, together with
+a kernel-checked proof that it strictly exceeds the repository's Contender 5.
+The baseline is the original total interpretation of raw simply typed
+lambda-calculus syntax with natural-number recursion, maximized over all
+terms of depth at most 42. Its Lean translation preserves malformed terms,
+computational casts, reversed variable indices, and the original winner
+selection rule.
+
+Our construction combines a cumulative envelope of this language with
+structural recursion on countably branching well-founded trees. An exact
+grafting identity turns substitution of trees into replacement of the base
+growth function. Higher function spaces and explicitly specified closure
+constructors supply the tree payload; score-dependent iteration supplies a
+quantitative guarantee independent of any ordinal interpretation. With
+\(T(0)=1\), \(T(h+1)=2^{T(h)}\), and
+\(\Theta(s,0)=s\), \(\Theta(s,k+1)=T(\Theta(s,k)+1)\), the checked result is
+\[
+ \boxed{\quad \Cfive<\Cnew,
+ \qquad \Theta(\Cfive+1,\Cfive+1)\leq\Cnew.\quad}
+\]
+All 32 audited declarations have empty transitive axiom lists. Fresh cumulative
+checking of all custom definitions and all comparison proofs fits the contest's
+15-second and one-minute budgets on the recorded machine. The construction is
+an explicit submission, with no claim of optimality among all admissible Lean
+programs. Exact ordinal calibration of the Veblen-inspired syntax is not used;
+an explicit counterexample explains why such calibration cannot be assumed.
+\end{abstract}
+\vfill
+{\small\color{muted}Pinned implementation: Lean 4.19.0.\quad
+Upstream snapshot: \texttt{d56dce013e62}.\\
+The archive contains the article, all Lean sources, an independent small-input
+model, reproduction scripts, source provenance, and validation records.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{The proposed entry and the claim it establishes}
+
+The submitted number is the closed Lean definition
+\begin{Verbatim}[frame=single,fontsize=\small]
+namespace BigNumber
+
+def contender_6 : Nat := Amplifier.candidate base
+
+end BigNumber
+\end{Verbatim}
+This short declaration names a fully specified construction; all dependencies
+are included and counted in the validation budget. The main proof is named
+\code{BigNumber.contender\_5\_lt\_contender\_6}. A stronger theorem,
+\code{BigNumber.contender\_6\_tower\_bound}, establishes the boxed inequality
+in the abstract. Neither theorem evaluates \Cfive\ or \Cnew.
+
+The lower bound has a direct reading. Start at \(\Cfive+1\). Construct a tower
+of twos whose height is one greater than that starting value. Use the resulting
+integer, plus one, as the height of the next tower. Repeat this operation
+\(\Cfive+1\) times. The resulting integer is a proved lower bound for the
+submitted number. The actual definition also contains substantial tree and
+higher-type structure that this estimate does not attempt to measure.
+
+There are three distinct levels of assurance:
+\begin{enumerate}
+\item The mathematical definitions and proofs below explain the construction
+      without requiring the reader to understand Lean tactics.
+\item The supplied Lean files check the exact translated baseline, tree
+      algebra, and numerical comparison with no axiom dependencies.
+\item A source audit connects the translated baseline to the Coq source.
+      This last connection is a reviewed translation, supported by independent
+      small-input tests; it is not a formal Coq-to-Lean compiler-correctness
+      theorem.
+\end{enumerate}
+
+The source repository was read at commit
+\begin{center}
+\code{d56dce013e6264292533efdc5e1de71863c6fb86}.
+\end{center}
+The computational definitions in \code{Contender.v}, including the designated
+fifth contender, are the benchmark throughout this article~\cite{contender}.
+
+\section{A precise Lean adaptation of the rules}
+
+The original rules require constructive numbers, formal comparison proofs,
+no axioms, a 15-second definition budget, and a one-minute proof budget. They
+also forbid defining a new entry by referring to the previous closed
+contender and ask for a substantial margin~\cite{rules}. We retain that intent
+and make the Lean-specific checks explicit.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth}X@{}}
+\toprule
+Requirement & Lean interpretation used here\\
+\midrule
+A natural number & A closed, safe, computable definition of type \code{Nat},
+using ordinary inductive recursors.\\[3pt]
+Definition budget & At most 15 seconds cumulatively to check all custom
+computational dependencies from source. The official standard library may be
+precompiled.\\[3pt]
+Comparison budget & At most 60 seconds cumulatively for the custom proofs;
+we additionally include the axiom and dependency audit in the measured proof
+budget.\\[3pt]
+No axioms & Empty transitive axiom lists for the entry and the advertised
+comparison theorems. No \code{sorry}, declared axioms, classical choice,
+user-written unsafe definitions, or noncomputable data.\\[3pt]
+Substantive new entry & No transitive dependence of the submitted number on
+the previous closed contender. General language definitions and total
+interpreters remain reusable mathematical infrastructure.\\[3pt]
+Reproducibility & Pin Lean 4.19.0, disclose the source snapshot, preserve
+original licensing, and include commands and recorded validation.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The allotted times concern \emph{checking the definition and proof}, not
+computing the decimal expansion and not the time spent designing the entry.
+The user supplied no separate deadline for development. We therefore used the
+repository's explicit checking budgets.
+
+Lean's logical framework includes proof irrelevance as a kernel conversion
+rule. Additional principles such as propositional extensionality, quotient
+soundness, and classical choice are visible to the axiom audit. The official
+manual explains the distinction between pure computation, proof-related
+extensions, and noncomputable choice~\cite{leanaxioms}. This submission stays
+within the strict empty-dependency interpretation. Importing a library that
+contains an unused axiom does not itself make a declaration depend on it.
+
+A few convenience lemmas in Lean's library carry \code{propext} transitively.
+The supplied proof files replace the particular maximum and multiplication
+lemmas that would have introduced that dependency with direct inductive
+proofs. These replacements are short; there is no need to weaken the contest's
+no-axioms rule.
+
+\section{What Contender 5 actually denotes}
+\label{sec:baseline}
+
+\subsection{Raw syntax and depth}
+
+The source defines simple types by
+\[
+ A,B ::= \mathsf{Nat}\mid A\to B
+\]
+and raw terms by
+\[
+ t,u ::= \mathsf{var}(i)\mid\lambda^{A,B}t\mid t\,u
+          \mid 0\mid S\mid\mathsf{rec}_A.
+\]
+The lambda constructor carries both a domain and a codomain annotation.
+Raw syntax is deliberately not restricted by a typing judgment. Every raw
+term receives a total, default-valued interpretation.
+
+Type depth is
+\[
+ d(\mathsf{Nat})=1,\qquad d(A\to B)=1+\max(d(A),d(B)).
+\]
+The term-depth conventions are important:
+\begin{align*}
+ d(\mathsf{var}(i))&=i+2,\\
+ d(\lambda^{A,B}t)&=1+\max(d(A),d(B),d(t)),\\
+ d(tu)&=1+\max(d(t),d(u)),\\
+ d(0)&=d(S)=1,\qquad d(\mathsf{rec}_A)=1+d(A).
+\end{align*}
+Let \(\mathcal R_n\) be the exact list produced by the source's
+\code{termsUpTo n}. The original file proves that this list contains exactly
+the raw terms of depth at most \(n\). Our Lean port reproduces its recursion,
+product nesting, concatenation order, and duplicate behavior literally.
+
+\subsection{A total semantic interpreter}
+
+The interpretation of a simple type is the corresponding natural-number or
+function type in the host theory. A value is a dependent pair
+\(\langle A,v\rangle\) with \(v\in\llbracket A\rrbracket\).
+The error value is zero at natural type and a constant error function at an
+arrow type. The interpreter is structural recursion on the raw syntax.
+
+The following details prevent accidental replacement of the benchmark by an
+easier, different number:
+\begin{itemize}
+\item Variable zero denotes the final environment element. With an environment
+      of length \(\ell\), variable \(i<\ell\) selects position
+      \(\ell-1-i\). A newly bound value is prepended. Thus indices are levels
+      counting from the outermost binder, not ordinary nearest-binder indices.
+\item A lambda evaluates its body in the extended environment and casts the
+      result to the annotated codomain. Both annotations affect raw evaluation.
+\item An application whose head has natural type returns the natural error
+      value. An arrow-valued head casts its argument into the domain before
+      applying the function.
+\item Equal arrow types use computational, recursively eta-expanded casts.
+      Incompatible types produce the appropriate default value. The definition
+      does not transport values through an opaque equality proof.
+\item The recursor at \(A\) has type
+      \(A\to(\N\to A\to A)\to\N\to A\). Its step receives the predecessor
+      index and the previous value.
+\item After evaluating a closed raw term, a natural-valued result is read as
+      its integer; a function-valued result is read as zero.
+\end{itemize}
+
+These rules cover malformed terms, not just the well-typed fragment usually
+called G\"odel's system~T. No normalization theorem for untyped lambda calculus
+is being assumed. The total host-language definition itself supplies the
+computation.
+
+\subsection{The selected maximum and the numerical envelope}
+
+The source traverses \(\mathcal R_n\), keeping a current best term. It replaces
+the winner only when the new value is \emph{strictly} greater, so the first
+winner is retained on ties. Define the numerical envelope
+\[
+ E(n)=\operatorname{foldmax}_{t\in\mathcal R_n}\eval(t),
+ \qquad\text{with initial maximum }0.
+\]
+The literal port of the source's closed entry is
+\[
+ \Cfive=\eval(\operatorname{maxBy}(\eval,0,0,\mathcal R_{42})).
+\]
+
+\begin{lemma}[Selected maximum agrees with the envelope]
+\label{lem:envelope}
+For every \(n\), the value selected by the original winner-selection
+algorithm is \(E(n)\). In particular, \(\Cfive=E(42)\).
+\end{lemma}
+\begin{proof}
+Use the stronger invariant that the current winning term has value exactly
+the current maximum \(m\). For an empty list, the selected term has value
+\(m\), which is the fold's initial accumulator. For a head value \(v\), either
+\(m<v\), in which case the new winner has value \(v=\max(m,v)\), or
+\(v\le m\), in which case the existing winner has value
+\(m=\max(m,v)\). Induction on the remaining list completes the proof.
+The initial winning term is zero and has value zero. The Lean theorem
+\code{eval\_maxBy} proves the invariant, and
+\code{contender\_5\_eq\_envelope} specializes it.
+\end{proof}
+
+Enumeration alone grows rapidly. If \(a_n\) is the number of types and
+\(u_n\) the number of raw terms, counting the constructors gives
+\begin{align*}
+ a_0=u_0&=0, & a_{n+1}&=1+a_n^2,\\
+ &&u_{n+1}&=n+a_n^2u_n+u_n^2+2+a_n.
+\end{align*}
+The two implementations agree on the following tractable prefix:
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+Depth & Types & Raw terms & Envelope\\
+\midrule
+0&0&0&0\\
+1&1&2&0\\
+2&2&10&1\\
+3&5&146&2\\
+4&26&24,976&3\\
+\bottomrule
+\end{tabular}
+\end{center}
+For example, \(u_{n+1}\ge u_n^2\) and \(u_1=2\), so
+\(u_{42}\ge2^{2^{41}}\). This is a lower bound on the size of the list,
+not a claimed estimate of its largest evaluated number. It explains why
+expanding the depth-42 list has no role in checking the submission.
+
+\section{An independent inflationary base}
+\label{sec:base}
+
+The new number uses the generic interpreter and envelope, but has no dependency
+on the closed definition \code{contender\_5}. We define
+\[
+ P(0)=E(0),\qquad P(n+1)=P(n)+E(n+1),\qquad b(n)=P(n)+n+1.
+\]
+Equivalently, \(P(n)=\sum_{j=0}^{n}E(j)\). The finite sum provides a convenient
+monotone envelope without requiring a separate monotonicity proof for the
+original syntax enumerator.
+
+\begin{proposition}[Base domination]
+\label{prop:base}
+For every \(n\), \(n+1\le b(n)\). For \(k\le n\),
+\(E(k)<b(n)\). Consequently \(\Cfive<b(64)\).
+\end{proposition}
+\begin{proof}
+Each envelope is a natural number. Hence \(P(n)\le P(n+1)\), and
+\(E(k)\le P(k)\). Induction along \(k\le n\) yields
+\(E(k)\le P(n)<P(n)+n+1=b(n)\). Also \(n+1\le b(n)\)
+because \(P(n)\ge0\). Set \(k=42,n=64\) and use
+Lemma~\ref{lem:envelope}.
+\end{proof}
+
+The implementation is eleven lines of computational code plus direct order
+proofs. The numeral 64 is a fixed input and starting higher-type level. The
+later feedback chooses much larger finite levels from previously computed
+scores; 64 is not a truncation of those later stages.
+
+\input{amplifier_theory.tex}
+
+\section{The closed contender and its certified margin}
+\label{sec:final}
+
+Specialize the amplifier's base to the function \(b\) from
+Section~\ref{sec:base}. Let \(s\) be its initial seed score and
+\(\Cnew=\operatorname{candidate}(b)\). The complete tree construction is
+fixed by the preceding definitions and reproduced as Lean code in the
+appendix.
+
+\begin{theorem}[Strictly beyond Contender 5]
+\label{thm:main}
+The supplied closed natural number satisfies
+\[
+ \Cfive<\Cnew.
+\]
+\end{theorem}
+\begin{proof}
+Proposition~\ref{prop:base} gives \(\Cfive<b(64)\). The amplifier's
+universal base-domination lemma gives
+\(b(64)\le F_b(a;64)\) for every tree \(a\), in particular for the final
+feedback tree. Its value is \Cnew. Transitivity proves the claim.
+\end{proof}
+
+The corresponding checked proof is short because all enormous expressions
+remain symbolic:
+\begin{Verbatim}[frame=single,fontsize=\small,breaklines=true]
+theorem contender_5_lt_contender_6 :
+    Baseline.contender_5 < contender_6 :=
+  Nat.lt_of_lt_of_le contender_5_lt_base64
+    (Amplifier.base_le_candidate base base_weak)
+\end{Verbatim}
+
+\begin{theorem}[Incumbent-relative tower guarantee]
+\label{thm:tower}
+Define
+\[
+ T(0)=1,\qquad T(h+1)=2^{T(h)},
+ \qquad
+ \Theta(s,0)=s,\quad\Theta(s,k+1)=T(\Theta(s,k)+1).
+\]
+Then
+\[
+ \boxed{\Theta(\Cfive+1,\Cfive+1)\le\Cnew.}
+\]
+In addition,
+\[
+ 65^{\Cfive+1}(\Cfive+2)\le\Cnew+1.
+\]
+\end{theorem}
+\begin{proof}
+The initial seed satisfies \(s\ge b(64)>\Cfive\), hence
+\(\Cfive+1\le s\). The tower function is monotone; induction on the round
+count shows that \(\Theta(s,k)\) is monotone in \(s\). It also increases
+with the round count because \(T(x+1)\ge x+2\).
+Thus
+\[
+ \Theta(\Cfive+1,\Cfive+1)\le\Theta(s,s)\le\Cnew,
+\]
+where the last inequality is the amplifier's feedback bound. For the second
+claim, use its independently checked bound
+\(65^s(s+1)\le\Cnew+1\), monotonicity of positive integer powers, and
+\(\Cfive+1\le s\).
+\end{proof}
+
+Both claims are formalized, including the monotonicity needed to replace
+\(s\) by a number expressed in terms of \Cfive. The power bound is a simple
+readable consequence. The iterated-tower bound is the stronger headline
+certificate. These are lower bounds, not asymptotic equivalents or a numerical
+evaluation of the entry.
+
+There is a practical proof-engineering detail here. Arithmetic lemmas should
+first be proved for abstract natural-number variables and only then applied
+to the enormous constants. In one direct closed instantiation, definitional
+comparison attempted to unfold a large value through an arithmetic alias.
+The final code uses a generic transfer lemma and, in the exponential bound,
+spells the right-hand side as \code{Amplifier.candidate base + 1}. That is
+definitionally \(\Cnew+1\), while avoiding unnecessary closed-value reduction.
+No mathematical hypothesis or computational definition is changed by this
+choice.
+
+\section{What the tree notation does and does not assert}
+\label{sec:ordinal}
+
+The constructors named \code{omegaPower}, \code{veblenTree}, and
+\code{gammaSeed} are explicit tree-building programs. Their names record
+inspiration from familiar ordinal constructions. The comparison proofs use
+their actual trees and the grafting identity, not a theorem identifying their
+ordinal ranks. This distinction is essential for arbitrary raw trees.
+
+\begin{proposition}[A counterexample to unrestricted ordinal calibration]
+\label{prop:ordinalcounter}
+Assign an ordinal value to a tree by
+\[
+ \rho(\mathsf{zero})=0,\quad
+ \rho(\mathsf{succ}(a))=\rho(a)+1,\quad
+ \rho(\mathsf{limit}(f))=\sup_{n<\omega}\rho(f(n)).
+\]
+The operation \code{veblenTree} does not, on all raw trees, factor through
+this ordinal valuation as the standard Veblen function.
+\end{proposition}
+\begin{proof}
+Let \(z=\mathsf{zero}\) and
+\(\ell=\mathsf{limit}(n\mapsto z)\). Both have value zero. However,
+\(\operatorname{veblenTree}(z,z)=\operatorname{omegaPower}(z)
+=\mathsf{succ}(z)\), whose value is one.
+
+For \(\ell\), the first-argument limit clause uses the common closure of
+the constant family \(a\mapsto\operatorname{omegaPower}(a)\).
+On input zero, its finite sweep of length \(r\) applies this operation
+\(1+2+\cdots+r\) times. These lengths are unbounded. Structural induction
+shows that \(\operatorname{omegaPower}\) has valuation
+\(\alpha\mapsto\omega^\alpha\): grafting has valuation ordinal addition,
+its finite repeated grafts give finite multiples, and the defining suprema
+give the successor and limit laws for exponentiation. Hence the common
+closure at zero has valuation
+\[
+ \sup_{j<\omega}\underbrace{\omega^{\omega^{\cdot^{\cdot^\omega}}}}
+ _{\text{finitely many exponentiations}}=\varepsilon_0.
+\]
+One output has value one and the other has value \(\varepsilon_0\), although
+their first inputs both have value zero and their second inputs agree.
+Therefore the construction cannot generally depend only on the two ordinal
+values in the asserted way.
+\end{proof}
+
+This is a mathematical analysis of a possible interpretation, not a Lean
+ordinal formalization. In particular, the valuation \(\rho\) is not strict
+well-founded tree height: a limit node may have the same value as its children.
+The example does not affect totality or any numerical theorem in the package.
+It identifies an assertion that would require additional restrictions and new
+proofs before being made.
+
+There is a second useful check: the formal theorem \code{fast\_at\_zero}
+says \(F_b(a;0)=b(0)\) for \emph{every} tree \(a\). At a successor the
+iteration count is one, and at a limit only branch zero is selected. Thus even
+extremely complicated tree syntax supplies no strict gain at input zero.
+Numerical dominance must follow from the evaluator's rules and hypotheses;
+ordinal language alone cannot establish it. Our entry evaluates at 64, where
+each explicit successor provides the proved positive gain.
+
+\section{Validation and reproducibility}
+\label{sec:validation}
+
+\subsection{What was checked}
+
+The archive contains a validator that stages the required Lean sources in a
+fresh directory, discovers their local imports, and rebuilds every custom
+dependency. It removes inherited project search paths, so pre-existing project
+\code{.olean} files cannot silently supply the entry or proofs. Only the pinned
+official toolchain's standard library is reused.
+
+The definition phase contains \code{BaselineDefs}, \code{BaseDefs},
+\code{AmplifierDefs}, and \code{CandidateDefs}. The proof phase contains
+\code{Baseline}, \code{Base}, \code{Amplifier}, and \code{Candidate}.
+An additional audit computes transitive axiom dependencies for 32 selected
+public declarations, including all final comparison theorems. Every list is
+empty. A declaration-body dependency traversal also verifies that
+\code{contender\_6} does not depend on the closed fifth contender or either
+of the source's selected-winner wrappers. It does use the general raw-language
+interpreter and numerical envelope, as intended.
+
+\input{validation_table.tex}
+
+These are observed wall times on the recorded environment, not hardware-
+independent performance guarantees. The validator supports the same numerical
+budgets on the reader's machine and fails rather than silently relaxing them.
+No enormous natural number is evaluated during either budgeted phase.
+
+The toolchain is Lean 4.19.0, commit
+\begin{center}
+\code{6caaee842e9495688c1567e78c0e68dbb96942aa}.
+\end{center}
+The official compiler and kernel libraries were unchanged. This container
+required a small disclosed application-path launcher because its ordinary
+executable-path query was unavailable. The launcher supplies its own resolved
+program path; it does not modify the elaborator or kernel. Its complete C
+source, build instructions, release archive hash, and shared-library hash are
+included in \artifact{scripts/REPRODUCTION.md} and the adjacent source files.
+An ordinary official Lean installation does not need this launcher.
+
+\subsection{Independent semantic checks}
+
+The Python model in \artifact{scripts/reference_model.py} independently
+implements the original raw syntax, cast pairing, reversed lookup, and
+recursor. Its depth-zero-through-four rows agree with Lean's executable smoke
+tests. Both implementations also check an example of recursion returning a
+function: start with successor, double function composition three times, and
+apply the resulting function to zero; the answer is eight. The Lean version
+is a closed reduction proof. It uses a locally increased reduction-depth
+limit only in this optional test, not in the entry or comparison modules.
+
+The independent model is a translation check, not a second proof assistant.
+Likewise, finite tests cannot prove that two implementations agree at all
+inputs. The universal comparison theorem is supplied by Lean, and the
+cross-language correspondence is supported by the detailed source audit and
+literal preservation of the relevant computational definitions.
+
+\subsection{Commands}
+
+With the pinned Lean toolchain available, run from the archive root:
+\begin{Verbatim}[frame=single,fontsize=\small,breaklines=true]
+python3 scripts/validate.py --lean lean
+python3 scripts/reference_model.py
+lake build
+\end{Verbatim}
+The first command is the budgeted, clean-source validation. The third is a
+convenient ordinary project build; it is not the source of the timing claim.
+The optional executable smoke modules are deliberately outside the submitted
+entry's import graph.
+
+To rebuild this article, run
+\begin{Verbatim}[frame=single,fontsize=\small]
+cd article
+latexmk -xelatex -interaction=nonstopmode -halt-on-error \
+  Lean_Big_Number.tex
+\end{Verbatim}
+The source uses standard TeX packages, Latin Modern fonts, and DejaVu Sans Mono
+for Unicode Lean listings. All input fragments are supplied.
+
+\section{Constructivity, the diagonal barrier, and optimality}
+
+\subsection{Why the definition is a natural number}
+
+Every component is a total definition in the constructive fragment used by the
+submission. The language enumerators recurse on natural depth. Interpretation
+recurses on syntax and uses ordinary natural-number recursors at interpreted
+types. The tree evaluator recurses on the inductive tree; its extra iterations
+have finite natural counts. Higher function spaces are formed by finite
+recursion on a natural level. Feedback uses a value from a previously
+constructed tree to choose a new finite count or level. There is no equation
+that defines a tree or natural number by presupposing its own final value.
+
+A limit constructor takes a function \(\N\to\mathsf{Tree}\). This does not
+require writing infinitely many subtrees into a file. A finite, total program
+provides the children. Structural recursion receives each requested child's
+recursive result, as licensed by the inductive recursor. A cyclic definition
+would not pass the same termination check.
+
+The finite maximum defining \(E(n)\) ranges over a language with an explicitly
+given total evaluator. It does not search arbitrary programs and wait for an
+unknown set of halting computations. Accordingly, the entry does not depend
+on a Busy Beaver bound, a halting oracle, classical selection of an unspecified
+maximum, or an unproved consistency assumption.
+
+\subsection{Why one cannot simply maximize over all Lean definitions}
+
+A tempting shortcut is to replace the object-language envelope by a purported
+total evaluator for every total Lean function, then diagonalize. That step
+requires a justification which the present construction deliberately does
+not assume. The elementary obstruction is worth stating precisely.
+
+\begin{proposition}[Diagonal obstruction]
+Suppose an enumerated class of total unary functions has a total evaluator
+\(U(e,n)\), represents every function in that class by some code, and is closed
+under the function \(d(n)=U(n,n)+1\) defined in the same class. These assumptions
+are inconsistent.
+\end{proposition}
+\begin{proof}
+If \(e\) represents \(d\), then
+\(d(e)=U(e,e)+1=d(e)+1\), impossible in \(\N\).
+\end{proof}
+
+This proposition does not rule out total interpretation of a weaker object
+language inside a stronger host language. That is exactly the relationship
+used here: the raw system-T-style language is interpreted in Lean, and the
+new tree feedback is an additional host-language construction. The argument
+also does not forbid fixed, finite maxima with independently justified total
+interpreters. It identifies why a supposed universal same-language evaluator
+cannot be inserted without resolving its scope and totality obligations.
+
+\subsection{The meaning of ``largest''}
+
+This article proposes a concrete entry and proves its performance against the
+specified incumbent. It does not establish that every admissible Lean program
+names a smaller number. If a fixed machine, time bound, and finite source-size
+cap produce a finite set of accepted source strings, then that finite contest
+has a maximum score abstractly. The work here neither characterizes that set
+nor proves optimality over it.
+
+The elementary successor operation explains why there is no largest natural
+number, and can improve a particular submission when sufficient resource
+slack remains. It is not, by itself, a proof that a resource-bounded contest
+has no maximum. Nor would it justify presenting a circular ``one greater than
+every permissible entry'' description as a constructive Lean definition.
+The present submission has an explicit source, a total computation, and a
+checked strict margin; those are the claimed achievements.
+
+\section{Further research directions}
+
+\begin{enumerate}
+\item \textbf{A calibrated domain of ordinal trees.} Identify a decidable or
+constructively checkable class of well-behaved trees on which the closure
+constructors respect an ordinal valuation. The degenerate-limit counterexample
+shows that restrictions must be stated, not inferred from notation. A useful
+result would combine closure of the class under the actual feedback operators
+with a proved numerical comparison principle.
+\item \textbf{Direct majorization of the raw interpreter.} Prove bounds for
+\(E(n)\) in a separately specified fast-growing hierarchy, including the effects
+of type annotations, recursor result types, malformed terms, and default
+casts. Such a theorem could replace the exhaustive envelope in the base by a
+more transparent closed growth function while retaining a checked comparison
+with the exact fifth contender.
+\item \textbf{A richer certified object language.} Extend the finite syntax
+with one explicit inductive tree type and its recursor, give a total
+interpretation, and prove an embedding of the current raw language with a
+controlled depth overhead. Iterating carefully stratified language extensions
+could provide a different route to stronger contenders without positing a
+universal Lean self-interpreter.
+\item \textbf{A verified translation bridge.} Formalize enough of the Coq
+computational subset to certify the correspondence of the two implementations.
+An intermediate first-order syntax for types, raw terms, casts, and evaluator
+equations would make the remaining cross-language trust boundary explicit.
+\item \textbf{Sharper structural lower bounds.} The graft proof intentionally
+ignores most of the Veblen-inspired payload. Find syntax-sensitive order
+relations preserved by evaluation at controlled inputs, and use them to
+quantify the higher-type seeds. The equality at input zero warns against
+unqualified pointwise monotonicity claims.
+\item \textbf{Checking efficiency with strict dependency audits.} Explore
+proof organization, abstract interfaces, and kernel conversion behavior while
+preserving empty axiom lists. The closed-value alias issue illustrates why
+symbolic theorem design can matter more than the physical length of a proof.
+Record total custom dependency cost, not just the final declaration's cost.
+\end{enumerate}
+
+\appendix
+\section{Archive map and provenance}
+
+\begin{longtable}{@{}p{0.38\textwidth}p{0.57\textwidth}@{}}
+\toprule
+Path & Purpose\\
+\midrule
+\endhead
+\artifact{BigNumber/BaselineDefs.lean} & Literal computational port and numerical envelope.\\
+\artifact{BigNumber/Baseline.lean} & Selected-max invariant and axiom-free maximum proofs.\\
+\artifact{BigNumber/BaseDefs.lean} & Inclusive envelope sum and independent base.\\
+\artifact{BigNumber/Base.lean} & Base domination, including the exact incumbent.\\
+\artifact{BigNumber/AmplifierDefs.lean} & Trees, interpreter, closure constructors, higher types, feedback.\\
+\artifact{BigNumber/Amplifier.lean} & Grafting, gains, monotonicity, and quantitative lower bounds.\\
+\artifact{BigNumber/CandidateDefs.lean} & The submitted closed natural number.\\
+\artifact{BigNumber/Candidate.lean} & Final strict and incumbent-relative certificates.\\
+\artifact{BigNumber/BaselineSmoke.lean} & Optional executable small-depth tests.\\
+\artifact{BigNumber/SemanticChecks.lean} & Closed higher-type recursor reduction test.\\
+\artifact{scripts/validate.py} & Clean build, cumulative budgets, axiom and dependency audit.\\
+\artifact{scripts/reference_model.py} & Independent small-input semantic model.\\
+\artifact{validation/} & Recorded outcomes, logs, and independent mathematical review.\\
+\artifact{upstream/} & Pinned Coq source, original rules, and MIT license.\\
+\artifact{article/} & Complete article source, fragments, and compiled PDF.\\
+\bottomrule
+\end{longtable}
+
+The upstream \code{Contender.v} Git blob is
+\code{f92db72deb0f3a4d4e3b575b4949eda73b1417a0}. The exact source files and their
+SHA-256 hashes are recorded in the archive manifest. The original source is
+redistributed under its MIT license, retained in \artifact{upstream/LICENSE}.
+New material is separately identified in the root README and license.
+
+\section{Complete computational amplifier}
+
+This listing is the exact computational module used in validation. It has no
+custom imports; the standard Lean prelude is implicit. The baseline and base
+modules are supplied as separate source files.
+\VerbatimInput[fontsize=\scriptsize,breaklines=true,breakanywhere=true,
+ numbers=left,numbersep=5pt]{../BigNumber/AmplifierDefs.lean}
+
+\section{The base and final comparison proofs}
+
+The following are the exact base and final proof modules. All supporting
+proofs, including the full graft and feedback theorems, are supplied in the
+archive and explained in the main text.
+\subsection{Base definitions}
+\VerbatimInput[fontsize=\scriptsize,breaklines=true,breakanywhere=true,
+ numbers=left,numbersep=5pt]{../BigNumber/BaseDefs.lean}
+\subsection{Base proofs}
+\VerbatimInput[fontsize=\scriptsize,breaklines=true,breakanywhere=true,
+ numbers=left,numbersep=5pt]{../BigNumber/Base.lean}
+\subsection{Closed definition}
+\VerbatimInput[fontsize=\scriptsize,breaklines=true,breakanywhere=true,
+ numbers=left,numbersep=5pt]{../BigNumber/CandidateDefs.lean}
+\subsection{Final certificates}
+\VerbatimInput[fontsize=\scriptsize,breaklines=true,breakanywhere=true,
+ numbers=left,numbersep=5pt]{../BigNumber/Candidate.lean}
+
+\begin{thebibliography}{9}
+\raggedright
+\bibitem{rules}
+Cody Roux and contributors.
+\emph{name-the-biggest-number: contest rules}.
+Pinned repository snapshot, accessed 12 October 2026.
+\url{https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/README.md}.
+
+\bibitem{contender}
+Cody Roux, Samuel Gruetter, and contributors.
+\emph{Contender.v}, especially the raw-language evaluator and Contender 5.
+Pinned repository snapshot.
+\url{https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/Contender.v}.
+
+\bibitem{leanaxioms}
+Lean community.
+\emph{Theorem Proving in Lean 4}, chapter ``Axioms and Computation.''
+Accessed 12 October 2026.
+\url{https://lean-lang.org/theorem_proving_in_lean4/Axioms-and-Computation/}.
+
+\bibitem{leanrelease}
+Lean development team.
+\emph{Lean 4.19.0}, pinned release and implementation.
+\url{https://github.com/leanprover/lean4/releases/tag/v4.19.0}.
+The exact implementation commit and library hashes used in this work appear
+in the reproduction record.
+\end{thebibliography}
+\end{document}

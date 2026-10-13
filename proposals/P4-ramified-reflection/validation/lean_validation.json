@@ -1,0 +1,15 @@
+{
+  "target": "Lean 4.35.0",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "definition_limit_seconds": 15,
+  "proof_limit_seconds": 60,
+  "kernel_checked": false,
+  "timing_qualified": false,
+  "source_screen": {
+    "status": "passed",
+    "findings": [],
+    "scope": "Token screen only, not an axiom audit"
+  },
+  "status": "not_run_compiler_unavailable",
+  "reason": "No lean, lake, or elan executable was available in the preparation container; toolchain download attempts also failed."
+}

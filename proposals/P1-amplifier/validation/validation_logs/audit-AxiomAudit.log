@@ -1,0 +1,67 @@
+AXIOM_AUDIT BigNumber.Baseline.contender_5: []
+AXIOM_AUDIT BigNumber.Baseline.envelope: []
+AXIOM_AUDIT BigNumber.Baseline.largest_eq_envelope: []
+AXIOM_AUDIT BigNumber.Baseline.contender_5_eq_envelope: []
+AXIOM_AUDIT BigNumber.Baseline.eval_maxBy: []
+AXIOM_AUDIT BigNumber.Baseline.envelope_bound: []
+AXIOM_AUDIT BigNumber.base: []
+AXIOM_AUDIT BigNumber.base_inflationary: []
+AXIOM_AUDIT BigNumber.envelope_lt_base: []
+AXIOM_AUDIT BigNumber.contender_5_lt_base64: []
+AXIOM_AUDIT BigNumber.Amplifier.candidate: []
+AXIOM_AUDIT BigNumber.Amplifier.base_le_fast: []
+AXIOM_AUDIT BigNumber.Amplifier.fast_at_zero: []
+AXIOM_AUDIT BigNumber.Amplifier.fast_succ_gain: []
+AXIOM_AUDIT BigNumber.Amplifier.fast_graft: []
+AXIOM_AUDIT BigNumber.Amplifier.graft_lower: []
+AXIOM_AUDIT BigNumber.Amplifier.advance_gain: []
+AXIOM_AUDIT BigNumber.Amplifier.stage_raw_gain: []
+AXIOM_AUDIT BigNumber.Amplifier.stage_scale: []
+AXIOM_AUDIT BigNumber.Amplifier.ladder_scale: []
+AXIOM_AUDIT BigNumber.Amplifier.candidate_bound: []
+AXIOM_AUDIT BigNumber.Amplifier.stage_tower: []
+AXIOM_AUDIT BigNumber.Amplifier.ladder_tower: []
+AXIOM_AUDIT BigNumber.Amplifier.candidate_tower: []
+AXIOM_AUDIT BigNumber.Amplifier.towerFeedback_diagonal_mono: []
+AXIOM_AUDIT BigNumber.Amplifier.candidate_tower_from: []
+AXIOM_AUDIT BigNumber.contender_6: []
+AXIOM_AUDIT BigNumber.contender_5_lt_seedScore: []
+AXIOM_AUDIT BigNumber.contender_5_lt_contender_6: []
+AXIOM_AUDIT BigNumber.contender_6_exponential_bound: []
+AXIOM_AUDIT BigNumber.contender_6_tower_bound: []
+AXIOM_AUDIT BigNumber.contender_6_seed_tower_bound: []
+DEPENDENCY_AUDIT BigNumber.contender_6: does not use BigNumber.Baseline.contender_5
+DEPENDENCY_AUDIT BigNumber.contender_6: does not use BigNumber.Baseline.largestOfDepth
+DEPENDENCY_AUDIT BigNumber.contender_6: does not use BigNumber.Baseline.largestSTLCNatRecNatOfDepth
+'BigNumber.Baseline.contender_5' does not depend on any axioms
+'BigNumber.Baseline.envelope' does not depend on any axioms
+'BigNumber.Baseline.largest_eq_envelope' does not depend on any axioms
+'BigNumber.Baseline.contender_5_eq_envelope' does not depend on any axioms
+'BigNumber.Baseline.eval_maxBy' does not depend on any axioms
+'BigNumber.Baseline.envelope_bound' does not depend on any axioms
+'BigNumber.base' does not depend on any axioms
+'BigNumber.base_inflationary' does not depend on any axioms
+'BigNumber.envelope_lt_base' does not depend on any axioms
+'BigNumber.contender_5_lt_base64' does not depend on any axioms
+'BigNumber.Amplifier.candidate' does not depend on any axioms
+'BigNumber.Amplifier.base_le_fast' does not depend on any axioms
+'BigNumber.Amplifier.fast_at_zero' does not depend on any axioms
+'BigNumber.Amplifier.fast_succ_gain' does not depend on any axioms
+'BigNumber.Amplifier.fast_graft' does not depend on any axioms
+'BigNumber.Amplifier.graft_lower' does not depend on any axioms
+'BigNumber.Amplifier.advance_gain' does not depend on any axioms
+'BigNumber.Amplifier.stage_raw_gain' does not depend on any axioms
+'BigNumber.Amplifier.stage_scale' does not depend on any axioms
+'BigNumber.Amplifier.ladder_scale' does not depend on any axioms
+'BigNumber.Amplifier.candidate_bound' does not depend on any axioms
+'BigNumber.Amplifier.stage_tower' does not depend on any axioms
+'BigNumber.Amplifier.ladder_tower' does not depend on any axioms
+'BigNumber.Amplifier.candidate_tower' does not depend on any axioms
+'BigNumber.Amplifier.towerFeedback_diagonal_mono' does not depend on any axioms
+'BigNumber.Amplifier.candidate_tower_from' does not depend on any axioms
+'BigNumber.contender_6' does not depend on any axioms
+'BigNumber.contender_5_lt_seedScore' does not depend on any axioms
+'BigNumber.contender_5_lt_contender_6' does not depend on any axioms
+'BigNumber.contender_6_exponential_bound' does not depend on any axioms
+'BigNumber.contender_6_tower_bound' does not depend on any axioms
+'BigNumber.contender_6_seed_tower_bound' does not depend on any axioms

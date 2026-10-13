@@ -38,3 +38,6 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Lean / Lake build output
+.lake/

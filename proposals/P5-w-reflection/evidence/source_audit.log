@@ -1,0 +1,27 @@
+{
+  "scope": "lexical inspection only; not Lean verification",
+  "files": [
+    {
+      "file": "lean/BigNumber/Audit.lean",
+      "forbidden_declarations_or_placeholders": []
+    },
+    {
+      "file": "lean/BigNumber/Definitions.lean",
+      "forbidden_declarations_or_placeholders": []
+    },
+    {
+      "file": "lean/BigNumber/Proofs.lean",
+      "forbidden_declarations_or_placeholders": []
+    },
+    {
+      "file": "lean/BigNumber/Smoke.lean",
+      "forbidden_declarations_or_placeholders": []
+    },
+    {
+      "file": "lean/BigNumber.lean",
+      "forbidden_declarations_or_placeholders": []
+    }
+  ],
+  "entry_definitions_reference_contender_5": false,
+  "successful": true
+}

@@ -1,0 +1,25 @@
+{
+  "pages": 16,
+  "compiled_pdf": true,
+  "final_log_has_overfull_boxes": false,
+  "unresolved_reference_markers": false,
+  "rendered_and_visually_reviewed_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "review_scope": "layout, typography, formulas, tables, and clipping; not a formal mathematical checker"
+}

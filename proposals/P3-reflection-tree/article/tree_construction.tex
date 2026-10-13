@@ -1,0 +1,325 @@
+\section{The explicit tree construction}\label{sec:tree-recipe}
+
+We now specify the single tree that indexes the submission. Every operation
+in this section corresponds to a transparent definition in
+\code{Trees.lean}; the equations fix the actual tree, including its branch
+order and its successor constructors. The construction has three parts:
+an initial family of tree transformations, amplification through all finite
+functional types, and promotion in which an amplified tree supplies an
+iteration index. The hierarchy \(H\) from Section~\ref{sec:hierarchy}
+then turns the resulting tree into a natural number.
+
+Throughout, \(\W\) is the inductive type with constructors
+\(\Z\), \(\Suc:\W\to\W\), and
+\(\Lim:(\N\to\W)\to\W\). These are literal constructors.
+In particular, a displayed limit includes its specified sequence of
+children. The construction uses no equivalence relation identifying
+different presentations, and every recursion below has an explicit
+structural argument. We retain suggestive source names such as
+\code{omegaPow} and \code{veblenTree} while defining their meaning entirely
+through these equations.
+
+\subsection{Finite iteration and tree-indexed iteration}
+
+For an endofunction \(f:X\to X\) on any type \(X\), write
+\[
+ f^0(x)=x,\qquad f^{k+1}(x)=f(f^k(x)).
+\]
+This is \code{treeIter}; despite its name, its definition is polymorphic
+and its iteration counter is an ordinary natural number. We will use it
+both on trees and on functions between trees. Thus the superscript always
+denotes composition iteration, with the underlying type determined by
+the supplied function.
+
+A separate operation, \code{stageIter}, uses a tree as its index. For
+\(f:\W\to\W\), define
+\begin{align}
+ I_f(\Z,x)&=x,\nonumber\\
+ I_f(\Suc(t),x)&=f(I_f(t,x)),\label{eq:tree-iteration}\\
+ I_f(\Lim(s),x)&=\Lim\bigl(k\mapsto I_f(s(k),x)\bigr).\nonumber
+\end{align}
+The recursion is on the first tree argument \(t\). The starting tree
+\(x\) remains a parameter, and each limit branch makes the recursive call
+at its corresponding child. No comparison between \(x\) and \(t\) is
+required. In particular, the later expression \(I_f(t,t)\) is a legitimate
+application of an already defined structural iterator.
+
+The finite trees and the first branching tree are
+\[
+ \widehat 0=\Z,\qquad \widehat{k+1}=\Suc(\widehat k),
+ \qquad \omega_{\W}=\Lim(k\mapsto\widehat k).
+\]
+They are \code{stageNat} and \code{stageOmega}. Keeping the two iteration
+operations distinct will matter when finite iteration is applied to a
+transformation of functions, and the result is subsequently used inside
+a tree-indexed iteration.
+
+\subsection{The initial arithmetic-shaped operations}
+
+Write \(a\oplus b\) for \code{stageAdd a b} and \(a\otimes b\)
+for \code{stageMul a b}. Their defining equations are
+\begin{align*}
+ a\oplus\Z&=a,
+ &a\oplus\Suc(b)&=\Suc(a\oplus b),
+ &a\oplus\Lim(s)&=\Lim(k\mapsto a\oplus s(k)),\\
+ a\otimes\Z&=\Z,
+ &a\otimes\Suc(b)&=(a\otimes b)\oplus a,
+ &a\otimes\Lim(s)&=\Lim(k\mapsto a\otimes s(k)).
+\end{align*}
+Both recurse on the right argument. The order in the multiplication
+successor clause is part of the specification: the accumulated result
+appears on the left of \(\oplus\), with the original \(a\) on its right.
+No commutativity or algebraic simplification is being assumed.
+
+Let \(p:\W\to\W\) denote \code{omegaPow}. It is defined by
+\[
+ p(\Z)=\Suc(\Z),\qquad
+ p(\Suc(a))=p(a)\otimes\omega_{\W},\qquad
+ p(\Lim(s))=\Lim(k\mapsto p(s(k))).
+\]
+These equations provide a concrete initial transformation for subsequent
+construction. The names and notation record the motivation for the
+recipe; the submitted number requires only the stated operations on
+\(\W\). We do not replace any of these trees by an ordinal representative
+or invoke arithmetic laws about such representatives.
+
+\subsection{Single and common closure recipes}
+
+For a tree transformation \(f\), first define the tree
+\[
+ O_f(x)=\Lim(k\mapsto f^k(x)).
+\]
+This is \code{omegaClose f x}. Its zeroth child is exactly \(x\).
+The word ``closure'' names this construction; it does not assert that
+applying \(f\) leaves the resulting tree unchanged.
+
+Given any transformation \(c:\W\to\W\), define its enumeration
+\(E_c:\W\to\W\) by
+\begin{align*}
+ E_c(\Z)&=c(\Z),\\
+ E_c(\Suc(a))&=c\bigl(\Suc(E_c(a))\bigr),\\
+ E_c(\Lim(s))&=\Lim(k\mapsto E_c(s(k))).
+\end{align*}
+This is \code{enumerateClosure}. The successor inside its middle clause
+is deliberate. The transformation called \code{derivative f} is
+\[
+                         D(f)=E_{O_f}.
+\]
+These definitions make sense for every supplied total \(f\) and \(c\),
+without hypotheses of monotonicity, continuity, or fixed-point behavior.
+For example, the first two enumerated values of the derivative satisfy
+\[
+ D(f)(\Z)=O_f(\Z),\qquad
+ D(f)(\Suc(\Z))=O_f\bigl(\Suc(O_f(\Z))\bigr).
+\]
+The second value therefore starts a fresh iteration sequence from the
+successor of the first constructed tree. It is not obtained by merely
+selecting a later child of the original sequence. This distinction fixes
+where the successor constructors enter the seed recipe and prevents an
+informal fixed-point interpretation from erasing part of its syntax.
+
+We also require a specified recipe for a sequence
+\(\mathbf f=(f_0,f_1,\ldots)\) of tree transformations. Its finite rounds
+and accumulated orbit are
+\begin{align*}
+ r^{\mathbf f}_0(x)&=x,
+ &r^{\mathbf f}_{m+1}(x)&=f_m(r^{\mathbf f}_m(x)),\\
+ u^{\mathbf f,x}_0&=x,
+ &u^{\mathbf f,x}_{m+1}&=
+       r^{\mathbf f}_{m+1}(u^{\mathbf f,x}_m).
+\end{align*}
+These are \code{closureRound} and \code{closureOrbit}. Round \(m\)
+applies \(f_0\) first and \(f_{m-1}\) last. The orbit repeatedly starts
+the next, longer round from the result already obtained. For example,
+its first two noninitial values are
+\(u_1=f_0(x)\) and \(u_2=f_1(f_0(f_0(x)))\).
+This example fixes both the order of composition and the repeated
+application of earlier functions.
+
+Finally set
+\[
+ J_{\mathbf f}(x)=\Lim(m\mapsto u^{\mathbf f,x}_m),
+ \qquad D_*(\mathbf f)=E_{J_{\mathbf f}}.
+\]
+The corresponding names are \code{commonClose} and
+\code{commonDerivative}. They are explicit branching-tree operations;
+their use does not require a separate theorem about common fixed points.
+
+\subsection{The indexed seed transformation}
+
+For a base transformation \(b:\W\to\W\), define a family
+\(V_b(a):\W\to\W\), structurally indexed by \(a\in\W\), through
+\begin{align*}
+ V_b(\Z)&=b,\\
+ V_b(\Suc(a))&=D(V_b(a)),\\
+ V_b(\Lim(s))&=D_*(k\mapsto V_b(s(k))).
+\end{align*}
+This family is \code{veblenTree base}. At a successor index the previous
+transformation is passed to the single-transformation recipe; at a limit
+index the whole sequence of recursively obtained transformations is
+passed to the common recipe. The definitions specify actual functions,
+so no choice of a canonical index or a preferred branch sequence occurs.
+
+Define the transformation
+\[
+ K_b=D\bigl(a\mapsto V_b(a)(\Z)\bigr).
+\]
+This is \code{criticalLift base}. The tree used as the initial argument
+later in the construction is
+\begin{equation}\label{eq:gamma-tree}
+                    \gamma=K_p(\Z),
+\end{equation}
+which is exactly \code{gammaTree}. The displayed \(\gamma\) is a name
+for this tree. It carries no asserted identification with a named ordinal
+or a named growth rate. All subsequent operations can therefore be
+checked using this definition alone.
+
+\subsection{Amplification at every finite functional type}
+
+The next part builds transformations uniformly through the finite types
+\[
+                    X_0=\W,\qquad X_{r+1}=X_r\to X_r.
+\]
+These are the types \code{TreeLevel r}. A value at level two transforms
+tree endofunctions; a value at level three transforms those transformations,
+and the recursion continues through every natural level.
+
+Define a sequence-combining operation \(L_r:(\N\to X_r)\to X_r\)
+and a successor operation \(S_r:X_r\to X_r\) by
+\begin{align*}
+ L_0(s)&=\Lim(s),
+ &S_0(x)&=\Suc(x),\\
+ L_{r+1}(s)(x)&=L_r(k\mapsto s(k)(x)),
+ &S_{r+1}(g)(x)&=S_r(g(x)).
+\end{align*}
+They are \code{levelLimit} and \code{levelSucc}. Above level zero they
+act pointwise. Thus the apparent limit of functions is constructed by
+lambda abstraction and the lower-level operation. No limit in a topology,
+existence theorem, or extensional equality proof is needed to define it.
+
+For each \(r\), the amplifier \(A_r\in X_{r+2}\) is
+\begin{equation}\label{eq:typed-amplifier}
+ A_r(f)(x)=S_r\bigl(L_r(k\mapsto f^k(x))\bigr),
+ \qquad f\in X_{r+1},\quad x\in X_r.
+\end{equation}
+This is \code{omegaAmplifier r}. The finite iteration is well typed
+because \(f\) is an endofunction on \(X_r\). The successor is applied
+after the sequence-combining operation at the same level. Retaining this
+successor is material to the growth proofs; deleting it would define a
+different candidate. The construction does not assume that successive
+type levels produce numerically increasing values.
+
+The first higher functional level makes the typing especially visible.
+For \(F:X_1\to X_1\), a tree transformation \(f\in X_1\), and a tree
+\(a\), the pointwise equations give
+\[
+ A_1(F)(f)(a)=
+       \Suc\bigl(\Lim(k\mapsto(F^k(f))(a))\bigr).
+\]
+Here the finite iteration acts on transformations before the resulting
+transformation is applied to \(a\). In contrast, \(A_0(f)(a)\) iterates
+\(f\) directly on trees. This explains why the varying type level adds
+structure beyond increasing the natural iteration counter in a single
+tree transformation. Both expressions nevertheless reduce to values of
+the same raw tree type once their arguments have been supplied.
+
+To turn these higher-type values back into trees, fix
+\(f:\W\to\W\) and \(a\in\W\). Define seeds
+\[
+ \sigma^{f,a}_0=a,\qquad
+ \sigma^{f,a}_1=f,\qquad
+ \sigma^{f,a}_{r+2}=A_r,
+\]
+and descent maps \(C^{f,a}_r:X_r\to\W\) by
+\[
+ C^{f,a}_0(x)=x,\qquad
+ C^{f,a}_{r+1}(g)=C^{f,a}_r\bigl(g(\sigma^{f,a}_r)\bigr).
+\]
+They are \code{levelSeed} and \code{descendLevel}. Each descent step
+applies one function to a seed of exactly the required type, then
+decreases the level. It does not inspect a function's implementation
+or search for a suitable argument.
+
+The resulting tree transformation is
+\begin{equation}\label{eq:higher-tower}
+ T_f(a)=\Suc\!\left(
+    \Lim\bigl(r\mapsto C^{f,a}_{r+2}(A_r)\bigr)\right).
+\end{equation}
+This is \code{higherTower f a}. Each branch has a finite type level,
+although the branch function admits every level. At branch zero,
+descent unfolds to
+\[
+ C^{f,a}_2(A_0)=A_0(f)(a)
+              =\Suc\bigl(\Lim(k\mapsto f^k(a))\bigr).
+\]
+This identity will supply a short, concrete growth argument without
+requiring a comparison between different higher-type branches.
+
+\subsection{Promotion and the final closed tree}
+
+The promotion operation \(P\) transforms a tree endofunction into a
+new tree endofunction:
+\begin{equation}\label{eq:tree-promotion}
+             P(f)(a)=\Suc\bigl(I_{T_f}(T_f(a),a)\bigr).
+\end{equation}
+It is \code{promoteTreeFunction}. Both roles of \(T_f\) are explicit:
+\(T_f(a)\) supplies the tree index, while \(T_f\) itself is the
+transformation being iterated. This reuse creates no recursive equation
+for an unknown object. First \(T_f\) is constructed, and then the
+previously defined iterator is applied to it and to a constructed tree.
+
+Set
+\begin{align}
+ f_0(a)&=\Suc(K_p(a)),\label{eq:starting-function}\\
+ G(a)&=\Suc\!\left(
+       \Lim\bigl(k\mapsto(P^{\,k+1}(f_0))(a)\bigr)\right).
+       \label{eq:promoted-function}
+\end{align}
+The source names are \code{startingTreeFunction} and
+\code{promotedTreeFunction}. Here \(P^{\,k+1}\) is ordinary finite
+iteration on the type \(X_1=\W\to\W\). The zeroth branch is
+\(P(f_0)(a)\), not \(f_0(a)\): the exponent \(k+1\) is essential
+to the stated definition and to the uniform growth proof that follows.
+The functions in these branches need not be ordered against one another.
+
+With this fixed \(G\), the remaining choices are
+\begin{equation}\label{eq:final-tree}
+ \boxed{\quad s=G(\gamma),\qquad
+ \Omega_*=\Suc\bigl(I_G(s,s)\bigr),\qquad
+ N=H_{\Omega_*}(43).\quad}
+\end{equation}
+The same constructed tree \(s\) supplies both the index and starting
+argument of the final structural iteration. In the source, the last
+tree definition is exactly
+\begin{LeanCode}
+def finalStage : Stage :=
+  let seed := promotedTreeFunction gammaTree
+  .succ (stageIter promotedTreeFunction seed seed)
+\end{LeanCode}
+The natural-number declaration is
+\code{contender\_6 := hierarchy finalStage 43}.
+
+The input \(43\) connects this construction to the reference comparison:
+quoting any old term of depth at most \(42\) costs one additional depth
+level. Every reflection at input \(43\) therefore includes that entire
+reference family. The tree recipe itself contains no reference to the
+previous contender. Its growth mechanism remains the same at other
+numerical inputs; the following section proves the relevant strict
+inequalities from local successor and limit behavior of \(H\).
+
+This completes the finite specification. Natural recursion handles
+finite rounds and type levels, and structural tree recursion handles
+the tree arguments. Infinitely many possible branches are represented
+by total functions with finite definitions. The claim is that these
+precise operations produce the stated checked natural number; assigning
+an ordinal meaning or an externally named asymptotic scale is a separate
+question and supplies no premise of the comparison proof.
+
+There are also two distinct uses of successor throughout the construction.
+The constructor \(\Suc\) and its pointwise extensions \(S_r\) build trees
+or functions returning trees. Only after the final tree is supplied to
+\(H\) does a tree successor request the numerical reflection operation
+\(\RF\). The tree transformations do not evaluate the numerical hierarchy
+while choosing their indices. This separation keeps the complete recipe
+typed and total independently of the size of the natural number obtained
+from it.

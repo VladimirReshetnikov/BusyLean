@@ -1,0 +1,490 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in,headheight=15pt]{geometry}
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{DejaVu Sans Mono}[Scale=0.78]
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\newcommand{\llbracket}{[\![}
+\newcommand{\rrbracket}{]\!]}
+\usepackage{microtype}
+\usepackage{booktabs,longtable,array,enumitem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{fancyhdr,fvextra}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=MidnightBlue,citecolor=MidnightBlue,
+ urlcolor=MidnightBlue,pdftitle={The Reflection Tree Contender},
+ pdfauthor={ChatGPT}}
+\definecolor{accent}{HTML}{163E58}
+\definecolor{lightaccent}{HTML}{EDF4F7}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textsf{The Reflection Tree Contender}}
+\fancyhead[R]{\small\textsf{Lean 4.19.0}}
+\fancyfoot[C]{\thepage}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{1.25em}
+\setlength{\emergencystretch}{2em}
+\setlist{itemsep=0.2em,topsep=0.4em}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Ty}{\mathsf{Ty}}
+\newcommand{\Tm}{\mathsf{Term}}
+\newcommand{\Ex}{\mathsf{Expr}}
+\newcommand{\W}{\mathsf{Stage}}
+\newcommand{\Z}{\mathsf z}
+\newcommand{\Suc}{\mathsf s}
+\newcommand{\Lim}{\mathsf l}
+\newcommand{\dep}{\operatorname{depth}}
+\newcommand{\ev}{\operatorname{eval}}
+\newcommand{\maxz}{\operatorname{max}_0}
+\newcommand{\RF}{\mathcal R}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\checked}[1]{\par\nopagebreak[3]\noindent{\small\textsf{Lean theorem: }\texttt{#1}}\par}
+\DefineVerbatimEnvironment{LeanCode}{Verbatim}
+ {fontsize=\small,breaklines=true,breakanywhere=true,frame=single,
+ rulecolor=\color{accent},framesep=6pt}
+\newtcolorbox{resultbox}{colback=lightaccent,colframe=accent,boxrule=0.7pt,
+ arc=1mm,left=3mm,right=3mm,top=2mm,bottom=2mm,breakable}
+\title{\color{accent}\Huge The Reflection Tree Contender\\[0.45em]
+ \Large A constructive, axiom-free Lean entry exceeding Contender 5}
+\author{A reproducible Lean 4 submission}
+\date{13 October 2026}
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\begin{abstract}
+We adapt Cody Roux's constructive biggest-number contest from Coq to Lean and
+give a closed, executable Lean natural number \(N\). The previous contender,
+denoted \(C_5\), is the maximum produced by the repository's total interpreter
+over all raw terms of depth at most \(42\). We preserve that interpreter's
+behavior on open and malformed terms, then build an oracle language containing
+literal quotations of its syntax. A bounded semantic maximum gives a
+constructive diagonal operator \(\RF\); structural recursion on countably
+branching trees iterates this operator. An explicit tree construction combines
+Veblen-inspired operations, amplification at every finite functional type,
+and iteration whose index is itself an amplified tree.
+
+Lean checks \(C_5<N\) without evaluating either number. More quantitatively,
+if \(x_0=C_5\) and \(x_{j+1}=2^{x_j+44}\), Lean checks \(x_5\le N\).
+We also prove that \(\RF(f)\) eventually strictly exceeds the output of every
+fixed program in the language with oracle \(f\), and cannot be represented
+there even on a final segment of the inputs. All audited declarations have
+an empty axiom dependency list, including no propositional extensionality,
+quotient soundness, classical choice, or admitted proof.
+
+This is a concrete contest proposal, not a claim of a mathematically largest
+definable natural number. Its comparison is independent of any unproved
+assignment of a named ordinal to the tree construction.
+\end{abstract}
+\begin{resultbox}
+\textbf{The submitted number and its certified margin.}
+Let \(\Omega_*\) be the explicit tree of Section~\ref{sec:tree-recipe}
+and \(H\) the hierarchy of Section~\ref{sec:hierarchy}. Submit
+\[
+                    \boxed{N=H_{\Omega_*}(43).}
+\]
+For \(B(x)=2^{x+44}\), the checked results include
+\[
+             \boxed{C_5<N,\qquad B^{\,5}(C_5)\le N.}
+\]
+The exponent \(5\) means five compositions of \(B\), not an ordinary
+fifth power. This lower bound uses only a short path through the outer
+constructors of \(\Omega_*\).
+\end{resultbox}
+\clearpage
+\begingroup
+\small\setlength{\parskip}{0pt}
+\tableofcontents
+\endgroup
+\clearpage
+
+\section{The contest and the precise deliverable}
+\subsection{What the original rules require}
+The repository asks for constructive natural numbers, a formal definition,
+and a formal proof of a strict improvement. Its timing limits are \(15\)
+seconds for checking the definition and one minute for checking the comparison
+proof. It disallows axioms and discourages defining the next entry by directly
+using the previous contender as a constant~\cite{contest-rules}.
+These are \emph{checking} limits; the rules do not require computing or printing
+the resulting numeral within those limits.
+
+We retain these substantive requirements. The changed proof assistant is
+Lean, pinned to version \(4.19.0\), and the submitted names are
+\code{Biggest.contender\_6} and
+\code{Biggest.contender\_5\_lt\_contender\_6}. Only \code{Init}, the standard
+Lean initialization library, is imported from outside the contest modules.
+No Mathlib installation is needed.
+
+Our adapted axiom prohibition is literal: the transitive axiom dependencies
+of the number and its comparison proof must be empty. Merely avoiding newly
+declared axioms while using \code{Classical.choice} would not meet this rule.
+The code also contains no \code{sorry}, \code{admit}, \code{partial},
+\code{unsafe}, \code{noncomputable}, or \code{native\_decide}.
+Lean's documented axiom audit checks the dependencies~\cite{lean-axioms}.
+
+\subsection{A frozen reference}
+The reference is
+\begin{center}
+\url{https://github.com/codyroux/name-the-biggest-number}
+\end{center}
+at commit
+\begin{center}
+\small\texttt{d56dce013e6264292533efdc5e1de71863c6fb86}.
+\end{center}
+The comparison uses \code{contender\_5} in \code{Contender.v}, attributed
+there to Samuel Gr\"utter~\cite{contender-source}. The original source
+and its MIT license are included for inspection.
+
+There are two distinct assurance boundaries. The Coq-to-Lean correspondence
+is a constructor-by-constructor audit of the executable equations. We do not
+claim a mechanically verified translation between the two proof assistants.
+Once the faithful Lean baseline is fixed, the maximum characterization,
+enumeration theorems, comparison, diagonal results, and tree growth results
+are all proved and checked inside Lean.
+
+\subsection{What a largest-number proposal can honestly mean}
+No unrestricted collection of definable natural numbers has a largest member:
+a definition of \(m\) immediately makes a definition of \(m+1\) possible.
+Resource-bounded contests constrain description and checking, but do not
+turn one construction into a proof of global optimality.
+
+The entry below is the strongest concrete construction developed and
+validated in this work. It improves the \emph{method} of producing numbers:
+it diagonally escapes a preceding language, iterates that escape through
+structural trees, and amplifies tree construction at all finite functional
+types. Its final value does not mention \(C_5\). That constant appears only
+in comparison proofs. The actual compiled dependency graph is also audited.
+
+\section{The exact baseline}\label{sec:baseline}
+\subsection{Types, raw terms, and their sizes}
+The original language has simple types
+\[
+             A,B ::= \N \mid A\to B
+\]
+and raw terms
+\[
+ t ::= \mathsf{var}(i)\mid\lambda_{A,B}t\mid\mathsf{app}(t,u)
+       \mid\mathsf{zero}\mid\mathsf{succ}\mid\mathsf{rec}_A.
+\]
+A lambda records its domain and expected codomain. Natural recursion is
+available at every simple type:
+\[
+ \mathsf{rec}_A:A\to(\N\to A\to A)\to\N\to A.
+\]
+This is a System-T-like language with a total, error-handling interpretation
+of \emph{all raw terms}. The maximum is not restricted to well-typed terms.
+
+Type and natural-index depths are
+\[
+ d_{\Ty}(\N)=1,\quad
+ d_{\Ty}(A\to B)=1+\max(d_{\Ty}(A),d_{\Ty}(B)),\quad d_{\N}(i)=i+1.
+\]
+The source term depths are exactly
+\begin{align*}
+ d(\mathsf{var}(i))&=i+2,\\
+ d(\lambda_{A,B}t)&=1+\max(d_{\Ty}(A),d_{\Ty}(B),d(t)),\\
+ d(\mathsf{app}(t,u))&=1+\max(d(t),d(u)),\\
+ d(\mathsf{zero})&=d(\mathsf{succ})=1,\\
+ d(\mathsf{rec}_A)&=1+d_{\Ty}(A).
+\end{align*}
+A depth bound therefore bounds variable indices, annotations, and syntax,
+leaving only finitely many raw terms.
+
+\subsection{Why malformed terms matter}
+A value is a dependent pair \((A,v)\), where
+\[
+ \llbracket\N\rrbracket=\N,\qquad
+ \llbracket A\to B\rrbracket=\llbracket A\rrbracket\to\llbracket B\rrbracket,
+ \qquad v\in\llbracket A\rrbracket.
+\]
+Each type has a default value
+\[
+ \operatorname{err}_{\N}=0,\qquad
+ \operatorname{err}_{A\to B}(x)=\operatorname{err}_B.
+\]
+A failed cast to \(B\) returns this default.
+
+The source's cast operation is retained. Natural-to-natural casts are
+identity; casts between a natural and a function type fail. An
+arrow-to-arrow cast checks equality of both component type codes.
+If both tests succeed, the argument is transported backwards and the
+result forwards using recursively defined paired casts. Otherwise the
+result is the default function. The Lean \code{castImpl} follows these
+equations rather than replacing them with well-typed elaboration.
+
+Environments are extended at the front, but indices count from the
+opposite end. If \(e\) has length \(\ell\), then
+\[
+ \operatorname{lookup}(e,i)=
+ \begin{cases}
+ \mathrm{none},&\ell\le i,\\
+ e[\ell-1-i],&i<\ell.
+ \end{cases}
+\]
+Thus index zero denotes the outermost binder. Substituting ordinary
+nearest-binder de Bruijn indexing would change the number.
+
+An unbound variable returns natural zero. A lambda evaluates its body
+in the extended environment and casts to its declared codomain. Applying
+a natural value returns natural zero; applying a function casts its
+argument to the required domain. At the top level, natural results
+contribute their values and function results contribute zero.
+
+A revealing example is
+\[
+           \ev(\mathsf{app}(\mathsf{succ},\mathsf{succ}))=1.
+\]
+The argument is a function, so its cast to \(\N\) gives zero; the outer
+successor returns one. An interpreter that rejects this term or
+immediately returns zero is not faithful to the source.
+
+\subsection{Enumeration and the maximum}
+Let \(\mathcal T_n\) be \code{termsUpTo n}, with source order and repetitions
+retained. Lean proves
+\[
+             t\in\mathcal T_n\quad\Longleftrightarrow\quad d(t)\le n.
+\]
+\checked{termsUpTo\_correct}
+
+Write \(\maxz\) for finite maximum with value zero on an empty list, and set
+\[
+                  C(n)=\maxz\{\ev(t):t\in\mathcal T_n\}.
+\]
+The original code selects a winning term with \code{maxBy}, starting from
+zero, then evaluates it. Replacement occurs only at a \emph{strictly}
+larger value. The port retains this implementation as \code{baseline};
+Lean proves its equality to the value-only maximum:
+\[
+                        \code{baseline}(n)=C(n).
+\]
+\checked{maxBy\_value;\quad baseline\_eq\_maximum}
+
+The exact reference contestant is
+\[
+                               C_5=C(42).
+\]
+The comparison does not substitute an approximate bound for \(C_5\).
+
+\subsection{Small checks and search-space size}
+Let \(T_n,Q_n\) count the enumerated type codes and terms. Their recurrences are
+\[
+ T_0=Q_0=0,\qquad T_{n+1}=1+T_n^2,
+\]
+\[
+                 Q_{n+1}=n+T_n^2Q_n+Q_n^2+2+T_n.
+\]
+Direct Lean evaluation gives:
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+Depth \(n\)&Types \(T_n\)&Terms \(Q_n\)&\(C(n)\)\\
+\midrule
+0&0&0&0\\1&1&2&0\\2&2&10&1\\3&5&146&2\\4&26&24,976&3\\
+\bottomrule
+\end{tabular}
+\end{center}
+The recurrence already yields \(Q_5=640,684,384\). This is a count
+calculation, not a claim that we enumerated that list. It illustrates
+why evaluating the depth-\(42\) maximum is irrelevant to checking its definition.
+
+\section{A constructive oracle diagonal}\label{sec:reflection}
+\subsection{An explicit language extension}
+The new language contains the original variable, lambda, application,
+zero, successor, and recursor constructors, plus
+\[
+          \mathsf{quote}(t),\qquad\mathsf{input},\qquad\mathsf{oracle}.
+\]
+Its evaluator has parameters \(f:\N\to\N\) and \(n\in\N\), with
+\begin{align*}
+ \llbracket\mathsf{input}\rrbracket_{f,n}&=(\N,n),\\
+ \llbracket\mathsf{oracle}\rrbracket_{f,n}&=(\N\to\N,f),\\
+ \llbracket\mathsf{quote}(t)\rrbracket_{f,n}
+    &=\llbracket t\rrbracket_{\mathrm{old},\,[]}.
+\end{align*}
+Quotation uses the empty \emph{old} environment even beneath new binders.
+It preserves the whole old typed value, including a function value;
+final numerical extraction uses the previous rule.
+
+Quotation is an ordinary constructor, not an elaborator reflection API or
+an unrestricted semantic constant. Its old syntax payload contributes
+to depth:
+\[
+ d_E(\mathsf{quote}(t))=d(t)+1,\qquad
+ d_E(\mathsf{input})=d_E(\mathsf{oracle})=1.
+\]
+The other depth clauses are unchanged. Let \(\mathcal E_n\) be
+\code{exprsUpTo n}. At stage \(n+1\), its first sublist is
+\(\{\mathsf{quote}(t):t\in\mathcal T_n\}\); the remaining constructors use
+depth-\(n\) types, indices, and subexpressions. Lean proves
+\[
+                e\in\mathcal E_n\quad\Longleftrightarrow\quad d_E(e)\le n.
+\]
+\checked{exprsUpTo\_correct}
+
+Write \(E_f(e;n)\) for final numerical evaluation. In particular,
+\[
+                       E_f(\mathsf{quote}(t);n)=\ev(t).
+\]
+This equation is definitional.
+\checked{eval\_quote}
+
+\subsection{The reflection operator}
+\begin{definition}
+For total \(f:\N\to\N\), define
+\[
+              M_f(n)=\maxz\{E_f(e;n):e\in\mathcal E_n\},
+\]
+\begin{equation}\label{eq:reflection}
+              \boxed{\RF(f)(n)=2^{\max(f(n),M_f(n))+n+1}.}
+\end{equation}
+\end{definition}
+This operation is computable for a supplied computable \(f\): its list
+is finite and the interpreter is structurally total. No halting decision
+or unproved stopping condition is used.
+
+The explicit \(f(n)\) term provides uniform pointwise growth even at tiny
+depths. The exponential provides a convenient margin. The essential
+diagonal improvement comes from the bounded semantic maximum.
+
+\begin{lemma}\label{lem:reflection}
+For every \(f,n\),
+\[
+ f(n)<\RF(f)(n),\qquad
+ e\in\mathcal E_n\Longrightarrow E_f(e;n)<\RF(f)(n),
+\]
+and
+\[
+                         2^{f(n)+n+1}\le\RF(f)(n).
+\]
+\end{lemma}
+\begin{proof}
+Let \(m=\max(f(n),M_f(n))\). Both \(f(n)\) and any listed expression's
+value are at most \(m\). The elementary inequality \(r<2^r\), with
+\(m\le m+n+1\), gives \(m<2^{m+n+1}\). The last inequality follows
+from monotonicity of powers of two in their exponent.
+\end{proof}
+\checked{reflect\_gt\_oracle;\quad reflect\_gt\_member;\quad oracle\_power\_le\_reflect}
+
+\begin{lemma}[Uniform baseline comparison]\label{lem:baseline}
+For every \(f\) and \(r\),
+\[
+                     C(r)<\RF(f)(r+1),\qquad
+                     2^{C(r)+r+2}\le\RF(f)(r+1).
+\]
+\end{lemma}
+\begin{proof}
+Every term in \(\mathcal T_r\) has a quotation in \(\mathcal E_{r+1}\)
+with the same numerical value. Thus \(C(r)\le M_f(r+1)\).
+Apply the preceding lemma and the defining exponent. No winning term
+needs to be found or evaluated.
+\end{proof}
+\checked{baseline\_le\_oracle\_max;\quad baseline\_lt\_reflect}
+\checked{baseline\_power\_le\_reflect}
+
+The final input \(43\) now has an exact explanation: the baseline depth
+is \(42\), and quotation costs one additional constructor.
+
+\subsection{Escaping every fixed preceding program}
+\begin{theorem}[Exact eventual domination]\label{thm:diagonal}
+Fix \(f:\N\to\N\) and one expression \(e\). For every \(n\ge d_E(e)\),
+\[
+                             E_f(e;n)<\RF(f)(n).
+\]
+\end{theorem}
+\begin{proof}
+Enumeration completeness gives \(e\in\mathcal E_n\); apply
+Lemma~\ref{lem:reflection}.
+\end{proof}
+\checked{reflect\_dominates\_program}
+
+The input primitive matters. It supplies the varying \(n\) at fixed syntax
+depth. A naive proof using the unary numeral for \(n\) instead would not
+justify this theorem, because that numeral's depth grows with \(n\).
+Here the theorem concerns a fixed unary program with a fixed oracle.
+
+\begin{corollary}
+There are no expression \(e\) and threshold \(b\) such that
+\[
+                  E_f(e;n)=\RF(f)(n)\quad\hbox{for all }n\ge b.
+\]
+\end{corollary}
+\begin{proof}
+Take \(n=\max(b,d_E(e))\) and contradict Theorem~\ref{thm:diagonal}.
+\end{proof}
+\checked{no\_fixed\_program\_defines\_reflect}
+\checked{no\_program\_eventually\_defines\_reflect}
+
+Each successor stage below therefore supplies a total function beyond
+every fixed expression using the preceding oracle. This is not a claim
+that the function escapes all Lean definitions; its Lean definition
+is supplied in the package.
+
+\section{Interpreting well-founded trees}\label{sec:hierarchy}
+\subsection{A strictly positive type}
+Use the inductive type
+\[
+              \W ::= \Z\mid\Suc(a)\mid\Lim(s),\qquad s:\N\to\W.
+\]
+Its Lean declaration is
+\begin{LeanCode}
+inductive Stage where
+  | zero : Stage
+  | succ : Stage -> Stage
+  | lim : (Nat -> Stage) -> Stage
+\end{LeanCode}
+The recursive occurrence in the codomain of \(\N\to\W\) is strictly positive.
+Lean supplies a structural recursor and checks recursive definitions
+through recursor applications~\cite{lean-inductive}.
+
+A limit node contains a total child function. It is not a cyclic graph
+or permission for unrestricted recursion. Every branch function in the
+submitted closed tree is explicitly constructed by the definitions below.
+
+\subsection{The numerical hierarchy}
+Define \(H:\W\to\N\to\N\) by
+\begin{align}
+ H_{\Z}(n)&=n+1,\label{eq:hz}\\
+ H_{\Suc(a)}(n)&=\RF(H_a)(n),\label{eq:hs}\\
+ H_{\Lim(s)}(n)&=1+\max_{0\le k\le n}H_{s(k)}(n).\label{eq:hl}
+\end{align}
+The implementation samples \(n,n-1,\ldots,0\) using
+\code{natsUpTo (n+1)}. The order does not affect the maximum.
+
+At a limit, all sampled children use the same external input \(n\).
+Taking the maximum protects every sampled branch without requiring
+the branch sequence to be increasing. In particular,
+\[
+                k\le n\Longrightarrow H_{s(k)}(n)<H_{\Lim(s)}(n).
+\]
+Thus each fixed branch is eventually strictly below its limit.
+
+These equations are structural recursion on \(\W\), combined with a
+finite maximum and total reflection. They compute a natural for the
+explicit closed stage and input. We do not claim that every abstract
+semantic element of \(\N\to\W\) in every classical set-theoretic model
+is computable. The particular submission has explicit computable
+branches and a checked total definition.
+
+\begin{lemma}[Local growth]\label{lem:local}
+For every \(a,s,n\),
+\[
+             H_a(n)<H_{\Suc(a)}(n),\qquad
+             H_{s(0)}(n)<H_{\Lim(s)}(n).
+\]
+\end{lemma}
+\begin{proof}
+Use the oracle inequality of Lemma~\ref{lem:reflection} for a successor.
+At a limit, zero belongs to the finite sample and one is added to its maximum.
+\end{proof}
+\checked{numeric\_successor\_growth;\quad numeric\_limit\_zero\_growth}
+
+\input{tree_construction.tex}
+\input{proofs_and_verification.tex}
+\end{document}
+

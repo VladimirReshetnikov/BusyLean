@@ -1,0 +1,11 @@
+test_01_lookup_and_errors (__main__.SemanticsTests.test_01_lookup_and_errors) ... ok
+test_02_finite_enumeration (__main__.SemanticsTests.test_02_finite_enumeration) ... ok
+test_03_binary_numerals (__main__.SemanticsTests.test_03_binary_numerals) ... ok
+test_04_tree_recursion (__main__.SemanticsTests.test_04_tree_recursion) ... ok
+test_05_rows (__main__.SemanticsTests.test_05_rows) ... ok
+test_06_guards (__main__.SemanticsTests.test_06_guards) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.324s
+
+OK

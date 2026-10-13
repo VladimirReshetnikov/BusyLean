@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/codyroux/name-the-biggest-number",
+  "commit": "d56dce013e6264292533efdc5e1de71863c6fb86",
+  "commit_url": "https://github.com/codyroux/name-the-biggest-number/commit/d56dce013e6264292533efdc5e1de71863c6fb86",
+  "prepared_at_utc": "2026-10-13T00:00:31.438905+00:00",
+  "scope": "Byte-exact, pinned upstream reference files; no upstream source content has been rewritten.",
+  "git_blob_hash_definition": "SHA1(ASCII(\"blob \"+decimal(byte_count))+NUL+file_bytes)",
+  "sha256_hash_definition": "SHA256(file_bytes)",
+  "license_file": "LICENSE",
+  "port_correspondence_note": "SOURCE_CORRESPONDENCE.txt",
+  "cross_kernel_status": "The package contains a manually audited Lean port; it does not claim a machine-checked Coq-to-Lean translation or an inter-kernel equivalence proof.",
+  "files": [
+    {
+      "path": "README.md",
+      "upstream_url": "https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/README.md",
+      "bytes": 1969,
+      "git_blob_sha1": "b2a2642114e50e86f4432f59aebf439617f78d18",
+      "sha256": "a20f2a1c951ce7558e771bb935c849bc391ec22075cd97ca3765b52e7ec7e09e",
+      "matches_recorded_upstream_blob": true,
+      "staging_correction": "Removed exactly one appended LF byte after verifying that this yields the recorded upstream byte count and Git blob SHA-1."
+    },
+    {
+      "path": "Contender.v",
+      "upstream_url": "https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/Contender.v",
+      "bytes": 23739,
+      "git_blob_sha1": "f92db72deb0f3a4d4e3b575b4949eda73b1417a0",
+      "sha256": "a809222145e3063b742af7f35e4e6ec41ca37d60ef32140958a5f09ccd21d04b",
+      "matches_recorded_upstream_blob": true,
+      "staging_correction": "Removed exactly one appended LF byte after verifying that this yields the recorded upstream byte count and Git blob SHA-1."
+    },
+    {
+      "path": "System_F.v",
+      "upstream_url": "https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/System_F.v",
+      "bytes": 28461,
+      "git_blob_sha1": "5870118fcfd4ca2834960beb9e900bb08f7ca109",
+      "sha256": "d75dc6879b0023f57f7c25d5672ac7b9aeed42e9af3579eacec0576a8fd86c44",
+      "matches_recorded_upstream_blob": true,
+      "staging_correction": "Removed exactly one appended LF byte after verifying that this yields the recorded upstream byte count and Git blob SHA-1."
+    },
+    {
+      "path": "Shenannigans.v",
+      "upstream_url": "https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/Shenannigans.v",
+      "bytes": 2052,
+      "git_blob_sha1": "da64117d63c09ab5daebacd8f48013bd490997cc",
+      "sha256": "78edeaf985d3f11f5e72aece36acfe0a5d1d1537c6f3894bfac9c0aaf2ea266b",
+      "matches_recorded_upstream_blob": true,
+      "staging_correction": "Removed exactly one appended LF byte after verifying that this yields the recorded upstream byte count and Git blob SHA-1."
+    },
+    {
+      "path": "LICENSE",
+      "upstream_url": "https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/LICENSE",
+      "bytes": 1065,
+      "git_blob_sha1": "0b94a2da98e6411a69cf8c29300c90c3175e61af",
+      "sha256": "446274637183a0a96b3ff8de2da9929baedaa83ea1e640b62c9922c77510b80a",
+      "matches_recorded_upstream_blob": true,
+      "staging_correction": "Removed exactly one appended LF byte after verifying that this yields the recorded upstream byte count and Git blob SHA-1."
+    }
+  ]
+}

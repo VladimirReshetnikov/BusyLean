@@ -1,0 +1,94 @@
+SOURCE CORRESPONDENCE: COQ CONTENDER 5 AND ITS LEAN PORT
+=====================================================
+
+Pinned repository:
+  https://github.com/codyroux/name-the-biggest-number
+Pinned commit:
+  d56dce013e6264292533efdc5e1de71863c6fb86
+
+The five adjacent upstream files are byte-exact snapshots. Their sizes, Git
+blob SHA-1 hashes, and SHA-256 hashes are recorded in SOURCE_PROVENANCE.json.
+Only one accidental, appended LF byte was removed from each staging copy;
+the removal was permitted only after the resulting bytes matched the recorded
+upstream Git blob and byte count. The source LICENSE is retained unchanged.
+
+Computational correspondence
+----------------------------
+
+Coq names                         Lean names (namespace Biggest)
+type, term                        Ty, Term
+type_eqb                          typeEqb
+type_depth, nat_depth, term_depth  typeDepth, natDepth, termDepth
+interp_type                       InterpTy
+lookup, error                     lookup, error
+cast_error, cast_impl, cast        castError, castImpl, cast
+interp_term, eval                 interpTerm, eval
+list_prod                         listProd
+typesUpTo, natsUpTo, termsUpTo     typesUpTo, natsUpTo, termsUpTo
+maxBy, largest_of_depth            maxBy, largestOfDepth
+largest_STLCNatRec_nat_of_depth    baseline
+contender_5                        contender_5
+
+1. Variable zero selects the outermost binder. For environment e and natural
+   index n, lookup first rejects length(e) <= n. Otherwise it selects ordinary
+   list index length(e) - (n + 1). A lambda extends its environment at the
+   front. Thus [10,11,12] yields 12,11,10 at indices 0,1,2, and no value at 3.
+   This convention must not be replaced by ordinary innermost-first indices.
+
+2. Both interpreters evaluate ALL raw terms. There is no typing or closedness
+   filter. A missing variable returns a natural zero. Applying a natural value
+   returns a natural zero. A lambda advertises its annotated arrow type and
+   casts its computed body value to the annotated codomain. Evaluation of a
+   final function value yields natural zero.
+
+3. The error at Nat is zero; the error at an arrow type is a constant function
+   returning the codomain's error. A mismatched argument is converted to an
+   error value and the receiving function still runs. Consequently the raw
+   term `succ succ` evaluates to 1, rather than raising an exception or making
+   the entire application evaluate to zero.
+
+4. The structural bidirectional cast is preserved. A Nat-to-Nat cast is the
+   identity. A base/arrow mismatch produces constant error maps. For two
+   arrow types, BOTH the domain and codomain typeEqb checks must succeed.
+   When they do, the argument cast is contravariant and the result cast is
+   covariant. Otherwise the whole cast returns error maps. These guards are
+   material for malformed terms; omitting them changes the specified number.
+
+5. Natural recursion has type R -> (Nat -> R -> R) -> Nat -> R. Its step is
+   passed the predecessor index and the previously computed value. Lean's
+   primitive natural recursion has the same zero and successor equations as
+   the Coq Nat.recursion used in the source.
+
+6. listProd recursively maps over the right list for each successive element
+   of the left list, matching Coq list_prod's order. The type and raw-term
+   enumerations preserve constructor order and repeated occurrences. Explicit
+   parentheses retain the source's right-associated list appends. maxBy
+   replaces the current winner only on a strictly greater value, preserving
+   the existing winner on ties. Lean's decidable natural comparisons select
+   the same branches as Coq's natural comparison booleans.
+
+7. The port defines contender_5 as baseline 42. The checked Lean theorem
+   baseline_eq_maximum proves that the port's term-selecting maxBy operation
+   gives the same natural as the value-only maximum of eval over termsUpTo.
+   The checked typesUpTo_correct, natsUpTo_correct, and termsUpTo_correct
+   theorems establish both directions of each depth-enumeration specification.
+
+Verification boundary
+---------------------
+
+The correspondence above is a constructor-by-constructor mathematical audit
+of the source and its Lean implementation. It is NOT a machine-checked
+Coq-to-Lean translation and is NOT a formal proof connecting the two kernels.
+The package's comparison theorem is checked inside Lean against the faithful
+Lean port. The port's definitions, scalar maximum correspondence, enumeration
+theorems, and subsequent diagonal comparison have been audited with Lean's
+#print axioms and do not depend on any axioms, including propext or Quot.sound.
+
+Sanity checks evaluated only small depths. For n=0,1,2,3,4, the type counts are
+0,1,2,5,26; the raw-term counts are 0,2,10,146,24976; and baseline values are
+0,0,1,2,3. No decimal expansion or direct evaluation of contender_5 was
+attempted. Type checking a finite definition is distinct from evaluating its
+enormous natural value.
+
+The auxiliary upstream System_F.v and Shenannigans.v files are preserved for
+context. Their presence does not make them dependencies of the Lean contender.

@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "description": "Every enumerated original term value and enumeration count matches through depth 4.",
+  "scope": "Finite independent regression evidence; no cross-prover equivalence theorem is claimed.",
+  "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "python_version": "3.12.14",
+  "depth_results": [
+    {
+      "depth": 0,
+      "types": 0,
+      "terms": 0,
+      "largest_value": 0
+    },
+    {
+      "depth": 1,
+      "types": 1,
+      "terms": 2,
+      "largest_value": 0
+    },
+    {
+      "depth": 2,
+      "types": 2,
+      "terms": 10,
+      "largest_value": 1
+    },
+    {
+      "depth": 3,
+      "types": 5,
+      "terms": 146,
+      "largest_value": 2
+    },
+    {
+      "depth": 4,
+      "types": 26,
+      "terms": 24976,
+      "largest_value": 3
+    }
+  ],
+  "term_values_compared": 25134,
+  "trace_lines_compared": 25149,
+  "trace_sha256": "8399b9141afa9fcaab48315607da627fd4c0fda83c7cd9a7a93e0d82268783ae",
+  "contender5_evaluated": false,
+  "reflector_evaluated": false
+}

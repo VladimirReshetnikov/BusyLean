@@ -1,0 +1,7 @@
+{
+  "page_count": 24,
+  "visual_review": "All 24 pages were rendered and visually inspected; the final cover was re-rendered and inspected after its last text update.",
+  "layout_warnings": [],
+  "compile_command": "latexmk -xelatex -interaction=nonstopmode -halt-on-error Lean_Big_Number.tex",
+  "pdf_sha256": "90913c954fb8b16d80339fef0fc468ee8ca53ab07a983981e74e5e6b8ea05fcc"
+}

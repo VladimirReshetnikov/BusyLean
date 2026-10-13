@@ -1,0 +1,17 @@
+{
+  "access_date": "2026-10-12",
+  "upstream_repository": "https://github.com/codyroux/name-the-biggest-number",
+  "head_commit": "d56dce013e6264292533efdc5e1de71863c6fb86",
+  "contender_file": "Contender.v",
+  "contender_content_blob": "f92db72deb0f3a4d4e3b575b4949eda73b1417a0",
+  "readme_content_blob": "b2a2642114e50e86f4432f59aebf439617f78d18",
+  "license_content_blob": "0b94a2da98e6411a69cf8c29300c90c3175e61af",
+  "inspection_scope": "Computational definitions and Contender 5; comparison and reification portions inspected; System_F.v opening inspected for context. Upstream Coq was not compiled.",
+  "lean_release_target": "https://github.com/leanprover/lean4/releases/tag/v4.35.0",
+  "lean_docs": [
+    "https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/",
+    "https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/",
+    "https://lean-lang.org/theorem_proving_in_lean4/Axioms-and-Computation/"
+  ],
+  "origin_essay": "https://www.scottaaronson.com/writings/bignumbers.html"
+}

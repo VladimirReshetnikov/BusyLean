@@ -1,0 +1,139 @@
+{
+  "status": "PASS",
+  "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "python_version": "3.12.14",
+  "method": "Fresh temporary project; each source checked and compiled; installed standard library reused.",
+  "entry_evaluated": false,
+  "contender5_evaluated": false,
+  "modules": [
+    {
+      "module": "Original",
+      "seconds": 0.705792,
+      "exit_code": 0,
+      "source_sha256": "e8e14737462302af2dc9fabe5544cc6c34d25828e763cddcd37bd60f3f8defc5"
+    },
+    {
+      "module": "Trees",
+      "seconds": 0.262128,
+      "exit_code": 0,
+      "source_sha256": "71f42e0be151c7c630355fea8aac91a373687df6d812ec9739d6af22dc2efab0"
+    },
+    {
+      "module": "Reflection",
+      "seconds": 0.336444,
+      "exit_code": 0,
+      "source_sha256": "9a54a6960f921e1f95ff8a7eb42fd90d37d0b8c816355db1e8cf9d54bd62e4ff"
+    },
+    {
+      "module": "Hierarchy",
+      "seconds": 0.260728,
+      "exit_code": 0,
+      "source_sha256": "e506ad5ff1ae6eb432c1a97bdca6bb3e8e2e6faaa360929a8f1b3472e98f1da5"
+    },
+    {
+      "module": "Arboreal",
+      "seconds": 0.883936,
+      "exit_code": 0,
+      "source_sha256": "a5b4eb4619427bc35a6f9a7ae66dd7b75fc5197e814d97acffe56bb0d6670d3a"
+    },
+    {
+      "module": "Forest",
+      "seconds": 0.380506,
+      "exit_code": 0,
+      "source_sha256": "5d58308e936a8a5d1d616f3ffc14aaffb0cb7aecbf467b2cb8744237ad668225"
+    },
+    {
+      "module": "Preliminary",
+      "seconds": 0.158263,
+      "exit_code": 0,
+      "source_sha256": "932c1b5f045dd87b631732f176f58abf01722741fdebaf6b1abaf89c3faa76ec"
+    },
+    {
+      "module": "ForestHierarchy",
+      "seconds": 0.160612,
+      "exit_code": 0,
+      "source_sha256": "ceb287fc7170695765107b21ebf4873581485849e948cbd171ff86c665f6988a"
+    },
+    {
+      "module": "Contender",
+      "seconds": 0.150298,
+      "exit_code": 0,
+      "source_sha256": "228e381c61da78545fde28ef7f61755d8c6b368fa3f830c3686e667993acaba5"
+    },
+    {
+      "module": "Smoke",
+      "seconds": 0.318066,
+      "exit_code": 0,
+      "source_sha256": "b0563cff30ebd1ca16bf5538d3db440905e60386678c6ac61ce013cb83adde3f"
+    },
+    {
+      "module": "Audit",
+      "seconds": 0.628684,
+      "exit_code": 0,
+      "source_sha256": "fead3df8aa64956d1d0fc6065f1a3feee216fd7547b268c3b629800d853b165f"
+    }
+  ],
+  "audit": {
+    "targets": 288,
+    "empty_axiom_lists": 288,
+    "nonempty_axiom_reports": [],
+    "all_empty": true
+  },
+  "all_modules_wall_seconds": 4.247454,
+  "entry_dependency_seconds": 2.962263,
+  "all_modules_sum_seconds": 4.245457,
+  "dependency_audit": {
+    "exit_code": 0,
+    "seconds": 0.83629,
+    "output": "DEPENDENCY_AUDIT PASS: contender_6\nLogical closure: 502 declarations; 169 package declarations.\nForbidden previous-number constants absent: [Original.contender5,\n preliminaryContender,\n contender_1,\n contender_2,\n contender_3,\n contender_4,\n contender_5,\n Original.contender_1,\n Original.contender_2,\n Original.contender_3,\n Original.contender_4,\n Original.contender_5].\nAxioms: []; unsafe: []; partial: []; package noncomputable: []; package implemented_by: [].\nLean-core implemented_by substitutions: [(Nat.repr, _private.Init.Data.Repr.0.Nat.reprFast)].\nLean-core noncomputable tags: [Nat.modCore, Nat.modCore.go]."
+  },
+  "source_crosscheck_seconds": 0.510469,
+  "source_crosscheck": {
+    "status": "PASS",
+    "description": "Every enumerated original term value and enumeration count matches through depth 4.",
+    "scope": "Finite independent regression evidence; no cross-prover equivalence theorem is claimed.",
+    "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+    "python_version": "3.12.14",
+    "depth_results": [
+      {
+        "depth": 0,
+        "types": 0,
+        "terms": 0,
+        "largest_value": 0
+      },
+      {
+        "depth": 1,
+        "types": 1,
+        "terms": 2,
+        "largest_value": 0
+      },
+      {
+        "depth": 2,
+        "types": 2,
+        "terms": 10,
+        "largest_value": 1
+      },
+      {
+        "depth": 3,
+        "types": 5,
+        "terms": 146,
+        "largest_value": 2
+      },
+      {
+        "depth": 4,
+        "types": 26,
+        "terms": 24976,
+        "largest_value": 3
+      }
+    ],
+    "term_values_compared": 25134,
+    "trace_lines_compared": 25149,
+    "trace_sha256": "8399b9141afa9fcaab48315607da627fd4c0fda83c7cd9a7a93e0d82268783ae",
+    "contender5_evaluated": false,
+    "reflector_evaluated": false
+  },
+  "entry_under_15_seconds_here": true,
+  "all_sources_and_audits_under_60_seconds_here": true
+}

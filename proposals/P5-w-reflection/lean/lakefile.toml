@@ -1,0 +1,6 @@
+name = "big_number"
+version = "0.1.0"
+defaultTargets = ["BigNumber"]
+
+[[lean_lib]]
+name = "BigNumber"

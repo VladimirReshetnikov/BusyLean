@@ -1,0 +1,10 @@
+{
+  "required_toolchain": "leanprover/lean4:v4.19.0",
+  "definitions_limit_seconds": 15,
+  "proof_limit_seconds": 60,
+  "kernel_checked": false,
+  "timing_verified": false,
+  "runs": [],
+  "status": "not_run",
+  "reason": "Lean executable not installed in this runtime"
+}

@@ -1,0 +1,244 @@
+{
+  "title": "A Constructive Lean Contender Beyond Contender 5",
+  "created_utc": "2026-10-13T00:01:13.269787+00:00",
+  "upstream_commit": "d56dce013e6264292533efdc5e1de71863c6fb86",
+  "lean_version": "Lean (version 4.19.0, x86_64-unknown-linux-gnu, commit 6caaee842e94, Release)",
+  "entry": "BigNumber.contender_6",
+  "strict_comparison": "BigNumber.contender_5_lt_contender_6",
+  "tower_bound": "BigNumber.contender_6_tower_bound",
+  "validation_passed": true,
+  "required_lean_sources_match_measured_report": true,
+  "manifest_scope": "All packaged files except manifest.json and SHA256SUMS; SHA256SUMS also covers manifest.json.",
+  "files": [
+    {
+      "path": "BigNumber/Amplifier.lean",
+      "bytes": 8810,
+      "sha256": "b9a3d0c605cb7a234fd37d6e8f959f8ecd2533c6f213c364557118caf0981a4e"
+    },
+    {
+      "path": "BigNumber/AmplifierAudit.lean",
+      "bytes": 854,
+      "sha256": "9eec9c621d35da82ae2021544c00187631b3c8105aab7517394d50b9f7cae89d"
+    },
+    {
+      "path": "BigNumber/AmplifierDefs.lean",
+      "bytes": 3873,
+      "sha256": "ec6aad6f279bf29e2466abe852a0be4e9a89e615ae0121ca2e2dd7e2327b9382"
+    },
+    {
+      "path": "BigNumber/Base.lean",
+      "bytes": 1107,
+      "sha256": "7413f3fb9d23dd9cabece31cef932a6af2941dd105b13b86a20b71bcd89bdfd1"
+    },
+    {
+      "path": "BigNumber/BaseDefs.lean",
+      "bytes": 391,
+      "sha256": "a66c50ee626a52d59a56220362547ccef566139527e104facfc64309ae442e60"
+    },
+    {
+      "path": "BigNumber/Baseline.lean",
+      "bytes": 3636,
+      "sha256": "cd03f141ca8b30da8506e1dcd7cc98d896636b631363f77e36681835e4f1ed6e"
+    },
+    {
+      "path": "BigNumber/BaselineDefs.lean",
+      "bytes": 5470,
+      "sha256": "c2a48d64e06f20e002dcd225ed822d8af163c537cc3c869a08f76eb3af426eaa"
+    },
+    {
+      "path": "BigNumber/BaselineSmoke.lean",
+      "bytes": 794,
+      "sha256": "8d43b5fe7b27c8265cd99c038b7926b029c9b61d558f84e77212c5dc5902f7ac"
+    },
+    {
+      "path": "BigNumber/Candidate.lean",
+      "bytes": 2265,
+      "sha256": "914af04dc748c3bb21afe9a70b7c6658b16750827adf79439c3c685dba6473b9"
+    },
+    {
+      "path": "BigNumber/CandidateDefs.lean",
+      "bytes": 225,
+      "sha256": "5a8c40b8c1345ef4c74189b7506e16cf69da654a6b2447b02af584bf3bb8386d"
+    },
+    {
+      "path": "BigNumber/SemanticChecks.lean",
+      "bytes": 586,
+      "sha256": "f31bd551af840f4c3e291c36ee50a0354da4adc4aa363751d655dc5ba1199af9"
+    },
+    {
+      "path": "BigNumber.lean",
+      "bytes": 27,
+      "sha256": "86893765bfaaf06530bd3d7c8ec84175f001dfb40bd439780cc98e1e0d4e9dbf"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1065,
+      "sha256": "446274637183a0a96b3ff8de2da9929baedaa83ea1e640b62c9922c77510b80a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7147,
+      "sha256": "96465e37e28b07dc754d004dace5472358c45917d9858997aacc950c43fbab6c"
+    },
+    {
+      "path": "article/Lean_Big_Number.pdf",
+      "bytes": 187349,
+      "sha256": "90913c954fb8b16d80339fef0fc468ee8ca53ab07a983981e74e5e6b8ea05fcc"
+    },
+    {
+      "path": "article/Lean_Big_Number.tex",
+      "bytes": 35229,
+      "sha256": "0ea73824b64abd21dc671557619bb24ce93185ab3c90a95f899f0d61c3f69783"
+    },
+    {
+      "path": "article/amplifier_theory.tex",
+      "bytes": 22981,
+      "sha256": "7d4bee82eef107cd1e4248fce4bb6d61e95a2ed0088472a7cc58da84951af1fa"
+    },
+    {
+      "path": "article/validation_table.tex",
+      "bytes": 1056,
+      "sha256": "5c8c8eae8720d0e213c65728aa087fef9d902b78b41bd5585b60ec5033bb2486"
+    },
+    {
+      "path": "lakefile.toml",
+      "bytes": 107,
+      "sha256": "cba65f1963762e649022875c47b12293d78566a074e0b83a686e1ecc37a3df7a"
+    },
+    {
+      "path": "lean-toolchain",
+      "bytes": 25,
+      "sha256": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea"
+    },
+    {
+      "path": "scripts/REPRODUCTION.md",
+      "bytes": 7075,
+      "sha256": "bc320c4ba73f8a92194f2d2c272437ef7e21af06115cc5f985beb0d664c9d497"
+    },
+    {
+      "path": "scripts/audit_names.txt",
+      "bytes": 1067,
+      "sha256": "7c854dbf4cbc336ce926ed875eed44dfdd15343e9f6fc11ef9638b55667e574c"
+    },
+    {
+      "path": "scripts/build_launcher.sh",
+      "bytes": 585,
+      "sha256": "668ddb5d8418ed68e6ad2088080fe4241b1d5899b0df2b4ca8aa7b35614992ba"
+    },
+    {
+      "path": "scripts/lean_launcher.c",
+      "bytes": 1717,
+      "sha256": "a8fbe81b5ee8cec1f3c0496da8c0c7d33a4b4700a17b09c24dfde1cd1e0d4723"
+    },
+    {
+      "path": "scripts/reference_model.py",
+      "bytes": 4309,
+      "sha256": "0781b21e68ff9baefdb928ec1dd93b58ea6a5623bf89a7c1c150f98b14de6060"
+    },
+    {
+      "path": "scripts/validate.py",
+      "bytes": 17593,
+      "sha256": "4ee4d89d862f22d7a7e4bbf925c451ff9fd731a89df66adf041cd8585542314a"
+    },
+    {
+      "path": "upstream/Contender.v",
+      "bytes": 23739,
+      "sha256": "a809222145e3063b742af7f35e4e6ec41ca37d60ef32140958a5f09ccd21d04b"
+    },
+    {
+      "path": "upstream/LICENSE",
+      "bytes": 1065,
+      "sha256": "446274637183a0a96b3ff8de2da9929baedaa83ea1e640b62c9922c77510b80a"
+    },
+    {
+      "path": "upstream/PROVENANCE.json",
+      "bytes": 821,
+      "sha256": "43339bb7064f5b8b1c16effd4249d0fc78603c276f521914644f230fb8efb9c4"
+    },
+    {
+      "path": "upstream/README.md",
+      "bytes": 1969,
+      "sha256": "a20f2a1c951ce7558e771bb935c849bc391ec22075cd97ca3765b52e7ec7e09e"
+    },
+    {
+      "path": "validation/independent_review.md",
+      "bytes": 12337,
+      "sha256": "f67cec72d1d529deda16b2ed49deb8e78e0d6262e24894811d6c8fc5e3e1c73e"
+    },
+    {
+      "path": "validation/pdf_review.json",
+      "bytes": 380,
+      "sha256": "8809a33ed87737672c94cb747641db0ae5f92a41d13b57522d68078d7ce66c3e"
+    },
+    {
+      "path": "validation/reference_model.json",
+      "bytes": 434,
+      "sha256": "3642f73a19bd10dcd19313a1bbaff29da6f6ccfe141cb2069051b2b7ff376e95"
+    },
+    {
+      "path": "validation/validation.json",
+      "bytes": 34969,
+      "sha256": "69917d6b86d850334273385634738cbcaf0988c34bd8276177e1d0a0e7b5081d"
+    },
+    {
+      "path": "validation/validation_logs/AxiomAudit.lean",
+      "bytes": 3735,
+      "sha256": "67ca76c90dfa45e04c48ec55709070462b607b66213d11573f6da683271a8c9a"
+    },
+    {
+      "path": "validation/validation_logs/KernelRecheck.lean",
+      "bytes": 1477,
+      "sha256": "896996feed23e3067946994308091bc7e4973110479f2b5eb7e837cf287ac852"
+    },
+    {
+      "path": "validation/validation_logs/audit-AxiomAudit.log",
+      "bytes": 3941,
+      "sha256": "f5c0824ee0a7ba3f129275a5519bd0cad7bdc163b3c93e0583fe32a76193f467"
+    },
+    {
+      "path": "validation/validation_logs/definitions-BigNumber.AmplifierDefs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/definitions-BigNumber.BaseDefs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/definitions-BigNumber.BaselineDefs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/definitions-BigNumber.CandidateDefs.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/kernel_recheck-KernelRecheck.log",
+      "bytes": 20379,
+      "sha256": "b3286980de149205cebc1d62b455ad845af9a812094905c0316e67dc6b247a73"
+    },
+    {
+      "path": "validation/validation_logs/proofs-BigNumber.Amplifier.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/proofs-BigNumber.Base.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/proofs-BigNumber.Baseline.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation/validation_logs/proofs-BigNumber.Candidate.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

@@ -1,0 +1,482 @@
+\section{Why the tree amplification gives numerical growth}\label{sec:growth}
+The tree formulas are elaborate, so their intended numerical effect needs
+proof rather than an appeal to their resemblance to ordinal notation.
+A useful abstraction separates this question from the details of reflection.
+
+Let \(v:\W\to\N\) satisfy just
+\begin{equation}\label{eq:v-hypotheses}
+ v(a)<v(\Suc(a)),\qquad v(s(0))<v(\Lim(s)).
+\end{equation}
+For each fixed \(n\), the interpretation \(v(a)=H_a(n)\) satisfies
+these conditions by Lemma~\ref{lem:local}. No ordering of arbitrary
+trees, monotonicity of the oracle, or monotonicity of a limit's branches
+is assumed.
+
+\begin{theorem}[Checked amplification properties]\label{thm:amplification}
+For every \(v\) satisfying \eqref{eq:v-hypotheses}, every function
+\(f:\W\to\W\), and every \(a\in\W\),
+\[
+ v(a)<v(T_f(a)),\qquad v(a)<v(P(f)(a)),\qquad v(a)<v(G(a)).
+\]
+Moreover, \(v(\gamma)<v(\Omega_*)\), where \(\gamma\) is the tree called
+\code{gammaTree}.
+\end{theorem}
+\begin{proof}
+The zeroth branch in \(T_f(a)\), after the descent operation is unfolded,
+is
+\[
+                  \Suc\bigl(\Lim(k\mapsto f^k(a))\bigr).
+\]
+The zeroth child of its limit is \(f^0(a)=a\). Two applications each
+of successor and limit growth establish the first claim. This argument
+does not require \(f\) itself to increase \(v\).
+
+If \(v(x)\le v(h(x))\) for every \(x\), structural induction on \(t\)
+shows
+\[
+                         v(a)\le v(I_h(t,a)).
+\]
+The zero case is equality. A successor applies extensivity of \(h\)
+after the induction hypothesis. At a limit, use its zeroth branch
+and the second hypothesis in \eqref{eq:v-hypotheses}.
+
+Apply this observation to \(h=T_f\), which is extensive by the first
+claim. The outer successor in
+\(P(f)(a)=\Suc(I_{T_f}(T_f(a),a))\) makes the inequality strict.
+For \(G\), its zeroth limit branch is \(P(f_0)(a)\); apply the second
+claim, followed by limit and successor growth.
+
+Finally let \(s=G(\gamma)\). The third claim gives \(v(\gamma)<v(s)\)
+and makes \(G\) extensive. Consequently
+\[
+             v(\gamma)<v(s)\le v(I_G(s,s))<v(\Omega_*).
+\]
+\end{proof}
+\checked{higherTower\_increases;\quad stageIter\_extensive}
+\checked{promoteTreeFunction\_increases;\quad promotedTreeFunction\_increases}
+\checked{finalStage\_exceeds\_gammaTree}
+
+Specializing this theorem to \(v(a)=H_a(n)\) gives, for every input \(n\),
+\[
+ H_a(n)<H_{T_f(a)}(n),\quad H_a(n)<H_{P(f)(a)}(n),\quad
+ H_a(n)<H_{G(a)}(n),\quad H_\gamma(n)<H_{\Omega_*}(n).
+\]
+These specializations are separate checked theorems in
+\code{NumericTreeGrowth.lean}. They establish actual numerical growth.
+They do not identify a standard fast-growing-hierarchy index, prove
+that \(P(f)(a)\) dominates \(f(a)\), or compare each adjacent finite
+functional level with the next.
+
+\section{The comparison and a fivefold exponential margin}\label{sec:comparison}
+\subsection{The short strict-comparison proof}
+The final tree has an outer successor. Thus \(N=\RF(H_b)(43)\)
+for its explicitly defined predecessor \(b\), and
+Lemma~\ref{lem:baseline}, with \(r=42\), immediately yields \(C_5<N\).
+The complete comparison theorem is:
+\begin{LeanCode}
+theorem contender_5_lt_contender_6 :
+    contender_5 < contender_6 := by
+  unfold contender_6 finalStage
+  exact baseline_lt_reflect _ 42
+\end{LeanCode}
+This proof is short because a uniform comparison with every oracle has
+already been proved. Checking the supporting definitions and lemmas is
+included in the reported budgets; the timing does not merely measure these
+three final lines.
+
+\subsection{A finite certificate inside the enormous tree}
+For a baseline depth \(r\), put
+\[
+ B_r(x)=2^{x+r+2},\qquad B_r^{\,0}(x)=x,\qquad
+ B_r^{\,k+1}(x)=B_r(B_r^{\,k}(x)).
+\]
+The relation \(\mathsf{MarginPath}(k,a)\) records a finite route through
+\(a\) containing \(k\) successor edges, with only zeroth-child moves
+at limit nodes. It has the rules
+\[
+ \mathsf{MarginPath}(0,a),
+ \qquad
+ \frac{\mathsf{MarginPath}(k,a)}
+      {\mathsf{MarginPath}(k+1,\Suc(a))},
+ \qquad
+ \frac{\mathsf{MarginPath}(k,s(0))}
+      {\mathsf{MarginPath}(k,\Lim(s))}.
+\]
+The endpoint of the route may be any tree. We need neither unfold the
+whole tree nor traverse every branch.
+
+\begin{lemma}[Path bound]\label{lem:path}
+If \(k\ne0\) and \(\mathsf{MarginPath}(k,a)\), then
+\[
+                         B_r^{\,k}(C(r))\le H_a(r+1).
+\]
+\end{lemma}
+\begin{proof}
+Induct on the path certificate. A path of length zero is excluded by
+the hypothesis. At the innermost successor, use the uniform bound
+\[
+                    B_r(C(r))\le\RF(H_b)(r+1),
+\]
+which holds for every predecessor \(b\), regardless of its value.
+At each remaining successor, combine the induction hypothesis,
+monotonicity of the ordinary function \(B_r\), and
+\[
+                    B_r(H_b(r+1))\le H_{\Suc(b)}(r+1).
+\]
+At each zeroth limit move, the corresponding child's value is bounded
+by the finite maximum defining its parent.
+\end{proof}
+\checked{margin\_path\_bound}
+
+The following certificate checks by unfolding only the required outer
+constructors:
+\begin{LeanCode}
+theorem finalStage_five_successors :
+    MarginPath 5 finalStage := by
+  apply MarginPath.next
+  apply MarginPath.next
+  apply MarginPath.limit0
+  apply MarginPath.next
+  apply MarginPath.next
+  apply MarginPath.limit0
+  apply MarginPath.next
+  exact MarginPath.base _
+\end{LeanCode}
+The moves have the following provenance:
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+Successor counted & Constructor exposed along the chosen route\\
+\midrule
+1 & The outer successor of \(\Omega_*\)\\
+2 & The outer successor of \(G\), exposed by the tree iterator\\
+3 & The outer successor of \(P(f_0)\), selected at branch zero of \(G\)\\
+4 & The outer successor of \(T_{f_0}\), exposed by its iterator\\
+5 & The successor in the level-zero amplifier, after descent\\
+\bottomrule
+\end{tabular}
+\end{center}
+Limit moves between these successors use only branch zero, which is
+always among the sampled branches. This route certifies only a small
+part of the definition's growth.
+
+\begin{theorem}[Certified numerical margin]\label{thm:margin}
+Define \(x_0=C_5\) and \(x_{j+1}=2^{x_j+44}\). Then
+\[
+                                \boxed{x_5\le N.}
+\]
+\end{theorem}
+\begin{proof}
+Apply Lemma~\ref{lem:path} to \(r=42\), \(k=5\), and the displayed
+certificate.
+\end{proof}
+\begin{LeanCode}
+theorem contender_6_fivefold_margin :
+    marginTower 42 5 (baseline 42) <= contender_6 :=
+  margin_path_bound 42 finalStage_five_successors
+    (Nat.noConfusion)
+\end{LeanCode}
+Here \code{baseline 42} is exactly the defining body of
+\code{contender\_5}. The formulation avoids needlessly asking the
+elaborator to normalize the huge closed number.
+
+The fivefold bound is a rigorous lower bound, not an estimate of \(N\),
+an upper bound, or a claim that five exponentials capture its scale.
+It is much stronger than the strict comparison required by the contest.
+
+\section{Constructivity and the scope of the claims}\label{sec:scope}
+\subsection{Why this is a constructive natural number}
+Every operation in the submitted closed definition is built from
+inductive constructors, total functions, structural recursors,
+finite lists, finite maxima, and natural-number arithmetic.
+Although \(\Lim\) stores a function with infinitely many possible
+arguments, it is represented by a finite piece of executable code.
+At a numerical limit stage, only finitely many arguments are requested.
+
+A subtle point is that reflection may call its oracle at an input
+larger than the current \(n\). This does not threaten termination:
+the recursively available object is the entire function \(H_a:\N\to\N\)
+at a structurally smaller stage. The recursion is on the stage,
+not on a claim that every oracle call decreases its natural input.
+The Lean kernel accepts the resulting recursor-based definition.
+
+The submitted definition and proofs depend on no termination oracle,
+choice principle, or semantic assertion that arbitrary programs halt. In particular,
+the construction does not use Busy Beaver values. Finite syntactic
+enumeration of a language with a total interpreter is sufficient.
+The distinction between finite descriptions, enormous values, and
+uncomputable growth is central to large-number contests; Aaronson's
+exposition gives broader context~\cite{aaronson}.
+
+Computable in principle does not mean feasible to evaluate. Neither
+\(C_5\) nor \(N\) was expanded to a numeral, and none of the verification
+commands attempts that calculation. The task is to check a finite
+definition and finite proofs about its value.
+
+\subsection{Trees are not automatically canonical ordinals}
+The constructors of \(\W\) resemble zero, successor, and countable
+limits. The seed constructions deliberately resemble familiar
+ordinal operations. We nevertheless use raw trees throughout,
+with no quotient by ordinal equality, no certified normal-form
+predicate, and no proof that a branch sequence is cofinal in a
+particular ordinal.
+
+This distinction matters numerically. For example,
+\[
+ H_{\Z}(n)=n+1,\qquad
+ H_{\Lim(k\mapsto\Z)}(n)=n+2.
+\]
+A conventional ordinal supremum would identify the second tree's
+putative ordinal value with zero, but our numerical semantics
+distinguishes the two presentations. Theorems about canonical
+ordinal notation cannot simply be transferred to these trees.
+
+Accordingly, \code{gammaTree} is a descriptive source name; this
+article does not prove that it denotes \(\Gamma_0\).
+We claim no exact Bachmann--Howard or other named ordinal calibration
+for \(\Omega_*\), and no associated proof-theoretic lower bound.
+Formal relationships between different constructive notions of
+ordinals require real additional hypotheses and proofs; see
+Kraus, Nordvall Forsberg, and Xu~\cite{constructive-ordinals}.
+Our comparison and amplification theorems avoid that unproved step.
+
+\subsection{Exactly what the diagonal theorem says}
+Theorem~\ref{thm:diagonal} fixes one expression and one total oracle.
+For every sufficiently large input, reflection exceeds that
+expression evaluated with that input and oracle. The finite depth
+of the fixed expression supplies the explicit threshold.
+The theorem neither quantifies over every Lean program nor asserts
+that all oracle programs are increasing.
+
+In particular, pointwise \(f\le g\) does not by itself justify
+\(\RF(f)\le\RF(g)\): programs may inspect or transform oracle outputs
+in ways that fail to preserve order. None of our proofs requires
+this inference. We use the explicit guard \(f(n)\), quotation
+membership, and branches actually sampled by a finite maximum.
+
+Similarly, the tree proofs establish the specific inequalities in
+Theorem~\ref{thm:amplification}. Their strength is that they hold for
+every supplied \(f\) without auxiliary monotonicity assumptions.
+They should not be read as a classification of the entire hierarchy
+by growth rate.
+
+\subsection{What is checked, and what remains a trust boundary}
+The Lean kernel checks the internal theorems. The source-to-source
+correspondence with the original Coq baseline is a detailed manual
+audit supported by exact source preservation and small execution
+checks. A fully formal translation between Coq's and Lean's
+foundations is not part of this deliverable.
+
+An empty axiom list means the checked declaration has no
+axiom dependencies in Lean's environment. It still presupposes
+the ordinary correctness of the kernel and the environment used
+to execute it. The package records the exact compiler version,
+source hashes, commands, and audit output so that the result can
+be checked independently on a normal installation.
+
+\section{Reproducible verification}\label{sec:verification}
+\subsection{A pinned, small dependency base}
+The contest modules use Lean \(4.19.0\) and import only \code{Init}
+from its standard distribution~\cite{lean-release}. All other
+imports refer to the included source modules. The external
+dependency-inspection tool additionally imports Lean's official
+metaprogramming API to read compiled declarations. That tool is
+part of the verification harness, not part of the submitted
+number's definition.
+
+The verifier compiles all project modules afresh in a temporary
+directory, without using prebuilt project object files.
+It records process wall time for every module. Its definition
+budget conservatively includes the baseline and shared interpreter,
+the oracle language, all tree definitions, and the hierarchy.
+Its proof budget includes the comparison's supporting proofs,
+the auxiliary theorems, the small checks, the generated axiom
+audit, and the compiled dependency inspection.
+
+\input{verification_metrics.tex}
+
+These are observed measurements on the recorded environment,
+not a promise that any machine, under any load, achieves the same
+times. They give substantial room within the adopted \(15\)-second
+definition and \(60\)-second proof limits.
+
+\subsection{Axiom and dependency checks}
+The harness first rejects forbidden source constructs such as
+\code{sorry} and \code{unsafe}, ignoring comments and string
+literals. This is only an early diagnostic. Its decisive logical
+check generates \code{\#print axioms} commands for the public
+definitions, inductive declarations, and theorems and verifies that
+each reported dependency list is empty. Critical results are
+explicitly required, so a missing comparison or margin theorem
+cannot accidentally pass as a vacuous audit.
+
+The definition of the new number must also be independent of
+the previous contestant constant. The harness traverses the
+actual compiled constants reachable from
+\code{Biggest.contender\_6}, including types and declaration
+bodies. It confirms that neither \code{Biggest.contender\_5}
+nor \code{Biggest.baseline} is reachable. The recorded closure
+also omits \code{Biggest.largestOfDepth} and \code{Biggest.maxBy}.
+The shared raw syntax, interpreter, and uniform enumerators
+are intentionally reachable: they implement the language being
+extended, not a use of the old winning number.
+
+The distinction is semantic. Merely importing a source module
+that also declares \code{contender\_5} does not make that
+constant a dependency of the new value. Conversely, hiding
+the constant behind a helper definition would still be found
+by the compiled closure traversal.
+
+\subsection{Small executable checks}
+The verified sample records include the type and term counts
+and baseline values in Section~\ref{sec:baseline}, expression
+counts \(0,4,28,914\) at depths zero through three, raw-interpreter
+samples, quotation preservation, oracle/input behavior, and
+small reflection values. Their purpose is to catch porting and
+wiring errors that readable examples expose well. They do not
+replace the general enumeration and comparison proofs.
+
+No high-depth term list or large tree value is evaluated.
+The checker verifies the finite syntax of the submission and
+its proof terms; this is precisely the resource being measured.
+
+\subsection{Commands to reproduce}
+Install the standard Lean \(4.19.0\) distribution and use
+Python \(3\) with its standard library. From the archive root,
+run:
+\begin{LeanCode}
+python3 verification/verify.py \
+  --lean /path/to/lean-4.19.0/bin/lean \
+  --source-dir lean \
+  --output verification/reproduced-results.json
+\end{LeanCode}
+The \code{lean-toolchain} file also pins the release for an
+ordinary Elan installation. The supplied verifier builds
+dependencies in their correct order and does not require Lake
+or Mathlib.
+
+To rebuild the article, use a TeX installation containing
+XeLaTeX, Latin Modern and DejaVu fonts, and the packages named
+in the preamble:
+\begin{LeanCode}
+cd article
+latexmk -xelatex -interaction=nonstopmode \
+  -halt-on-error reflection_tree_contender.tex
+\end{LeanCode}
+The checked source distribution contains the main article,
+its three included \code{.tex} files, the compiled PDF,
+and the independent verification evidence.
+
+The execution container needed one narrowly scoped compatibility
+helper because its PID namespace and mounted procfs did not agree:
+Lean's lookup of its own executable used a pathname unavailable
+in that namespace. The included C source redirects exactly that
+own-executable lookup to \code{/proc/self/exe}. The official
+compiler and shared libraries were unchanged. This affects
+executable discovery, not logical constants or kernel checking.
+A normal installation does not need it; full details and binary
+hashes are recorded in the runtime notes.
+
+\section{Guide to the artifacts}
+\begin{longtable}{@{}p{0.32\textwidth}p{0.62\textwidth}@{}}
+\toprule
+File or directory & Role\\
+\midrule
+\endhead
+\code{lean/Baseline.lean} & Exact raw interpreter, enumeration, maximum, and the reference constant.\\
+\code{lean/Enumeration.lean} & Soundness and completeness of the original finite enumerators.\\
+\code{lean/Oracle.lean} & Quotation, input, oracle syntax, and the reflection operator.\\
+\code{lean/OracleFacts.lean} & Uniform oracle growth and baseline comparison.\\
+\code{lean/Diagonal.lean} & Exact expression enumeration and eventual diagonal domination.\\
+\code{lean/Trees.lean} & All tree operations and the explicit final stage.\\
+\code{lean/Hierarchy.lean} & Numerical tree interpretation and \code{contender\_6}.\\
+\code{lean/TreeGrowth.lean} & Generic structural amplification proofs.\\
+\code{lean/TreeMargin.lean} & Finite path certificate and the fivefold exponential bound.\\
+\code{lean/NumericTreeGrowth.lean} & Growth theorems instantiated for the actual hierarchy.\\
+\code{lean/Comparison.lean} & The strict comparison with \code{contender\_5}.\\
+\code{lean/Checks.lean} & Small executable regression examples.\\
+\code{lean/Main.lean} & Convenient import point and principal theorem audits.\\
+\code{verification/} & Fresh-build script, measured results, logs, and runtime notes.\\
+\code{reference/} & Frozen upstream files, their license, source hashes, and correspondence notes.\\
+\code{article/} & Full article source and compiled PDF.\\
+\bottomrule
+\end{longtable}
+
+\section{Directions for a subsequent contender}
+The present construction is frozen after proof and review. Several
+substantive extensions could support a later contest entry.
+
+One route is to develop an explicit ordinal-notation invariant,
+prove the required branch properties, and connect the resulting
+numerical hierarchy to a standard growth classification. That
+would make named ordinal comparisons justified rather than
+suggestive. A separate route is to index the functional-type
+construction by trees, using dependent products at limit types;
+this would require a compatible descent and numerical
+majorization theory.
+
+Another improvement is to extend the total object language while
+preserving a proved interpreter and finite, complete enumeration.
+The reflection proof is modular: a language embedding that respects
+values and has a controlled depth cost immediately supplies a
+new comparison. A formal Coq-to-Lean simulation would strengthen
+the current source-correspondence boundary independently of
+making the number larger.
+
+For the existing entry, richer finite path certificates could
+prove stronger lower bounds without changing its definition.
+They would refine what is known about the same \(N\), rather
+than estimate its full value. Efficient duplicate elimination
+in enumeration could also be justified by proving preservation
+of the semantic maximum, although it is unnecessary for
+definition checking.
+
+There is no canonical last enlargement. The contribution here is
+a precise closed term with an explicit improvement mechanism,
+a strict comparison with the repository's actual baseline, and
+a reproducible record of the proofs and resource measurements.
+
+\clearpage
+\begin{thebibliography}{9}
+\raggedright
+\bibitem{contest-rules}
+Cody Roux and contributors.
+\emph{Name the biggest number: contest rules.}
+Repository README, frozen at commit
+\texttt{d56dce013e6264292533efdc5e1de71863c6fb86}.
+\url{https://github.com/codyroux/name-the-biggest-number}.
+
+\bibitem{contender-source}
+Cody Roux and contributors; Contender 5 by Samuel Gr\"utter.
+\emph{Contender.v.}
+Same frozen commit; an exact copy is included in this archive.
+\url{https://github.com/codyroux/name-the-biggest-number/blob/d56dce013e6264292533efdc5e1de71863c6fb86/Contender.v}.
+
+\bibitem{lean-axioms}
+Lean development team.
+\emph{The Lean Language Reference: Axioms.}
+\url{https://lean-lang.org/doc/reference/latest/Axioms/}.
+Accessed 12 October 2026; verification itself is pinned to 4.19.0.
+
+\bibitem{lean-inductive}
+Lean development team.
+\emph{The Lean Language Reference: Inductive Types.}
+\url{https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/}.
+Accessed 12 October 2026.
+
+\bibitem{lean-release}
+Lean development team.
+\emph{Lean 4.19.0 release.}
+\url{https://github.com/leanprover/lean4/releases/tag/v4.19.0}.
+
+\bibitem{constructive-ordinals}
+Nicolai Kraus, Fredrik Nordvall Forsberg, and Chuangjie Xu.
+\emph{Type-Theoretic Approaches to Ordinals.}
+2022. \url{https://arxiv.org/abs/2208.03844}.
+
+\bibitem{aaronson}
+Scott Aaronson.
+\emph{Who Can Name the Bigger Number?}
+1999. \url{https://www.scottaaronson.com/writings/bignumbers.html}.
+\end{thebibliography}
+
