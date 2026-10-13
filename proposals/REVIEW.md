@@ -7,8 +7,8 @@ from [`Contender.v`](../docs/name-the-biggest-number-master/Contender.v).
 
 Every proposal was rebuilt from source here, on **Lean 4.34.0** (the locally
 installed toolchain; Lean 4.19.0, which most proposals pinned, is not
-installed). Rules applied: those of the [Lean edition](../README.md), where the
-only permitted axiom is `propext`.
+installed). Rules applied: those of the [Lean edition](../README.md#rules-lean-edition),
+where the permitted axioms are `propext` and `Quot.sound`.
 
 ## Build and audit results
 
@@ -44,7 +44,8 @@ are the same three kinds in P4 and P5:
   on `propext`.
 
 Setting `backward.match.sparseCases false` removes the first source only. No
-proposal depends on `Quot.sound` or `Classical.choice`.
+proposal depends on `Quot.sound` or `Classical.choice`. All five therefore
+pass the axiom rule.
 
 ## What each proposal actually builds
 
@@ -104,3 +105,32 @@ diagonalizations and a 42-fold iteration, about +ω² in ordinal terms).
 Step 1 is robust: it compares object-language ordinals that differ by
 collapsing levels. Steps 2 and 3 compare amplifiers of similar shape and are
 less certain.
+
+## Outcome
+
+None of the five is adopted unchanged. P5 has the strongest idea, but it was
+uncompiled and barely amplified. The adopted Contender 6
+([`BusyLean/Contender6.lean`](../BusyLean/Contender6.lean)) **combines** their
+ideas:
+
+* P5's W-language (the strongest base) as the object language,
+* relativized to an oracle *family* with dynamic index access (P2's forest
+  reflection) and iterated along a tree index (P2, P4),
+* where the index ranges over **every tree the W-language itself defines**,
+  which is new. This raises the index from an explicit notation (< BH) to the
+  language's own ordinal, for growth ≈ f_{ψ(Ω_ω)·ψ(Ω_ω)},
+* seeded with P5's own family, so `P5 < Contender 6` is a *formal* theorem,
+  not just an ordinal estimate.
+
+The comparison with Contender 5 uses an exact, independent Lean port of
+`Contender.v` ([`BusyLean/Contender5.lean`](../BusyLean/Contender5.lean)).
+[`BusyLean/PortAgreement.lean`](../BusyLean/PortAgreement.lean) proves that P5's
+numerical port of the old language agrees with it at every depth. That settles
+the one fidelity question P5 had left open.
+
+Candidly, the price of the formal margin over P5 is that Contender 6's
+definition contains P5's family, and with it P5's seed guard
+`max (oldMaximum n) (wMaximum n)`. That guard is the old language's maximum as
+a function of depth, not the constant `contender_5`. `test/Audit.lean`
+machine-checks that the definition never mentions `contender_5`, the `maxBy`
+winner, or either proposal-level contender constant.
