@@ -366,3 +366,38 @@ Contender 15 adopts P17's `HyperReflection` and `HyperReflectionFacts`
 modules, with attribution, and applies them to a family-aware **ladder**
 reflection seeded with Contender 14's family. That combines both routes: the
 strongest language here and the strongest amplifier received.
+
+# Late arrival: P21
+
+One more archive, `BusyLean_Contender14_SelfHeight_Fd_Operator_Power.zip`,
+proposes a "Contender 14" over Contender 13 (commit `0cd13c0`). It arrived
+after this repository's Contenders 14–20.
+
+## Build and audit
+
+Overlaid on a scratch worktree at `0cd13c0` and built with Lean 4.34.0, with
+the reviewer's own audit:
+
+| | Author's status | Definitions | Proofs | Axioms (`contender_14`, comparison, every new constant) |
+|---|---|---|---|---|
+| P21 | "not kernel-compiled" | compile, 2.3 s | **compile**, 1.7 s | `propext, Quot.sound` |
+
+The closure of its `contender_14` (1,913 constants) avoids `contender_5` …
+`contender_13`.
+
+## What it builds
+
+`F14 n = operatorPower tree14 fdTransformer (family13 n + 1) (fun _ => family13)
+(family13 n) (family13 n)`. This is a tower of operator stages along
+`tree14 = realize (hyper 42 (encode tree12))`, whose height is the
+self-referential value `family13 n + 1`, over family-aware Fd reflection. It
+belongs to the same class as P18 and P19: about |Fd|·τ^ω.
+
+## Comparison
+
+It proves `contender_13 < contender_14` for its own number. Informally it is
+below P17/P20, whose rank hierarchy of lifts already subsumes towers of stages,
+and therefore below this repository's Contender 14 (the ladder language). It
+is far below the current Contender 20. Nothing new is adopted: the
+self-height parameter is the same diagonal device Contender 15 uses for its
+rank.
