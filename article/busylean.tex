@@ -141,6 +141,7 @@ Contender~55 stacks the number languages along the tree, each level a
 first-class closure for the next.
 Contender~56 stacks the tree and number languages jointly.
 Contender~57 lets programs choose the stacking heights.
+Contender~58 repeats that step to a tower of $N$ stack-reflecting languages.
 \end{abstract}
 
 \tableofcontents
@@ -2155,6 +2156,26 @@ $N=\mathrm{family}_{56}(n)$ and $T=\mathrm{heightTree}(N)$. Proved:
 The definitions check in 1.5\,s and the proofs in 2.6\,s.
 
 %======================================================================
+\section{Contender 58: a tower of stack-reflecting languages}
+
+Contender~57 turns the joint stack over a language into two primitives of a
+larger language. The step can be repeated. Level~0 has Contender~54's
+primitives, and level~$k{+}1$ adds $\mathsf{stackT}$ and $\mathsf{stackN}$
+for the joint stack \emph{over the language of level~$k$}, at program-chosen
+heights:
+\[
+P_0=P_{54},\qquad P_{k+1}=\mathsf{stackT}_k::\mathsf{stackN}_k::P_k .
+\]
+A program at level $k{+}1$ stacks, to heights it chooses, languages that
+themselves stack languages, $k$ levels deep. The tower height is
+$N=\mathrm{family}_{57}(n)$. The tree joins Contender~57's tree with the closure
+of the meta-jump under the top language, and the top language's number
+closure is the hierarchy's base:
+$F_{58}(n)=h^{\mathrm{numLift}_{P_N}(\mathrm{family}_{57})}_{T}(N)$. Proved:
+\lean{family57\_lt\_F58} and \lean{contender\_57\_lt\_\allowbreak contender\_58}.
+The definitions check in 1.2\,s and the proofs in 2.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2255,6 +2276,7 @@ Contender & idea & informal size\\
 55 (Lean) & number languages (with reflection) stacked along the tree & $h_T$ over the stacked number closure\\
 56 (Lean) & tree and number languages stacked jointly & $h_{T'}$ over the joint number closure\\
 57 (Lean) & joint stacks at program-chosen heights & $h_T$ over the height-choosing number closure\\
+58 (Lean) & a tower of $N$ stack-reflecting languages & $h_T$ over the top language's closure\\
 \bottomrule
 \end{tabular}
 \end{center}
