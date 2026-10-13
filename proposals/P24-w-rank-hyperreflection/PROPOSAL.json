@@ -1,0 +1,14 @@
+{
+  "proposal": "BusyLean Contender 20: W-rank hyperreflection",
+  "base_repository": "https://github.com/VladimirReshetnikov/BusyLean",
+  "base_commit": "64d31a0cf6f1aa4477a088be5554957de6e87a61",
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "main_definition": "BusyLean.contender_20",
+  "comparison_theorem": "BusyLean.contender_19_lt_contender_20",
+  "construction": "WTree-indexed iteration of second-order transformer-lift amplification",
+  "static_audit": "PASS",
+  "lean_kernel_build": "NOT RUN: lean/lake unavailable in artifact runtime",
+  "article_pages": 25,
+  "article_pdf_sha256": "7b8fd2e8e90f15a1440f1729be49dd225c686e0b0961548ed05af0b5224bb206",
+  "article_tex_sha256": "948de9601c1d55e126b18a0bfa5528d88a9a9621a8ac39cbeac17422215227ab"
+}

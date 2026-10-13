@@ -1,0 +1,5 @@
+Repository: https://github.com/VladimirReshetnikov/BusyLean
+Base branch: main
+Base commit: 64d31a0cf6f1aa4477a088be5554957de6e87a61
+Base commit date: 2026-10-13T15:34:49Z
+Lean toolchain declared by repository: leanprover/lean4:v4.34.0

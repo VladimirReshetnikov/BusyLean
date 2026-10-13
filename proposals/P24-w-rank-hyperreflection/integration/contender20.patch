@@ -1,0 +1,1808 @@
+diff --git a/BusyLean/TransfiniteHyperReflection.lean b/BusyLean/TransfiniteHyperReflection.lean
+new file mode 100644
+index 0000000..7d99c5b
+--- /dev/null
++++ b/BusyLean/TransfiniteHyperReflection.lean
+@@ -0,0 +1,187 @@
++import BusyLean.HyperReflectionFacts
++
++/-!
++# W-rank hyperreflection
++
++`diagonalLift` is indexed by a natural-number rank.  This module raises the
++construction one type level.  A `HyperLift` transforms transformer lifts, and
++`runHyperLift` iterates such an operation along a countably branching
++well-founded `WTree Nat`.
++
++The important proof invariant is `GoodLift`: a lift preserves progressive
++transformers and is strictly inflationary.  No monotonicity in an oracle is
++used.  The strict comparison follows an explicit child and an explicit splice
++coordinate, exactly as in the first-order reflection proofs.
++
++All definitions are structural and executable.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- One type level above `TransformerLift`. -/
++abbrev HyperLift := TransformerLift → TransformerLift
++
++/-- The two invariants needed to iterate a transformer lift safely. -/
++abbrev GoodLift (lift : TransformerLift) : Prop :=
++  PreservesProgressive lift ∧ StrictlyInflationary lift
++
++/-- A hyperlift maps good lifts to good lifts. -/
++abbrev PreservesGoodLift (op : HyperLift) : Prop :=
++  ∀ lift, GoodLift lift → GoodLift (op lift)
++
++/-- A hyperlift strictly exceeds its input lift at every visible coordinate. -/
++abbrev StrictlyInflationary2 (op : HyperLift) : Prop :=
++  ∀ (lift : TransformerLift), GoodLift lift →
++    ∀ (base : Transformer), Progressive base →
++      ∀ (seed : Family) (i o n : Nat), i ≤ n →
++        lift base seed i n < op lift base seed o n
++
++/-- Assemble a countable family of transformer lifts.  Output coordinate `i`
++selects lift `i`; that lift is read at its canonical transformer coordinate
++`0`, through `spliceTransformers`. -/
++def spliceLifts (lifts : Nat → TransformerLift) : TransformerLift :=
++  fun base => spliceTransformers (fun i => lifts i base)
++
++/-- One rank step over a fixed schedule.  The input lift is used twice: first
++to amplify the base and then as the local lift throughout the schedule. -/
++def rankStep (schedule : WTree Nat) : HyperLift :=
++  fun lift base => stageLift lift (lift base) schedule
++
++/-- Iterate a hyperlift along a well-founded tree.
++
++At a leaf, apply the hyperlift once.  At a node, recursively construct one lift
++per child, splice those lifts, and apply the hyperlift to the splice. -/
++def runHyperLift (op : HyperLift) (seed : TransformerLift) :
++    WTree Nat → TransformerLift
++  | .leaf => op seed
++  | .node f =>
++      op (spliceLifts (fun i => runHyperLift op seed (f i)))
++
++/-- W-tree-indexed diagonal lifting over a fixed inner schedule. -/
++def treeDiagonalLift (schedule rankTree : WTree Nat)
++    (seed : TransformerLift) : TransformerLift :=
++  runHyperLift (rankStep schedule) seed rankTree
++
++/-- Splicing preserves the progressive-preservation invariant. -/
++theorem spliceLifts_preservesProgressive {lifts : Nat → TransformerLift}
++    (hlifts : ∀ i, PreservesProgressive (lifts i)) :
++    PreservesProgressive (spliceLifts lifts) := by
++  intro base hbase
++  exact spliceTransformers_progressive (fun i => hlifts i base hbase)
++
++/-- Splicing preserves strict inflationarity. -/
++theorem spliceLifts_strictlyInflationary {lifts : Nat → TransformerLift}
++    (hlifts : ∀ i, StrictlyInflationary (lifts i)) :
++    StrictlyInflationary (spliceLifts lifts) := by
++  intro base hbase seed i o n hi
++  change base seed i n < lifts o base seed 0 n
++  exact hlifts o base hbase seed i 0 n hi
++
++/-- A splice of good lifts is good. -/
++theorem spliceLifts_good {lifts : Nat → TransformerLift}
++    (hlifts : ∀ i, GoodLift (lifts i)) :
++    GoodLift (spliceLifts lifts) :=
++  ⟨spliceLifts_preservesProgressive (fun i => (hlifts i).1),
++    spliceLifts_strictlyInflationary (fun i => (hlifts i).2)⟩
++
++/-- One rank step maps good lifts to good lifts. -/
++theorem rankStep_preservesGood (schedule : WTree Nat) :
++    PreservesGoodLift (rankStep schedule) := by
++  intro lift hlift
++  rcases hlift with ⟨hpres, hstrict⟩
++  constructor
++  · intro base hbase
++    change Progressive (stageLift lift (lift base) schedule)
++    exact stageLift_progressive lift hpres
++      (lift base) (hpres base hbase) schedule
++  · intro base hbase seed i o n hi
++    change base seed i n <
++      stageLift lift (lift base) schedule seed o n
++    have hfirst : base seed i n < lift base seed i n :=
++      hstrict base hbase seed i i n hi
++    have hsecond : lift base seed i n <
++        stageLift lift (lift base) schedule seed o n :=
++      base_lt_stageLift lift hpres hstrict
++        (lift base) (hpres base hbase) schedule seed i o n hi
++    exact Nat.lt_trans hfirst hsecond
++
++/-- One rank step is strictly inflationary at the level of lifts. -/
++theorem rankStep_strictlyInflationary2 (schedule : WTree Nat) :
++    StrictlyInflationary2 (rankStep schedule) := by
++  intro lift hlift base hbase seed i o n hi
++  rcases hlift with ⟨hpres, hstrict⟩
++  change lift base seed i n <
++    stageLift lift (lift base) schedule seed o n
++  exact base_lt_stageLift lift hpres hstrict
++    (lift base) (hpres base hbase) schedule seed i o n hi
++
++/-- W-tree iteration preserves goodness. -/
++theorem runHyperLift_good (op : HyperLift)
++    (hop : PreservesGoodLift op)
++    (seed : TransformerLift) (hseed : GoodLift seed) :
++    (a : WTree Nat) → GoodLift (runHyperLift op seed a)
++  | .leaf => hop seed hseed
++  | .node f =>
++      hop
++        (spliceLifts (fun i => runHyperLift op seed (f i)))
++        (spliceLifts_good
++          (fun i => runHyperLift_good op hop seed hseed (f i)))
++
++/-- Every W-tree stage strictly exceeds its seed lift.
++
++The node case follows child zero, identifies it with coordinate zero of the
++splice, and then applies strictness of the hyperlift. -/
++theorem seed_lt_runHyperLift (op : HyperLift)
++    (hpres : PreservesGoodLift op)
++    (hstrict : StrictlyInflationary2 op)
++    (seedLift : TransformerLift) (hseed : GoodLift seedLift) :
++    (a : WTree Nat) →
++      ∀ (base : Transformer), Progressive base →
++        ∀ (seed : Family) (i o n : Nat), i ≤ n →
++          seedLift base seed i n <
++            runHyperLift op seedLift a base seed o n
++  | .leaf, base, hbase, seed, i, o, n, hi =>
++      hstrict seedLift hseed base hbase seed i o n hi
++  | .node f, base, hbase, seed, i, o, n, hi => by
++      have hchild :
++          seedLift base seed i n <
++            runHyperLift op seedLift (f 0) base seed 0 n :=
++        seed_lt_runHyperLift op hpres hstrict seedLift hseed
++          (f 0) base hbase seed i 0 n hi
++      have hsplice : GoodLift
++          (spliceLifts (fun j => runHyperLift op seedLift (f j))) :=
++        spliceLifts_good
++          (fun j => runHyperLift_good op hpres seedLift hseed (f j))
++      have hparent := hstrict
++        (spliceLifts (fun j => runHyperLift op seedLift (f j)))
++        hsplice base hbase seed 0 o n (Nat.zero_le n)
++      change
++        runHyperLift op seedLift (f 0) base seed 0 n <
++          runHyperLift op seedLift (.node f) base seed o n at hparent
++      exact Nat.lt_trans hchild hparent
++
++/-- The W-rank diagonal lift is good whenever its seed lift is good. -/
++theorem treeDiagonalLift_good (schedule rankTree : WTree Nat)
++    (seed : TransformerLift) (hseed : GoodLift seed) :
++    GoodLift (treeDiagonalLift schedule rankTree seed) := by
++  simpa [treeDiagonalLift] using
++    runHyperLift_good (rankStep schedule)
++      (rankStep_preservesGood schedule) seed hseed rankTree
++
++/-- The W-rank diagonal lift strictly exceeds its seed lift. -/
++theorem seed_lt_treeDiagonalLift (schedule rankTree : WTree Nat)
++    (seedLift : TransformerLift) (hseed : GoodLift seedLift)
++    (base : Transformer) (hbase : Progressive base)
++    (seed : Family) (i o n : Nat) (hi : i ≤ n) :
++    seedLift base seed i n <
++      treeDiagonalLift schedule rankTree seedLift base seed o n := by
++  simpa [treeDiagonalLift] using
++    seed_lt_runHyperLift (rankStep schedule)
++      (rankStep_preservesGood schedule)
++      (rankStep_strictlyInflationary2 schedule)
++      seedLift hseed rankTree base hbase seed i o n hi
++
++end BusyLean
+diff --git a/BusyLean/Contender20.lean b/BusyLean/Contender20.lean
+new file mode 100644
+index 0000000..70b3d7c
+--- /dev/null
++++ b/BusyLean/Contender20.lean
+@@ -0,0 +1,66 @@
++import BusyLean.TransfiniteHyperReflection
++import BusyLean.Contender19
++
++/-!
++# Contender 20: W-rank hyperreflection
++
++```
++family19 n      := F19 (F19 n)
++seedLift20 n    := diagonalLift (schedule20 n) (family19 n + 1)
++lift20 n        := treeDiagonalLift (schedule20 n) (rankTree20 n) (seedLift20 n)
++F20 n           := lift20 n lTransformer seedFamily20 n n
++contender_20     := F20 (F20 42)
++```
++
++Contender 19 uses a natural-number rank of transformer lifts.  Contender 20
++raises the rank mechanism one type level and iterates it along a countably
++branching well-founded tree.  At an outer node, the recursively generated child
++lifts are spliced into a single lift, then one diagonal rank step is applied.
++
++The seed is already a diagonal lift of rank `family19 n + 1`.  The outer rank
++tree is an autonomous hyperclosure above a schedule that is itself an
++autonomous hyperclosure above Contender 19's schedule.  The object-language
++transformer remains the large-Veblen-ladder reflector.
++
++Do not evaluate `contender_20`.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Contender 19's construction as a function of its input. -/
++def family19 (n : Nat) : Nat := F19 (F19 n)
++
++/-- The constant oracle family used by Contender 20. -/
++def seedFamily20 : Family := fun _ => family19
++
++/-- Inner schedule: a self-height autonomous closure above Contender 19's
++schedule. -/
++def schedule20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42) (Autonomous.encode (schedule19 n)))
++
++/-- Outer W-rank: another self-height autonomous closure, now above the inner
++schedule itself. -/
++def rankTree20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42) (Autonomous.encode (schedule20 n)))
++
++/-- The finite-rank lift from which the W-rank closure starts. -/
++def seedLift20 (n : Nat) : TransformerLift :=
++  diagonalLift (schedule20 n) (family19 n + 1)
++
++/-- The W-rank lift used at input `n`. -/
++def lift20 (n : Nat) : TransformerLift :=
++  treeDiagonalLift (schedule20 n) (rankTree20 n) (seedLift20 n)
++
++/-- Pointwise Contender-20 family. -/
++def F20 (n : Nat) : Nat :=
++  lift20 n lTransformer seedFamily20 n n
++
++/-- Contender 20.  Never evaluate it. -/
++def contender_20 : Nat := F20 (F20 42)
++
++end BusyLean
+diff --git a/BusyLean/Comparison20.lean b/BusyLean/Comparison20.lean
+new file mode 100644
+index 0000000..ea4a149
+--- /dev/null
++++ b/BusyLean/Comparison20.lean
+@@ -0,0 +1,82 @@
++import BusyLean.Contender20
++import BusyLean.Comparison19
++
++/-! # Contender 20: comparison theorems -/
++
++namespace BusyLean
++
++open BusyLean.W
++
++/-- The finite-rank seed lift satisfies both iteration invariants. -/
++theorem seedLift20_good (n : Nat) : GoodLift (seedLift20 n) :=
++  ⟨diagonalLift_preservesProgressive (schedule20 n) (family19 n + 1),
++    diagonalLift_strictlyInflationary (schedule20 n) (family19 n + 1)⟩
++
++/-- The full W-rank lift satisfies both iteration invariants. -/
++theorem lift20_good (n : Nat) : GoodLift (lift20 n) := by
++  simpa [lift20] using
++    treeDiagonalLift_good (schedule20 n) (rankTree20 n)
++      (seedLift20 n) (seedLift20_good n)
++
++/-- The raw large-Veblen reflection exceeds the Contender-19 seed family. -/
++theorem family19_lt_raw20 (n : Nat) :
++    family19 n < lTransformer seedFamily20 0 n := by
++  change seedFamily20 0 n < lTransformer seedFamily20 0 n
++  exact lTransformer_progressive seedFamily20 0 0 n (Nat.zero_le n)
++
++/-- The finite diagonal rank strictly exceeds raw reflection. -/
++theorem raw20_lt_seedLift20 (n : Nat) :
++    lTransformer seedFamily20 0 n <
++      seedLift20 n lTransformer seedFamily20 0 n := by
++  simpa [seedLift20] using
++    (diagonalLift_strictlyInflationary
++      (schedule20 n) (family19 n + 1))
++      lTransformer lTransformer_progressive
++      seedFamily20 0 0 n (Nat.zero_le n)
++
++/-- The outer W-rank stage strictly exceeds its already enormous seed lift. -/
++theorem seedLift20_lt_F20 (n : Nat) :
++    seedLift20 n lTransformer seedFamily20 0 n < F20 n := by
++  change seedLift20 n lTransformer seedFamily20 0 n <
++    lift20 n lTransformer seedFamily20 n n
++  simpa [lift20] using
++    seed_lt_treeDiagonalLift (schedule20 n) (rankTree20 n)
++      (seedLift20 n) (seedLift20_good n)
++      lTransformer lTransformer_progressive
++      seedFamily20 0 n n (Nat.zero_le n)
++
++/-- Raw reflection is below the complete Contender-20 stage. -/
++theorem raw_reflection20_lt_F20 (n : Nat) :
++    reflectLFamily seedFamily20 n < F20 n := by
++  change lTransformer seedFamily20 0 n < F20 n
++  exact Nat.lt_trans (raw20_lt_seedLift20 n) (seedLift20_lt_F20 n)
++
++/-- Pointwise domination of Contender 19's family. -/
++theorem family19_lt_F20 (n : Nat) : family19 n < F20 n :=
++  Nat.lt_trans (family19_lt_raw20 n) (raw_reflection20_lt_F20 n)
++
++/-- Every large-Veblen-ladder program in the bounded enumeration lies below
++`F20 n`. -/
++theorem lvalue_lt_F20 {n : Nat} {t : FL.CTm Ordinal.LargeVeblen}
++    (ht : t ∈ FL.lveblenLadderUpTo n) :
++    FL.lvalue (packFamily seedFamily20) n t < F20 n :=
++  Nat.lt_trans (lvalue_lt_reflectLFamily seedFamily20 ht)
++    (raw_reflection20_lt_F20 n)
++
++/-- The input is below Contender 19's self-composed family. -/
++theorem input_lt_family19 (n : Nat) : n < family19 n :=
++  Nat.lt_trans (input_lt_F19 n) (input_lt_F19 (F19 n))
++
++/-- Every input is below the corresponding Contender-20 family value. -/
++theorem input_lt_F20 (n : Nat) : n < F20 n :=
++  Nat.lt_trans (input_lt_family19 n) (family19_lt_F20 n)
++
++/-- The required formal comparison. -/
++theorem contender_19_lt_contender_20 : contender_19 < contender_20 :=
++  Nat.lt_trans (family19_lt_F20 42) (input_lt_F20 (F20 42))
++
++/-- A convenient inherited comparison. -/
++theorem contender_18_lt_contender_20 : contender_18 < contender_20 :=
++  Nat.lt_trans contender_18_lt_contender_19 contender_19_lt_contender_20
++
++end BusyLean
+diff --git a/test/Audit20.lean b/test/Audit20.lean
+new file mode 100644
+index 0000000..53bf8a7
+--- /dev/null
++++ b/test/Audit20.lean
+@@ -0,0 +1,54 @@
++import BusyLean.Comparison20
++import Lean
++
++/-! Focused audit for Contender 20. -/
++
++open Lean Elab Command
++
++/-- Constants reachable from a declaration through types and values. -/
++def constClosure20 (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if a forbidden declaration occurs in the closure of `root`. -/
++elab "#assert_not_in_closure20 " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := constClosure20 env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then
++      throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.contender_20
++#print axioms BusyLean.contender_19_lt_contender_20
++#print axioms BusyLean.family19_lt_F20
++#print axioms BusyLean.lvalue_lt_F20
++#print axioms BusyLean.seed_lt_runHyperLift
++#print axioms BusyLean.treeDiagonalLift_good
++
++#assert_not_in_closure20 BusyLean.contender_20 :
++  BusyLean.contender_19 BusyLean.contender_18 BusyLean.contender_17
++  BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_19_lt_contender_20
++#check @BusyLean.family19_lt_F20
++#check @BusyLean.lvalue_lt_F20
++#check @BusyLean.seed_lt_treeDiagonalLift
+diff --git a/test/Contender20Smoke.lean b/test/Contender20Smoke.lean
+new file mode 100644
+index 0000000..8754de9
+--- /dev/null
++++ b/test/Contender20Smoke.lean
+@@ -0,0 +1,15 @@
++import BusyLean.Comparison20
++
++/-!
++This file deliberately contains only type-level smoke checks.  Evaluating the
++contender or its nontrivial family values is not feasible.
++-/
++
++#check BusyLean.HyperLift
++#check BusyLean.rankStep
++#check BusyLean.runHyperLift
++#check BusyLean.treeDiagonalLift
++#check BusyLean.contender_20
++#check BusyLean.contender_19_lt_contender_20
++#check BusyLean.family19_lt_F20
++#check BusyLean.lvalue_lt_F20
+diff --git a/scripts/static_audit.py b/scripts/static_audit.py
+new file mode 100755
+index 0000000..c5033c0
+--- /dev/null
++++ b/scripts/static_audit.py
+@@ -0,0 +1,102 @@
++#!/usr/bin/env python3
++"""Static, compiler-independent sanity checks for the Contender-20 overlay."""
++from __future__ import annotations
++
++import hashlib
++import json
++import re
++import sys
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++LEAN_FILES = [
++    ROOT / "BusyLean" / "TransfiniteHyperReflection.lean",
++    ROOT / "BusyLean" / "Contender20.lean",
++    ROOT / "BusyLean" / "Comparison20.lean",
++]
++FORBIDDEN = {
++    "axiom",
++    "noncomputable",
++    "partial",
++    "unsafe",
++    "extern",
++    "implemented_by",
++    "sorry",
++    "admit",
++}
++
++
++def strip_comments(text: str) -> str:
++    """Remove nested Lean block comments and line comments conservatively."""
++    out: list[str] = []
++    i = 0
++    depth = 0
++    while i < len(text):
++        if text.startswith("/-", i):
++            depth += 1
++            i += 2
++        elif depth and text.startswith("-/", i):
++            depth -= 1
++            i += 2
++        elif depth:
++            i += 1
++        elif text.startswith("--", i):
++            j = text.find("\n", i)
++            if j < 0:
++                break
++            out.append("\n")
++            i = j + 1
++        else:
++            out.append(text[i])
++            i += 1
++    return "".join(out)
++
++
++def balanced(text: str) -> bool:
++    pairs = {")": "(", "]": "[", "}": "{"}
++    stack: list[str] = []
++    in_string = False
++    escaped = False
++    for ch in text:
++        if in_string:
++            if escaped:
++                escaped = False
++            elif ch == "\\":
++                escaped = True
++            elif ch == '"':
++                in_string = False
++            continue
++        if ch == '"':
++            in_string = True
++        elif ch in "([{":
++            stack.append(ch)
++        elif ch in pairs:
++            if not stack or stack.pop() != pairs[ch]:
++                return False
++    return not stack and not in_string
++
++
++def main() -> int:
++    report: dict[str, object] = {"files": {}, "status": "PASS"}
++    for path in LEAN_FILES:
++        raw = path.read_text(encoding="utf-8")
++        code = strip_comments(raw)
++        words = set(re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", code))
++        bad = sorted(FORBIDDEN & words)
++        item = {
++            "bytes": len(raw.encode("utf-8")),
++            "lines": raw.count("\n") + 1,
++            "sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
++            "forbidden_tokens": bad,
++            "balanced_delimiters": balanced(code),
++            "max_line_length": max(map(len, raw.splitlines()), default=0),
++        }
++        report["files"][str(path.relative_to(ROOT))] = item
++        if bad or not item["balanced_delimiters"]:
++            report["status"] = "FAIL"
++    print(json.dumps(report, indent=2, sort_keys=True))
++    return 0 if report["status"] == "PASS" else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/build_overlay.sh b/scripts/build_overlay.sh
+new file mode 100755
+index 0000000..396f8c5
+--- /dev/null
++++ b/scripts/build_overlay.sh
+@@ -0,0 +1,8 @@
++#!/usr/bin/env bash
++set -euo pipefail
++
++# Run from the root of a BusyLean checkout after copying this overlay into it.
++lake build BusyLean.Contender20
++lake build BusyLean.Comparison20
++lake env lean test/Contender20Smoke.lean
++lake env lean test/Audit20.lean
+diff --git a/article/contender20.tex b/article/contender20.tex
+new file mode 100644
+index 0000000..4f5a675
+--- /dev/null
++++ b/article/contender20.tex
+@@ -0,0 +1,1219 @@
++\documentclass[11pt]{article}
++\usepackage[T1]{fontenc}
++\usepackage{lmodern}
++\usepackage{amsmath,amssymb,amsthm,mathtools}
++\usepackage{microtype}
++\usepackage[margin=0.92in]{geometry}
++\usepackage{booktabs,longtable,array}
++\usepackage{enumitem}
++\usepackage{xcolor}
++\usepackage{listings}
++\usepackage{fancyhdr}
++\usepackage{hyperref}
++
++\hypersetup{
++  colorlinks=true,
++  linkcolor=blue!45!black,
++  urlcolor=blue!50!black,
++  citecolor=blue!45!black,
++  pdftitle={Contender 20: W-Rank Hyperreflection in BusyLean},
++  pdfauthor={Research proposal for BusyLean}
++}
++
++\pagestyle{fancy}
++\fancyhf{}
++\fancyhead[L]{BusyLean Contender 20}
++\fancyhead[R]{W-rank hyperreflection}
++\fancyfoot[C]{\thepage}
++\setlength{\headheight}{14pt}
++
++\lstdefinelanguage{lean}{
++  keywords={abbrev,def,theorem,inductive,structure,where,match,with,fun,let,in,
++    namespace,end,open,import,by,have,show,exact,simpa,using,change,intro,rcases,
++    constructor,at},
++  sensitive=true,
++  morecomment=[l]{--},
++  morecomment=[s]{/-}{-/},
++  morestring=[b]"
++}
++\lstset{
++  language=lean,
++  basicstyle=\ttfamily\footnotesize,
++  keywordstyle=\bfseries\color{blue!45!black},
++  commentstyle=\itshape\color{black!58},
++  stringstyle=\color{green!35!black},
++  columns=fullflexible,
++  keepspaces=true,
++  frame=single,
++  framerule=0.3pt,
++  rulecolor=\color{black!25},
++  xleftmargin=0.75em,
++  xrightmargin=0.75em,
++  breaklines=true,
++  breakatwhitespace=false,
++  showstringspaces=false,
++  literate={→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {∀}{{$\forall$}}1
++    {∧}{{$\wedge$}}1 {≤}{{$\le$}}1 {<}{{$<$}}1
++    {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1 {∈}{{$\in$}}1
++    {·}{{$\cdot$}}1 {₀}{{$_0$}}1 {₁}{{$_1$}}1 {₂}{{$_2$}}1
++}
++
++\newtheorem{theorem}{Theorem}[section]
++\newtheorem{lemma}[theorem]{Lemma}
++\newtheorem{proposition}[theorem]{Proposition}
++\newtheorem{corollary}[theorem]{Corollary}
++\theoremstyle{definition}
++\newtheorem{definition}[theorem]{Definition}
++\newtheorem{construction}[theorem]{Construction}
++\theoremstyle{remark}
++\newtheorem{remark}[theorem]{Remark}
++\newtheorem{caution}[theorem]{Caution}
++
++\newcommand{\N}{\mathbb{N}}
++\newcommand{\code}[1]{\texttt{#1}}
++\newcommand{\Fam}{\mathsf{Fam}}
++\newcommand{\Tr}{\mathsf{Tr}}
++\newcommand{\Lift}{\mathsf{Lift}}
++\newcommand{\HLift}{\mathsf{HLift}}
++\newcommand{\Prog}{\mathsf{Prog}}
++\newcommand{\Good}{\mathsf{Good}}
++\newcommand{\Step}{\mathsf{Step}}
++\newcommand{\Run}{\mathsf{Run}}
++\newcommand{\LV}{\mathsf{LV}}
++\newcommand{\WTree}{\mathsf{WTree}}
++\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
++
++\title{\textbf{Contender 20: W-Rank Hyperreflection in BusyLean}\\[0.45em]
++  \large A second-order, well-founded-tree closure of diagonal transformer lifting}
++\author{Research proposal prepared for Vladimir Reshetnikov}
++\date{October 13, 2026}
++
++\begin{document}
++\maketitle
++
++\begin{abstract}
++BusyLean's current Contender~19 combines two independent sources of growth: a
++large-Veblen-length ladder of normalizing universes and a finite hierarchy of
++\emph{transformer lifts}.  Its lift rank is a natural number, albeit the
++astronomical value \(\mathrm{family18}(n)+1\).  This note proposes Contender~20,
++which raises the amplifier one type level.  A \emph{hyperlift} maps transformer
++lifts to transformer lifts.  We define a structural recursion that iterates a
++hyperlift along an arbitrary countably branching well-founded tree.  At each
++outer node, the recursively generated child lifts are spliced into a single
++lift, after which one diagonal rank step is applied.  This is a W-tree analogue
++of transfinite iteration with a genuine limit constructor, rather than another
++finite self-composition.
++
++The central technical point is strict growth without monotonicity.  Reflection
++is not monotone in its oracle: a reflected program may inspect an oracle value
++and branch.  Consequently, none of the comparison proofs may replace an
++oracle by a pointwise larger one.  We instead maintain two explicit invariants:
++a lift preserves progressive transformers, and it strictly exceeds its input
++transformer at every visible coordinate.  We prove that splicing preserves
++both invariants, one rank step preserves both, W-tree iteration preserves both,
++and every nonempty stage---including a leaf stage---strictly exceeds its seed
++lift.  The node proof follows child zero and then coordinate zero of the splice;
++it uses no extensional monotonicity principle.
++
++At input \(n\), the finite seed lift already has rank
++\(\mathrm{family19}(n)+1\).  The outer rank is an autonomous hyperclosure above
++a schedule that is itself an autonomous hyperclosure above Contender~19's
++schedule.  Applying the resulting W-rank lift to the large-Veblen reflector and
++the constant oracle family \(\mathrm{family19}\) yields \(F_{20}(n)\), and
++\(\mathrm{contender}_{20}=F_{20}(F_{20}(42))\).  The supplied Lean development
++proves pointwise \(\mathrm{family19}(n)<F_{20}(n)\), hence
++\(\mathrm{contender}_{19}<\mathrm{contender}_{20}\), and also bounds every
++large-Veblen-ladder program in the existing depth-\(n\) enumeration.
++
++The package is designed for BusyLean's Lean~4.34.0 toolchain and includes the
++three Lean modules, focused audit and smoke files, an integration patch, and
++static checks.  The present execution environment did not contain Lean, so the
++sources have not been kernel-checked here; this verification boundary is stated
++explicitly throughout the report.
++\end{abstract}
++
++\tableofcontents
++\newpage
++
++%======================================================================
++\section{Result at a glance}
++
++The proposal adds one generic module and two contender-specific modules:
++
++\begin{center}
++\small
++\begin{tabular}{P{0.38\textwidth}P{0.52\textwidth}}
++\toprule
++File & Role\\
++\midrule
++\code{TransfiniteHyper\allowbreak Reflection.lean} & Hyperlifts, lift splicing,
++W-tree iteration, preservation and strictness theorems.\\
++\code{Contender20.lean} & The two autonomous schedules, the finite seed lift,
++the W-rank lift, \(F_{20}\), and \code{contender\_20}.\\
++\code{Comparison20.lean} & The pointwise comparison chain,
++\code{contender\_19\_lt\_contender\_20}, and the program-value bound.\\
++\bottomrule
++\end{tabular}
++\end{center}
++
++The headline definition is short:
++
++\begin{lstlisting}
++def family19 (n : Nat) : Nat := F19 (F19 n)
++
++def seedLift20 (n : Nat) : TransformerLift :=
++  diagonalLift (schedule20 n) (family19 n + 1)
++
++def lift20 (n : Nat) : TransformerLift :=
++  treeDiagonalLift (schedule20 n) (rankTree20 n) (seedLift20 n)
++
++def F20 (n : Nat) : Nat :=
++  lift20 n lTransformer seedFamily20 n n
++
++def contender_20 : Nat := F20 (F20 42)
++\end{lstlisting}
++
++The proof is deliberately factored into three strict inequalities:
++\begin{equation}\label{eq:chain}
++\underbrace{\mathrm{family19}(n)}_{F_{19}(F_{19}(n))}
++<\underbrace{L(\mathrm{seed}_{20})}_{\text{one large-Veblen reflection}}
++<\underbrace{D_n(L)(\mathrm{seed}_{20})}_{\text{finite-rank seed lift}}
++<\underbrace{W_n(D_n)(L)(\mathrm{seed}_{20})}_{F_{20}(n)}.
++\end{equation}
++Here \(L\) is the existing large-Veblen reflector, \(D_n\) is a diagonal lift
++of rank \(\mathrm{family19}(n)+1\), and \(W_n\) is the new W-tree rank closure.
++Each arrow is witnessed by an existing or newly proved strict-inflation
++property; no appeal is made to an informal ordinal estimate.
++
++\paragraph{Formal status.}
++The package gives complete Lean terms for the definitions and proofs.  Static
++checks confirm balanced delimiters, line lengths below 81 in the three main
++modules, and absence of the tokens used for nonconstructive or incomplete
++shortcuts.  Because no Lean executable was available in the artifact runtime,
++``the Lean development proves'' in this note means that the supplied source
++contains the stated proof term and is intended to pass the repository's kernel
++build; an actual build receipt remains the first integration task.
++
++%======================================================================
++\section{Baseline: what Contender 19 already does}
++
++BusyLean is a Lean~4 continuation of the constructive biggest-number contest
++originating in Roux's Coq repository and Aaronson's larger-number essay
++\cite{aaronson,roux}.  A contender is not merely a description.  It is a closed
++\code{Nat}, computable in principle, together with a formal theorem that it is
++larger than the incumbent.  The repository additionally audits axioms,
++dependency closure, and clean-build time.
++
++Contender~19 has the form
++\[
++F_{19}(n)=D_{S_{19}(n),\,r_{19}(n)}(L)
++  (\lambda i.\,\mathrm{family18})(n,n),
++\qquad
++\mathrm{contender}_{19}=F_{19}(F_{19}(42)),
++\]
++where:
++\begin{itemize}[leftmargin=*]
++\item \(L=\code{lTransformer}\) reflects over the level-\(n\) language whose
++  atoms are normal large-Veblen terms;
++\item \(S_{19}(n)\) is an autonomous W-tree schedule above the earlier index;
++\item \(D_{S,k}=\code{diagonalLift S k}\) is a natural-number hierarchy of
++  transformer lifts;
++\item \(r_{19}(n)=\mathrm{family18}(n)+1\); and
++\item \(\mathrm{family18}(n)=F_{18}(F_{18}(n))\).
++\end{itemize}
++
++The language side is already formidable.  Its atoms are Sch\"utte-style
++Klammersymbole: Veblen argument arrays whose positions are themselves terms.
++The repository proves well-foundedness of the normal forms and then obtains a
++normalizing universe ladder from the generic theorem \code{FL.wfUniv}.  In
++particular, a new contender cannot honestly advertise a major advance merely
++by replacing 42 with 43 or adding one more self-composition.
++
++The amplifier side, however, has a clean boundary.  \code{diagonalLift} is
++indexed by \(k\in\N\):
++\begin{align*}
++D_{S,0}(T)&=\code{liftTransformer}(T),\\
++D_{S,k+1}(T)&=\code{stageLift}(D_{S,k})(D_{S,k}(T))(S).
++\end{align*}
++Even when \(k\) is incomprehensibly large, the rank object is still a natural
++number.  Contender~20 targets precisely this boundary.
++
++%======================================================================
++\section{Design criteria and rejected easy moves}
++
++A satisfactory successor should meet five criteria.
++
++\begin{enumerate}[leftmargin=*]
++\item \textbf{Closed and constructive.}  Every definition must reduce by
++  structural recursion or already certified normalization; no unbounded search
++  for a witness, semantic truth predicate, or Busy Beaver is permitted.
++\item \textbf{A structural advance.}  The definition should add a new closure
++  principle, not only a larger numeral in an existing parameter.
++\item \textbf{A direct formal comparison.}  The previous family should occur as
++  a computable seed, while the proof should expose strict occurrences rather
++  than rely on unproved growth folklore.
++\item \textbf{Compatibility with nonmonotone reflection.}  Reflected programs
++  can branch on oracle values, so pointwise oracle monotonicity is unavailable.
++\item \textbf{Small trusted surface.}  The new proof should be generic and sit
++  above the existing normalization theorems rather than duplicate the
++  large-Veblen development.
++\end{enumerate}
++
++Several tempting moves were rejected.
++
++\paragraph{Only seed Contender 19 into Contender 19's amplifier.}
++Replacing \code{family18} by \code{family19} and retaining exactly the old
++finite-rank construction would certainly give a larger number and a short
++proof.  It would also be a routine generational step.  The present proposal
++uses that stronger seed \emph{and} adds an independent W-rank closure.
++
++\paragraph{Add more finite self-compositions.}
++Definitions such as \(F_{19}^{F_{19}(42)}(42)\) are computable and enormous,
++but they do not exploit BusyLean's generic reflection architecture.  They also
++obscure the conceptual comparison between language strength and amplifier
++strength.
++
++\paragraph{Jump immediately to collapsing-function atoms.}
++A Bachmann--Howard or stronger ladder is a natural language-side project, but
++raw collapsing-function syntax is not automatically well-founded under the
++intended comparison.  Canonical closure side conditions are essential, and a
++credible formalization is substantially larger than the present overlay.  It
++is a valuable future direction, not a prudent source of a quick theorem.
++
++\paragraph{Assume monotonicity.}
++This is simply invalid.  If a reflected term reads an oracle value and branches,
++a larger oracle can select a smaller branch.  Existing BusyLean proofs avoid
++this trap, and the new second-order proofs preserve that discipline.
++
++%======================================================================
++\section{Four type levels of reflection data}
++
++The construction is easiest to understand by separating four function spaces.
++
++\begin{definition}[Families]
++\[
++\Fam := \N\to\N\to\N.
++\]
++A family \(s\) is read as a countable collection of unary functions:
++\(s(i,n)\) is coordinate \(i\) at numerical input \(n\).
++\end{definition}
++
++\begin{definition}[Transformers]
++\[
++\Tr := \Fam\to\Fam.
++\]
++A transformer maps an oracle family to a new family.  The repository's
++large-Veblen reflection transformer is one example.
++\end{definition}
++
++\begin{definition}[Transformer lifts]
++\[
++\Lift := \Tr\to\Tr.
++\]
++A transformer lift amplifies a transformer.  Existing examples are
++\code{liftTransformer}, \code{stageLift L}, and every
++\code{diagonalLift schedule k}.
++\end{definition}
++
++\begin{definition}[Hyperlifts]
++\[
++\HLift := \Lift\to\Lift.
++\]
++This is the new level.  A hyperlift amplifies the method by which transformers
++are amplified.
++\end{definition}
++
++The Lean declarations mirror this hierarchy:
++
++\begin{lstlisting}
++abbrev Transformer := Family → Family
++abbrev TransformerLift := Transformer → Transformer
++abbrev HyperLift := TransformerLift → TransformerLift
++\end{lstlisting}
++
++A type-level rise of this kind has precedent inside BusyLean.  Contender~6
++iterated ordinary reflection over families.  Contender~12 lifted reflection to
++transformers.  Contender~15 introduced a finite hierarchy of transformer
++lifts.  Contender~20 moves from a natural-number hierarchy in \(\Lift\) to
++well-founded-tree recursion in \(\HLift\).
++
++%======================================================================
++\section{The invariants: progress and strict occurrence}
++
++The first-order invariant already present in BusyLean is progressivity.
++
++\begin{definition}[Progressive transformer]
++A transformer \(T\) is progressive when
++\[
++\Prog(T) :\Longleftrightarrow
++\forall s,i,o,n\;\bigl(i\le n\Rightarrow s(i,n)<T(s)(o,n)\bigr).
++\]
++Every visible seed coordinate is strictly below every output coordinate at the
++same numerical input.
++\end{definition}
++
++For a lift \(L\in\Lift\), two properties matter.
++
++\begin{definition}[Preservation and strict inflation]
++\begin{align*}
++\mathsf{Pres}(L)&:\Longleftrightarrow
++  \forall T\;(\Prog(T)\Rightarrow\Prog(L(T))),\\
++\mathsf{Strict}(L)&:\Longleftrightarrow
++  \forall T\;\Bigl(\Prog(T)\Rightarrow
++  \forall s,i,o,n\;(i\le n\Rightarrow T(s)(i,n)<L(T)(s)(o,n))\Bigr).
++\end{align*}
++Set \(\Good(L):=\mathsf{Pres}(L)\wedge\mathsf{Strict}(L)\).
++\end{definition}
++
++In Lean these are the existing predicates \code{PreservesProgressive} and
++\code{StrictlyInflationary}, paired by the new abbreviation:
++
++\begin{lstlisting}
++abbrev GoodLift (lift : TransformerLift) : Prop :=
++  PreservesProgressive lift ∧ StrictlyInflationary lift
++\end{lstlisting}
++
++At the hyperlift level we require preservation of goodness and a second-order
++strictness statement.
++
++\begin{definition}[Goodness-preserving and second-order strict]
++For \(H\in\HLift\),
++\begin{align*}
++\mathsf{PresGood}(H)&:\Longleftrightarrow
++  \forall L\;(\Good(L)\Rightarrow\Good(H(L))),\\
++\mathsf{Strict}_2(H)&:\Longleftrightarrow
++  \forall L\;\bigl[\Good(L)\Rightarrow{}\\
++ &\qquad \forall T\;\bigl[\Prog(T)\Rightarrow{}\\
++ &\qquad\quad \forall s,i,o,n\;\bigl(i\le n\Rightarrow
++    L(T)(s)(i,n)<H(L)(T)(s)(o,n)\bigr)\bigr]\bigr].
++\end{align*}
++\end{definition}
++
++These predicates are intentionally intensional: they identify a concrete copy
++of the old object inside the new one.  That is why they remain useful when no
++monotonicity theorem exists.
++
++%======================================================================
++\section{Splicing lifts: the limit mechanism}
++
++The repository already has \code{spliceTransformers}.  Given transformers
++\(T_0,T_1,\ldots\), the splice selects \(T_i\) by output coordinate \(i\), then
++reads its canonical coordinate zero.  We lift this operation one type level.
++
++\begin{definition}[Lift splice]
++For \(L_i\in\Lift\), define
++\[
++\mathsf{spliceLift}(L_0,L_1,\ldots)(T)
++:=\mathsf{spliceTransformer}(L_0(T),L_1(T),\ldots).
++\]
++Equivalently,
++\[
++\mathsf{spliceLift}(\vec L)(T)(s)(i,n)=L_i(T)(s)(0,n).
++\]
++\end{definition}
++
++\begin{lstlisting}
++def spliceLifts (lifts : Nat → TransformerLift) : TransformerLift :=
++  fun base => spliceTransformers (fun i => lifts i base)
++\end{lstlisting}
++
++\begin{proposition}[Splicing preserves goodness]\label{prop:splice}
++If every \(L_i\) is good, then \(\mathsf{spliceLift}(\vec L)\) is good.
++\end{proposition}
++
++\begin{proof}
++Let \(T\) be progressive.  Each \(L_i(T)\) is progressive, so the existing
++first-order splice theorem makes their splice progressive.
++
++For strictness, fix seed \(s\), input coordinate \(j\), output coordinate
++\(i\), and \(j\le n\).  Strictness of \(L_i\), with canonical output coordinate
++zero, gives
++\[
++T(s)(j,n)<L_i(T)(s)(0,n)
++=\mathsf{spliceLift}(\vec L)(T)(s)(i,n).
++\]
++No comparison between two different oracle families occurs.
++\end{proof}
++
++The splice is the correct analogue of a limit-stage join.  It does not collapse
++all children to a numerical maximum.  Every child remains addressable, which
++allows later transformers to select branches dynamically through the family
++interface.
++
++%======================================================================
++\section{One diagonal step at the hyperlift level}
++
++Fix an inner schedule \(S\in\WTree(\N)\).  The new hyperlift
++\(\Step_S\) sends a lift \(L\) to
++\[
++\Step_S(L)(T):=\code{stageLift}\bigl(L,L(T),S\bigr).
++\]
++
++\begin{lstlisting}
++def rankStep (schedule : WTree Nat) : HyperLift :=
++  fun lift base => stageLift lift (lift base) schedule
++\end{lstlisting}
++
++This is exactly the successor functional implicit in \code{diagonalLift}: the
++input lift appears twice, once to pre-amplify the base transformer and once as
++the local lifting operation used at every node of the schedule.
++
++\begin{proposition}[Rank step preserves goodness]\label{prop:rankgood}
++If \(L\) is good, then \(\Step_S(L)\) is good.
++\end{proposition}
++
++\begin{proof}
++Let \(T\) be progressive.  Preservation for \(L\) gives progressivity of
++\(L(T)\).  The existing theorem \code{stageLift\_progressive} now shows that
++\(\code{stageLift}(L,L(T),S)\) is progressive.
++
++For strictness, use two explicit strict inclusions:
++\[
++T(s)(i,n)<L(T)(s)(i,n)
++<\code{stageLift}(L,L(T),S)(s)(o,n).
++\]
++The first is strictness of \(L\); the second is
++\code{base\_lt\_stageLift}, applied with base transformer \(L(T)\).
++\end{proof}
++
++\begin{proposition}[Second-order strictness]\label{prop:rankstrict2}
++If \(L\) is good and \(T\) is progressive, then
++\[
++L(T)(s)(i,n)<\Step_S(L)(T)(s)(o,n)
++\qquad(i\le n).
++\]
++Thus \(\mathsf{Strict}_2(\Step_S)\) holds.
++\end{proposition}
++
++\begin{proof}
++This is a direct application of \code{base\_lt\_stageLift} with base
++transformer \(L(T)\).  Unlike Proposition~\ref{prop:rankgood}, no preliminary
++step from \(T\) to \(L(T)\) is needed.
++\end{proof}
++
++%======================================================================
++\section{W-tree iteration of hyperlifts}
++
++Let \(H\in\HLift\), let \(L_0\in\Lift\), and let \(A\in\WTree(\N)\).  Define
++\(\Run(H,L_0,A)\in\Lift\) by structural recursion:
++\begin{align*}
++\Run(H,L_0,\mathsf{leaf})
++  &=H(L_0),\\
++\Run(H,L_0,\mathsf{node}(f))
++  &=H\left(\mathsf{spliceLift}
++      \bigl(i\mapsto\Run(H,L_0,f(i))\bigr)\right).
++\end{align*}
++
++\begin{lstlisting}
++def runHyperLift (op : HyperLift) (seed : TransformerLift) :
++    WTree Nat → TransformerLift
++  | .leaf => op seed
++  | .node f =>
++      op (spliceLifts (fun i => runHyperLift op seed (f i)))
++\end{lstlisting}
++
++Because \code{WTree} is inductive, every branch is well-founded even though a
++node has countably many children and their heights may be unbounded.  Hence the
++outer rank can represent genuine limit shapes such as a root whose \(i\)-th
++child has finite height \(i\).  The definition remains ordinary structural
++recursion in Lean.
++
++\begin{theorem}[Goodness of W-tree iteration]\label{thm:rungood}
++If \(H\) preserves good lifts and \(L_0\) is good, then
++\(\Run(H,L_0,A)\) is good for every well-founded tree \(A\).
++\end{theorem}
++
++\begin{proof}
++By structural induction on \(A\).  At a leaf, apply preservation of goodness to
++\(L_0\).  At a node, the induction hypothesis makes every child lift good;
++Proposition~\ref{prop:splice} makes their splice good; preservation of goodness
++for \(H\) finishes the step.
++\end{proof}
++
++The next theorem is the key comparison result.
++
++\begin{theorem}[The W-tree stage strictly exceeds its seed]\label{thm:seedlt}
++Assume \(H\) preserves goodness and is second-order strictly inflationary.  If
++\(L_0\) is good and \(T\) is progressive, then for every \(A\), seed family
++\(s\), and \(i\le n\),
++\[
++L_0(T)(s)(i,n)<\Run(H,L_0,A)(T)(s)(o,n).
++\]
++\end{theorem}
++
++\begin{proof}
++Again use structural induction on \(A\).
++
++At a leaf, the result is exactly \(\mathsf{Strict}_2(H)\).
++
++At a node \(\mathsf{node}(f)\), first follow child zero.  The induction
++hypothesis gives
++\[
++L_0(T)(s)(i,n)<\Run(H,L_0,f(0))(T)(s)(0,n).
++\]
++By definition of lift splicing, the right-hand side is coordinate zero of the
++splice of all child lifts.  Theorem~\ref{thm:rungood} and
++Proposition~\ref{prop:splice} show that this splice is good.  Apply
++\(\mathsf{Strict}_2(H)\) to the splice, from its coordinate zero to arbitrary
++output coordinate \(o\):
++\[
++\Run(H,L_0,f(0))(T)(s)(0,n)
++< H(\mathsf{spliceLift}(\ldots))(T)(s)(o,n).
++\]
++The last term is definitionally
++\(\Run(H,L_0,\mathsf{node}(f))(T)(s)(o,n)\).  Transitivity completes the
++proof.
++\end{proof}
++
++\begin{remark}[Why child zero is enough]
++The theorem does not attempt to compare every child simultaneously or take a
++maximum over child values.  It needs one explicit embedded predecessor.  Child
++zero supplies that predecessor, while the splice preserves access to all other
++children for subsequent computations.
++\end{remark}
++
++\begin{remark}[No hidden monotonicity]
++The proof never changes the oracle supplied to the same reflected program.
++Every inequality follows a syntactically present old lift or child.  This is the
++second-order analogue of the proof style already used by BusyLean's
++\code{transformer\_lt\_lift\_at} and \code{base\_lt\_stageLift}.
++\end{remark}
++
++%======================================================================
++\section{The generic W-rank diagonal lift}
++
++We specialize the preceding recursion to the diagonal rank step:
++\[
++\mathsf{treeDiagonalLift}(S,A,L_0)
++:=\Run(\Step_S,L_0,A).
++\]
++
++\begin{lstlisting}
++def treeDiagonalLift (schedule rankTree : WTree Nat)
++    (seed : TransformerLift) : TransformerLift :=
++  runHyperLift (rankStep schedule) seed rankTree
++\end{lstlisting}
++
++Propositions~\ref{prop:rankgood} and~\ref{prop:rankstrict2}, together with
++Theorems~\ref{thm:rungood} and~\ref{thm:seedlt}, immediately yield:
++
++\begin{corollary}[Generic W-rank facts]\label{cor:generic}
++If \(L_0\) is good, then
++\(\mathsf{treeDiagonalLift}(S,A,L_0)\) is good and strictly exceeds \(L_0\)
++at every visible coordinate over every progressive base transformer.
++\end{corollary}
++
++This factorization is important for auditability.  The contender-specific file
++does not prove a bespoke inequality through an enormous definition.  It only
++instantiates a small, reusable theorem about arbitrary schedules, rank trees,
++seed lifts, base transformers, and oracle families.
++
++%======================================================================
++\section{Choosing the two Contender-20 trees}
++
++Let
++\[
++\mathrm{family19}(n):=F_{19}(F_{19}(n)).
++\]
++As in earlier BusyLean generations, this is a function of the input, not a
++reference to the closed constant \code{contender\_19}.  Consequently the
++closure audit can require that \code{contender\_20} contain none of the earlier
++closed contender constants.
++
++The repository's \code{Autonomous} syntax builds transparent well-founded trees
++with addition, multiplication, omega powers, derivative-like fixed-point
++closures, a common-critical closure, and higher derivatives.  We use it twice.
++
++\begin{construction}[Inner schedule]
++\begin{align*}
++S_{20}(n):={}&\code{Autonomous.realize}\bigl(
++  \code{Autonomous.hyper}(\mathrm{family19}(n)+42,\\
++&\hspace{41mm}\code{Autonomous.encode}(S_{19}(n)))\bigr).
++\end{align*}
++\end{construction}
++
++\begin{construction}[Outer rank tree]
++\begin{align*}
++R_{20}(n):={}&\code{Autonomous.realize}\bigl(
++  \code{Autonomous.hyper}(\mathrm{family19}(n)+42,\\
++&\hspace{41mm}\code{Autonomous.encode}(S_{20}(n)))\bigr).
++\end{align*}
++\end{construction}
++
++The first closure enlarges the schedule used inside each rank step.  The second
++closure is not another inner schedule: it indexes the recursion over lifts
++itself.  This separation prevents the outer mechanism from collapsing into
++``one more finite rank'' by notation alone.
++
++The concrete Lean code is:
++
++\begin{lstlisting}
++def schedule20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42)
++      (Autonomous.encode (schedule19 n)))
++
++def rankTree20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42)
++      (Autonomous.encode (schedule20 n)))
++\end{lstlisting}
++
++\begin{caution}[Syntax trees, not asserted ordinal equalities]
++BusyLean's \code{Autonomous} module explicitly treats these operations as
++transparent tree syntax.  The present proposal likewise does not identify
++\code{hyper k a} with a particular quotient ordinal.  The only formal facts
++used are structural well-foundedness of the generated W-trees and the generic
++strict-growth theorems.
++\end{caution}
++
++%======================================================================
++\section{The finite seed lift and the final family}
++
++The outer W-rank iteration starts from a seed that already exceeds the entire
++Contender-19 family pointwise through a large finite rank:
++\[
++D_{20}(n):=\code{diagonalLift}(S_{20}(n),\mathrm{family19}(n)+1).
++\]
++This is \code{seedLift20 n}.  Existing BusyLean theorems give both components
++of \(\Good(D_{20}(n))\).
++
++Define
++\[
++W_{20}(n):=\mathsf{treeDiagonalLift}
++  (S_{20}(n),R_{20}(n),D_{20}(n)).
++\]
++Let \(s_{20}(i,n)=\mathrm{family19}(n)\) be the constant seed family.  Finally,
++\[
++F_{20}(n):=W_{20}(n)(L)(s_{20})(n,n),
++\qquad
++\mathrm{contender}_{20}:=F_{20}(F_{20}(42)),
++\]
++where \(L=\code{lTransformer}\).
++
++The full contender file has only six substantive definitions after the imports.
++There is no new object-language interpreter, type checker, or normalization
++argument.  All language-theoretic strength is inherited from Contender~19; all
++new work lies in the generic amplifier.
++
++%======================================================================
++\section{Formal comparison with Contender 19}
++
++We now unpack the chain~\eqref{eq:chain}.
++
++\subsection{The previous family is below raw reflection}
++
++Progressivity of the large-Veblen transformer states
++\[
++s(i,n)<L(s)(o,n)\qquad(i\le n).
++\]
++Taking \(s=s_{20}\), \(i=o=0\), and observing that
++\(s_{20}(0,n)=\mathrm{family19}(n)\), we obtain
++\[
++\mathrm{family19}(n)<L(s_{20})(0,n).
++\]
++This is \code{family19\_lt\_raw20}.
++
++\subsection{Raw reflection is below the finite seed lift}
++
++The existing theorem \code{diagonalLift\_strictlyInflationary} gives
++\[
++L(s_{20})(0,n)<D_{20}(n)(L)(s_{20})(0,n).
++\]
++This is \code{raw20\_lt\_seedLift20}.
++
++\subsection{The finite seed lift is below the W-rank lift}
++
++Corollary~\ref{cor:generic}, instantiated with schedule \(S_{20}(n)\), rank
++tree \(R_{20}(n)\), seed lift \(D_{20}(n)\), and base transformer \(L\), gives
++\[
++D_{20}(n)(L)(s_{20})(0,n)
++<W_{20}(n)(L)(s_{20})(n,n)=F_{20}(n).
++\]
++This is \code{seedLift20\_lt\_F20}.  Notice that this theorem isolates the new
++structural gain: even after the finite seed rank has been chosen using
++\(\mathrm{family19}(n)\), the outer W-tree stage is formally and strictly
++larger.
++
++\subsection{Pointwise and closed comparisons}
++
++By transitivity,
++\begin{theorem}[Pointwise dominance]
++For every \(n\),
++\[
++\mathrm{family19}(n)<F_{20}(n).
++\]
++\end{theorem}
++
++The existing input-growth theorem for \(F_{19}\) gives
++\[
++n<F_{19}(n)<F_{19}(F_{19}(n))=\mathrm{family19}(n)<F_{20}(n),
++\]
++so \(n<F_{20}(n)\) for every \(n\).  At \(n=42\),
++\[
++\mathrm{contender}_{19}=\mathrm{family19}(42)<F_{20}(42)
++<F_{20}(F_{20}(42))=\mathrm{contender}_{20}.
++\]
++Thus the proposed module states:
++
++\begin{lstlisting}
++theorem contender_19_lt_contender_20 :
++    contender_19 < contender_20 :=
++  Nat.lt_trans (family19_lt_F20 42)
++    (input_lt_F20 (F20 42))
++\end{lstlisting}
++
++The same file records the inherited corollary
++\(\mathrm{contender}_{18}<\mathrm{contender}_{20}\).
++
++%======================================================================
++\section{Bounding the large-Veblen programs}
++
++A contender should not merely dominate the previous closed numeral; it should
++retain a semantic explanation.  Contender~19 defines
++\code{FL.lveblenLadderUpTo n}, the finite enumeration of large-Veblen-ladder
++programs of depth at most \(n\), and \code{FL.lvalue} for their normalized
++natural-number values relative to a packed oracle family.
++
++The existing theorem says that every enumerated value is below one raw
++large-Veblen reflection:
++\[
++\code{FL.lvalue}(\code{packFamily}(s),n,t)
++<\code{reflectLFamily}(s,n).
++\]
++Combining it with raw reflection below \(F_{20}(n)\) yields:
++
++\begin{theorem}[Program bound]
++If \(t\in\code{FL.lveblenLadderUpTo n}\), then
++\[
++\code{FL.lvalue}(\code{packFamily}(s_{20}),n,t)<F_{20}(n).
++\]
++\end{theorem}
++
++This theorem, named \code{lvalue\_lt\_F20}, ties the new amplifier back to the
++strongest object language in the repository.  It also shows why reusing the
++large-Veblen reflector is preferable to an arbitrary arithmetic base: the
++number continues to dominate an explicit, certified class of programs.
++
++%======================================================================
++\section{Computability and termination}
++
++The number is computationally hopeless but constructive in the contest's
++sense.
++
++\subsection{Structural definitions}
++
++The new definitions recurse only on values whose inductive structure is
++visible:
++\begin{itemize}[leftmargin=*]
++\item \code{runHyperLift} recurses on \code{WTree Nat};
++\item \code{Autonomous.hyper} recurses on a natural number and builds
++  \code{OTree} syntax;
++\item \code{Autonomous.realize} and \code{encode} recurse on tree syntax;
++\item \code{diagonalLift} recurses on a natural-number rank; and
++\item the inherited normalizer computes only from an explicit strong-
++  normalization certificate.
++\end{itemize}
++
++No new semantic termination axiom is introduced.  In particular, the outer
++rank tree is not traversed by a general while loop or a minimization operator;
++it is consumed by the recursor of an inductive W-type.
++
++\subsection{Countable branching is still data}
++
++A node of \code{WTree Nat} stores a total function \(\N\to\WTree(\N)\).  Such a
++function can describe infinitely many children, but it is itself a finite Lean
++term computing any requested child.  The inductive type rules out infinite
++descending branches.  This is exactly the representation already used by the
++repository's forest reflection and autonomous schedules.
++
++\subsection{Why evaluation should not be attempted}
++
++The fact that a term denotes a natural number and is computable in principle
++does not imply that reduction is remotely feasible.  Merely constructing the
++rank \(\mathrm{family19}(42)+1\) is beyond physical possibility, before any
++large-Veblen program normalization or outer W-rank traversal occurs.  The
++proper artifact is the definition and strict comparison theorem, not decimal
++or binary expansion.
++
++%======================================================================
++\section{How much larger is it?}
++
++There are two distinct answers.
++
++\subsection{The formal answer}
++
++The pointwise theorem
++\[
++\forall n\quad \mathrm{family19}(n)<F_{20}(n)
++\]
++is exact.  The proof also factors through two additional strict stages after
++raw reflection.  Therefore the new family is not merely larger at the final
++input; it uniformly dominates the self-composed Contender-19 family.
++
++Moreover, \code{seedLift20\_lt\_F20} proves that the new W-rank stage adds a
++strict amount even after the finite diagonal rank
++\(\mathrm{family19}(n)+1\) has been applied.  This isolates a formal advantage
++of the new mechanism over the strongest obvious same-type seed.
++
++\subsection{The heuristic answer}
++
++Let \(\Phi_S(L)=\Step_S(L)\).  Existing \code{diagonalLift S k} is finite
++iteration of a closely related successor operation beginning with autonomous
++lifting.  In contrast, \code{runHyperLift} supports a W-tree recursion:
++children are recursively evaluated, retained separately through a splice, and
++then passed through \(\Phi_S\).  A linear rank tree behaves like a long iterate
++of \(\Phi_S\); a limit-shaped node behaves like a join of a countable family of
++prior iterates followed by another step.
++
++This makes \code{treeDiagonalLift} a natural intensional analogue of
++transfinite iteration of \(\Phi_S\).  The rank tree \(R_{20}(n)\) is itself an
++autonomous hyperclosure above \(S_{20}(n)\), so the outer closure is far more
++than a fixed finite number of successor steps.
++
++\begin{caution}[No exact ordinal calibration is claimed]
++The operations manipulate program transformers that can inspect oracles.
++Their extensional behavior is nonmonotone, and the autonomous trees are syntax
++rather than quotient ordinals.  Assigning a precise fast-growing-hierarchy
++index would require a semantics of lift expressions and a simulation theorem.
++The report therefore uses ``W-rank'' and ``transfinite-shaped'' descriptively,
++not as a proved equality with a named ordinal.
++\end{caution}
++
++A conservative qualitative summary is:
++\begin{center}
++\begin{tabular}{lll}
++\toprule
++Construction & Rank object & Limit behavior\\
++\midrule
++Contender 15--19 amplifier & natural number & none at rank level\\
++Contender 20 seed & natural number \(\mathrm{family19}(n)+1\) & none at rank level\\
++Contender 20 outer stage & well-founded countably branching tree & splice of child lifts\\
++\bottomrule
++\end{tabular}
++\end{center}
++
++%======================================================================
++\section{Why the proposal is not a disguised finite rank}
++
++One might worry that every concrete Lean term is finite syntax, so the outer
++W-tree could secretly amount to one very large natural rank.  This objection
++confuses syntax size with inductive rank.  The term
++\[
++\mathsf{node}(i\mapsto\mathsf{chain}(i))
++\]
++is finite syntax but has children of every finite height.  There is no single
++finite branch-height bound.  More elaborate definable child functions produce
++far larger well-founded ranks.
++
++The outer recursion also retains child lifts separately.  Replacing a node by
++``iterate the same lift \(m\) times'' would discard this addressability.  In
++\code{runHyperLift}, later rank steps receive a splice and can select different
++child lifts by output coordinate.  Thus even a numerical upper bound on the
++height would not by itself establish extensional equivalence to
++\code{diagonalLift S k}.
++
++A fully formal separation theorem is left open.  Useful targets are:
++\begin{enumerate}[leftmargin=*]
++\item prove that chain-shaped rank trees simulate specified finite hyperlift
++  iterates;
++\item prove that a canonical omega-shaped rank tree dominates every fixed
++  finite iterate on a family of test transformers; and
++\item derive a non-representability result for W-rank lifts analogous to the
++  repository's earlier language non-representability results.
++\end{enumerate}
++
++The present contender does not need this separation theorem for strict
++comparison, because Theorem~\ref{thm:seedlt} already proves that the outer stage
++strictly exceeds its chosen finite seed lift.
++
++%======================================================================
++\section{Audit and engineering considerations}
++
++\subsection{Dependency discipline}
++
++The definition uses \code{F19} and \code{schedule19} but never the closed
++constant \code{contender\_19}.  This follows the repository's established
++pattern: each generation depends on the previous \emph{family}, not the
++previous final constant.  The focused audit traverses the environment closure
++of \code{contender\_20} and rejects dependencies on
++\code{contender\_5},\ldots,\code{contender\_19}.
++
++\subsection{Axiom audit}
++
++The package asks Lean to print axioms for:
++\begin{itemize}[leftmargin=*]
++\item \code{contender\_20};
++\item \code{contender\_19\_lt\_contender\_20};
++\item \code{family19\_lt\_F20};
++\item \code{lvalue\_lt\_F20};
++\item \code{seed\_lt\_runHyperLift}; and
++\item \code{treeDiagonalLift\_good}.
++\end{itemize}
++The intended result is the repository's permitted set, at most
++\code{propext} and \code{Quot.sound}, with no \code{Classical.choice}.  The new
++proofs themselves use only induction, conjunction, definitional unfolding,
++and transitivity of \(<\).
++
++\subsection{Static audit already performed}
++
++The included \code{scripts/static\_audit.py} strips nested Lean comments and
++checks the three main modules for:
++\begin{itemize}[leftmargin=*]
++\item balanced parentheses, brackets, and braces;
++\item forbidden shortcut tokens;
++\item SHA-256 digests and file sizes; and
++\item maximum line length.
++\end{itemize}
++The generated \code{STATIC\_AUDIT.json} reports \code{PASS}.  This is not a
++substitute for elaboration or kernel checking, but it catches packaging and
++obvious-source failures independently of Lean.
++
++\subsection{Expected build cost}
++
++The definition module adds no large inductive syntax, normalization semantics,
++or recursive proof over large-Veblen terms.  The generic module has fewer than
++200 lines, and the comparison module fewer than 90.  Most declarations are
++small structural recursors or theorem applications.  It is therefore plausible
++that the overlay fits the 15-second definition and 60-second proof budgets on
++the repository's reference class of machine.  This is a prediction, not a
++measurement; only a clean Lean~4.34.0 build can certify it.
++
++\subsection{Repository integration}
++
++The proposed integration steps are:
++\begin{enumerate}[leftmargin=*]
++\item copy the three \code{BusyLean/*.lean} files and the two \code{test/*.lean}
++  files into the repository;
++\item append the three imports supplied in
++  \code{integration/BusyLean.lean.append};
++\item in \code{scripts/check.py}, set
++  \begin{quote}\small
++  \code{PREVIOUS = "BusyLean.Comparison19"}\\
++  \code{CURRENT\_DEF = "BusyLean.Contender20"}.
++  \end{quote}
++\item build \code{BusyLean.Contender20} and
++  \code{BusyLean.Comparison20};
++\item run the smoke and focused audit files; and
++\item after success, merge the focused audit declarations into the repository's
++  global \code{test/Audit.lean}.
++\end{enumerate}
++
++%======================================================================
++\section{Verification boundary and risk register}
++
++A serious proposal should separate proved mathematics, source-level evidence,
++and unverified assumptions.
++
++\begin{longtable}{P{0.25\textwidth}P{0.27\textwidth}P{0.39\textwidth}}
++\toprule
++Claim & Current evidence & Remaining action\\
++\midrule
++\endfirsthead
++\toprule
++Claim & Current evidence & Remaining action\\
++\midrule
++\endhead
++Definitions are constructive & All new recursors are structural; static audit
++finds no shortcut tokens & Confirm generated declaration kinds and axioms in Lean\\
++The generic strictness proof is logically sound & Full proof given in
++Sections 5--8 and encoded in Lean & Elaborate and kernel-check on 4.34.0\\
++The imports and names match the base repository & Source was written against
++commit \code{64d31a0...} and exact current interfaces & Build overlay against
++that commit\\
++The proof stays within axiom policy & No new classical argument; audit commands
++included & Inspect \code{\#print axioms} output\\
++The closure avoids earlier contender constants & Definition uses \code{F19},
++not \code{contender\_19}; closure command included & Run environment closure audit\\
++The time budgets are met & Modules are small and reuse compiled theory & Run
++clean budget script on reference hardware\\
++The outer rank is qualitatively beyond finite rank & W-tree recursion and
++spliced limit nodes are explicit & Formalize finite-iterate simulation and
++separation theorems\\
++A precise ordinal calibration is known & Not claimed & Develop semantics for
++hyperlift expressions\\
++\bottomrule
++\end{longtable}
++
++The largest practical risk is not the mathematics but elaboration detail:
++definitional reduction around \code{spliceLifts} or a changed implicit argument
++could require a local \code{change} or \code{simpa}.  The proof was written in
++the style of the repository's current \code{HyperReflectionFacts.lean}, and
++all such equalities are shallow.  No repair should alter the mathematical
++definitions.
++
++%======================================================================
++\section{Further research program}
++
++The proposal opens several directions that are more interesting than merely
++repeating it with a larger seed.
++
++\subsection{Immediate formal tasks}
++
++\begin{enumerate}[leftmargin=*]
++\item \textbf{Kernel build and timing.}  Produce a clean Lean~4.34.0 receipt,
++  axiom report, closure count, and definition/proof timings.
++\item \textbf{Chain simulation.}  Define a finite chain tree \(C_k\)
++  and prove an explicit recurrence for the stage
++  \[
++  \Run(\Step_S,L,C_k).
++  \]
++\item \textbf{Canonical limit tree.}  Define
++  \(C_\omega=\mathsf{node}(k\mapsto C_k)\) and prove that its child coordinates
++  expose every finite stage.
++\item \textbf{Rank monotonicity without oracle monotonicity.}  Identify an
++  intensional embedding relation on lift expressions under which replacing a
++  rank tree by a tree containing it preserves a strict lower bound.
++\end{enumerate}
++
++\subsection{Semantics and ordinal analysis}
++
++Assign formal syntax to transformer, lift, and hyperlift expressions, with an
++interpretation into the existing functions.  A well-founded rank semantics
++could then prove lower bounds of the form
++\[
++\text{expression rank }\alpha\quad\Longrightarrow\quad
++\text{dominates a calibrated hierarchy through }\alpha.
++\]
++The nonmonotone oracle semantics means that the usual pointwise order is too
++coarse.  A logical relation tracking explicit seed occurrences and selectable
++child coordinates is a more promising invariant.
++
++\subsection{Higher type levels}
++
++Contender~20 adds one fixed type level, \(\HLift=\Lift\to\Lift\).  A systematic
++successor would code a hierarchy
++\[
++X_0=\Tr,\qquad X_{k+1}=X_k\to X_k
++\]
++and interpret generic splice/stage syntax at each finite level.  The level
++could then depend on the input.  This would parallel the earlier transition
++from fixed F$_\omega$ kinds to dynamic and laddered universes, but on the
++amplifier axis rather than the object-language axis.
++
++\subsection{Reflecting the amplifier language}
++
++A stronger and more difficult construction would give the object language
++codes for good transformer lifts or hyperlifts, normalize those codes, and
++reflect over every bounded program defining such an amplifier.  This would
++replace the hand-selected \code{rankStep} by diagonalization over an explicit
++amplifier language.  Soundness would require a typed syntax whose semantics
++preserves \(\Good\), making the invariant itself part of the type system.
++
++\subsection{Collapsing-function universe ladders}
++
++The language axis still has room above large Veblen.  A canonical system of
++Buchholz-style or operator-controlled collapsing terms, with Lean-checked
++normal forms and well-foundedness, could feed \code{FL.wfUniv}.  The main
++challenge is eliminating descending chains admitted by raw terms.  Once such a
++ladder exists, it composes immediately with the W-rank amplifier developed
++here.
++
++\subsection{Minimality and compression}
++
++The generic module is intentionally explicit.  After a successful build, one
++can investigate whether \code{GoodLift} should be a structure, whether the two
++strictness predicates admit a common typeclass, and whether the first- and
++second-order stage proofs can be generated from a single universe-polymorphic
++schema.  Compression should follow validation, not precede it.
++
++%======================================================================
++\section{Conclusion}
++
++Contender~20 is designed as a principled next step rather than a cosmetic
++increase.  Contender~19's language remains the base: programs range over a
++large-Veblen-length universe ladder with certified normalization.  Its
++natural-number rank hierarchy remains as an enormous seed.  The new operation
++raises the amplifier one type level and closes it under structural recursion on
++countably branching well-founded trees.
++
++The core theorem is robust because it uses only explicit occurrences.  At an
++outer node, child zero is below the parent by induction and second-order strict
++inflation; the splice makes that child definitionally visible.  No oracle
++monotonicity, ordinal quotient, or semantic shortcut enters the formal
++comparison.  This yields the exact pointwise inequality
++\(\mathrm{family19}(n)<F_{20}(n)\), the closed comparison
++\(\mathrm{contender}_{19}<\mathrm{contender}_{20}\), and a retained upper bound
++for every enumerated large-Veblen-ladder program.
++
++The proposal's mathematical architecture is complete and the source package is
++ready for integration.  Its one unresolved status item is mechanical but
++essential: the supplied Lean code must be built and audited on the repository's
++Lean~4.34.0 toolchain.  The package makes that boundary visible rather than
++substituting confidence for a kernel receipt.
++
++%======================================================================
++\appendix
++\section{Complete generic Lean module}
++
++\lstinputlisting{../BusyLean/TransfiniteHyperReflection.lean}
++
++\section{Complete contender definition}
++
++\lstinputlisting{../BusyLean/Contender20.lean}
++
++\section{Complete comparison module}
++
++\lstinputlisting{../BusyLean/Comparison20.lean}
++
++\section{Reproducibility checklist}
++
++\begin{enumerate}[leftmargin=*]
++\item Check out BusyLean commit
++  \code{64d31a0cf6f1aa4477a088be5554957de6e87a61}.
++\item Confirm \code{lean-toolchain} contains
++  \code{leanprover/lean4:v4.34.0}.
++\item Copy the overlay files into the checkout.
++\item Append the imports in \code{integration/BusyLean.lean.append}.
++\item Run \code{python3 scripts/static\_audit.py}.
++\item Run \code{lake build BusyLean.Contender20}.
++\item Run \code{lake build BusyLean.Comparison20}.
++\item Run \code{lake env lean test/Contender20Smoke.lean}.
++\item Run \code{lake env lean test/Audit20.lean}.
++\item Update and run the repository-wide clean budget script.
++\item Record build times, closure size, and exact axiom lists in a receipt.
++\end{enumerate}
++
++\begin{thebibliography}{9}
++
++\bibitem{aaronson}
++Scott Aaronson,
++\emph{Who Can Name the Bigger Number?},
++\url{https://www.scottaaronson.com/writings/bignumbers.html}.
++
++\bibitem{roux}
++Cody Roux,
++\emph{name-the-biggest-number}, Coq contest repository,
++\url{https://github.com/codyroux/name-the-biggest-number}.
++
++\bibitem{busylean}
++Vladimir Reshetnikov,
++\emph{BusyLean: name the biggest number, in Lean},
++\url{https://github.com/VladimirReshetnikov/BusyLean},
++base commit \code{64d31a0cf6f1aa4477a088be5554957de6e87a61}.
++
++\bibitem{lean4}
++Leonardo de Moura and Sebastian Ullrich,
++``The Lean 4 Theorem Prover and Programming Language,''
++in \emph{Automated Deduction--CADE 28},
++Lecture Notes in Computer Science 12699, Springer, 2021, pp.~625--635.
++
++\bibitem{schuette}
++Kurt Sch\"utte,
++\emph{Proof Theory},
++Grundlehren der mathematischen Wissenschaften 225,
++Springer, 1977.
++
++\bibitem{pohlers}
++Wolfram Pohlers,
++\emph{Proof Theory: The First Step into Impredicativity},
++Universitext, Springer, 2009.
++
++\bibitem{wainer}
++Helmut Schwichtenberg and Stanley S. Wainer,
++\emph{Proofs and Computations},
++Perspectives in Logic, Cambridge University Press, 2012.
++
++\end{thebibliography}
++
++\end{document}
+diff --git a/BusyLean.lean b/BusyLean.lean
+index 0bf75e1..0000000 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -41,4 +41,7 @@
+ import BusyLean.Ordinal.SortedLexQ
+ import BusyLean.Ordinal.LargeVeblen
+ import BusyLean.Contender19
+ import BusyLean.Comparison19
++import BusyLean.TransfiniteHyperReflection
++import BusyLean.Contender20
++import BusyLean.Comparison20
+diff --git a/scripts/check.py b/scripts/check.py
+index a708a0c..0000000 100755
+--- a/scripts/check.py
++++ b/scripts/check.py
+@@ -23,8 +23,8 @@ ROOT = Path(__file__).resolve().parent.parent
+ BUILD_DIRS = [ROOT / ".lake" / "build",
+               ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
+ PERMITTED = {"propext", "Quot.sound"}
+-PREVIOUS = "BusyLean.Comparison18"   # previous contender: definitions + proofs
+-CURRENT_DEF = "BusyLean.Contender19"  # current contender's definition module
++PREVIOUS = "BusyLean.Comparison19"   # previous contender: definitions + proofs
++CURRENT_DEF = "BusyLean.Contender20"  # current contender's definition module
+ DEFINITION_BUDGET = 15.0  # seconds
+ PROOF_BUDGET = 60.0
+ LAKE = shutil.which("lake") or "lake"

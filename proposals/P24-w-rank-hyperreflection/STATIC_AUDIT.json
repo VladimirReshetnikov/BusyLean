@@ -1,0 +1,29 @@
+{
+  "files": {
+    "BusyLean/Comparison20.lean": {
+      "balanced_delimiters": true,
+      "bytes": 3339,
+      "forbidden_tokens": [],
+      "lines": 83,
+      "max_line_length": 78,
+      "sha256": "5bd1f9f0aa9858b679cd707d7dace9f0efe7977d1826b76d3714e3fbdedb5001"
+    },
+    "BusyLean/Contender20.lean": {
+      "balanced_delimiters": true,
+      "bytes": 2261,
+      "forbidden_tokens": [],
+      "lines": 67,
+      "max_line_length": 80,
+      "sha256": "361d3f0b3d38b7b42aa7e33d2114162b1a6106a1b114060937255563369f4e94"
+    },
+    "BusyLean/TransfiniteHyperReflection.lean": {
+      "balanced_delimiters": true,
+      "bytes": 7927,
+      "forbidden_tokens": [],
+      "lines": 188,
+      "max_line_length": 79,
+      "sha256": "f60eec65e13cbe56bf999675c0c8a0c32e61e1bef71d0507eb43ea3cc8100cc2"
+    }
+  },
+  "status": "PASS"
+}

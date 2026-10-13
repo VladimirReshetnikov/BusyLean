@@ -1,0 +1,33 @@
+digraph Contender20 {
+  graph [rankdir=LR, bgcolor="white", pad=0.25, nodesep=0.45, ranksep=0.75,
+         labelloc=t, label="BusyLean Contender 20: W-rank hyperreflection"];
+  node [shape=box, style="rounded", fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9];
+
+  family19 [label="family19(n) = F19(F19(n))"];
+  ltrans [label="large-Veblen reflector\nlTransformer"];
+  sched19 [label="Contender 19 schedule\nschedule19(n)"];
+  sched20 [label="inner autonomous closure\nschedule20(n)"];
+  ranktree [label="outer autonomous closure\nrankTree20(n)"];
+  seedlift [label="finite seed lift\ndiagonalLift(schedule20, family19+1)"];
+  rankstep [label="hyperlift rank step\nL ↦ stageLift L (L base) schedule20"];
+  wrank [label="W-tree iteration\ntreeDiagonalLift"];
+  f20 [label="F20(n)", shape=doubleoctagon];
+  contender [label="contender_20 = F20(F20(42))", shape=doubleoctagon];
+
+  family19 -> ltrans [label="constant oracle family"];
+  sched19 -> sched20 [label="encode; hyper; realize"];
+  sched20 -> ranktree [label="encode; hyper; realize"];
+  sched20 -> seedlift [label="inner schedule"];
+  family19 -> seedlift [label="rank family19(n)+1"];
+  sched20 -> rankstep [label="fixed schedule"];
+  seedlift -> wrank [label="seed TransformerLift"];
+  rankstep -> wrank [label="iterate"];
+  ranktree -> wrank [label="W-rank index"];
+  ltrans -> f20 [label="base transformer"];
+  family19 -> f20 [label="seed family"];
+  wrank -> f20 [label="apply at (n,n)"];
+  f20 -> contender [label="self-application"];
+
+  family19 -> f20 [label="formal strict chain", style=dashed, constraint=false];
+}

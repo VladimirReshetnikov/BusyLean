@@ -1,0 +1,13 @@
+Patch syntax/application test: PASS
+
+Method: a temporary Git repository was populated with the exact BusyLean.lean
+import list and the relevant scripts/check.py block from base commit
+64d31a0cf6f1aa4477a088be5554957de6e87a61. The commands
+
+  git apply --check integration/contender20.patch
+  git apply integration/contender20.patch
+
+both succeeded, and the expected new modules/imports/current-definition setting
+were asserted afterward.
+
+This checks patch integrity and context matching; it does not compile Lean.

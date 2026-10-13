@@ -1,0 +1,7 @@
+For the repository-wide budget script, change:
+
+PREVIOUS = "BusyLean.Comparison19"
+CURRENT_DEF = "BusyLean.Contender20"
+
+Then add the Contender-20 declarations to test/Audit.lean, or run the focused
+`test/Audit20.lean` supplied by this package.

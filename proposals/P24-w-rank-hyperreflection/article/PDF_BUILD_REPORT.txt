@@ -1,0 +1,21 @@
+PDF build and visual verification report
+========================================
+
+Source: article/contender20.tex
+Output: article/contender20.pdf
+Engine: pdflatex through latexmk (PDF skill helper)
+Pages: 25
+Bytes: 477206
+PDF SHA-256: 7b8fd2e8e90f15a1440f1729be49dd225c686e0b0961548ed05af0b5224bb206
+TeX SHA-256: 948de9601c1d55e126b18a0bfa5528d88a9a9621a8ac39cbeac17422215227ab
+
+Final LaTeX log check:
+- overfull boxes: none
+- underfull boxes: none
+- undefined references/citations: none
+- LaTeX warnings: none
+
+Visual check:
+- rendered all 25 pages at 150 dpi
+- inspected all pages
+- no clipping, overlap, missing glyphs, black boxes, or broken page geometry found
