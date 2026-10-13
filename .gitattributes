@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: MIT-0
+
+# Normalize line endings to LF in the repository and checkout.
+* text=auto eol=lf
+
+# Preserve the exact captured receipt bytes referenced by Mathics evidence hashes.
+validation/mathics-*-tests.json -text -whitespace
+validation/mathics-*-guard-audit.json -text -whitespace
+validation/mathics-numerical-precision-audit.json -text -whitespace
+validation/mathics-*loading-gate.json -text -whitespace
+validation/mathics-wave4-native-definitions.json -text -whitespace
+validation/mathics-wave4-*.json -text -whitespace
+validation/mathics-fourier-termination-audit.json -text -whitespace
+validation/mathics-linux-*/**/*.json -text -whitespace
+validation/mathics-linux-*-workflow.json -text -whitespace
+
+# Preserve binary artifacts byte-for-byte.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+
+# Immutable vendored blobs and hashed build logs must survive checkout unchanged.
+vendor/proveit/docs/** -text -whitespace
+vendor/proveit/LICENSE -text
+vendor/proveit/build-logs/** -text -whitespace
+
+# Preserve captured LaTeX transcript spacing in checksummed build evidence.
+validation/review-normalization-pdf-pass-*.txt -whitespace
+validation/observable-ingress-pdf-pass-*.txt -whitespace
+validation/observable-ingress-merge-pdf-pass-*.txt -whitespace
+validation/log-power-normalization-pdf-pass-*.txt -whitespace
+validation/fourier-termination-pdf-pass-*.txt -whitespace
+validation/wave4-merge-pdf-pass-*.txt -whitespace
+
+# Preserve submitted Markdown hard breaks and patch context in wave-4 payloads.
+external-reports/code-review/wave-4/code-review-*/** -whitespace
+
+# Preserve checksummed arrival files whose submitted bytes contain trailing spaces.
+Analysis/FabiusFunction/docs/semi-formalized-research-frontiers/drafts/representations/Matrix_Dilated_Fabius_Rvachev_Frontier_Report/matrix_dilated_fabius_rvachev.tex -whitespace

@@ -1,0 +1,40 @@
+# LaTeX auxiliary files (the rendered PDF is tracked deliberately)
+*.aux
+/article/asymptotic-inverse.log
+/docs/article/asymptotic-inverse.log
+!/vendor/proveit/build-logs/**/*.log
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.idx
+*.ind
+*.ilg
+*.nav
+*.snm
+
+# Wolfram Language artefacts
+*.mx
+wolfram-test-report.txt
+native-test-report.txt
+
+# Python tooling used by the reports' verification scripts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Checksum ledgers shipped with the reports are not tracked
+**/SHA256SUMS
+**/SHA256SUMS.*
+**/MANIFEST.sha256
+
+# IDE and operating-system files
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
