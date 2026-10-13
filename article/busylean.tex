@@ -88,6 +88,8 @@ classical impredicative argument carried by Lean's \lean{Acc}. Contender~21
 bounds the number of collapsing levels, which turns the multi-level argument
 into a downward induction over relativized scopes. It then diagonalizes over the
 bound, so ladder lengths climb to Buchholz's ordinal $\psi_0(\Omega_\omega)$.
+Contender~22 relativizes the bounded systems to a well-founded base and
+iterates, which goes beyond $\psi_0(\Omega_\omega)$.
 \end{abstract}
 
 \tableofcontents
@@ -1073,15 +1075,66 @@ level $\psi_0(\Omega_2)$ into the universe at $\Omega_1$ (value~9). The
 definitions check in 4.0\,s and the proofs in 2.5\,s.
 
 %======================================================================
+\section{Contender 22: a tower of relativized Buchholz notations}
+
+\subsection{The barrier at \texorpdfstring{$\psi_0(\Omega_\omega)$}{psi0(Omega omega)}}
+Contender~21's argument needs a bound on the levels: the downward induction
+starts at $R(L+1)$. A single notation for all levels has no such start, and
+the relativized argument regresses forever. The literature crosses this barrier
+with Buchholz's \emph{distinguished sets}: sets $X$ such that, for each
+$\alpha\in X$, $X$ agrees below the next regular above~$\alpha$ with the
+well-founded part of a closure $C^\alpha(X)$. The maximal distinguished class is
+then shown to contain every notation. Arai's lecture notes present the
+technique for reflection notations. Porting it means formalizing a large part of
+the notation theory (closure sets, their monotonicity, and the comparison
+facts), so it remains on the roadmap.
+
+\subsection{Relativizing to a base}
+A cheaper step stays within finitely nested accessibility. The level-bounded
+systems are relativized to a type of \emph{base atoms} with a transitive,
+well-founded order (\lean{BuchholzBase.lean}). Atoms $B\,b$ lie below every
+collapse but may occur inside collapse arguments, so each collapse ranges over
+everything below it. The well-foundedness proof is Contender~21's
+\lean{stepR}. Only the treatment of atoms changes: they are accessible in every
+scope by the base's own well-foundedness (\lean{accB}), not by the level
+induction.
+
+The union of all level-bounded systems over a base, ordered by the bound
+\emph{first}, is again a transitive, well-founded, decidable order. It is
+well-founded by induction on the bound and then \lean{acc\_nf}. So it can serve
+as the base of the next round:
+\begin{lstlisting}
+structure WFO where           -- order, transitivity, well-foundedness, enumeration
+  T : Type
+  ...
+def tower : ℕ → WFO
+  | 0 => WFO.empty
+  | k + 1 => (tower k).next     -- all bounded systems over tower k
+\end{lstlisting}
+\lean{tower 1} has order type $\psi_0(\Omega_\omega)$. Each further step
+collapses over everything below it, heuristically giving
+$\psi_0(\Omega_\omega\cdot k)$ for \lean{tower k}.
+
+\subsection{The contender}
+Input $n$ uses the ladder over \lean{tower n}, with the universe
+\lean{wfUniv f (tower\_wf n)}.
+\lean{F22 n := diagonalLift (schedule22 n) (family21 n + 1) twTransformer (fun \_ => family21) n n}.
+Proved: \lean{contender\_21\_lt\_\allowbreak contender\_22},
+\lean{family21\_lt\_F22} and \lean{tvalue22\_lt\_F22}. The smoke test packs an
+operator over a base atom of \lean{tower 2} into the universe at $\psi_0$ of
+that atom (value~10). The definitions check in 3.7\,s and the proofs in 1.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
 prove well-founded; $\varepsilon_0$, $\Gamma_0$ and the large Veblen ordinal are
 done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
 collapsing (Contender~20), and $\psi_0(\Omega_\omega)$ in the limit of bounded
-Buchholz systems (Contender~21). Next would be a single notation for all levels
-at once (with $D_\omega$, reaching $\psi_0(\varepsilon_{\Omega_\omega+1})$), which
-needs distinguished sets or an inductive definition doing their job. Collapsing functions need genuine normal forms: in Buchholz's raw order,
+Buchholz systems (Contender~21). Contender~22 iterates bounded systems over a
+base. The next real step is a single notation for all levels at once (with
+$D_\omega$, reaching $\psi_0(\varepsilon_{\Omega_\omega+1})$), which needs
+Buchholz's distinguished sets. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
@@ -1118,6 +1171,7 @@ Contender & idea & informal size\\
 19 (Lean) & 15 over a ladder of large-Veblen length & Klammersymbole of height $n$ at input $n$\\
 20 (Lean) & 15 over a ladder of Bachmann--Howard length & $\psi$-terms of height $n$ at input $n$\\
 21 (Lean) & 15 over Buchholz ladders, level bound $n$ at input $n$ & lengths up to $\psi_0(\Omega_\omega)$\\
+22 (Lean) & 15 over a tower of relativized Buchholz notations & beyond $\psi_0(\Omega_\omega)$\\
 \bottomrule
 \end{tabular}
 \end{center}

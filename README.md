@@ -9,7 +9,41 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 21
+## Current contender: Contender 22
+
+```lean
+def family21 (n : Nat) : Nat := F21 (F21 n)                  -- Contender 21 = family21 42
+def F22 (n : Nat) : Nat :=                                   -- BusyLean/Contender22.lean
+  diagonalLift (schedule22 n) (family21 n + 1) twTransformer (fun _ => family21) n n
+def contender_22 : Nat := F22 (F22 42)
+
+theorem contender_21_lt_contender_22 : contender_21 < contender_22   -- BusyLean/Comparison22.lean
+```
+
+Input `n` uses the ladder over `tower n`
+([`Ordinal/BuchholzBase.lean`](BusyLean/Ordinal/BuchholzBase.lean)):
+
+* the level-bounded Buchholz systems are relativized to *base atoms* from a
+  transitive, well-founded order. Atoms lie below every collapse but may occur
+  inside collapse arguments, and the well-foundedness proof is Contender 21's
+  level step, with atoms accessible from the base's own well-foundedness;
+* the union of all level-bounded systems over a base, ordered by the bound
+  first, is again such an order, so it becomes the next base:
+  `tower (k+1) = (tower k).next`.
+
+`tower 1` has order type `ψ₀(Ω_ω)`, and each step collapses over everything
+below (heuristically `ψ₀(Ω_ω·k)`). A single notation for all levels at once
+would need Buchholz's distinguished sets; that is the next real step.
+
+| Theorem | Statement |
+|---|---|
+| `Ordinal.BuchB.stepR` | the level step, relativized to a well-founded base |
+| `Ordinal.tower_wf` | every stage of the tower is well-founded |
+| `contender_21_lt_contender_22` | Contender 21 < Contender 22 |
+| `family21_lt_F22` | Contender 21's family is beaten at every input |
+| `tvalue22_lt_F22` | every program of depth ≤ `n` over the atoms of `tower n` is below `F22 n` |
+
+## Contender 21
 
 ```lean
 def family20 (n : Nat) : Nat := F20 (F20 n)                  -- Contender 20 = family20 42
@@ -542,8 +576,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 21's definition modules take
-about 4 s and its proofs about 2.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 22's definition modules take
+about 4 s and its proofs about 2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -583,6 +617,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender19.lean`](BusyLean/Contender19.lean), [`Comparison19.lean`](BusyLean/Comparison19.lean) | Contender 19 definitions and theorems |
 | [`BusyLean/Contender20.lean`](BusyLean/Contender20.lean), [`Comparison20.lean`](BusyLean/Comparison20.lean) | Contender 20 definitions and theorems |
 | [`BusyLean/Contender21.lean`](BusyLean/Contender21.lean), [`Comparison21.lean`](BusyLean/Comparison21.lean) | Contender 21 definitions and theorems |
+| [`BusyLean/Contender22.lean`](BusyLean/Contender22.lean), [`Comparison22.lean`](BusyLean/Comparison22.lean) | Contender 22 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-one reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -611,6 +646,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 19 | Lean | this repository | the ladder extended to large-Veblen length (Klammersymbole with term positions) |
 | 20 | Lean | this repository | the ladder extended to Bachmann–Howard length (collapsing; impredicative WF proof) |
 | 21 | Lean | this repository | Buchholz ladders with level bound `n` at input `n`, lengths up to `ψ₀(Ω_ω)` |
+| 22 | Lean | this repository | ladders over a tower of Buchholz notations relativized to well-founded bases |
 
 Proposals P1–P21 (four batches and a late arrival) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
