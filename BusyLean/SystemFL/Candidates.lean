@@ -477,6 +477,7 @@ theorem interp_kren : ∀ (A : (Ty α)) (θ₀ : Nat → (BaseKind α)) (θ₁ :
       rw [interp_kren A]
       rfl
 
+omit [DecidableEq α] [AtomOrder α] in
 theorem eval_subst (θ₀ : Nat → (BaseKind α)) (θ₁ : Nat → (Kind α)) {σ₀ σ₁ : Nat → (Kind α)}
     (hσ : ∀ n, (σ₀ n).DynFree) (K : (Kind α)) :
     eval θ₀ θ₁ (K.subst σ₀ σ₁) =
