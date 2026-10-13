@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 40
+## Current contender: Contender 41
+
+```lean
+def family40 (n : Nat) : Nat := F40 (F40 n)                  -- Contender 40 = family40 42
+def base41 (N : Nat) (t : CTree) : CTree :=                  -- BusyLean/Contender41.lean
+  .lim fun i => if i = 0 then FLT2.jumpL family40 N t else base40 N t
+def readerTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then metaTree N else metaBoostT (metaTree N) (base41 N) (metaTree N)
+def F41 (n : Nat) : Nat := hier family40 (readerTree (family40 n)) (family40 n)
+def contender_41 : Nat := F41 (F41 42)
+
+theorem contender_40_lt_contender_41 : contender_40 < contender_41   -- BusyLean/Comparison41.lean
+```
+
+[`SystemFLT2/`](BusyLean/SystemFLT2) is the ladder language over System FT2's
+terms. A ladder program of the reader type receives the tree constructors, a
+recursor, and the input tree, and denotes a well-founded tree
+(`FLT2.wt_of_readerTy`). `FLT2.jumpL g N T` joins `T` with the trees that all
+reader programs of depth ≤ `N` over `Addr T` build from `T`. Contender 41 adds this
+jump to Contender 40's base under P27's metalanguages.
+
+| Theorem | Statement |
+|---|---|
+| `contender_40_lt_contender_41` | Contender 40 < Contender 41 |
+| `family40_lt_F41` | Contender 40's family is beaten at every input |
+| `FLT2.wt_of_readerTy` | ladder reader programs denote well-founded trees |
+
+## Contender 40
 
 ```lean
 def family39 (n : Nat) : Nat := F39 (F39 n)                  -- Contender 39 = family39 42
@@ -1049,8 +1076,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 40's definition modules take
-about 6.5 s (including System FT2) and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 41's definition modules take
+about 7 s (including SystemFLT2) and its proofs about 2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1067,6 +1094,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Comparison.lean`](BusyLean/Comparison.lean) | all Contender 6 theorems |
 | [`BusyLean/SystemF/`](BusyLean/SystemF) | System F: syntax, reduction, types, candidates (SN), Church terms, normalizer |
 | [`BusyLean/SystemFLT/`](BusyLean/SystemFLT) | the ladder language over System FT terms; `wt_of_treeTy` (Church-tree programs are well-founded trees) |
+| [`BusyLean/SystemFLT2/`](BusyLean/SystemFLT2) | the ladder language over System FT2 terms; `wt_of_readerTy` (reader programs are well-founded trees) |
 | [`BusyLean/SystemFT2/`](BusyLean/SystemFT2) | System F with a tree recursor and an oracle tree: `trec_mem`, `wt_tsub`, `jumpF` |
 | [`BusyLean/SystemFT/`](BusyLean/SystemFT) | System F with tree constructors: the tree candidate `WT`, `wt_of_typed`, tree extraction `toTree` |
 | [`BusyLean/Contender7.lean`](BusyLean/Contender7.lean) | `fvalue`, `reflectF`, `contender_7` (definitions) |
@@ -1113,6 +1141,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender38.lean`](BusyLean/Contender38.lean), [`Comparison38.lean`](BusyLean/Comparison38.lean) | Contender 38 definitions and theorems |
 | [`BusyLean/Contender39.lean`](BusyLean/Contender39.lean), [`Comparison39.lean`](BusyLean/Comparison39.lean) | Contender 39 definitions and theorems |
 | [`BusyLean/Contender40.lean`](BusyLean/Contender40.lean), [`Comparison40.lean`](BusyLean/Comparison40.lean) | Contender 40 definitions and theorems |
+| [`BusyLean/Contender41.lean`](BusyLean/Contender41.lean), [`Comparison41.lean`](BusyLean/Comparison41.lean) | Contender 41 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1160,6 +1189,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 38 | Lean | this repository | fast-growing hierarchy along Contender 37's tree |
 | 39 | Lean | this repository | languages over the jump mixed with predicative collapse; hierarchy along them |
 | 40 | Lean | this repository | System FT2 jump (tree recursion over the input) under P27's metalanguages |
+| 41 | Lean | this repository | ladder reader programs (SystemFLT2) as the jump, under the metalanguages |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see

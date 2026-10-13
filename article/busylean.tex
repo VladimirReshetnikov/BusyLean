@@ -116,7 +116,8 @@ amplifiers, not through the size of their atoms. Contender~38 runs a
 fast-growing hierarchy along the trees themselves, and Contender~39 interleaves
 the impredicative jump with predicative collapse. System~FT2 adds tree recursion
 over an input tree, which makes the jump a genuine operator, and Contender~40
-places it under a metalanguage with first-class language closure.
+places it under a metalanguage with first-class language closure. Contender~41
+gives the ladder language the same recursor over its input tree.
 \end{abstract}
 
 \tableofcontents
@@ -1753,6 +1754,36 @@ The definitions check in 6.5\,s, which now includes System~FT2, and the proofs
 in 2.1\,s.
 
 %======================================================================
+\section{Contender 41: the ladder jump that reads its input}
+
+System~FT2 gave System~F a recursor over an input tree. \lean{SystemFLT2} gives
+the same to the ladder language, which has dynamic kinds and a universe for
+every named atom. The kinds and types are reused from \lean{SystemFL}. Typing,
+candidates, Church terms and the transfinite universes are copied onto the
+FT2 terms. As for Contender~36, the new constants need no typing rules. A
+program of the \emph{reader type}
+\[
+\forall X.\ X\to(X\to X)\to((\mathsf{nat}\to X)\to X)\to
+\bigl(\forall Y.\ Y\to(Y\to Y)\to((\mathsf{nat}\to Y)\to Y)\to X\to Y\bigr)\to X\to X
+\]
+is applied, after erasure, to the constructors, the FT2 recursor and the oracle
+tree. Adequacy with $X$ set to the tree candidate gives
+\lean{FLT2.wt\_of\_readerTy}. Two lemmas connect the systems: FL's
+interpretation of \textsf{nat} has the same members as FT2's numeral candidate
+(\lean{natP\_iff}), and the recursor belongs to the recursor type for every
+candidate $Y$ (\lean{trec\_mem\_recTy}).
+
+The ladder jump $\mathrm{jumpL}_N(T)$ joins $T$ with the trees that all reader
+programs of depth $\le N$ over $\mathrm{Addr}(T)$ build from $T$. Contender~41
+adds it to Contender~40's base, $b'_N(t)=\lim(\mathrm{jumpL}_N(t),\,b_N(t))$,
+and stacks P27's metalanguages over it to the height of Contender~40's tree:
+\[
+F_{41}(n)=h^{\mathrm{family}_{40}}_{\mathrm{readerTree}(N)}(N),\qquad N=\mathrm{family}_{40}(n).
+\]
+Proved: \lean{family40\_lt\_F41} and \lean{contender\_40\_lt\_\allowbreak contender\_41}.
+The definitions check in 7.2\,s and the proofs in 2.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1827,6 +1858,7 @@ Contender & idea & informal size\\
 38 (Lean) & fast-growing hierarchy along Contender 37's tree & $h_{\mathrm{jumpTree}(n)}$ over $F_{37}$\\
 39 (Lean) & languages over jump and collapse, depth $F_{38}$ & $h_{\mathrm{mixTree}}$ over $F_{38}$\\
 40 (Lean) & FT2 jump (tree recursion) under metalanguages & $h_{\mathrm{metaTree}}$ over $F_{39}$\\
+41 (Lean) & ladder reader programs (FLT2) under metalanguages & $h_{\mathrm{readerTree}}$ over $F_{40}$\\
 \bottomrule
 \end{tabular}
 \end{center}
