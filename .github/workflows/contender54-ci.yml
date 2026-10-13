@@ -1,0 +1,67 @@
+name: Contender 54 verification
+
+on:
+  push:
+    branches: ["research/contender54-tiled-ci"]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+
+      - name: Check definitions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci54
+          { /usr/bin/time -p lake env lean BusyLean/LargeElim.lean; } 2>&1 | tee ci54/definitions.log
+          { /usr/bin/time -p lake env lean BusyLean/Contender54.lean; } 2>&1 | tee -a ci54/definitions.log
+
+      - name: Check comparison proofs
+        shell: bash
+        run: |
+          set -euo pipefail
+          { /usr/bin/time -p lake env lean BusyLean/Comparison54.lean; } 2>&1 | tee ci54/proofs.log
+
+      - name: Run smoke checks and axiom audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean test/LargeElimSmoke.lean 2>&1 | tee ci54/smoke.log
+          cat > ci54/Audit54.lean <<'EOF'
+          import BusyLean.Comparison54
+          #print axioms BusyLean.contender_54
+          #print axioms BusyLean.contender_53_lt_contender_54
+          #print axioms BusyLean.iter_contender_53_lt_contender_54
+          EOF
+          lake env lean ci54/Audit54.lean 2>&1 | tee ci54/axioms.log
+          if grep -Rnw --include='*.lean' -e 'sorry' BusyLean/LargeElim.lean BusyLean/Contender54.lean BusyLean/Comparison54.lean; then
+            echo 'Unexpected sorry found' >&2
+            exit 1
+          fi
+
+      - name: Record versions and source hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version | tee ci54/versions.txt
+          lake --version | tee -a ci54/versions.txt
+          git rev-parse HEAD | tee -a ci54/versions.txt
+          sha256sum BusyLean/LargeElim.lean BusyLean/Contender54.lean BusyLean/Comparison54.lean test/LargeElimSmoke.lean > ci54/source-sha256.txt
+
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender54-verification
+          path: ci54/
+          if-no-files-found: error
