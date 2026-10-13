@@ -489,3 +489,21 @@ schedule's ordinal, iterated finitely. That is the same class of amplifier as
 P22's W-tree rank, which Contender 23 already uses with a rank *above* the
 schedule. It keeps Contender 19's language, so it is informally below this
 repository's Contenders 20–24. Nothing new is adopted.
+
+# Late arrival: P24
+
+`BusyLean_Contender20_WRank_Hyperreflection.zip` proposes a "Contender 20"
+over Contender 19 (base commit `64d31a0`).
+
+| | Definitions | Proofs | Axioms |
+|---|---|---|---|
+| P24 | compile, 2.0 s | **compile**, 1.2 s | `propext, Quot.sound`; the closure (4,192 constants) avoids `contender_5` … `contender_19` |
+
+Its `treeDiagonalLift schedule rankTree seed` runs the diagonal lift step along
+a W-tree rank (`rankTree20 n`, an autonomous notation above the schedule),
+seeded with a finite-rank `diagonalLift`. This is P22's idea found
+independently, with the same rank shape. It proves `contender_19 <
+contender_20` for its own number. It keeps Contender 19's language, so it is
+informally below this repository's Contenders 20–24, and Contender 23 already
+uses the transfinite-rank hierarchy. Nothing new is adopted; it corroborates
+P22.
