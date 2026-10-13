@@ -333,7 +333,7 @@ theorem eval_subst (θ₀ : Nat → Fw.Kind) (θ₁ : Nat → Kind) {σ₀ σ₁
   exact eval_dynFree (hσ n)
 
 theorem interp_ksubst : ∀ (A : Ty) (θ₀ : Nat → Fw.Kind) (θ₁ : Nat → Kind) (ρ : Nat → SVal f)
-    (σ₀ σ₁ : Nat → Kind) (hσ : ∀ n, (σ₀ n).DynFree) (k : Kind),
+    (σ₀ σ₁ : Nat → Kind) (_ : ∀ n, (σ₀ n).DynFree) (k : Kind),
     interp θ₀ θ₁ ρ (Ty.ksubst σ₀ σ₁ A) k =
       interp (fun n => evalFw θ₀ (σ₀ n)) (fun n => eval θ₀ θ₁ (σ₁ n)) ρ A k
   | tvar _, _, _, _, _, _, _, _ => rfl
