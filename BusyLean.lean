@@ -23,3 +23,7 @@ import BusyLean.Contender13
 import BusyLean.Comparison13
 import BusyLean.Contender14
 import BusyLean.Comparison14
+import BusyLean.HyperReflection
+import BusyLean.HyperReflectionFacts
+import BusyLean.Contender15
+import BusyLean.Comparison15
