@@ -125,6 +125,7 @@ Contender~45 makes each stage of the construction the base primitive of the
 next, iterated along a tree.
 Contender~46 collapses the universes of codes of Contenders~27--31
 relative to the closure's operator.
+Contender~47 iterates that self-based iteration itself.
 \end{abstract}
 
 \tableofcontents
@@ -1910,6 +1911,24 @@ $N=\mathrm{family}_{45}(n)$. Proved: \lean{family45\_lt\_F46} and
 2.0\,s and the proofs in 2.4\,s.
 
 %======================================================================
+\section{Contender 47: iterating the self-based iteration}
+
+Contender~45's $\Theta$ starts from the meta-jump and makes each stage the
+base of the next. Started from an arbitrary base $B$ (with Contender~46's
+closure), the iteration is again an operator on trees, written
+$\Theta^B$. It can itself be iterated:
+\[
+\Psi_0=\mathrm{metaJump}_N,\qquad \Psi_{a+1}(t)=\Theta^{\Psi_a}_t(t),\qquad
+\Psi_{\lim f}(t)=\lim_i\Psi_{f\,i}(t).
+\]
+$\Psi_{a+1}$ runs the whole self-based iteration along its argument, starting
+from all of $\Psi_a$. $\Psi$ is iterated along Contender~46's tree:
+$F_{47}(n)=h^{\mathrm{family}_{46}}_{\mathrm{psiTree}(N)}(N)$ with
+$N=\mathrm{family}_{46}(n)$. Proved: \lean{family46\_lt\_F47} and
+\lean{contender\_46\_lt\_\allowbreak contender\_47}. The definitions check in
+1.5\,s and the proofs in 2.1\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1990,6 +2009,7 @@ Contender & idea & informal size\\
 44 (Lean) & closures with tree-indexed relative collapse & $h_{\mathrm{levelTree44}}$ over $F_{43}$\\
 45 (Lean) & the construction as its own base, iterated along a tree & $h_{\mathrm{thetaTree}}$ over $F_{44}$\\
 46 (Lean) & universes of codes collapsed relative to the operator & $h_{\mathrm{univTree46}}$ over $F_{45}$\\
+47 (Lean) & the self-based iteration, iterated along a tree & $h_{\mathrm{psiTree}}$ over $F_{46}$\\
 \bottomrule
 \end{tabular}
 \end{center}

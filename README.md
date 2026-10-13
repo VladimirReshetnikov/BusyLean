@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 46
+## Current contender: Contender 47
+
+```lean
+def family46 (n : Nat) : Nat := F46 (F46 n)                  -- Contender 46 = family46 42
+def thetaFrom (N : Nat) (B : CTree → CTree) : CTree → CTree → CTree  -- thetaU from base B
+def psi (N : Nat) : CTree → CTree → CTree                    -- BusyLean/Contender47.lean
+  | .zero => metaJump N
+  | .succ a => fun t => thetaFrom N (psi N a) t t
+  | .lim f => fun t => .lim fun i => psi N (f i) t
+  | _ => metaJump N
+def psiTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then univTree46 N else psi N (univTree46 N) (univTree46 N)
+def F47 (n : Nat) : Nat := hier family46 (psiTree (family46 n)) (family46 n)
+def contender_47 : Nat := F47 (F47 42)
+
+theorem contender_46_lt_contender_47 : contender_46 < contender_47   -- BusyLean/Comparison47.lean
+```
+
+Contender 45's self-based iteration, started from any base `B`, is itself an
+operator on trees. `psi` iterates it: stage `a+1` runs the whole iteration along
+its argument from base `psi a`. `psi` runs along Contender 46's tree.
+
+| Theorem | Statement |
+|---|---|
+| `contender_46_lt_contender_47` | Contender 46 < Contender 47 |
+| `family46_lt_F47` | Contender 46's family is beaten at every input |
+
+## Contender 46
 
 ```lean
 def family45 (n : Nat) : Nat := F45 (F45 n)                  -- Contender 45 = family45 42
@@ -1208,8 +1235,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 46's definition modules take
-about 2.0 s and its proofs about 2.4 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 47's definition modules take
+about 1.5 s and its proofs about 2.1 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1279,6 +1306,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender44.lean`](BusyLean/Contender44.lean), [`Comparison44.lean`](BusyLean/Comparison44.lean) | Contender 44 definitions and theorems |
 | [`BusyLean/Contender45.lean`](BusyLean/Contender45.lean), [`Comparison45.lean`](BusyLean/Comparison45.lean) | Contender 45 definitions and theorems |
 | [`BusyLean/Contender46.lean`](BusyLean/Contender46.lean), [`Comparison46.lean`](BusyLean/Comparison46.lean) | Contender 46 definitions and theorems |
+| [`BusyLean/Contender47.lean`](BusyLean/Contender47.lean), [`Comparison47.lean`](BusyLean/Comparison47.lean) | Contender 47 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1332,6 +1360,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 44 | Lean | this repository | closures with relative collapse over tree-indexed levels |
 | 45 | Lean | this repository | each stage of the construction is the base primitive of the next, along a tree |
 | 46 | Lean | this repository | universes of codes (Contenders 27–31) collapsed relative to the closure's operator |
+| 47 | Lean | this repository | the self-based iteration of Contender 45, itself iterated along a tree |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
