@@ -150,6 +150,8 @@ Contender~63 makes its stacking operator a value of the language.
 Contender~64 towers that step along a tree.
 Contender~65 makes the pattern of Contenders~57--64 a hierarchy of step
 operators along a tree.
+Contender~66 makes closing and towering values, so programs build such
+hierarchies themselves.
 \end{abstract}
 
 \tableofcontents
@@ -2333,6 +2335,28 @@ $N=\mathrm{family}_{64}(n)$. Proved: \lean{family64\_lt\_F65} and
 1.4\,s and the proofs in 2.5\,s.
 
 %======================================================================
+\section{Contender 66: programs over closure and towering}
+
+Contender~65's hierarchy of step operators is built from two operations:
+closing a language with an extra family of closures, and towering a step along a
+tree. Contender~66 makes both values of the language with products:
+\[
+\mathsf{closeWith}:(\mathsf{tree}\to C)\to C,\qquad
+\mathsf{towerFrom}:(C\to C)\to C\to\mathsf{tree}\to C .
+\]
+$\mathsf{closeWith}(H)$ is the closure pair of Contender~61's language plus the
+family $H$. Then $\mathrm{metaStep}(S)(c)=\mathsf{closeWith}(\mathsf{towerFrom}\,S\,c)$
+is a program, Contender~65's hierarchy $M$ is a tree recursion at type
+$C\to C$, and programs can diagonalize across meta-levels, feed towers of one
+hierarchy into another, and iterate at higher types. These primitives join
+Contender~61's. The tree joins Contender~65's tree with the meta-jump's closure
+under this language, and the language's number closure is the hierarchy's base:
+$F_{66}(n)=h^{\mathrm{num2Lift}(\mathrm{family}_{65})}_T(N)$ with
+$N=\mathrm{family}_{65}(n)$. Proved: \lean{family65\_lt\_F66} and
+\lean{contender\_65\_lt\_\allowbreak contender\_66}. The definitions check in
+1.7\,s and the proofs in 3.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2441,6 +2465,7 @@ Contender & idea & informal size\\
 63 (Lean) & programs over the stacking operator of the tower language & $h_T$ over the language's closure\\
 64 (Lean) & Contender 63's step towered along a tree & $h_T$ over the tree-indexed tower\\
 65 (Lean) & hierarchy of step operators (the pattern of 57--64 iterated) & $h_T$ over $M_T$-towers\\
+66 (Lean) & closure-with-family and towering as values & $h_T$ over the language's closure\\
 \bottomrule
 \end{tabular}
 \end{center}
