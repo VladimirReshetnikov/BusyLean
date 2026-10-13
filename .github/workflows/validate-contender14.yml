@@ -1,0 +1,27 @@
+name: Validate Contender 14 research branch
+
+on:
+  push:
+    branches:
+      - research/contender14-diagonal-hyperreflection
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Toolchain
+        run: |
+          lean --version
+          lake --version
+      - name: Build Contender 14 definitions
+        run: /usr/bin/time -f 'definitions_seconds=%e' lake build BusyLean.Contender14
+      - name: Build Contender 14 proofs
+        run: /usr/bin/time -f 'proofs_seconds=%e' lake build BusyLean.Comparison14
+      - name: Audit
+        run: lake env lean test/Contender14Audit.lean
