@@ -9,8 +9,9 @@ inductive Tree : Type where
 
 /-- The W-recursion operation exposed to the object language. -/
 def treeFold {α : Type} (z : α)
-    (s : (Nat → Tree) → (Nat → α) → α) : Tree → α :=
-  Tree.rec z s
+    (s : (Nat → Tree) → (Nat → α) → α) : Tree → α
+  | .zero => z
+  | .sup f => s f (fun n => treeFold z s (f n))
 
 namespace Language
 open BigNumber.Lists
@@ -36,7 +37,7 @@ def typeDepth : Ty → Nat
   | .arr a b => 1 + Nat.max (typeDepth a) (typeDepth b)
 
 def defaultVal : (a : Ty) → Den a
-  | .nat => 0
+  | .nat => (0 : Nat)
   | .tree => Tree.zero
   | .arr _ b => fun _ => defaultVal b
 
@@ -84,17 +85,17 @@ def interp (q : Nat → Nat → Nat) : Tm → List Pack → Pack
   | .var i, env =>
       match lookup env i with
       | some v => v
-      | none => ⟨.nat, 0⟩
+      | none => ⟨.nat, (0 : Nat)⟩
   | .lam a b body, env =>
       ⟨.arr a b, fun x => cast b (interp q body (⟨a, x⟩ :: env))⟩
   | .app f x, env =>
       let fv := interp q f env
       let xv := interp q x env
       match fv with
-      | ⟨.nat, _⟩ => ⟨.nat, 0⟩
-      | ⟨.tree, _⟩ => ⟨.nat, 0⟩
+      | ⟨.nat, _⟩ => ⟨.nat, (0 : Nat)⟩
+      | ⟨.tree, _⟩ => ⟨.nat, (0 : Nat)⟩
       | ⟨.arr a b, g⟩ => ⟨b, g (cast a xv)⟩
-  | .zero, _ => ⟨.nat, 0⟩
+  | .zero, _ => ⟨.nat, (0 : Nat)⟩
   | .succ, _ => ⟨.arr .nat .nat, Nat.succ⟩
   | .treeZero, _ => ⟨.tree, Tree.zero⟩
   | .treeSup, _ => ⟨.arr (.arr .nat .tree) .tree, Tree.sup⟩

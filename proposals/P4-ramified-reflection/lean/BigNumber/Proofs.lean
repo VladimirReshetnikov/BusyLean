@@ -154,7 +154,14 @@ theorem oracleWitness_occ (i n : Nat) (hi : i ≤ n) :
 
 theorem value_oracleWitness (q : Nat → Nat → Nat) (i n : Nat) :
     value q (oracleWitness i n) = Nat.succ (q i n) := by
-  simp only [value, oracleWitness, interp, interp_numeral, cast, castPair]
+  have h : interp q (.app (.app .oracle (numeral i)) (numeral n)) [] = ⟨Ty.nat, q i n⟩ := by
+    change (⟨Ty.nat, q (cast Ty.nat (interp q (numeral i) []))
+      (cast Ty.nat (interp q (numeral n) []))⟩ : Pack) = _
+    rw [interp_numeral, interp_numeral]
+    rfl
+  change Nat.succ (cast Ty.nat (interp q (.app (.app .oracle (numeral i)) (numeral n)) [])) = _
+  rw [h]
+  rfl
 
 theorem value_succ_quote (q : Nat → Nat → Nat) (t : Legacy.Tm) :
     value q (.app .succ (.quote t)) = Nat.succ (Legacy.value t) := rfl
@@ -176,7 +183,8 @@ theorem baseline_lt_envelope (q : Nat → Nat → Nat) :
   have hu := terms_mono (show 44 ≤ 68 from by decide) hs
   have hb := maximum_bound (value q) hu
   rw [value_succ_quote] at hb
-  exact hb
+  unfold envelope Legacy.contender_5
+  exact Nat.lt_of_succ_le hb
 
 end Language
 

@@ -4,10 +4,9 @@ import BigNumber.Language
 namespace BigNumber
 
 /-- The recursion is on a W-tree; the oracle only evaluates immediate children. -/
-def reflect : Tree → Nat → Nat :=
-  Tree.rec
-    (fun n => Language.envelope (fun _ _ => 0) (n + 4))
-    (fun _ ih n => Language.envelope (fun i x => ih i x) (n + 4))
+def reflect : Tree → Nat → Nat
+  | .zero, n => Language.envelope (fun _ _ => 0) (n + 4)
+  | .sup f, n => Language.envelope (fun i x => reflect (f i) x) (n + 4)
 
 def iterate {α : Type} (f : α → α) : Nat → α → α
   | 0, x => x

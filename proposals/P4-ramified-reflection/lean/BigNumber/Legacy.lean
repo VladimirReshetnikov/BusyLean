@@ -28,7 +28,7 @@ def typeDepth : Ty → Nat
   | .arr a b => 1 + Nat.max (typeDepth a) (typeDepth b)
 
 def defaultVal : (a : Ty) → Den a
-  | .nat => 0
+  | .nat => (0 : Nat)
   | .arr _ b => fun _ => defaultVal b
 
 def castPair : (a b : Ty) → (Den a → Den b) × (Den b → Den a)
@@ -69,16 +69,16 @@ def interp : Tm → List Pack → Pack
   | .var i, env =>
       match lookup env i with
       | some v => v
-      | none => ⟨.nat, 0⟩
+      | none => ⟨.nat, (0 : Nat)⟩
   | .lam a b body, env =>
       ⟨.arr a b, fun x => cast b (interp body (⟨a, x⟩ :: env))⟩
   | .app f x, env =>
       let fv := interp f env
       let xv := interp x env
       match fv with
-      | ⟨.nat, _⟩ => ⟨.nat, 0⟩
+      | ⟨.nat, _⟩ => ⟨.nat, (0 : Nat)⟩
       | ⟨.arr a b, g⟩ => ⟨b, g (cast a xv)⟩
-  | .zero, _ => ⟨.nat, 0⟩
+  | .zero, _ => ⟨.nat, (0 : Nat)⟩
   | .succ, _ => ⟨.arr .nat .nat, Nat.succ⟩
   | .natRec r, _ =>
       ⟨.arr r (.arr (.arr .nat (.arr r r)) (.arr .nat r)),

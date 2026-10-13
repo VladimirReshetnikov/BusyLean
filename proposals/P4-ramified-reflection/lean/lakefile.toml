@@ -1,0 +1,7 @@
+# Build harness added during review (not part of the original submission).
+name = "lean_big_number_research"
+defaultTargets = ["BigNumber"]
+
+[[lean_lib]]
+name = "BigNumber"
+globs = ["BigNumber.+"]
