@@ -116,3 +116,5 @@ import BusyLean.Comparison43
 import BusyLean.Ordinal.RelLevels
 import BusyLean.Contender44
 import BusyLean.Comparison44
+import BusyLean.Contender45
+import BusyLean.Comparison45
