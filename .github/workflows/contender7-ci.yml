@@ -1,0 +1,27 @@
+name: Contender 7 verification
+
+on:
+  push:
+    branches: ["research/autonomous-reflection-c7-20261012"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: false
+      - name: Build Contender 7 definitions
+        run: lake build BusyLean.Contender7
+      - name: Build full library
+        run: lake build
+      - name: Record toolchain
+        run: |
+          lean --version
+          lake --version
