@@ -39,6 +39,8 @@ elab "#assert_c20_not_in_closure " root:ident " : " bad:ident* : command => do
 #print axioms BusyLean.contender_20
 #print axioms BusyLean.contender_19_lt_contender_20
 #print axioms BusyLean.family19_lt_F20
+#print axioms BusyLean.orbit19_lt_F20
+#print axioms BusyLean.long_F19_orbit_lt_contender_20
 #print axioms BusyLean.avalue_lt_F20
 #print axioms BusyLean.orbit19_lt_next
 #print axioms BusyLean.Ordinal.wLevel_wf
@@ -53,6 +55,8 @@ elab "#assert_c20_not_in_closure " root:ident " : " bad:ident* : command => do
 
 #check @BusyLean.contender_19_lt_contender_20
 #check @BusyLean.family19_lt_F20
+#check @BusyLean.orbit19_lt_F20
+#check @BusyLean.long_F19_orbit_lt_contender_20
 #check @BusyLean.avalue_lt_F20
 #check @BusyLean.Ordinal.wLevel_wf
 #check @BusyLean.FL.sn_erase_wlevel
