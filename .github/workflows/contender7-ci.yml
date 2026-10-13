@@ -17,13 +17,21 @@ jobs:
         with:
           auto-config: false
           use-github-cache: false
-      - name: Build Contender 7 definitions
-        run: lake build BusyLean.Contender7
-      - name: Build full library
-        run: lake build
-      - name: Run Contender 7 audit
-        run: lake env lean test/Contender7Audit.lean
-      - name: Record toolchain
+      - name: Run reproducible contest checker
         run: |
-          lean --version
-          lake --version
+          set -o pipefail
+          mkdir -p verification
+          python3 scripts/check.py 2>&1 | tee verification/contender7-check.log
+      - name: Record toolchain and revision
+        run: |
+          {
+            git rev-parse HEAD
+            lean --version
+            lake --version
+          } | tee verification/toolchain.txt
+      - name: Preserve verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender7-verification-${{ github.sha }}
+          path: verification
