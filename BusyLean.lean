@@ -111,3 +111,5 @@ import BusyLean.Comparison41
 import BusyLean.Ordinal.RelCollapse
 import BusyLean.Contender42
 import BusyLean.Comparison42
+import BusyLean.Contender43
+import BusyLean.Comparison43
