@@ -9,7 +9,31 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 67
+## Current contender: Contender 68
+
+```lean
+def cwStep (N : Nat) (g : Nat → Nat) (X : (CTree → Closures) → Closures) (H : CTree → Closures) :
+    Closures :=                                                -- BusyLean/Contender68.lean
+  (ptl2Lift (famTy :: cwTy :: prims66) (H, X, primEnv66 N g), num2Lift (famTy :: cwTy :: prims66) (H, X, primEnv66 N g))
+def prims68 : List PTL2.Ty := .arr cwTy cwTy :: .arr .tree cwTy :: prims66
+def primEnv68 (N : Nat) (g : Nat → Nat) : PTL2.Env prims68 := (cwStep N g, cwTower N g, primEnv66 N g)
+def family67 (n : Nat) : Nat := F67 (F67 n)                  -- Contender 67 = family67 42
+def F68 (n : Nat) : Nat := hier (cwStepClosure (family67 n) family67) (cwStepTree (family67 n)) (family67 n)
+def contender_68 : Nat := F68 (F68 42)
+
+theorem contender_67_lt_contender_68 : contender_67 < contender_68   -- BusyLean/Comparison68.lean
+```
+
+The step of Contender 67's reflective tower, `cwStep : cwTy → cwTy`, and the
+tower itself, `cwAt : tree → cwTy`, become values. Programs iterate the step
+from any operator they build, along trees they build.
+
+| Theorem | Statement |
+|---|---|
+| `contender_67_lt_contender_68` | Contender 67 < Contender 68 |
+| `family67_lt_F68` | Contender 67's family is beaten at every input |
+
+## Contender 67
 
 ```lean
 def cwTower (N : Nat) (g : Nat → Nat) : CTree → (CTree → Closures) → Closures   -- Contender67.lean
@@ -1805,8 +1829,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 67's definition modules take
-about 1.8 s and its proofs about 2.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 68's definition modules take
+about 1.9 s and its proofs about 3.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1897,6 +1921,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender65.lean`](BusyLean/Contender65.lean), [`Comparison65.lean`](BusyLean/Comparison65.lean) | Contender 65 definitions and theorems |
 | [`BusyLean/Contender66.lean`](BusyLean/Contender66.lean), [`Comparison66.lean`](BusyLean/Comparison66.lean) | Contender 66 definitions and theorems |
 | [`BusyLean/Contender67.lean`](BusyLean/Contender67.lean), [`Comparison67.lean`](BusyLean/Comparison67.lean) | Contender 67 definitions and theorems |
+| [`BusyLean/Contender68.lean`](BusyLean/Contender68.lean), [`Comparison68.lean`](BusyLean/Comparison68.lean) | Contender 68 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1971,6 +1996,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 65 | Lean | this repository | the pattern of Contenders 57–64 as a hierarchy of step operators along a tree |
 | 66 | Lean | this repository | closure-with-family and towering as values; hierarchies of steps become programs |
 | 67 | Lean | this repository | a reflective tower of closure-with-family operators along a tree |
+| 68 | Lean | this repository | the reflective tower's step and the tower as values of the language |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see

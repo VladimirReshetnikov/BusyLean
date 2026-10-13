@@ -153,6 +153,7 @@ operators along a tree.
 Contender~66 makes closing and towering values, so programs build such
 hierarchies themselves.
 Contender~67 raises the closing operator itself along a tree.
+Contender~68 makes that tower's step a value.
 \end{abstract}
 
 \tableofcontents
@@ -2379,6 +2380,27 @@ $N=\mathrm{family}_{66}(n)$. Proved: \lean{family66\_lt\_F67} and
 1.8\,s and the proofs in 2.5\,s.
 
 %======================================================================
+\section{Contender 68: programs over the reflective tower's step}
+
+Contender~67's tower of closure operators has a uniform step:
+$\mathrm{cwStep}(X)(H)$ is the closure of Contender~66's language plus $H$ and the
+operator $X$, and $cw_{a+1}=\mathrm{cwStep}(cw_a)$. Contender~68 makes the step
+and the tower values of the language:
+\[
+\mathsf{cwStep}:cwTy\to cwTy,\qquad \mathsf{cwAt}:\mathsf{tree}\to cwTy,\qquad
+cwTy=(\mathsf{tree}\to C)\to C .
+\]
+Programs iterate $\mathsf{cwStep}$ from any operator they build, not only from
+$cw_0$, along trees they build. They also diagonalize, and feed one tower into
+another. These primitives join Contender~66's. The tree joins Contender~67's tree
+with the meta-jump's closure under this language, and the language's number
+closure is the hierarchy's base:
+$F_{68}(n)=h^{\mathrm{num2Lift}(\mathrm{family}_{67})}_T(N)$ with
+$N=\mathrm{family}_{67}(n)$. Proved: \lean{family67\_lt\_F68} and
+\lean{contender\_67\_lt\_\allowbreak contender\_68}. The definitions check in
+1.9\,s and the proofs in 3.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2489,6 +2511,7 @@ Contender & idea & informal size\\
 65 (Lean) & hierarchy of step operators (the pattern of 57--64 iterated) & $h_T$ over $M_T$-towers\\
 66 (Lean) & closure-with-family and towering as values & $h_T$ over the language's closure\\
 67 (Lean) & reflective tower of closure-with-family operators & $h_T$ over $cw_T$\\
+68 (Lean) & the reflective tower's step and the tower as values & $h_T$ over the language's closure\\
 \bottomrule
 \end{tabular}
 \end{center}
