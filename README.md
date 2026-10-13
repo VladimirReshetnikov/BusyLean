@@ -9,7 +9,32 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 62
+## Current contender: Contender 63
+
+```lean
+def up2 (N : Nat) (g : Nat → Nat) (H : CTree → Closures) : CTree → Closures :=  -- Contender63.lean
+  stack2 (famTy :: prims61) (H, primEnv61 N g)
+def prims63 : List PTL2.Ty := famTy :: .arr famTy famTy :: prims61
+def primEnv63 (N : Nat) (g : Nat → Nat) : PTL2.Env prims63 :=
+  (stack2 prims61 (primEnv61 N g), up2 N g, primEnv61 N g)
+def family62 (n : Nat) : Nat := F62 (F62 n)                  -- Contender 62 = family62 42
+def F63 (n : Nat) : Nat := hier (up2Closure (family62 n) family62) (up2Tree (family62 n)) (family62 n)
+def contender_63 : Nat := F63 (F63 42)
+
+theorem contender_62_lt_contender_63 : contender_62 < contender_63   -- BusyLean/Comparison63.lean
+```
+
+Contender 62's stack becomes a value of the language at any height
+(`stack2 : tree → C`), together with its family-raising operator
+`up2 : (tree → C) → tree → C`. Hierarchies of `up2`, iterated along trees that
+programs build, are programs.
+
+| Theorem | Statement |
+|---|---|
+| `contender_62_lt_contender_63` | Contender 62 < Contender 63 |
+| `family62_lt_F63` | Contender 62's family is beaten at every input |
+
+## Contender 62
 
 ```lean
 def stack2 (P : List PTL2.Ty) (σ : PTL2.Env P) : CTree → Closures  -- BusyLean/Contender62.lean
@@ -1668,8 +1693,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 62's definition modules take
-about 1.2 s and its proofs about 2.0 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 63's definition modules take
+about 2.7 s and its proofs about 2.7 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1755,6 +1780,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender60.lean`](BusyLean/Contender60.lean), [`Comparison60.lean`](BusyLean/Comparison60.lean) | Contender 60 definitions and theorems |
 | [`BusyLean/Contender61.lean`](BusyLean/Contender61.lean), [`Comparison61.lean`](BusyLean/Comparison61.lean) | Contender 61 definitions and theorems |
 | [`BusyLean/Contender62.lean`](BusyLean/Contender62.lean), [`Comparison62.lean`](BusyLean/Comparison62.lean) | Contender 62 definitions and theorems |
+| [`BusyLean/Contender63.lean`](BusyLean/Contender63.lean), [`Comparison63.lean`](BusyLean/Comparison63.lean) | Contender 63 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1824,6 +1850,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 60 | Lean | this repository | a hierarchy of tower operators, each level's towers primitives of the next |
 | 61 | Lean | this repository | System T with products over the tower operators (towerT, towerH as values) |
 | 62 | Lean | this repository | the language over the tower operators, stacked along a tree |
+| 63 | Lean | this repository | programs over the stacking operator of the tower language (stack2, up2 as values) |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
