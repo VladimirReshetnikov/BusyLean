@@ -117,7 +117,8 @@ fast-growing hierarchy along the trees themselves, and Contender~39 interleaves
 the impredicative jump with predicative collapse. System~FT2 adds tree recursion
 over an input tree, which makes the jump a genuine operator, and Contender~40
 places it under a metalanguage with first-class language closure. Contender~41
-gives the ladder language the same recursor over its input tree.
+gives the ladder language the same recursor over its input tree, and
+Contender~42 collapses relative to these jumps.
 \end{abstract}
 
 \tableofcontents
@@ -1784,6 +1785,34 @@ Proved: \lean{family40\_lt\_F41} and \lean{contender\_40\_lt\_\allowbreak conten
 The definitions check in 7.2\,s and the proofs in 2.0\,s.
 
 %======================================================================
+\section{Contender 42: collapsing relative to the meta-jump}
+
+Contenders~40 and~41 iterate the impredicative jumps with languages over
+\emph{countable} trees. Predicative collapse entered only from outside, as
+$\mathrm{boost}_{31}$ applied to a result, so it never saw how the jump is
+iterated. \lean{RelCollapse.lean} relativizes Contender~25's Buchholz-style
+collapse $D_v$ to an operator $J$: the level-0 successor step becomes
+\[
+D^J_0(t+1)=\lim\bigl(\varepsilon^+(x),\ J(\varepsilon^+(x))\bigr),\qquad x=D^J_0(t),
+\]
+with higher levels unchanged. At a supremum, Buchholz's diagonal
+$x_0=\Omega_j$, $x_{k+1}=D_j(g\,x_k)$ re-enters level~0, so $J$ is applied at
+every stage of the collapse, not only to its output. Collapsing an argument
+above $\Omega_\omega$ relative to $J$ reaches closure points of $J$ under
+collapsing, which iteration by a language over countable trees does not.
+
+Contender~42 collapses relative to the \emph{meta-jump}
+$\mathrm{metaJump}_N(t)=\lim\bigl(b'_N(t),\ \mathrm{metaBoostT}_t(b'_N)(t)\bigr)$,
+the ladder and System~F jumps under metalanguages stacked to the height of
+$t$. The argument is the $\varepsilon$-iterates above $\Omega_\omega+T$, with
+$T$ Contender~41's tree:
+\[
+F_{42}(n)=h^{\mathrm{family}_{41}}_{\mathrm{collapseTree}(N)}(N),\qquad N=\mathrm{family}_{41}(n).
+\]
+Proved: \lean{family41\_lt\_F42} and \lean{contender\_41\_lt\_\allowbreak contender\_42}.
+The definitions check in 1.9\,s and the proofs in 1.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1859,6 +1888,7 @@ Contender & idea & informal size\\
 39 (Lean) & languages over jump and collapse, depth $F_{38}$ & $h_{\mathrm{mixTree}}$ over $F_{38}$\\
 40 (Lean) & FT2 jump (tree recursion) under metalanguages & $h_{\mathrm{metaTree}}$ over $F_{39}$\\
 41 (Lean) & ladder reader programs (FLT2) under metalanguages & $h_{\mathrm{readerTree}}$ over $F_{40}$\\
+42 (Lean) & Buchholz collapse relative to the meta-jump & $h_{\mathrm{collapseTree}}$ over $F_{41}$\\
 \bottomrule
 \end{tabular}
 \end{center}
