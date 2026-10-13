@@ -9,7 +9,39 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 12
+## Current contender: Contender 13
+
+```lean
+def family12 (n : Nat) : Nat := F12 (F12 n)               -- Contender 12 = family12 42
+def F13 (n : Nat) : Nat := Fd.reflectFd family12 n        -- BusyLean/Contender13.lean
+def contender_13 : Nat := F13 (F13 42)
+
+theorem contender_12_lt_contender_13 : contender_12 < contender_13   -- BusyLean/Comparison13.lean
+```
+
+`reflectFd f n` exceeds `f n` and the value of every closed program of
+**dynamic-kind System Fω** of depth `≤ n` with the Church numeral type. The
+language adds a predicative universe of operators to kind-polymorphic Fω:
+
+* a kind `dyn` whose elements are operators of *every* dyn-free kind
+  (semantically `Σ k, Sem k`), with type-level `pack K A : dyn`,
+  `unpack K X : K`, and `unpack K (pack K A) ≡ A`;
+* kind variables at two levels. Level-1 variables range over kinds built from
+  `dyn`, so programs can climb `dyn, dyn → ★, …` at run time (uniform orders
+  ω + n).
+
+Kinds still cannot quantify over kinds, so `dyn` never contains itself, and
+the semantic SN proof (`Fd.sn_of_typed`) certifies consistency.
+
+| Theorem | Statement |
+|---|---|
+| `Fd.sn_of_typed` | every dynamic-kind Fω term (with oracle) is strongly normalizing |
+| `Fd.infer_sound` | the checker is sound |
+| `contender_12_lt_contender_13` | Contender 12 < Contender 13 |
+| `family12_lt_F13` | Contender 12's family is beaten at every input |
+| `fvalue_lt_contender_13` | every program of depth ≤ `F13 42` is exceeded |
+
+## Contender 12
 
 ```lean
 def fkTransformer : Transformer := fun fs _ n => reflect11 fs n        -- BusyLean/Contender12.lean
@@ -260,9 +292,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 12's definition modules take
-about 4 s and its proofs about 7 s; the full clean build of all contenders
-takes about 38 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 13's definition modules take
+about 7.5 s and its proofs about 2 s; the full clean build of all contenders
+takes about 33 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -288,6 +320,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/MetaReflection.lean`](BusyLean/MetaReflection.lean), [`MetaReflectionFacts.lean`](BusyLean/MetaReflectionFacts.lean) | operator-level reflection (adopted from P6) |
 | [`BusyLean/Autonomous.lean`](BusyLean/Autonomous.lean) | ordinal notations above a tree (adopted from P7) |
 | [`BusyLean/Contender12.lean`](BusyLean/Contender12.lean), [`Comparison12.lean`](BusyLean/Comparison12.lean) | Contender 12 definitions and theorems |
+| [`BusyLean/SystemFd/`](BusyLean/SystemFd) | dynamic-kind Fω: syntax, typing, candidates with `dyn = Σ k, Sem k` (SN), sound checker |
+| [`BusyLean/Contender13.lean`](BusyLean/Contender13.lean), [`Comparison13.lean`](BusyLean/Comparison13.lean) | Contender 13 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the ten reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -306,6 +340,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 10 | Lean | this repository | kind-polymorphic System Fω (unbounded orders at run time), seeded with Contender 9 |
 | 11 | Lean | this repository | kind-polymorphic Fω reflected along the W-language's trees |
 | 12 | Lean | this repository | operator-level reflection (from P6) along notations above the index (from P7), over kind-polymorphic Fω |
+| 13 | Lean | this repository | dynamic-kind Fω: a predicative universe of operators, with two levels of kind variables |
 
 Proposals P1–P10 (two batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

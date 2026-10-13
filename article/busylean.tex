@@ -68,7 +68,9 @@ Constructions is not a growth-rate jump. Contender~10 makes the jump
 cheaply: kind polymorphism lets one program reach kinds of unbounded order
 at run time, beyond higher-order arithmetic. A second batch of five proposals is
 reviewed; two of its ideas, operator-level reflection and ordinal notations
-above a language-defined index, are adopted in Contender~12.
+above a language-defined index, are adopted in Contender~12. Contender~13 adds a predicative universe of
+operators, a kind $\mathtt{dyn}$ interpreted as $\sum_k\mathrm{Sem}(k)$, with
+level-1 kind variables that range over it.
 \end{abstract}
 
 \tableofcontents
@@ -545,21 +547,75 @@ impredicative languages lack. They are recorded for a future tree-capable
 language.
 
 %======================================================================
+\section{Contender 13: a predicative universe of operators}
+
+\subsection{The idea}
+Kind polymorphism (Contender~10) lets one program reach every \emph{finite}
+order uniformly. The next step is an object that collects all finite orders at
+once. Letting kinds quantify over kinds would do it impredicatively, but that
+is Girard's System~U$^-$, which is inconsistent. The predicative alternative is
+a new kind $\mathtt{dyn}$ whose semantic domain is the dependent sum
+\[\mathrm{Sem}(\mathtt{dyn}) \;=\; \textstyle\sum_{k\ \text{dyn-free}}\mathrm{Sem}(k),\]
+which is exactly the type \lean{SVal} of Contender~8's model. It is a universe
+of all finite-order operators that does not contain itself. Two type-level
+constructs reach it: $\mathtt{pack}\,K\,A:\mathtt{dyn}$ for $A:K$, and
+$\mathtt{unpack}\,K\,X:K$ for $X:\mathtt{dyn}$, with the conversion
+$\mathtt{unpack}\,K\,(\mathtt{pack}\,K\,A)\to A$. Both are restricted to
+\emph{dyn-free} kinds, a syntactic condition.
+
+Kind variables now come in two sorts. Level-0 variables range over dyn-free
+kinds and can appear in $\mathtt{pack}$/$\mathtt{unpack}$. Level-1 variables
+range over \emph{all} kinds, including $\mathtt{dyn}$, $\mathtt{dyn}\to\star$,
+and so on. The existential climbing trick of Contender~10, applied to level-1
+variables, therefore reaches orders $\omega+n$ for run-time~$n$.
+
+\subsection{The model}
+Semantic kinds are closed syntactic kinds, which have decidable equality, so
+the dynamic read \lean{SVal.get} of Contender~6 still works. A decoding
+\lean{toFw} sends dyn-free closed kinds to F$_\omega$ kinds, with
+$\mathrm{Sem}(K)=\mathrm{Sem}_{F_\omega}(k)$ whenever
+$\mathtt{toFw}\,K=\mathtt{some}\,k$. $\mathtt{pack}$ is \lean{SVal.mk} through
+that cast, and $\mathtt{unpack}$ is \lean{SVal.get} through the reverse cast.
+The lemma \lean{unpack\_pack} states that the read-back of a packed value is
+the value itself, which is what makes the new conversion sound. Level-0 kind
+variables are evaluated to F$_\omega$ kinds and level-1 variables to arbitrary
+kinds; $\forall\kappa_0$ and $\forall\kappa_1$ are intersections over the
+respective ranges.
+\begin{theorem}[\lean{Fd.sn\_of\_typed}]
+Every term typable in dynamic-kind System~F$_\omega$ with the oracle is
+strongly normalizing, using only \lean{propext} and \lean{Quot.sound}.
+\end{theorem}
+The smoke test exercises all of it. A program typable only through
+$\mathtt{unpack}\,\star\,(\mathtt{pack}\,\star\,\mathtt{nat})\equiv\mathtt{nat}$
+evaluates to 3. Level-1 polymorphism instantiated at $\mathtt{dyn}$ evaluates
+to 5. Instantiating a level-0 variable with $\mathtt{dyn}$, and packing at a
+kind containing $\mathtt{dyn}$, are both rejected.
+
+\subsection{The contender}
+\begin{lstlisting}
+def family12 (n : ℕ) : ℕ := F12 (F12 n)    -- family12 42 = contender_12
+def F13 (n : ℕ) : ℕ := reflectFd family12 n
+def contender_13 : ℕ := F13 (F13 42)
+\end{lstlisting}
+Proved: \lean{contender\_12\_lt\_\allowbreak contender\_13},
+\lean{family12\_lt\_F13} at every input, and
+\lean{fvalue\_lt\_\allowbreak contender\_13}. The new definition modules check
+in about 7.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
-\paragraph{A ladder of kind universes.} Kind polymorphism is the first rung
-of a predicative ladder. Kinds may quantify over kinds if the result lives
-one level higher. Each level is modeled by a dependent function space over
-countable syntax, defined by recursion on levels with environments of
-lower-level semantics. Type operators of polymorphic kind require type-level
-kind abstraction and its $\beta$-rule. A contender that diagonalizes over the
-number of levels would climb the whole ladder.
+\paragraph{A ladder of dynamic kinds.} $\mathtt{dyn}$ is the first universe of
+a ladder. A kind $\mathtt{dyn}_{j+1}$ would collect operators of every kind
+built from $\mathtt{dyn}_0,\dots,\mathtt{dyn}_j$. Its domain is a dependent sum
+over those lower kinds, and the sorts of kind variables are indexed by level.
+A contender that lets programs of depth $n$ use $n$ levels would climb the
+whole ladder, reaching orders $\omega\cdot n$ uniformly and order $\omega^2$
+in the limit.
 
 \paragraph{Large elimination and trees.} Runtime-to-type dependency with large
 elimination remains the route to a CIC-like system. A language able to hand
-well-founded trees back to Lean, whether through a realizability model or a
-candidate-based well-foundedness argument, would also unlock the world and
-model constructions of P8--P10 at impredicative strength.
+trees back to Lean would unlock the world and model constructions of P8--P10.
 
 %======================================================================
 \section{Status}
@@ -577,6 +633,7 @@ Contender & idea & informal size\\
 10 (Lean) & kind-polymorphic F$_\omega$ & beyond higher-order arithmetic\\
 11 (Lean) & 10, reflected along W-trees & multiplicative gain over 10\\
 12 (Lean) & 10, operator-level reflection (P6, P7 ideas) & exponential index over 11\\
+13 (Lean) & dynamic kind: a universe of operators & uniform orders $\omega+n$\\
 \bottomrule
 \end{tabular}
 \end{center}
