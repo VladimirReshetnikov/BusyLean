@@ -68,3 +68,6 @@ import BusyLean.Comparison26
 import BusyLean.Ordinal.TreeUniverses
 import BusyLean.Contender27
 import BusyLean.Comparison27
+import BusyLean.Ordinal.TreeUniverses2
+import BusyLean.Contender28
+import BusyLean.Comparison28
