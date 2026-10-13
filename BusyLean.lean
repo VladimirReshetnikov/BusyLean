@@ -55,3 +55,6 @@ import BusyLean.TreeHyperReflection
 import BusyLean.TreeHyperReflectionFacts
 import BusyLean.Contender23
 import BusyLean.Comparison23
+import BusyLean.Ordinal.TowerAlong
+import BusyLean.Contender24
+import BusyLean.Comparison24
