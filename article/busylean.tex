@@ -74,7 +74,9 @@ level-1 kind variables that range over it. Contender~14 climbs a ladder of
 such universes: at input $n$ it reflects over the language with $n$ stacked
 universes, all normalized by one theorem that is parametric in the universe.
 A fourth batch of proposals contributes a rank hierarchy of transformer lifts,
-which Contender~15 applies to the ladder.
+which Contender~15 applies to the ladder. Contender~16 makes the ladder
+transfinite: Lean builds a universe for every well-founded atom order, and
+Cantor normal forms give a ladder of length $\omega^\omega$.
 \end{abstract}
 
 \tableofcontents
@@ -757,13 +759,72 @@ in 2.9\,s and the proofs in 3.1\,s. Informally the size is about
 $|\mathrm{FL}_n|\cdot\varepsilon(\tau)$, diagonalized over the ladder level~$n$.
 
 %======================================================================
+\section{Contender 16: a transfinite ladder}
+
+\subsection{The length of the ladder is the lever}
+Contender~14 diagonalizes over finitely many universes. Letting a program
+choose its level at run time would add only about one more factor of $\omega$.
+A much larger lever is the \emph{length} of the ladder. The ladder language
+was parametric in its atoms from the start, and only the \lean{Option} tower of
+Contender~14 was finite. So the question becomes: for which atom orders can
+Lean build a universe?
+
+\begin{theorem}[\lean{FL.wfUniv}]
+For every type of atoms whose decidable order is well-founded, there is a
+universe. Hence (\lean{FL.sn\_of\_typed}) the ladder language over those atoms is
+strongly normalizing.
+\end{theorem}
+The domain of atom $a$ is defined by well-founded recursion
+(\lean{WellFounded.fix}):
+\[
+\mathrm{El}(a) \;=\; \textstyle\sum_{k\ \text{fits}\ a}\ \mathrm{Sem}(k),
+\qquad \mathrm{Sem}(b) = \mathrm{El}(b)\ \text{for atoms } b<a .
+\]
+A value stores its kind together with a proof that the kind fits. Reading
+compares kinds, which is decidable, so the law $\mathrm{rd}(\mathrm{pk}\,v)=v$
+holds. The unfolding equation \lean{WellFounded.fix\_eq} is not
+definitional, so it is used through casts. Because types are erased,
+\lean{WellFounded.fix} at \lean{Type} compiles without a
+\lean{noncomputable} marker. The universe at a limit atom such as $\omega$
+holds operators from \emph{every} lower level at once.
+
+\subsection{Well-founded Cantor normal forms}
+A non-increasing list $[a_1,\dots,a_k]$ denotes
+$\omega^{a_1}+\dots+\omega^{a_k}$, and the lexicographic order on such lists is
+the ordinal order. \lean{Ordinal.wf\_sorted} proves this order well-founded
+whenever the exponents are accessible. The proof uses neither transitivity nor
+trichotomy; asymmetry comes from accessibility. A sorted list headed by $h$
+splits into a run $h^{k+1}$ and a tail below $h$. Two such lists compare like
+the pairs $(k,\text{tail})$, which gives an induction on the head, then on the
+run length, then on the tail. With natural-number exponents this gives
+notations below $\omega^\omega$ (\lean{OmegaPow}). Applied hereditarily it will
+give $\varepsilon_0$.
+
+\subsection{The contender}
+\begin{lstlisting}
+def transfiniteUpTo (n : ℕ) := ctmsUpTo (omegaPowUpTo n) n   -- atoms: ≤ n terms, exponents < n
+def family15 (n : ℕ) : ℕ := F15 (F15 n)
+def F16 (n : ℕ) : ℕ :=
+  diagonalLift (schedule16 n) (family15 n + 1) tTransformer (fun _ => family15) n n
+def contender_16 : ℕ := F16 (F16 42)
+\end{lstlisting}
+\lean{tTransformer} is family-aware reflection over the transfinite ladder,
+normalized by \lean{sn\_of\_typed (wfUniv f omegaPow\_wf)}. At depth~$n$,
+programs reach levels up to $\omega^{n-1}\cdot n$. Proved:
+\lean{contender\_15\_lt\_\allowbreak contender\_16}, \lean{family15\_lt\_F16} and
+\lean{tvalue\_lt\_F16}. The smoke test packs an operator of kind
+$\mathtt{dyn}_3\to\star$ into the level-$\omega$ universe and evaluates it to~4.
+The opposite direction is rejected. The definitions check in 4.8\,s and the
+proofs in 2.8\,s.
+
+%======================================================================
 \section{Roadmap}
 
-\paragraph{Levels inside the language.} Contender~14 fixes the level per
-program and diagonalizes outside. Level variables, in the style of universe
-polymorphism, would let one program quantify over rungs and climb a run-time
-number of them. That gives orders $\omega\cdot n$ uniformly in one program,
-and the reflection would then diagonalize at $\omega^2$.
+\paragraph{Longer ladders.} The ladder now has whatever length Lean can
+prove well-founded. Applying the sorted-list lemma hereditarily gives
+$\varepsilon_0$. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
+and further) are well-founded in Lean's type theory, and each one plugs into
+\lean{wfUniv} unchanged.
 
 \paragraph{Reflection along trees.} As with Contenders~9 and~11, reflecting
 the ladder along the W-language's trees is a cheap multiplicative step.
@@ -791,6 +852,7 @@ Contender & idea & informal size\\
 13 (Lean) & dynamic kind: a universe of operators & uniform orders $\omega+n$\\
 14 (Lean) & ladder of universes, level $n$ at input $n$ & orders $\omega\cdot n$, diagonalized\\
 15 (Lean) & 14 with P17's rank hierarchy of lifts & $|\mathrm{FL}_n|\cdot\varepsilon(\tau)$\\
+16 (Lean) & 15 over a ladder of length $\omega^\omega$ & levels $<\omega^{n}$ at input $n$\\
 \bottomrule
 \end{tabular}
 \end{center}

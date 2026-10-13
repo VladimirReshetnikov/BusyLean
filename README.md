@@ -9,7 +9,42 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 15
+## Current contender: Contender 16
+
+```lean
+def family15 (n : Nat) : Nat := F15 (F15 n)                  -- Contender 15 = family15 42
+def F16 (n : Nat) : Nat :=                                   -- BusyLean/Contender16.lean
+  diagonalLift (schedule16 n) (family15 n + 1) tTransformer (fun _ => family15) n n
+def contender_16 : Nat := F16 (F16 42)
+
+theorem contender_15_lt_contender_16 : contender_15 < contender_16   -- BusyLean/Comparison16.lean
+```
+
+The ladder of universes becomes **transfinite**.
+
+* [`SystemFL/Transfinite.lean`](BusyLean/SystemFL/Transfinite.lean):
+  `FL.wfUniv` builds a universe for *every* well-founded atom order, by
+  well-founded recursion: the domain of atom `a` is the sum of the semantics of
+  all base kinds whose atoms lie below `a`. So the ladder language normalizes for
+  ladders of any well-founded length.
+* [`Ordinal/SortedLex.lean`](BusyLean/Ordinal/SortedLex.lean): the
+  lexicographic order on non-increasing lists (Cantor normal forms) is
+  well-founded whenever the exponents are accessible.
+* [`Ordinal/OmegaPow.lean`](BusyLean/Ordinal/OmegaPow.lean): atoms are notations
+  below `ω^ω`. At depth `n`, programs use levels up to `ω^(n-1)·n`; for example,
+  the universe at `ω` holds operators from every finite level.
+* The amplifier is Contender 15's rank hierarchy of lifts, seeded with
+  Contender 15's family.
+
+| Theorem | Statement |
+|---|---|
+| `FL.wfUniv` | a universe for every well-founded atom order |
+| `Ordinal.wf_sorted` | sorted lists of accessible elements are well-founded lexicographically |
+| `contender_15_lt_contender_16` | Contender 15 < Contender 16 |
+| `family15_lt_F16` | Contender 15's family is beaten at every input |
+| `tvalue_lt_F16` | every transfinite-ladder program of depth ≤ `n` is below `F16 n` |
+
+## Contender 15
 
 ```lean
 def family14 (n : Nat) : Nat := F14 (F14 n)                  -- Contender 14 = family14 42
@@ -358,9 +393,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 15's definition modules take
-about 3 s and its proofs about 3 s; the full clean build of all contenders
-takes about 48 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 16's definition modules take
+about 5 s and its proofs about 3 s; the full clean build of all contenders
+takes about 49 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -392,6 +427,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender14.lean`](BusyLean/Contender14.lean), [`Comparison14.lean`](BusyLean/Comparison14.lean) | Contender 14 definitions and theorems |
 | [`BusyLean/HyperReflection.lean`](BusyLean/HyperReflection.lean), [`HyperReflectionFacts.lean`](BusyLean/HyperReflectionFacts.lean) | rank hierarchy of transformer lifts (adopted from P17) |
 | [`BusyLean/Contender15.lean`](BusyLean/Contender15.lean), [`Comparison15.lean`](BusyLean/Comparison15.lean) | Contender 15 definitions and theorems |
+| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded Cantor normal forms (sorted lists) and the atoms below `ω^ω` |
+| [`BusyLean/Contender16.lean`](BusyLean/Contender16.lean), [`Comparison16.lean`](BusyLean/Comparison16.lean) | Contender 16 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -414,6 +451,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 13 | Lean | this repository | dynamic-kind Fω: a predicative universe of operators, with two levels of kind variables |
 | 14 | Lean | this repository | a ladder of such universes, one SN proof for all levels; input `n` uses level `n` |
 | 15 | Lean | this repository | P17's rank hierarchy of transformer lifts over family-aware ladder reflection |
+| 16 | Lean | this repository | a transfinite ladder (length `ω^ω`) via a universe for every well-founded atom order |
 
 Proposals P1–P20 (four batches) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
