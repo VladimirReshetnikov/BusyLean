@@ -14,3 +14,8 @@ import BusyLean.Contender10
 import BusyLean.Comparison10
 import BusyLean.Contender11
 import BusyLean.Comparison11
+import BusyLean.MetaReflection
+import BusyLean.MetaReflectionFacts
+import BusyLean.Autonomous
+import BusyLean.Contender12
+import BusyLean.Comparison12
