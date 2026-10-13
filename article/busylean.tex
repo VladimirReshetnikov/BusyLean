@@ -2000,33 +2000,42 @@ Proved: \lean{readNat\_lt\_ladderReflect}, \lean{family49\_lt\_F50} and
 %======================================================================
 \section{Roadmap}
 
-\paragraph{Longer ladders.} The ladder now has whatever length Lean can
-prove well-founded; $\varepsilon_0$, $\Gamma_0$ and the large Veblen ordinal are
-done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
-collapsing (Contender~20), and $\psi_0(\Omega_\omega)$ in the limit of bounded
-Buchholz systems (Contender~21). Contender~22 iterates bounded systems over a
-base. Contender~25 sidesteps notations entirely: tree ordinals defined by
-structural recursion need no well-foundedness proof. Contender~26 adds tree-indexed levels, and Contender~27
-universes of level codes. Beyond that lie levels closed under codes for
-\emph{all} universes at once, and Mahlo-like collapsing hierarchies, in which levels are
-closed under level-forming operations. All of them are definable by structural
-recursion in Lean's inductive types. Collapsing functions need genuine normal forms: in Buchholz's raw order,
-$D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
-and further) are well-founded in Lean's type theory, and each one plugs into
-\lean{wfUniv} unchanged.
+The construction now has three layers. Their weak points mark where further
+growth must come from.
 
-\paragraph{Reflection along trees.} As with Contenders~9 and~11, reflecting
-the ladder along the W-language's trees is a cheap multiplicative step.
+\paragraph{Languages that read trees.} The impredicative languages (System~FT2
+and the ladder language FLT2) recurse over an input tree at every type. They
+build trees from it (the jumps of Contenders~40--41) and compute numbers from
+it (the reflections of Contenders~49--50). Their strength is fixed by the
+language: System~F, or the ladder with a universe for each named atom. The
+next step up is a stronger reading language. One option is type-level
+recursion over the input tree, so that universes are indexed by the tree's
+nodes and not just by named atoms. This is large elimination, the route to a
+CIC-like system, and it needs a new strong normalization proof.
 
-\paragraph{Impredicative trees in stronger systems.} The candidate
-$\mathrm{WT}$ needs nothing specific to System~F. The same constants added to
-F$_\omega$ or to the kind-polymorphic system of Contender~10 give trees
-described by higher-order impredicative encodings. Feeding the trees back as
-oracles, or letting programs inspect the ladder over a tree, is a further step.
+\paragraph{Using the atom order.} Section~\ref{sec:truncation} showed that a
+ladder sees only the atoms it names. Quantification over atoms, such as a type
+former $\forall b<a.\,A$ interpreted as an intersection over all atoms below $a$,
+would let programs act uniformly across the transfinite order. Whether that
+adds strength without recursion over atoms is open. Atom recursion would.
 
-\paragraph{Large elimination and trees.} Runtime-to-type dependency with large
-elimination remains the route to a CIC-like system. A language able to hand
-trees back to Lean would unlock the world and model constructions of P8--P10.
+\paragraph{Operators on trees.} Contenders~42--48 stack operators on trees:
+collapsing relative to a jump, collapse as a first-class closure, the
+construction as its own base, and a Veblen-style hierarchy of iteration
+levels. The natural continuation is collapsing at this level, with iteration
+levels indexed by higher tree classes and then collapsed, as Buchholz's
+functions collapse the levels $\Omega_\nu$. A complementary step is a
+metalanguage whose primitives include the iteration operators themselves, so
+that programs can iterate them at higher types.
+
+\paragraph{Reading the final tree.} Contenders~49 and~50 turn the final tree
+into a number with programs that recurse over it. Any stronger reading
+language from the first paragraph improves this step directly.
+
+\paragraph{Ladder lengths.} The ordinal-notation ladders of Contenders~15--24
+remain correct and well-founded, but by Section~\ref{sec:truncation} their
+length does not reach the numbers. Their well-foundedness proofs are reusable
+wherever a genuine transfinite recursion is needed.
 
 %======================================================================
 \section{Status}
