@@ -218,3 +218,73 @@ constructions of P8–P10 require an object language that manipulates trees as
 data. The W-language qualifies, but System F, Fω and Fk do not, since they
 have no set-theoretic model. These ideas are recorded for a future
 tree-capable language.
+
+---
+
+# Third batch: P11–P16
+
+Six more archives arrived. P11–P15 propose a "Contender 11" over this
+repository's Contender 10 (kind-polymorphic Fω, commit `4c4b03d`). P16 is a late
+"Contender 7" over Contender 6 (commit `86b3606`). None of them knows about
+Contenders 11–13 as they now exist here.
+
+## Build and audit results
+
+Each proposal was overlaid on a scratch git worktree at its base commit and
+built with Lean 4.34.0 (`lake build BusyLean.Comparison11`, or `Comparison7`
+for P16). The axiom checks are my own; the proposals' scripts were not run.
+
+| | Archive | Author's status | Definitions | Proofs | Axioms of `contender_N` / comparison |
+|---|---|---|---|---|---|
+| P11 | `BusyLean_Contender11.zip` | uncompiled | compile | **compile** | `propext, Quot.sound` / same |
+| P12 | `…_Crowned_Forest.zip` | uncompiled | compile | fail: type mismatch at `Comparison11.lean:77`, max recursion depth at `:149` | n/a |
+| P13 | `…_DRKR_Research_Package.zip` | uncompiled | compile | **did not terminate**: stopped after more than 5 CPU-minutes, far beyond the 60 s proof budget | n/a |
+| P14 | `…_DiagonalForest.zip` | uncompiled | compile | **compile** | `propext, Quot.sound` / same |
+| P15 | `…_ForestFk.zip` | merged-source check claimed | compile | **compile** | `propext, Quot.sound` / same |
+| P16 | `busylean_reflection_power_research.zip` | uncompiled | compile | fail: max recursion depth at `Comparison7.lean:99` | n/a |
+
+The failures share one cause, the trap described in the article's
+engineering lessons. A proof step makes the elaborator compare or unfold a
+term containing a contender-sized number. P16's `change` relates
+`metaHeight` to `Nat.succ (42 + p5Family 0 42)`, and its comment says it
+"unfolds only the successor guard", but the definitional check evaluates
+`p5Family 0 42`. P13's `simpa [RK.ramified]` and its `rfl` relating
+`contender_10 + 1` to `family10 42 + 1` invite the same normalization at a
+giant rank.
+
+## What they build
+
+All six keep an earlier language: Fk (|Fk|) for P11–P15, and the W-language
+(|L| ≈ ψ(Ω_ω)) for P16. The amplifiers on top are:
+
+* **P11, self-accelerated tower.** Complete forest-reflection rounds along
+  the index, iterated a self-fed finite number of times: ≈ |Fk|·|L|·ω.
+* **P12, crowned forest.** The index plus an input-diagonal chain above it:
+  ≈ |Fk|·(|L|+ω).
+* **P13, ramified kind reflection.** The autonomous lift along the index,
+  iterated up to rank `family10 n + 1`: ≈ |Fk|·|L|^ω.
+* **P14, self-height diagonal forest.** Reflection towers whose height is a
+  previous reflection value, placed along the index: ≈ |Fk|·|L|·ω.
+* **P15, forest reflection of Fk.** Its construction is identical to this
+  repository's Contender 11: ≈ |Fk|·|L|².
+* **P16, reflection power.** Whole schedulers reflected repeatedly along the
+  index over the W-language: an amplifier of Contender 6, ≈ |L|^ω.
+
+## Comparison with the current contenders
+
+Every amplifier in this batch is at most Contender 12's: Contender 12 iterates
+the same autonomous lift along a Γ-like *tree*, not a finite rank, which
+gives about |Fk|·|L|^(Γ-closure). Contender 13 changes the language itself, to
+dynamic-kind Fω with uniform orders ω+n, which by the "base language
+dominates" heuristic exceeds every |Fk|-based amplification. Informally, the
+whole batch is therefore below Contender 12, and well below Contender 13. P16
+is a W-language construction, far below Contender 7. No theorem relates
+their constants to mine.
+
+## Ideas
+
+Self-fed iteration counts (P11, P14), crowns (P12) and finite diagonal ranks
+(P13) each add about a factor of ω to the index ordinal. They are subsumed
+by the tree-indexed operator stage of Contender 12, so nothing in this batch
+is adopted. P15 independently arrived at Contender 11's exact construction,
+which corroborates it.
