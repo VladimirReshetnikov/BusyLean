@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 25
+## Current contender: Contender 26
+
+```lean
+def family25 (n : Nat) : Nat := F25 (F25 n)                  -- Contender 25 = family25 42
+def F26 (n : Nat) : Nat :=                                   -- BusyLean/Contender26.lean
+  wDiagonalLift (schedule26 n) (rank26 n) ltTransformer (fun _ => family25) n n
+def contender_26 : Nat := F26 (F26 42)
+
+theorem contender_25_lt_contender_26 : contender_25 < contender_26   -- BusyLean/Comparison26.lean
+```
+
+The collapsing levels are now **countable tree ordinals themselves**
+([`Ordinal/TreeLevels.lean`](BusyLean/Ordinal/TreeLevels.lean)). Everything
+below a level is lumped by structural recursion on the level tree. Arguments
+carry the level of each supremum (`supAt c g`), so collapsing never needs to
+compare levels. `DL` diagonalizes successor levels Buchholz-style and takes
+limits at limit levels, all by structural recursion. `ladderTree n` iterates
+`Λ ↦ ψ₀(ε_{Ω_Λ+1})`, heuristically toward the fixed points of `α ↦ ψ₀(Ω_α)`.
+Input `n` uses the ladder over `Addr (ladderTree n)`, which is well-founded
+structurally.
+
+| Theorem | Statement |
+|---|---|
+| `contender_25_lt_contender_26` | Contender 25 < Contender 26 |
+| `family25_lt_F26` | Contender 25's family is beaten at every input |
+| `lvalue26_lt_F26` | every program of depth ≤ `n` over the addresses of `ladderTree n` is below `F26 n` |
+
+## Contender 25
 
 ```lean
 def family24 (n : Nat) : Nat := F24 (F24 n)                  -- Contender 24 = family24 42
@@ -659,8 +686,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 25's definition modules take
-about 3.5 s and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 26's definition modules take
+about 4.5 s and its proofs about 5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -705,6 +732,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender23.lean`](BusyLean/Contender23.lean), [`Comparison23.lean`](BusyLean/Comparison23.lean) | Contender 23 definitions and theorems |
 | [`BusyLean/Contender24.lean`](BusyLean/Contender24.lean), [`Comparison24.lean`](BusyLean/Comparison24.lean) | Contender 24 definitions and theorems |
 | [`BusyLean/Contender25.lean`](BusyLean/Contender25.lean), [`Comparison25.lean`](BusyLean/Comparison25.lean) | Contender 25 definitions and theorems |
+| [`BusyLean/Contender26.lean`](BusyLean/Contender26.lean), [`Comparison26.lean`](BusyLean/Comparison26.lean) | Contender 26 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -737,6 +765,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 23 | Lean | this repository | 22 with P22's transfinite (W-tree) rank for the lift hierarchy |
 | 24 | Lean | this repository | towers along well-founded indices, each round indexed by the previous one |
 | 25 | Lean | this repository | ladders over addresses in collapsed tree ordinals (P25's idea; well-foundedness for free) |
+| 26 | Lean | this repository | collapsing with tree-indexed levels, iterated toward fixed points of `α ↦ ψ₀(Ω_α)` |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

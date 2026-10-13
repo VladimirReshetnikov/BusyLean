@@ -96,6 +96,8 @@ Contender~25 adopts a proposal's key idea: atoms are addresses in a Lean-defined
 tree, so well-foundedness is structural and free. The ladder then runs over
 trees built by Buchholz-style collapsing functions defined by plain structural
 recursion, heuristically to $\psi_0(\varepsilon_{\Omega_\omega+n})$.
+Contender~26 indexes the collapsing levels by tree ordinals themselves,
+heuristically climbing toward the fixed points of $\alpha\mapsto\psi_0(\Omega_\alpha)$.
 \end{abstract}
 
 \tableofcontents
@@ -1257,6 +1259,44 @@ address $(3,5)$ packs into the root's universe (value~12). The definitions check
 in 3.5\,s and the proofs in 2.2\,s.
 
 %======================================================================
+\section{Contender 26: transfinitely many levels}
+
+Contender~25's collapsing functions have finitely many levels. With tree
+ordinals, the levels can themselves be countable tree ordinals
+(\lean{TreeLevels.lean}). The type of everything below level $a$ is defined by
+structural recursion on the level tree:
+\[
+\mathrm{Low}(0)=\emptyset,\qquad
+\mathrm{Low}(a{+}1)=\mathrm{Low}(a)\oplus\mathrm{Lev}(a),\qquad
+\mathrm{Low}(\lim f)=\textstyle\sum_i \mathrm{Low}(f\,i)\oplus\mathrm{Lev}(f\,i),
+\]
+with $\mathrm{Lev}(a)$ the trees with suprema over $\mathrm{Low}(a)$. Embedding
+a level into a higher one extends suprema by zero, so no retraction is needed.
+
+A difficulty arises for arguments. Splitting a supremum into the parts below
+and above the target level would need a decidable order on levels, and tree
+orders are not decidable. The fix is to let suprema carry their level. The
+argument type has a constructor \lean{supAt (c : CTree) (g : Low c → LTop)},
+which is still strictly positive. Then
+\begin{lstlisting}
+def DL : (a : CTree) → LTop → Lev a
+  | a, .supAt c g =>
+      match c, g with
+      | .succ c', g => -- x0 = Omega c',  x(k+1) = DL c' (g x(k));  result lim_k DL a (g x(k))
+      | .lim f, g   => -- the limit over i of the successor case at f i
+      ...
+\end{lstlisting}
+Again every recursive call is on \lean{g x}, so the definition is structural,
+and it uses only \lean{propext}. \lean{ladderTree n} iterates
+$\Lambda\mapsto \mathrm{DL}\,0\,(\varepsilon_{\Omega_\Lambda+1})$ $n{+}1$ times,
+starting from Contender~25's tree. Heuristically this climbs toward the fixed
+points of $\alpha\mapsto\psi_0(\Omega_\alpha)$. Input $n$ uses the ladder over
+\lean{Addr (ladderTree n)}, with the W-ranked lift hierarchy seeded with
+Contender~25's family. Proved: \lean{contender\_25\_lt\_\allowbreak contender\_26},
+\lean{family25\_lt\_F26} and \lean{lvalue26\_lt\_F26}. The definitions check in
+4.4\,s and the proofs in 4.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1265,9 +1305,10 @@ done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
 collapsing (Contender~20), and $\psi_0(\Omega_\omega)$ in the limit of bounded
 Buchholz systems (Contender~21). Contender~22 iterates bounded systems over a
 base. Contender~25 sidesteps notations entirely: tree ordinals defined by
-structural recursion need no well-foundedness proof. The next steps there are
-collapsing functions with transfinitely many levels ($\Omega_\alpha$ for tree
-ordinals $\alpha$, reaching $\psi_0(\Omega_{\Omega_{\cdots}})$), and beyond. Collapsing functions need genuine normal forms: in Buchholz's raw order,
+structural recursion need no well-foundedness proof. Contender~26 adds tree-indexed levels. Beyond that
+lie inaccessible-like and Mahlo-like collapsing hierarchies, in which levels are
+closed under level-forming operations. All of them are definable by structural
+recursion in Lean's inductive types. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
@@ -1308,6 +1349,7 @@ Contender & idea & informal size\\
 23 (Lean) & 22 with P22's W-ranked lift hierarchy & transfinite rank over 22\\
 24 (Lean) & towers along well-founded indices, self-indexed rounds & fixed points of $x\mapsto\psi_0(\Omega_\omega x)$\\
 25 (Lean) & ladders over addresses in collapsed tree ordinals & $\psi_0(\varepsilon_{\Omega_\omega+n})$ at input $n$\\
+26 (Lean) & collapsing with tree-indexed levels & toward fixed points of $\alpha\mapsto\psi_0(\Omega_\alpha)$\\
 \bottomrule
 \end{tabular}
 \end{center}
