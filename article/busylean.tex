@@ -102,7 +102,8 @@ Contender~27 stratifies level codes into universes, toward an inaccessible-like
 level, and Contender~28 stacks the universes along tree ordinals given by
 earlier collapses. Contender~29 iterates the universe-building operators
 themselves, indexed by tree ordinals, and Contender~30 lifts closure to all
-finite types over universes.
+finite types over universes; Contender~31 to transfinite types indexed by
+collapsed trees.
 \end{abstract}
 
 \tableofcontents
@@ -1404,6 +1405,32 @@ type. Proved: \lean{contender\_29\_lt\_\allowbreak contender\_30},
 2.1\,s and the proofs in 2.0\,s.
 
 %======================================================================
+\section{Contender 31: closure functionals of transfinite type}
+
+The finite types of Contender~30 extend along tree ordinals
+(\lean{TreeUniverses5.lean}):
+\[
+AT_0=\mathrm{Univ},\qquad AT_{a+1}=AT_a\to AT_a,\qquad AT_{\lim f}=\textstyle\prod_i AT_{f\,i},
+\]
+with pointwise unions everywhere and closure points at successor types. A
+canonical functional $\mathrm{step}_a\in AT_{a+1}$ is defined by structural
+recursion. It is the base operator at $0$, closure at successors, and taken
+componentwise at limits. It is evaluated down to a universe along the canonical
+chain of lower elements, with unions at limit types. The type level at input
+$n$ is Contender~30's tree, so the height of the type hierarchy is itself a
+collapsed tree. No axioms are used. Proved:
+\lean{contender\_30\_lt\_\allowbreak contender\_31}, \lean{family30\_lt\_F31} and
+\lean{ttvalue\_lt\_F31}. The definitions check in 2.0\,s and the proofs in 2.4\,s.
+
+\paragraph{Where this leaves the search.} Contenders 25--31 all follow one
+pattern: a countable tree ordinal is defined by structural recursion, and the
+ladder runs over its addresses, with well-foundedness for free. Each step
+nests the previous construction inside a stronger recursion. The true sizes are
+heuristic; only the comparisons are proved. A qualitatively larger jump needs a
+stronger object language, for example dependent types with large elimination,
+which would require a new normalization proof.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1462,6 +1489,7 @@ Contender & idea & informal size\\
 28 (Lean) & universes stacked along collapsed trees & iterated universe heights\\
 29 (Lean) & higher-order universe operators along trees & hierarchy of inaccessible-like closures\\
 30 (Lean) & closure functionals of all finite types & higher-type closure hierarchies\\
+31 (Lean) & closure functionals of transfinite (tree-indexed) type & type height = collapsed tree\\
 \bottomrule
 \end{tabular}
 \end{center}

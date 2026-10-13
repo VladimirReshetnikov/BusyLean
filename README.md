@@ -9,7 +9,30 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 30
+## Current contender: Contender 31
+
+```lean
+def family30 (n : Nat) : Nat := F30 (F30 n)                  -- Contender 30 = family30 42
+def F31 (n : Nat) : Nat :=                                   -- BusyLean/Contender31.lean
+  wDiagonalLift (schedule31 n) (rank31 n) ttTransformer (fun _ => family30) n n
+def contender_31 : Nat := F31 (F31 42)
+
+theorem contender_30_lt_contender_31 : contender_30 < contender_31   -- BusyLean/Comparison31.lean
+```
+
+The closure types are indexed by **tree ordinals**
+([`Ordinal/TreeUniverses5.lean`](BusyLean/Ordinal/TreeUniverses5.lean)):
+`AT (a+1) = AT a → AT a` and `AT (lim f) = Π i, AT (f i)`. Canonical
+functionals are evaluated down to a universe. The type height at input `n` is
+Contender 30's tree. No axioms are used.
+
+| Theorem | Statement |
+|---|---|
+| `contender_30_lt_contender_31` | Contender 30 < Contender 31 |
+| `family30_lt_F31` | Contender 30's family is beaten at every input |
+| `ttvalue_lt_F31` | every program of depth ≤ `n` over the addresses of `transTypeTree n` is below `F31 n` |
+
+## Contender 30
 
 ```lean
 def family29 (n : Nat) : Nat := F29 (F29 n)                  -- Contender 29 = family29 42
@@ -787,8 +810,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 30's definition modules take
-about 2 s and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 31's definition modules take
+about 2 s and its proofs about 2.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -838,6 +861,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender28.lean`](BusyLean/Contender28.lean), [`Comparison28.lean`](BusyLean/Comparison28.lean) | Contender 28 definitions and theorems |
 | [`BusyLean/Contender29.lean`](BusyLean/Contender29.lean), [`Comparison29.lean`](BusyLean/Comparison29.lean) | Contender 29 definitions and theorems |
 | [`BusyLean/Contender30.lean`](BusyLean/Contender30.lean), [`Comparison30.lean`](BusyLean/Comparison30.lean) | Contender 30 definitions and theorems |
+| [`BusyLean/Contender31.lean`](BusyLean/Contender31.lean), [`Comparison31.lean`](BusyLean/Comparison31.lean) | Contender 31 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -875,6 +899,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 28 | Lean | this repository | universes stacked along collapsed tree ordinals |
 | 29 | Lean | this repository | higher-order universe operators (closure points), indexed by tree ordinals |
 | 30 | Lean | this repository | closure functionals of all finite types over universes |
+| 31 | Lean | this repository | closure functionals of transfinite (tree-indexed) type |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
