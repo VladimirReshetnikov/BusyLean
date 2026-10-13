@@ -867,9 +867,9 @@ implemented as a Boolean function by mutual well-founded recursion on sizes:
 \begin{lstlisting}
 def ltP : P → P → Bool
   | .phi a b, .phi c d =>
-      if ltV a c then ltVP b c d          -- b < φ(c,d)
+      if ltV a c then ltVP b c d          -- b < phi(c,d)
       else if decide (a = c) then ltV b d
-      else leVP a b d                     -- φ(a,b) ≤ d
+      else leVP a b d                     -- phi(a,b) <= d
 \end{lstlisting}
 A term is normal when every sum is non-increasing, hereditarily. No
 fixed-point condition is imposed, so non-canonical terms such as
