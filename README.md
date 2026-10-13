@@ -9,7 +9,29 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 33
+## Current contender: Contender 34
+
+```lean
+def family33 (n : Nat) : Nat := F33 (F33 n)                  -- Contender 33 = family33 42
+def F34 (n : Nat) : Nat :=                                   -- BusyLean/Contender34.lean
+  wDiagonalLift (schedule34 n) (rank34 n) tsTransformer (fun _ => family33) n n
+def contender_34 : Nat := F34 (F34 42)
+
+theorem contender_33_lt_contender_34 : contender_33 < contender_34   -- BusyLean/Comparison34.lean
+```
+
+The tree-ordinal language is stacked **along a tree ordinal**
+([`Ordinal/TreeLanguage3.lean`](BusyLean/Ordinal/TreeLanguage3.lean)):
+`boostT (a+1) = langLift (boostT a)`, with pointwise limits. At input `n`, the
+height and the argument are both Contender 33's tree.
+
+| Theorem | Statement |
+|---|---|
+| `contender_33_lt_contender_34` | Contender 33 < Contender 34 |
+| `family33_lt_F34` | Contender 33's family is beaten at every input |
+| `tsvalue_lt_F34` | every program of depth ≤ `n` over the addresses of `treeStackedTree n` is below `F34 n` |
+
+## Contender 33
 
 ```lean
 def family32 (n : Nat) : Nat := F32 (F32 n)                  -- Contender 32 = family32 42
@@ -860,7 +882,7 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 33's definition modules take
+On an Intel i7-1355U (Windows 11), Contender 34's definition modules take
 about 2 s and its proofs about 2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
@@ -914,6 +936,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender31.lean`](BusyLean/Contender31.lean), [`Comparison31.lean`](BusyLean/Comparison31.lean) | Contender 31 definitions and theorems |
 | [`BusyLean/Contender32.lean`](BusyLean/Contender32.lean), [`Comparison32.lean`](BusyLean/Comparison32.lean) | Contender 32 definitions and theorems |
 | [`BusyLean/Contender33.lean`](BusyLean/Contender33.lean), [`Comparison33.lean`](BusyLean/Comparison33.lean) | Contender 33 definitions and theorems |
+| [`BusyLean/Contender34.lean`](BusyLean/Contender34.lean), [`Comparison34.lean`](BusyLean/Comparison34.lean) | Contender 34 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -954,6 +977,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 31 | Lean | this repository | closure functionals of transfinite (tree-indexed) type |
 | 32 | Lean | this repository | System T over tree ordinals with Contender 31 as a primitive; all programs of bounded size |
 | 33 | Lean | this repository | the tree-ordinal language stacked on itself (each language is the next primitive) |
+| 34 | Lean | this repository | the language stacked along a collapsed tree ordinal |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

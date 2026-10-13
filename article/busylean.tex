@@ -105,7 +105,8 @@ themselves, indexed by tree ordinals, and Contender~30 lifts closure to all
 finite types over universes; Contender~31 to transfinite types indexed by
 collapsed trees. Contender~32 turns the constructions into programs of a typed
 language over tree ordinals with a semantic interpreter, and takes all programs of
-bounded size. Contender~33 stacks the language on itself.
+bounded size. Contender~33 stacks the language on itself, and Contender~34 stacks
+it along tree ordinals.
 \end{abstract}
 
 \tableofcontents
@@ -1480,6 +1481,21 @@ its addresses. Proved: \lean{contender\_32\_lt\_\allowbreak contender\_33},
 2.0\,s and the proofs in 2.1\,s.
 
 %======================================================================
+\section{Contender 34: languages stacked along tree ordinals}
+
+Contender~33 stacks the language $n{+}1$ times. The stacking height can
+itself be a tree ordinal (\lean{TreeLanguage3.lean}):
+\[
+\mathrm{boost}_0=\mathrm{boost}_{31},\qquad
+\mathrm{boost}_{a+1}=\mathrm{langLift}(\mathrm{boost}_a),\qquad
+\mathrm{boost}_{\lim f}(t)=\lim_i \mathrm{boost}_{f\,i}(t).
+\]
+At input $n$, both the height and the argument are Contender~33's tree, and the
+ladder runs over the addresses of the result. Proved:
+\lean{contender\_33\_lt\_\allowbreak contender\_34}, \lean{family33\_lt\_F34} and
+\lean{tsvalue\_lt\_F34}. The definitions check in 2.0\,s and the proofs in 2.1\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1541,6 +1557,7 @@ Contender & idea & informal size\\
 31 (Lean) & closure functionals of transfinite (tree-indexed) type & type height = collapsed tree\\
 32 (Lean) & System T over trees with Contender 31 as a primitive & all programs of size $\le n{+}3$\\
 33 (Lean) & the language stacked $n{+}1$ times on itself & languages over languages\\
+34 (Lean) & the language stacked along a collapsed tree & stacking height = tree\\
 \bottomrule
 \end{tabular}
 \end{center}
