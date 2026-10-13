@@ -9,7 +9,36 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 58
+## Current contender: Contender 59
+
+```lean
+def towerStep (P : List TL.Ty) (σ : TL.Env P) (c : Closures) : Closures :=  -- Contender59.lean
+  -- close P plus the height-indexed joint stacks started from c
+def towerT (P : List TL.Ty) (σ : TL.Env P) : CTree → Closures
+  | .zero => (ptlLift P σ, numLift P σ)
+  | .succ a => towerStep P σ (towerT P σ a)
+  | .lim f => (pointwise tree limit, maxima of number closures)
+  | _ => (ptlLift P σ, numLift P σ)
+def family58 (n : Nat) : Nat := F58 (F58 n)                  -- Contender 58 = family58 42
+def F59 (n : Nat) : Nat :=
+  hier (towerClosureT (family58 n) family58 (towerTreeT (family58 n))) (towerTreeT (family58 n)) (family58 n)
+def contender_59 : Nat := F59 (F59 42)
+
+theorem contender_58_lt_contender_59 : contender_58 < contender_59   -- BusyLean/Comparison59.lean
+```
+
+Contender 58's tower of stack-reflecting languages, indexed by a **tree**. With
+closure pairs in place of primitive lists, `towerStep` closes the language with
+the joint stacks started from the previous level, and `towerT` iterates it along
+a tree, pointwise at limits.
+
+| Theorem | Statement |
+|---|---|
+| `contender_58_lt_contender_59` | Contender 58 < Contender 59 |
+| `family58_lt_F59` | Contender 58's family is beaten at every input |
+| `Ordinal.lt_towerT` | every level of the tower's number closure strictly dominates its oracle and argument |
+
+## Contender 58
 
 ```lean
 def primsK : Nat → List TL.Ty                                 -- BusyLean/Contender58.lean
@@ -1552,8 +1581,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 58's definition modules take
-about 1.2 s and its proofs about 2.0 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 59's definition modules take
+about 1.1 s and its proofs about 2.0 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1635,6 +1664,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender56.lean`](BusyLean/Contender56.lean), [`Comparison56.lean`](BusyLean/Comparison56.lean) | Contender 56 definitions and theorems |
 | [`BusyLean/Contender57.lean`](BusyLean/Contender57.lean), [`Comparison57.lean`](BusyLean/Comparison57.lean) | Contender 57 definitions and theorems |
 | [`BusyLean/Contender58.lean`](BusyLean/Contender58.lean), [`Comparison58.lean`](BusyLean/Comparison58.lean) | Contender 58 definitions and theorems |
+| [`BusyLean/Contender59.lean`](BusyLean/Contender59.lean), [`Comparison59.lean`](BusyLean/Comparison59.lean) | Contender 59 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1700,6 +1730,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 56 | Lean | this repository | tree and number languages stacked jointly, each level's two closures primitives of the next |
 | 57 | Lean | this repository | joint stacks as primitives at program-chosen heights |
 | 58 | Lean | this repository | a tower of N languages, each with the joint stacks over the previous one as primitives |
+| 59 | Lean | this repository | the tower of stack-reflecting languages, indexed by a tree |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see

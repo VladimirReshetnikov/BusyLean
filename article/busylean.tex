@@ -142,6 +142,7 @@ first-class closure for the next.
 Contender~56 stacks the tree and number languages jointly.
 Contender~57 lets programs choose the stacking heights.
 Contender~58 repeats that step to a tower of $N$ stack-reflecting languages.
+Contender~59 indexes that tower by a tree.
 \end{abstract}
 
 \tableofcontents
@@ -2176,6 +2177,27 @@ $F_{58}(n)=h^{\mathrm{numLift}_{P_N}(\mathrm{family}_{57})}_{T}(N)$. Proved:
 The definitions check in 1.2\,s and the proofs in 2.0\,s.
 
 %======================================================================
+\section{Contender 59: the tower of stack-reflecting languages along a tree}
+
+Contender~58's tower has a natural-number height, because primitive lists are
+finite. Working with closure pairs instead of primitive lists, the tower can be
+indexed by a tree. \lean{jointFrom} is Contender~56's joint stack started from a
+given closure pair $c$. \lean{towerStep} closes the language whose primitives are
+Contender~54's plus the height-indexed joint stacks started from $c$, and
+\lean{towerT} iterates it:
+\[
+C_0=\text{closure of }P_{54},\qquad C_{a+1}=\mathrm{towerStep}(C_a),\qquad
+C_{\lim f}=\text{pointwise limit and maximum}.
+\]
+The tower runs along Contender~58's tree to build the tree $T$, then along $T$
+for the number closure:
+$F_{59}(n)=h^{C_T.2(\mathrm{family}_{58})}_T(N)$ with
+$N=\mathrm{family}_{58}(n)$. \lean{lt\_towerT} shows that every level strictly
+dominates its oracle and argument. Proved: \lean{family58\_lt\_F59} and
+\lean{contender\_58\_lt\_\allowbreak contender\_59}. The definitions check in
+1.1\,s and the proofs in 2.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2277,6 +2299,7 @@ Contender & idea & informal size\\
 56 (Lean) & tree and number languages stacked jointly & $h_{T'}$ over the joint number closure\\
 57 (Lean) & joint stacks at program-chosen heights & $h_T$ over the height-choosing number closure\\
 58 (Lean) & a tower of $N$ stack-reflecting languages & $h_T$ over the top language's closure\\
+59 (Lean) & the tower of stack-reflecting languages along a tree & $h_T$ over the tree-indexed tower\\
 \bottomrule
 \end{tabular}
 \end{center}
