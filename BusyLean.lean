@@ -99,3 +99,5 @@ import BusyLean.Contender37
 import BusyLean.Comparison37
 import BusyLean.Contender38
 import BusyLean.Comparison38
+import BusyLean.Contender39
+import BusyLean.Comparison39
