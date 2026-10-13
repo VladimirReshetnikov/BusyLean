@@ -127,6 +127,8 @@ Contender~46 collapses the universes of codes of Contenders~27--31
 relative to the closure's operator.
 Contender~47 iterates that self-based iteration itself.
 Contender~48 indexes such iteration levels by a tree.
+Contender~49 reads its final tree with impredicative programs instead of a
+fixed hierarchy.
 \end{abstract}
 
 \tableofcontents
@@ -1951,6 +1953,28 @@ $N=\mathrm{family}_{47}(n)$. Proved: \lean{family47\_lt\_F48} and
 1.5\,s and the proofs in 4.4\,s.
 
 %======================================================================
+\section{Contender 49: impredicative reflection over the tree}
+
+Since Contender~38 the trees have been turned into numbers by $h$, one fixed
+fast-growing hierarchy. System~FT2 reads a tree far more strongly. Its
+programs of type $\mathsf{nat}$ see the tree as the oracle tree and recurse
+over it into every type, impredicatively. They can implement $h$ itself, and
+also iterate along the tree at higher types, build impredicative encodings over
+it, and diagonalize. The reflection
+\[
+R^{g,T}(m)=m+1+\max\bigl(g(m),\ \max\{\,\mathrm{val}_{g,T}(p) : p\ \text{an FT2 program of type nat and depth}\le m\,\}\bigr)
+\]
+collects them, and Contender~49 runs the hierarchy along Contender~48's tree
+with this reflection as its base:
+\[
+F_{49}(n)=h^{R^{\mathrm{family}_{48},T}}_{T}(N),\qquad N=\mathrm{family}_{48}(n),\ T=\mathrm{levelIterTree}(N).
+\]
+Proved: \lean{natValue\_lt\_treeReflect} (every such program is below the
+reflection), \lean{family48\_lt\_F49} and
+\lean{contender\_48\_lt\_\allowbreak contender\_49}. The definitions check in
+1.0\,s and the proofs in 3.6\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -2033,6 +2057,7 @@ Contender & idea & informal size\\
 46 (Lean) & universes of codes collapsed relative to the operator & $h_{\mathrm{univTree46}}$ over $F_{45}$\\
 47 (Lean) & the self-based iteration, iterated along a tree & $h_{\mathrm{psiTree}}$ over $F_{46}$\\
 48 (Lean) & tree-indexed hierarchy of iteration levels & $h_{\mathrm{levelIterTree}}$ over $F_{47}$\\
+49 (Lean) & FT2 programs of type nat reading the tree, as the hierarchy's base & $h_T$ over FT2 reflection on $T$\\
 \bottomrule
 \end{tabular}
 \end{center}

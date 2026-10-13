@@ -9,7 +9,32 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 48
+## Current contender: Contender 49
+
+```lean
+def treeReflect (g : Nat → Nat) (T : CTree) (m : Nat) : Nat := -- BusyLean/Contender49.lean
+  m + 1 + maxN (g m) (maximum (FT2.natValue ⟨g, T⟩) (FT2.ctmsUpTo m))
+def family48 (n : Nat) : Nat := F48 (F48 n)                  -- Contender 48 = family48 42
+def F49 (n : Nat) : Nat :=
+  hier (treeReflect family48 (levelIterTree (family48 n))) (levelIterTree (family48 n)) (family48 n)
+def contender_49 : Nat := F49 (F49 42)
+
+theorem contender_48_lt_contender_49 : contender_48 < contender_49   -- BusyLean/Comparison49.lean
+```
+
+Instead of a fixed hierarchy, the final tree is read by **System FT2 programs of
+type `nat`**. They see the tree as the oracle tree and recurse over it into
+every type, impredicatively. `treeReflect g T m` exceeds `g m` and every such
+program of depth ≤ `m`, and the hierarchy along Contender 48's tree uses it as
+its base.
+
+| Theorem | Statement |
+|---|---|
+| `contender_48_lt_contender_49` | Contender 48 < Contender 49 |
+| `family48_lt_F49` | Contender 48's family is beaten at every input |
+| `natValue_lt_treeReflect` | every FT2 program of depth ≤ `m` reading the tree is below the reflection |
+
+## Contender 48
 
 ```lean
 def family47 (n : Nat) : Nat := F47 (F47 n)                  -- Contender 47 = family47 42
@@ -1270,8 +1295,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 48's definition modules take
-about 1.5 s and its proofs about 4.4 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 49's definition modules take
+about 1.0 s and its proofs about 3.6 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1343,6 +1368,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender46.lean`](BusyLean/Contender46.lean), [`Comparison46.lean`](BusyLean/Comparison46.lean) | Contender 46 definitions and theorems |
 | [`BusyLean/Contender47.lean`](BusyLean/Contender47.lean), [`Comparison47.lean`](BusyLean/Comparison47.lean) | Contender 47 definitions and theorems |
 | [`BusyLean/Contender48.lean`](BusyLean/Contender48.lean), [`Comparison48.lean`](BusyLean/Comparison48.lean) | Contender 48 definitions and theorems |
+| [`BusyLean/Contender49.lean`](BusyLean/Contender49.lean), [`Comparison49.lean`](BusyLean/Comparison49.lean) | Contender 49 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1398,6 +1424,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 46 | Lean | this repository | universes of codes (Contenders 27–31) collapsed relative to the closure's operator |
 | 47 | Lean | this repository | the self-based iteration of Contender 45, itself iterated along a tree |
 | 48 | Lean | this repository | Veblen-style hierarchy of iteration levels indexed by a tree |
+| 49 | Lean | this repository | System FT2 programs of type nat reading the tree, as the base of the hierarchy along it |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
