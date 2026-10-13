@@ -9,7 +9,32 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 28
+## Current contender: Contender 29
+
+```lean
+def family28 (n : Nat) : Nat := F28 (F28 n)                  -- Contender 28 = family28 42
+def F29 (n : Nat) : Nat :=                                   -- BusyLean/Contender29.lean
+  wDiagonalLift (schedule29 n) (rank29 n) otTransformer (fun _ => family28) n n
+def contender_29 : Nat := F29 (F29 42)
+
+theorem contender_28_lt_contender_29 : contender_28 < contender_29   -- BusyLean/Comparison29.lean
+```
+
+Universe-building **operators are themselves iterated**
+([`Ordinal/TreeUniverses3.lean`](BusyLean/Ordinal/TreeUniverses3.lean)).
+`Φ F U` is the closure point of `F` above `U`, so `Φ next` jumps to the next
+inaccessible-like universe. Operators are indexed by tree ordinals
+(`ΦT (a+1) = Φ (ΦT a)`, unions at limits), and each round collapses inside the
+universe after `ΦT Λ base`, with `Λ` the previous round's tree. No axioms are
+used. Input `n` uses the ladder over the addresses of `operatorTree n`.
+
+| Theorem | Statement |
+|---|---|
+| `contender_28_lt_contender_29` | Contender 28 < Contender 29 |
+| `family28_lt_F29` | Contender 28's family is beaten at every input |
+| `otvalue_lt_F29` | every program of depth ≤ `n` over the addresses of `operatorTree n` is below `F29 n` |
+
+## Contender 28
 
 ```lean
 def family27 (n : Nat) : Nat := F27 (F27 n)                  -- Contender 27 = family27 42
@@ -737,8 +762,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 28's definition modules take
-about 2 s and its proofs about 2.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 29's definition modules take
+about 2.5 s and its proofs about 2.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -786,6 +811,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender26.lean`](BusyLean/Contender26.lean), [`Comparison26.lean`](BusyLean/Comparison26.lean) | Contender 26 definitions and theorems |
 | [`BusyLean/Contender27.lean`](BusyLean/Contender27.lean), [`Comparison27.lean`](BusyLean/Comparison27.lean) | Contender 27 definitions and theorems |
 | [`BusyLean/Contender28.lean`](BusyLean/Contender28.lean), [`Comparison28.lean`](BusyLean/Comparison28.lean) | Contender 28 definitions and theorems |
+| [`BusyLean/Contender29.lean`](BusyLean/Contender29.lean), [`Comparison29.lean`](BusyLean/Comparison29.lean) | Contender 29 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -821,6 +847,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 26 | Lean | this repository | collapsing with tree-indexed levels, iterated toward fixed points of `α ↦ ψ₀(Ω_α)` |
 | 27 | Lean | this repository | stratified universes of level codes, toward the first fixed point of `α ↦ Ω_α` |
 | 28 | Lean | this repository | universes stacked along collapsed tree ordinals |
+| 29 | Lean | this repository | higher-order universe operators (closure points), indexed by tree ordinals |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
