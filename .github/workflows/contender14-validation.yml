@@ -37,9 +37,20 @@ jobs:
             "$HOME/.elan/bin/lake" --version
           } | tee validation/tool-versions.txt
 
+      - name: Prebuild accepted dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          mkdir -p validation
+          /usr/bin/time -f $'elapsed_seconds=%e\nuser_seconds=%U\nsystem_seconds=%S\nmax_rss_kb=%M' \
+            lake build BusyLean.Comparison13 BusyLean.MetaReflectionFacts \
+              BusyLean.ReflectionFacts > validation/prebuild.log 2>&1
+
       - name: Compile definitions, comparisons, and audit
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p validation
