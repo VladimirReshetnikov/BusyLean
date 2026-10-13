@@ -114,7 +114,9 @@ the next. Contender~37 stacks the tree languages over this jump. A correction
 truncation of its atom order, so Contenders~15--37 grew through their
 amplifiers, not through the size of their atoms. Contender~38 runs a
 fast-growing hierarchy along the trees themselves, and Contender~39 interleaves
-the impredicative jump with predicative collapse.
+the impredicative jump with predicative collapse. System~FT2 adds tree recursion
+over an input tree, which makes the jump a genuine operator, and Contender~40
+places it under a metalanguage with first-class language closure.
 \end{abstract}
 
 \tableofcontents
@@ -1685,6 +1687,72 @@ $F_{39}(n)=h^{\mathrm{family}_{38}}_{\mathrm{mixTree}(N)}(N)$. Proved:
 The definitions check in 1.1\,s and the proofs in 2.6\,s.
 
 %======================================================================
+\section{System FT2: an impredicative jump that reads its input}
+
+The truncation argument applies to the jump of Contenders~36 and~37 as well. A
+ladder program over $\mathrm{Addr}(t)$ never inspects $t$, so the trees it builds
+are the same for every $t$. Hence $\mathrm{ladderTree}(t)$ is about
+$\max(t,C)+1$ for a constant $C$, and $\mathrm{bootT}$ along an index adds the
+index's length. The impredicative strength sat in the constant, not in a
+function of the input.
+
+\lean{SystemFT2} fixes this. It is System~F with the tree constructors, a
+\emph{tree recursor}, and an \emph{oracle tree} $T$:
+\[
+\mathsf{trec}:\forall X.\ X\to(X\to X)\to((\mathsf{nat}\to X)\to X)\to\mathsf{tree}\to X,
+\qquad \mathsf{tin}:\mathsf{tree}.
+\]
+\begin{itemize}[leftmargin=*]
+\item The recursor reduces on constructor forms:
+  $\mathsf{trec}\,z\,s\,l\,\mathsf{con}_0\to z$,
+  $\mathsf{trec}\,z\,s\,l\,(\mathsf{con}_1 b)\to s\,(\mathsf{trec}\,z\,s\,l\,b)$, and
+  $\mathsf{trec}\,z\,s\,l\,(\mathsf{con}_2 g)\to l\,(\lambda k.\,\mathsf{trec}\,z\,s\,l\,(g\,k))$.
+\item The input tree is read lazily by address. $\mathsf{tsub}\,p$ unfolds
+  the node of $T$ at path $p$ into constructor form, and
+  $\mathsf{tsubl}\,p\,\bar k\to\mathsf{tsub}(k{::}p)$ gives the branches of a
+  limit node.
+\end{itemize}
+Two changes make the candidate proof go through.
+\begin{itemize}[leftmargin=*]
+\item The tree candidate requires the children $g\,a$ of $\mathsf{con}_2\,g$
+  for every $a$ in the \emph{numeral candidate}, not only for numerals. The
+  limit case of the recursor maps the whole candidate.
+\item Partial applications of $\mathsf{trec}$ (fewer than four arguments) and
+  $\mathsf{tsubl}$ are not neutral.
+\end{itemize}
+\lean{trec\_mem} is proved by induction on the tree candidate nested with SN
+inductions on the three step functions, and \lean{wt\_tsub} by induction on
+$T$. Both use only \lean{propext} and \lean{Quot.sound}.
+
+So $\mathrm{jumpF}(t)$, the trees of all programs of depth $\le N$ that read
+$t$, contains every tree System~F builds from $t$. It is a genuine
+operator, and its iterates grow.
+
+%======================================================================
+\section{Contender 40: the jump under first-class language closure}
+
+Proposal~P27 contributed a \emph{metalanguage}: System~T over trees with a
+closure operator $\mathsf{lift}:(\mathsf{tree}\to\mathsf{tree})\to\mathsf{tree}\to\mathsf{tree}$
+as a primitive (\lean{TreeLanguage4.lean}, adopted). Contender~34 iterated
+\lean{langLift} externally. Here programs build transformers, close them
+under the whole lower language, and iterate the closure themselves.
+\lean{metaBoostT} stacks these metalanguages along a tree, each calling the
+previous closure as a first-class value.
+
+Contender~40's base transformer joins the FT2 jump, Contender~31's collapse
+applied to it, and Contender~39's mixed primitive:
+\[
+b_N(t)=\lim\bigl(\mathrm{jumpF}_N(t),\ \mathrm{boost}_{31}(\mathrm{jumpF}_N(t)),\
+\mathrm{mixed}_N(t)\bigr).
+\]
+The tree is $\lim\bigl(M,\ \mathrm{metaBoostT}_{M}(b_N)(M)\bigr)$ with
+$M=\mathrm{mixTree}(N)$ and $N=\mathrm{family}_{39}(n)$. The number is
+$F_{40}(n)=h^{\mathrm{family}_{39}}_{\mathrm{metaTree}(N)}(N)$. Proved:
+\lean{family39\_lt\_F40} and \lean{contender\_39\_lt\_\allowbreak contender\_40}.
+The definitions check in 6.5\,s, which now includes System~FT2, and the proofs
+in 2.1\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1758,6 +1826,7 @@ Contender & idea & informal size\\
 37 (Lean) & tree languages stacked over the ladder jump & transfinite iterates of the jump\\
 38 (Lean) & fast-growing hierarchy along Contender 37's tree & $h_{\mathrm{jumpTree}(n)}$ over $F_{37}$\\
 39 (Lean) & languages over jump and collapse, depth $F_{38}$ & $h_{\mathrm{mixTree}}$ over $F_{38}$\\
+40 (Lean) & FT2 jump (tree recursion) under metalanguages & $h_{\mathrm{metaTree}}$ over $F_{39}$\\
 \bottomrule
 \end{tabular}
 \end{center}
