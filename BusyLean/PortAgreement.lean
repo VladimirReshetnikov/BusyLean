@@ -77,7 +77,7 @@ theorem castPair_arr_true {a b c d : BigNumber.Ty}
     BigNumber.castPair (.arr a b) (.arr c d) =
       (fun f x => (BigNumber.castPair b d).1 (f ((BigNumber.castPair a c).2 x)),
        fun f x => (BigNumber.castPair b d).2 (f ((BigNumber.castPair a c).1 x))) := by
-  rw [BigNumber.castPair, if_pos h]
+  rw [BigNumber.castPair, ite_eq_left h]
   rfl
 
 theorem castPair_arr_false {a b c d : BigNumber.Ty}
@@ -160,13 +160,13 @@ theorem EnvRel.lookup {env e} (h : EnvRel env e) (n : Nat) :
   rw [h.length_eq]
   cases hb : Nat.ble e.length n with
   | true =>
-      rw [if_pos (Nat.le_of_ble_eq_true hb)]
+      rw [ite_eq_left (Nat.le_of_ble_eq_true hb)]
       exact OptRel.none
   | false =>
       have hn : ¬ e.length ≤ n := fun hle => by
         rw [Nat.ble_eq_true_of_le hle] at hb
         exact Bool.noConfusion hb
-      rw [if_neg hn]
+      rw [ite_eq_right hn]
       exact h.nth _
 
 /-! ## The fundamental lemma -/
@@ -293,7 +293,7 @@ theorem oldTerms_eq : ∀ n, BigNumber.oldTerms n = (C5.termsUpTo n).map trTerm
           trTerm
       rw [natsUpTo_eq, oldTypes_eq, oldTerms_eq n, cross_map, cross_map, cross_map]
       simp only [List.map_append, List.map_map, List.append_assoc, List.map_cons,
-        List.map_nil, List.cons_append, List.nil_append]
+        List.cons_append, List.nil_append]
       rfl
 
 /-! ## Maxima -/
@@ -305,12 +305,12 @@ theorem maxN_zero_right : ∀ a, BigNumber.maxN a 0 = a
 theorem maxN_eq_right : ∀ {a b : Nat}, a ≤ b → BigNumber.maxN a b = b
   | 0, _, _ => rfl
   | _ + 1, 0, h => absurd h (Nat.not_succ_le_zero _)
-  | a + 1, b + 1, h => congrArg Nat.succ (maxN_eq_right (Nat.le_of_succ_le_succ h))
+  | _ + 1, _ + 1, h => congrArg Nat.succ (maxN_eq_right (Nat.le_of_succ_le_succ h))
 
 theorem maxN_eq_left : ∀ {a b : Nat}, b ≤ a → BigNumber.maxN a b = a
   | _, 0, _ => maxN_zero_right _
   | 0, _ + 1, h => absurd h (Nat.not_succ_le_zero _)
-  | a + 1, b + 1, h => congrArg Nat.succ (maxN_eq_left (Nat.le_of_succ_le_succ h))
+  | _ + 1, _ + 1, h => congrArg Nat.succ (maxN_eq_left (Nat.le_of_succ_le_succ h))
 
 theorem maxN_le {a b c : Nat} (ha : a ≤ c) (hb : b ≤ c) : BigNumber.maxN a b ≤ c := by
   cases Nat.le_total a b with

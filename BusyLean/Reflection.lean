@@ -84,8 +84,11 @@ theorem lt_reflect {fs : Family} {n m : Nat}
     (h : m ≤ BigNumber.maxN (prefixMax (fun i => fs i n) n)
       (BigNumber.maximum (evalWith fs) (BigNumber.allTerms n))) :
     m < reflect fs n := by
-  unfold reflect
-  omega
+  show m < n + 1 + _
+  have hM : ∀ M : Nat, M + 1 ≤ n + 1 + M := fun M => by
+    rw [Nat.add_comm M 1]
+    exact Nat.add_le_add_right (Nat.le_add_left 1 n) M
+  exact Nat.lt_of_le_of_lt h (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (hM _))
 
 /-- Every visible oracle value is exceeded. -/
 theorem oracle_lt_reflect (fs : Family) {i n : Nat} (hi : i ≤ n) : fs i n < reflect fs n :=
