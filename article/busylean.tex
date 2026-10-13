@@ -145,6 +145,7 @@ Contender~58 repeats that step to a tower of $N$ stack-reflecting languages.
 Contender~59 indexes that tower by a tree.
 Contender~60 iterates the tower operator itself along a tree.
 Contender~61 makes the tower operators values of a language with products.
+Contender~62 stacks that language along a tree.
 \end{abstract}
 
 \tableofcontents
@@ -2246,6 +2247,22 @@ $N=\mathrm{family}_{60}(n)$. Proved: \lean{program\_lt\_num2Lift},
 The definitions check in 3.0\,s and the proofs in 2.7\,s.
 
 %======================================================================
+\section{Contender 62: the tower language stacked along a tree}
+
+Contender~61's language has products, so a whole closure pair $C$ is a single
+value. \lean{stack2} stacks the language along a tree. Level~0 is the language's
+closure pair. Level~$a{+}1$'s language has level~$a$'s closure pair as one extra
+primitive of type $C$, so programs can apply both closures, compose them and
+iterate them at higher types. Limits are pointwise for trees and maxima for
+numbers. The stack runs along Contender~61's tree to build a tree $T$, then
+along $T$ for the number closure:
+$F_{62}(n)=h^{S^2_T.2(\mathrm{family}_{61})}_T(N)$ with
+$N=\mathrm{family}_{61}(n)$. \lean{lt\_stack2} shows that every level strictly
+dominates its oracle and argument. Proved: \lean{family61\_lt\_F62} and
+\lean{contender\_61\_lt\_\allowbreak contender\_62}. The definitions check in
+1.2\,s and the proofs in 2.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2350,6 +2367,7 @@ Contender & idea & informal size\\
 59 (Lean) & the tower of stack-reflecting languages along a tree & $h_T$ over the tree-indexed tower\\
 60 (Lean) & hierarchy of tower operators along a tree & $h_T$ over $U_T(T)$\\
 61 (Lean) & System T with products over the tower operators & $h_T$ over the tower language's closure\\
+62 (Lean) & the tower language stacked along a tree & $h_T$ over the stacked tower language\\
 \bottomrule
 \end{tabular}
 \end{center}
