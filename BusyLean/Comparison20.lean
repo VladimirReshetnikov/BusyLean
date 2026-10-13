@@ -55,6 +55,16 @@ theorem orbit19_lt_next (i n : Nat) : orbit19 i n < orbit19 (i + 1) n := by
   simpa only [orbit19, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
     using iterateF19_lt_succ (i + 2) n
 
+/-- Every seed-orbit coordinate visible at input `n` lies below `F20 n`.
+This is a substantially stronger lower bound than merely embedding coordinate
+zero. -/
+theorem orbit19_lt_F20 {i n : Nat} (hi : i ≤ n) : orbit19 i n < F20 n := by
+  have h :=
+    ((diagonalLift_preservesProgressive (schedule20 n) (rank20 n))
+      aTransformer aTransformer_progressive)
+      orbit19 i n n hi
+  simpa only [F20] using h
+
 /-- At every input, `F20` strictly exceeds Contender 19's family. -/
 theorem family19_lt_F20 (n : Nat) : family19 n < F20 n := by
   have h :=
@@ -89,6 +99,18 @@ theorem input_lt_F20 (n : Nat) : n < F20 n :=
 /-- Pointwise, the old function `F19` is already below the new function. -/
 theorem F19_lt_F20 (n : Nat) : F19 n < F20 n :=
   Nat.lt_trans (input_lt_F19 (F19 n)) (family19_lt_F20 n)
+
+/-- The inner stage already dominates 44 finite iterates of `F19` from 42. -/
+theorem iterateF19_44_42_lt_F20_42 : iterateF19 44 42 < F20 42 := by
+  simpa only [orbit19] using
+    (orbit19_lt_F20 (i := 42) (n := 42) (Nat.le_refl 42))
+
+/-- A strong closed lower bound for the final contender: it exceeds an
+`F19`-orbit whose length is itself `F20 42 + 2`. -/
+theorem long_F19_orbit_lt_contender_20 :
+    iterateF19 (F20 42 + 2) (F20 42) < contender_20 := by
+  simpa only [orbit19, contender_20] using
+    (orbit19_lt_F20 (i := F20 42) (n := F20 42) (Nat.le_refl _))
 
 /-- **The required exact comparison:** Contender 19 is strictly smaller than
 Contender 20. -/
