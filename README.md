@@ -9,7 +9,44 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 6
+## Current contender: Contender 7
+
+```lean
+def F7 (n : Nat) : Nat := F.reflectF finalFamily n        -- BusyLean/Contender7.lean
+def contender_7 : Nat := F7 (F7 42)
+
+theorem contender_6_lt_contender_7 : contender_6 < contender_7   -- BusyLean/Comparison7.lean
+```
+
+`reflectF f n` exceeds `f n` and the value of every closed **System F**
+program (Church-style, enumeration depth `≤ n`) of Church numeral type
+`∀X. (X → X) → X → X`. Programs may call an oracle `orc : nat → nat`,
+interpreted as `f`. A program's value is computed inside Lean: erase the
+types, normalize, read off the numeral. Normalization is a total function
+because of a formal **strong normalization theorem for System F**
+(`F.sn_of_typed`), proved by Girard's reducibility candidates. The
+impredicative quantification over candidates is legal because Lean's `Prop`
+is impredicative.
+
+* The oracle is Contender 6's family, so System F can amplify Contender 6
+  with the strength of second-order arithmetic.
+* The outer `F7` runs System F at a syntax budget larger than Contender 6.
+* Informally, the numeric functions definable in System F are those provably
+  total in second-order arithmetic Z₂, far beyond ψ(Ω_ω) (Contender 6's
+  language).
+
+| Theorem | Statement |
+|---|---|
+| `F.sn_of_typed` | every System F term (with oracle) is strongly normalizing |
+| `F.infer_sound` | the type inferrer is sound for the erased term |
+| `F.nstep_nf` | the normalizer's output is normal |
+| `contender_6_lt_contender_7` | Contender 6 < Contender 7 |
+| `finalFamily_lt_F7` | Contender 6's family is beaten at every input |
+| `fvalue_lt_contender_7` | every System F program of depth ≤ `F7 42` is exceeded |
+
+All of these use only `propext` and `Quot.sound`.
+
+## Contender 6
 
 ```lean
 def contender_6 : Nat := stage p5Family index 42        -- BusyLean/Contender6.lean
@@ -40,11 +77,6 @@ P5 is a theorem (`p5_lt_contender_6`). An informal fast-growing-hierarchy
 estimate is f<sub>|L|·|L|</sub>(42) with |L| ≈ ψ(Ω_ω); for comparison, P5 is
 about f<sub>|L|+ω²</sub>(42) and Contender 5 about f<sub>&lt;ε₀</sub>(42).
 
-**Never evaluate `contender_6` (or `contender_5`).** Checking the definitions
-and proofs does not evaluate either number.
-
-### Verified results
-
 | Theorem | Statement |
 |---|---|
 | `contender_5_lt_contender_6` | exact port of Contender 5 < Contender 6 |
@@ -54,9 +86,11 @@ and proofs does not evaluate either number.
 | `program_lt_finalFamily` | every program of depth ≤ n, run with the final oracles, is exceeded |
 | `PortAgreement.largest_eq_oldMaximum` | P5's old-language port equals the exact port, at every depth |
 
-All of these depend on `propext` only; the definition of `contender_5` uses no
-axioms. The audit also checks that the definition of `contender_6` never
-mentions `contender_5` or its winner-selection functions.
+These depend on `propext` only; the definition of `contender_5` uses no
+axioms.
+
+**Never evaluate any contender.** Checking the definitions and proofs does not
+evaluate the numbers.
 
 ## Rules (Lean edition)
 
@@ -75,8 +109,12 @@ These are adapted from the [original rules](docs/name-the-biggest-number-master/
 4. **Time budgets.** From a clean build directory (the Lean core library
    may be precompiled), the definition and everything it imports must check
    in at most 15 s, and the proof in at most 60 s, on a reasonable machine.
-5. **No laziness.** Do not use `contender_N` itself to define
-   `contender_(N+1)`; beat it by a large margin.
+5. **No laziness.** Do not use the constant `contender_N` itself to define
+   `contender_(N+1)`, and beat it by a large margin. The previous contender's
+   *construction* (for example its family of functions) may appear as an
+   oracle or seed of a qualitatively stronger construction, which makes the
+   comparison formal. The audit checks that the constant itself is never
+   mentioned.
 6. **No shenanigans.** No exploits of the kernel, the elaborator or the
    toolchain.
 7. **Toolchain.** Lean **4.34.0** (`lean-toolchain`). Libraries are allowed if
@@ -92,8 +130,8 @@ python3 scripts/check.py
 
 This deletes the build directories, times the definition and proof phases
 against the budgets, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11) the definitions take about 5 s and the
-proofs about 5–6 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11) the definitions take about 11 s and the
+proofs about 9 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -107,6 +145,10 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/ReflectionFacts.lean`](BusyLean/ReflectionFacts.lean) | their inequalities |
 | [`BusyLean/Contender6.lean`](BusyLean/Contender6.lean) | `index`, `p5Family`, `contender_6` (definitions) |
 | [`BusyLean/Comparison.lean`](BusyLean/Comparison.lean) | all Contender 6 theorems |
+| [`BusyLean/SystemF/`](BusyLean/SystemF) | System F: syntax, reduction, types, candidates (SN), Church terms, normalizer |
+| [`BusyLean/Contender7.lean`](BusyLean/Contender7.lean) | `fvalue`, `reflectF`, `contender_7` (definitions) |
+| [`BusyLean/Comparison7.lean`](BusyLean/Comparison7.lean) | Contender 7 theorems |
+| [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the five reviewed proposals and [the review](proposals/REVIEW.md) |
 | [`docs/`](docs) | snapshot of the original Coq contest |
@@ -118,6 +160,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 4 | Coq | codyroux | `ack 5 42 10002`, Ackermann-style |
 | 5 | Coq | samuelgruetter | largest STLC + natural recursion (System T) numeral of depth 42 |
 | 6 | Lean | this repository | forest reflection over System T + finite-type W-types, along the language's own trees; it combines ideas from proposals P5, P2 and P4 |
+| 7 | Lean | this repository | System F (impredicative polymorphism) with Contender 6 as oracle; strong normalization proved in Lean |
 
 Proposals P1–P5 were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

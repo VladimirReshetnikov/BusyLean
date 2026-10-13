@@ -57,10 +57,11 @@ Contender~6, which combines their best ideas: an object language with W-types
 over every finite type, relativized to oracle families, and reflected along
 every tree that the language itself can define. Along the way we prove formally
 that one proposal's re-implementation of the old language agrees with the exact
-port. The notes then explain the strategy for the next contenders, which climb
-the ladder System~F, System~F$_\omega$, Calculus of Constructions. Each rung is a
-qualitatively stronger total language whose normalization can be justified
-inside Lean.
+port. We then construct Contender~7: System~F with Contender~6 as an oracle.
+Its strong normalization is proved inside Lean by Girard's reducibility
+candidates, which is possible because Lean's \texttt{Prop} is impredicative,
+and normalization runs as a certified total function. The next rungs of the
+ladder are System~F$_\omega$ and the Calculus of Constructions.
 \end{abstract}
 
 \tableofcontents
@@ -242,40 +243,106 @@ depth.
 \end{itemize}
 
 %======================================================================
-\section{Roadmap: impredicativity}
+\section{Contender 7: impredicative polymorphism}
 
 Contender~6 lives below the next collapsing level: everything it does is
-predicative. The next qualitative jump is \emph{impredicative polymorphism}.
+predicative. The next qualitative jump is \emph{impredicative polymorphism}. The
+numeric functions definable in Girard's System~F on Church numerals are exactly
+those provably total in second-order arithmetic $\mathsf{Z}_2$, and
+$\psi(\Omega_\omega)$ is merely the ordinal of $\Pi^1_1$-CA$_0$, a small fragment
+of $\mathsf{Z}_2$.
 
-\paragraph{System F.} The numeric functions definable in Girard's System~F on
-Church numerals are exactly those provably total in second-order arithmetic
-$\mathsf{Z}_2$. $\psi(\Omega_\omega)$ is the ordinal of $\Pi^1_1$-CA$_0$, a
-small fragment of $\mathsf{Z}_2$. A System-F maximum therefore dwarfs
-everything above.
+\subsection{Why Lean can host System F}
+System~F has no set-theoretic model in Lean's predicative \lean{Type}: a model
+would have to interpret $\forall X.A$ as a product over \emph{all} types,
+including itself. Girard's normalization proof needs much less. It interprets
+types as \emph{reducibility candidates}, predicates on terms, and quantifies
+over all candidates. In Lean a candidate is a structure whose main field is
+$P:\mathrm{Tm}\to\mathrm{Prop}$. A statement ``$\forall C:\mathrm{Cand},\ \dots$''
+is again a proposition, because \lean{Prop} is impredicative. The normalization
+proof therefore goes through, even though there is no semantic model.
 
-\paragraph{Why Lean can host it.} System~F has no set-theoretic model in Lean's
-predicative \lean{Type}. Girard's \emph{reducibility candidates} proof of strong
-normalization quantifies only over \emph{predicates on terms}, and Lean's
-impredicative \lean{Prop} makes $\forall C:\mathrm{Term}\to\mathrm{Prop}$ a
-legitimate proposition. The plan:
+\subsection{The formalization}
 \begin{enumerate}[leftmargin=*]
-\item untyped de~Bruijn $\lambda$-terms with $\beta$-reduction (types erased);
-\item Curry-style System~F typing; saturated sets; the interpretation
-  $\llbracket\forall X.A\rrbracket_\rho=\bigcap_C\llbracket A\rrbracket_{C\cdot\rho}$;
-  and adequacy, which gives strong normalization;
-\item Church-style terms (decidable type checking) enumerated by depth, checked
-  against the Church numeral type, erased, normalized by a deterministic
-  strategy (a total function by well-founded recursion, using the SN proof),
-  and decoded;
-\item an \emph{oracle constant} $O$ with $\delta$-rule $O\,\overline{n}\to\overline{f(n)}$, so
-  System~F programs can amplify a previous contender's family. That makes the
-  formal comparison immediate, and it lets F's own strength act on top of it.
+\item \textbf{Untyped core} (\lean{SystemF/Syntax}, \lean{Reduction}): de~Bruijn
+  terms with an oracle constant \lean{orc}; parallel substitution with its
+  composition algebra; full $\beta$-reduction plus the $\delta$-rule
+  $\mathtt{orc}\,\overline{n}\to\overline{f(n)}$ on canonical Church numerals;
+  $\mathrm{SN}$ as accessibility.
+\item \textbf{Types} (\lean{Types}): de~Bruijn System~F types and Curry-style
+  typing of \emph{erased} terms. A flag enables the oracle rule; numerals are
+  typed without it.
+\item \textbf{Candidates} (\lean{Candidates}): CR1--CR3, where \emph{neutral}
+  means neither a $\lambda$ nor the oracle (\lean{orc a} can reduce at the
+  head); the arrow construction; the intersection $\forall$; the interpretation
+  $\llbracket A\rrbracket_\rho$; its renaming and substitution lemmas, proved as
+  \emph{equalities} of candidates via funext, propext and proof irrelevance;
+  $\beta$-closure for $\lambda$; and adequacy.
+  The oracle is justified afterwards. Numerals lie in every interpretation of
+  $\mathtt{nat}$ (adequacy without the oracle rule), so the $\delta$-reduct of
+  $\mathtt{orc}\,a$ stays inside the candidate.
 \end{enumerate}
+\begin{theorem}[\lean{F.sn\_of\_typed}]
+Every term typable in System~F with the oracle is strongly normalizing under
+$\beta\delta$, for every oracle function $f$. The proof uses only \lean{propext}
+and \lean{Quot.sound}.
+\end{theorem}
 
-\paragraph{Further rungs.} System~F$_\omega$ (higher-order arithmetic) needs
-candidates for type constructors, i.e.\ functions between candidate spaces. The
-Calculus of Constructions, the system behind Loader's number, adds
-dependent types. Each rung is a new contender.
+\subsection{From programs to numbers}
+Programs are Church-style terms (annotated $\lambda$, explicit type abstraction
+and application), so type inference is decidable. \lean{infer\_sound} states
+that inference implies the Curry typing of the erased term. A program's value
+is computed as follows: check that it is closed of type
+$\mathtt{nat}=\forall X.(X\to X)\to X\to X$; erase it; normalize it by the
+normal-order step function \lean{nstep}, iterated by well-founded recursion on
+the SN certificate (the compiler runs this as an ordinary loop); and read the
+Church numeral. A smoke test shows the pipeline computing:
+$2^3\mapsto 8$ and $3^{2^2}\mapsto 81$ by polymorphic instantiation, oracle
+calls $\mathtt{orc}\,\overline{4}\mapsto 40$ for $f(n)=10n$, and $0$ for
+ill-typed programs.
+
+\subsection{The contender}
+\begin{lstlisting}
+def reflectF (f : ℕ → ℕ) (n : ℕ) : ℕ :=
+  n + 1 + max (f n) (maximum (fvalue f) (ctmsUpTo n))
+def F7 (n : ℕ) : ℕ := reflectF finalFamily n
+def contender_7 : ℕ := F7 (F7 42)
+\end{lstlisting}
+The oracle is Contender~6's family. System~F programs can call it and amplify it
+with second-order strength. The outer \lean{F7} runs System~F at a syntax budget
+already larger than Contender~6. Proved:
+\lean{contender\_6\_lt\_contender\_7}, \lean{finalFamily\_lt\_F7} (at every
+input), and \lean{fvalue\_lt\_contender\_7} (every System~F program of depth
+$\le$ \lean{F7 42} is exceeded). The audit confirms that the constant
+\lean{contender\_6} itself never occurs in the definition; only Contender~6's
+family occurs, as the oracle.
+
+\paragraph{Size.} By the heuristics of Section~2, Contender~7 is about
+$f_{|\mathsf{Z}_2|}$ applied at an input beyond Contender~6. Here
+$|\mathsf{Z}_2|$ is the proof-theoretic ordinal of second-order arithmetic.
+Nobody has computed it, but it lies far beyond every ordinal named in this
+article.
+
+%======================================================================
+\section{Roadmap}
+
+\paragraph{System F$_\omega$.} Adding type operators (kinds
+$\kappa::=*\mid\kappa\to\kappa$) gives the strength of higher-order arithmetic.
+The candidate method extends: a type constructor of kind $\kappa\to\kappa'$ is
+interpreted as a function between candidate spaces, defined by recursion on
+kinds. Type equality now includes $\beta$-conversion of type operators, so
+Church-style checking needs type normalization, which is itself the
+normalization of the simply typed $\lambda$-calculus.
+
+\paragraph{The Calculus of Constructions.} Dependent types on top of
+F$_\omega$ is the system behind Loader's number, the largest well-known
+computable googologism. Its normalization proof (Coquand, Geuvers) also uses
+candidates, now indexed by the dependent structure.
+
+\paragraph{Amplifiers.} The reflection machinery of Contender~6 applies to any
+total language with an oracle. A forest reflection along trees definable in
+System~F would add a multiplicative factor. That is modest compared to the
+next rung of the ladder, which remains the priority.
 
 %======================================================================
 \section{Status}
@@ -286,8 +353,9 @@ dependent types. Each rung is a new contender.
 Contender & idea & informal size\\
 \midrule
 5 (Coq) & System T, depth 42 & $f_{<\varepsilon_0}(42)$\\
-6 (Lean) & forest reflection over finite-type W-language, own trees & $f_{\psi(\Omega_\omega)^2}(42)$\\
-7 (planned) & System F with oracle & beyond $f_{|\mathsf{Z}_2|}$\\
+6 (Lean) & W-language, reflected along its own trees & $f_{\psi(\Omega_\omega)^2}(42)$\\
+7 (Lean) & System F with Contender 6 as oracle & $f_{|\mathsf{Z}_2|}(>\!C_6)$\\
+8 (planned) & System F$_\omega$ & higher-order arithmetic\\
 \bottomrule
 \end{tabular}
 \end{center}
