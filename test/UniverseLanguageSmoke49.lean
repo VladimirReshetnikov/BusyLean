@@ -4,7 +4,7 @@ open BusyLean.Ordinal
 
 /-- The old universe-relative collapse is represented exactly. -/
 example (J : CTree → CTree) (T : CTree) :
-    UL.oldBoostTerm.eval J T () = boost31J J T := rfl
+    (UL.oldBoostTerm.eval J T UL.emptyEnv).down = boost31J J T := rfl
 
 /-- The universe-language jump retains its input on branch zero. -/
 example (J : CTree → CTree) (T : CTree) (n : Nat) :
