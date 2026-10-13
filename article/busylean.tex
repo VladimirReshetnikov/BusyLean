@@ -109,7 +109,11 @@ bounded size. Contender~33 stacks the language on itself, and Contender~34 stack
 it along tree ordinals. Contender~35 takes its trees from impredicative System~F
 programs, made well-founded by a reducibility candidate for trees. Contender~36
 lets the ladder language build the trees, so each ladder defines the length of
-the next. Contender~37 stacks the tree languages over this jump.
+the next. Contender~37 stacks the tree languages over this jump. A correction
+(Section~\ref{sec:truncation}): a ladder program of depth $n$ sees only a finite
+truncation of its atom order, so Contenders~15--37 grew through their
+amplifiers, not through the size of their atoms. Contender~38 runs a
+fast-growing hierarchy along the trees themselves.
 \end{abstract}
 
 \tableofcontents
@@ -1601,6 +1605,63 @@ and the ladder runs over its addresses. Proved:
 \lean{jtvalue\_lt\_F37}. The definitions check in 1.9\,s and the proofs in 2.5\,s.
 
 %======================================================================
+\section{A correction: what a ladder sees}\label{sec:truncation}
+
+From Contender~15 on, the ladders run over larger and larger well-founded
+atom orders: ordinal notations, then addresses in collapsed trees. The
+informal sizes given for these contenders assumed that the ladder's strength
+grows with the order type of the atoms. That assumption is wrong.
+
+A program of enumeration depth $n$ can mention only the atoms in its
+enumeration list: notations of size $\le n$, or addresses of depth $\le n$.
+Every typing rule that involves atoms (\lean{Fits}, \lean{apack},
+\lean{aunpack}, kind instantiation with syntactic kinds) refers only to atoms
+named in the derivation, and erasure forgets all types. So the set of typable
+erased programs, and with it every ladder value, depends only on the finite
+order on the named atoms. For address atoms its chains have length at most
+$n+1$, whatever the tree. The universes over unnamed atoms exist in the
+semantics, but no program can use them.
+
+The formal results are unaffected. Each comparison theorem is proved, and every
+contender does exceed the previous one. But from Contender~15 to Contender~37 the
+growth came from the oracle seeding and the W-ranked amplifiers, which nest
+each contender's family inside the next. It did not come from the size of the
+atom order. The trees themselves are genuinely large: they are computed by
+structural recursion, System~T over trees, and System~F and ladder programs.
+They were just used in a place that cannot exploit them. The informal sizes in
+the status table for Contenders~15--37 describe the atom orders, not the
+numbers.
+
+%======================================================================
+\section{Contender 38: a fast-growing hierarchy along the trees}
+
+Contender~38 uses the tree as the index of a fast-growing hierarchy instead of
+as ladder atoms. For a base $g$ and a tree $t$:
+\[
+h^g_{0}(m)=g(m),\qquad h^g_{t+1}(m)=\bigl(h^g_t\bigr)^{m+1}(m),\qquad
+h^g_{\lim f}(m)=\max_{i\le m} h^g_{f\,i}(m).
+\]
+At limits it takes the maximum over the first $m{+}1$ branches. The usual
+diagonal $h_{f\,m}(m)$ would be ruined by the zero padding of the
+program-list limits (\lean{ftTree}, \lean{ladderTree}, \lean{langLift}),
+because whether a given branch is large depends on where its program falls in
+the enumeration. With the maximum, every branch $i\le m$ counts. The definition
+is structural recursion on \lean{CTree}.
+
+The contender is
+\[
+F_{38}(n)=h^{\mathrm{family}_{37}}_{\mathrm{jumpTree}(n)}\bigl(\mathrm{family}_{37}(n)\bigr),
+\qquad C_{38}=F_{38}(F_{38}(42)).
+\]
+The base already contains all of Contender~37's amplifiers. The index contains
+every tree built so far: the collapsing constructions, the stacked tree
+languages, the System~F and ladder program trees, and the jump stacking above
+them. \lean{le\_hier} shows that the hierarchy dominates its base and its
+argument whenever the base is inflationary. This gives
+\lean{family37\_lt\_F38} and \lean{contender\_37\_lt\_\allowbreak contender\_38}.
+The definitions check in 1.6\,s and the proofs in 3.1\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1672,8 +1733,12 @@ Contender & idea & informal size\\
 35 (Lean) & trees built by System F programs (System FT) & impredicative trees\\
 36 (Lean) & ladder programs build the next ladder's tree, iterated along a tree & self-defined ladder lengths\\
 37 (Lean) & tree languages stacked over the ladder jump & transfinite iterates of the jump\\
+38 (Lean) & fast-growing hierarchy along Contender 37's tree & $h_{\mathrm{jumpTree}(n)}$ over $F_{37}$\\
 \bottomrule
 \end{tabular}
 \end{center}
+
+For Contenders~15--37 the informal size describes the atom order. The ladder
+values see only its finite truncation (Section~\ref{sec:truncation}).
 
 \end{document}

@@ -9,7 +9,38 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 37
+## Current contender: Contender 38
+
+```lean
+def family37 (n : Nat) : Nat := F37 (F37 n)                  -- Contender 37 = family37 42
+def hier (g : Nat → Nat) : CTree → Nat → Nat                 -- BusyLean/Contender38.lean
+  | .zero, m => g m
+  | .succ t, m => iterN (hier g t) (m + 1) m
+  | .lim f, m => maxUpTo (fun i => hier g (f i) m) m
+  | _, m => g m
+def F38 (n : Nat) : Nat := hier family37 (jumpTree n) (family37 n)
+def contender_38 : Nat := F38 (F38 42)
+
+theorem contender_37_lt_contender_38 : contender_37 < contender_38   -- BusyLean/Comparison38.lean
+```
+
+**A correction.** A ladder program of depth `n` can name only atoms of size or
+depth ≤ `n`, and erasure forgets types. So ladder values depend only on the
+finite order on named atoms, whose chains have length ≤ `n + 1` for address
+atoms. Contenders 15–37 are all proved larger than their predecessors, but they
+grew through oracle seeding and the W-ranked amplifiers, not through the size of
+their atom orders. Contender 38 uses the trees directly: a fast-growing
+hierarchy along `jumpTree n` with base Contender 37's family. Maxima over the
+first branches at limits make it robust to the zero padding of program-list
+limits.
+
+| Theorem | Statement |
+|---|---|
+| `contender_37_lt_contender_38` | Contender 37 < Contender 38 |
+| `family37_lt_F38` | Contender 37's family is beaten at every input |
+| `Ordinal.le_hier` | the hierarchy dominates its base and argument (inflationary base) |
+
+## Contender 37
 
 ```lean
 def family36 (n : Nat) : Nat := F36 (F36 n)                  -- Contender 36 = family36 42
@@ -963,8 +994,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 37's definition modules take
-about 2 s and its proofs about 2.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 38's definition modules take
+about 1.6 s and its proofs about 3 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1023,6 +1054,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender35.lean`](BusyLean/Contender35.lean), [`Comparison35.lean`](BusyLean/Comparison35.lean) | Contender 35 definitions and theorems |
 | [`BusyLean/Contender36.lean`](BusyLean/Contender36.lean), [`Comparison36.lean`](BusyLean/Comparison36.lean) | Contender 36 definitions and theorems |
 | [`BusyLean/Contender37.lean`](BusyLean/Contender37.lean), [`Comparison37.lean`](BusyLean/Comparison37.lean) | Contender 37 definitions and theorems |
+| [`BusyLean/Contender38.lean`](BusyLean/Contender38.lean), [`Comparison38.lean`](BusyLean/Comparison38.lean) | Contender 38 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1067,6 +1099,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 35 | Lean | this repository | ladder over trees built by impredicative System F programs |
 | 36 | Lean | this repository | ladder programs build the next ladder's tree, iterated along a tree |
 | 37 | Lean | this repository | tree languages stacked over the ladder jump |
+| 38 | Lean | this repository | fast-growing hierarchy along Contender 37's tree |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
