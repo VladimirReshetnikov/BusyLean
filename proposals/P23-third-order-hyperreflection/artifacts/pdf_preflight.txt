@@ -1,0 +1,6 @@
+PDF: /mnt/data/BusyLean_Contender20_ThirdOrder_Hyperreflection/article/contender20.pdf
+Pages: 30
+Encrypted: False
+Openable (PyMuPDF): True
+Likely scanned: False
+XFA present: False

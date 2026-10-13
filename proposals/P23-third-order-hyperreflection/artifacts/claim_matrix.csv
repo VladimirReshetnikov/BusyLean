@@ -1,0 +1,10 @@
+claim_id,claim,evidence,status,qualification
+C1,"contender_20 is a closed computable Nat","overlay/BusyLean/Contender20.lean; structural recursion in SuperReflection.lean",static-pass,"Lean kernel replay is still required for final acceptance"
+C2,"The library sources contain none of the forbidden implementation shortcuts","artifacts/static_audit_report.json",verified-static,"Comments and strings are stripped before scanning"
+C3,"The definition does not use the constant contender_19","Contender20.lean source scan; test/Audit20.lean transitive closure command",static-pass/kernel-pending,"F19, the previous construction, is intentionally used as the seed"
+C4,"Contender 19 is strictly below Contender 20","theorem contender_19_lt_contender_20 in Comparison20.lean",proof-drafted,"Must be replayed by Lean 4.34.0"
+C5,"The third-order lift strictly exceeds its initial current-style diagonal lift","theorem diagonalLift_lt_lift20 in Comparison20.lean",proof-drafted,"This is the main architectural domination theorem"
+C6,"Every final large-Veblen program in the bounded enumeration is below F20 n","theorem final_lvalue_lt_F20 in Comparison20.lean",proof-drafted,"Programs run relative to the packed final third-order family"
+C7,"Only propext and Quot.sound are used","overlay/test/Audit20.lean and overlay/scripts/check20.py",kernel-pending,"No axiom claim is made until #print axioms is replayed"
+C8,"Definition and proof satisfy 15 s / 60 s budgets","overlay/scripts/check20.py",unverified,"No timing claim is made because Lean/Lake are absent from this environment"
+C9,"The article PDF compiles and renders without layout defects","article/contender20.pdf and PDF QA artifacts",verified,"Checked after compilation by rendering every page"

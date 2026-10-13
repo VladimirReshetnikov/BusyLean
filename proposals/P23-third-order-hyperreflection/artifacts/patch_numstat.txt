@@ -1,0 +1,7 @@
+4	0	BusyLean.lean
+113	0	BusyLean/Comparison20.lean
+64	0	BusyLean/Contender20.lean
+71	0	BusyLean/SuperReflection.lean
+218	0	BusyLean/SuperReflectionFacts.lean
+101	0	scripts/check20.py
+63	0	test/Audit20.lean

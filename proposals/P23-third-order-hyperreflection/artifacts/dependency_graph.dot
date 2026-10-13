@@ -1,0 +1,78 @@
+digraph BusyLean20 {
+  graph [rankdir=LR, bgcolor="white", fontname="Helvetica", fontsize=11,
+         label="Contender 20 dependency and domination graph", labelloc=t,
+         pad=0.25, nodesep=0.45, ranksep=0.75];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10,
+        fillcolor="#F7F7F7", color="#555555", margin="0.10,0.06"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", arrowsize=0.75];
+
+  subgraph cluster_baseline {
+    label="Accepted baseline";
+    color="#9CB7D4";
+    style="rounded";
+    F19 [label="F19 / family19", fillcolor="#E8F1FA"];
+    LV [label="large-Veblen\nreflection lTransformer", fillcolor="#E8F1FA"];
+    DL [label="diagonalLift", fillcolor="#E8F1FA"];
+    T12 [label="tree12 / autonomous index", fillcolor="#E8F1FA"];
+  }
+
+  subgraph cluster_new {
+    label="Third-order construction";
+    color="#C6A15B";
+    style="rounded";
+    S20 [label="schedule20 n", fillcolor="#FFF3D8"];
+    IR [label="innerRank20 n", fillcolor="#FFF3D8"];
+    MR [label="metaRank20 n", fillcolor="#FFF3D8"];
+    PL [label="promoteLift", fillcolor="#FFF3D8"];
+    LS [label="liftStage", fillcolor="#FFF3D8"];
+    SC [label="superClosure", fillcolor="#FFF3D8"];
+    SI [label="superIterate", fillcolor="#FFF3D8"];
+    L20 [label="lift20 n", fillcolor="#FFE7AD"];
+    HF [label="hyperFamily20 n", fillcolor="#FFE7AD"];
+    F20 [label="F20 n", fillcolor="#FFD37A"];
+    C20 [label="contender_20", fillcolor="#F4BD55", shape=doubleoctagon];
+  }
+
+  subgraph cluster_proofs {
+    label="Formal domination statements";
+    color="#89B58A";
+    style="rounded";
+    G [label="GoodLift invariant", fillcolor="#E9F5E9"];
+    DLT [label="diagonalLift_lt_lift20", fillcolor="#E9F5E9"];
+    FLT [label="family19_lt_F20", fillcolor="#E9F5E9"];
+    PGT [label="final_lvalue_lt_F20", fillcolor="#E9F5E9"];
+    CT [label="contender_19_lt_contender_20", fillcolor="#D7EED7"];
+  }
+
+  F19 -> S20 [label="controls height"];
+  F19 -> IR [label="+1"];
+  F19 -> MR [label="+1"];
+  T12 -> S20 [label="encoded base"];
+  S20 -> DL;
+  IR -> DL;
+  DL -> L20 [label="initial lift"];
+  PL -> SC;
+  LS -> SC;
+  S20 -> SC;
+  SC -> SI;
+  MR -> SI;
+  SI -> L20;
+  LV -> HF [label="base transformer"];
+  F19 -> HF [label="seed family"];
+  L20 -> HF;
+  HF -> F20 [label="final family oracle"];
+  LV -> F20 [label="final reflection"];
+  F20 -> C20 [label="F20 (F20 42)"];
+
+  G -> PL [dir=both, arrowhead=normal, arrowtail=none];
+  G -> LS [dir=both, arrowhead=normal, arrowtail=none];
+  G -> SI [dir=both, arrowhead=normal, arrowtail=none];
+  DL -> DLT;
+  L20 -> DLT;
+  F19 -> FLT;
+  F20 -> FLT;
+  HF -> PGT;
+  F20 -> PGT;
+  FLT -> CT;
+  C20 -> CT;
+}

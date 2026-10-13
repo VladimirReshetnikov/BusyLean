@@ -1,0 +1,1 @@
+PASS axiom-report regex: [('BusyLean.foo', 'propext, Quot.sound'), ('BusyLean.bar', '')]

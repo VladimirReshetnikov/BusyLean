@@ -1,0 +1,678 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index 0bf75e1..2df3575 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -42,3 +42,7 @@ import BusyLean.Ordinal.SortedLexQ
+ import BusyLean.Ordinal.LargeVeblen
+ import BusyLean.Contender19
+ import BusyLean.Comparison19
++import BusyLean.SuperReflection
++import BusyLean.SuperReflectionFacts
++import BusyLean.Contender20
++import BusyLean.Comparison20
+diff --git a/BusyLean/Comparison20.lean b/BusyLean/Comparison20.lean
+new file mode 100644
+index 0000000..3542435
+--- /dev/null
++++ b/BusyLean/Comparison20.lean
+@@ -0,0 +1,113 @@
++import BusyLean.Contender20
++import BusyLean.SuperReflectionFacts
++import BusyLean.Comparison19
++
++/-! # Contender 20: comparison theorems -/
++
++namespace BusyLean
++
++open BusyLean.W
++
++/-- The current-style lift used as the base of Contender 20 satisfies both
++higher invariants. -/
++theorem diagonalLift20_good (n : Nat) :
++    GoodLift (diagonalLift (schedule20 n) (innerRank20 n)) :=
++  ⟨diagonalLift_preservesProgressive
++      (schedule20 n) (innerRank20 n),
++    diagonalLift_strictlyInflationary
++      (schedule20 n) (innerRank20 n)⟩
++
++/-- The final third-order lift is good. -/
++theorem lift20_good (n : Nat) : GoodLift (lift20 n) := by
++  simpa [lift20] using
++    (superIterate_good (schedule20 n)
++      (diagonalLift (schedule20 n) (innerRank20 n))
++      (diagonalLift20_good n) (metaRank20 n))
++
++/-- `lift20 n` preserves progressive transformers. -/
++theorem lift20_preservesProgressive (n : Nat) :
++    PreservesProgressive (lift20 n) :=
++  (lift20_good n).1
++
++/-- `lift20 n` strictly exceeds every progressive base transformer. -/
++theorem lift20_strictlyInflationary (n : Nat) :
++    StrictlyInflationary (lift20 n) :=
++  (lift20_good n).2
++
++/-- Formal architectural gain: the complete third-order lift strictly exceeds
++its own initial current-style diagonal hyperlift, at every visible coordinate.
++-/
++theorem diagonalLift_lt_lift20 (n : Nat)
++    (base : Transformer) (hbase : Progressive base)
++    (seed : Family) (i o : Nat) (hi : i ≤ n) :
++    diagonalLift (schedule20 n) (innerRank20 n)
++        base seed i n <
++      lift20 n base seed o n := by
++  simpa [lift20, metaRank20] using
++    (lift_lt_superIterate_succ (schedule20 n)
++      (diagonalLift (schedule20 n) (innerRank20 n))
++      (diagonalLift20_good n) (family19 n)
++      base hbase seed i o n hi)
++
++/-- The preceding family is already beaten inside the produced hyper-family. -/
++theorem family19_lt_hyperFamily20 (n : Nat) :
++    family19 n < hyperFamily20 n 0 n := by
++  have h := (lift20_preservesProgressive n)
++    lTransformer lTransformer_progressive seed19 0 0 n (Nat.zero_le n)
++  simpa [seed19, hyperFamily20] using h
++
++/-- Every visible coordinate of the produced family is below the final
++large-Veblen reflection. -/
++theorem hyperFamily20_lt_F20 {i n : Nat} (hi : i ≤ n) :
++    hyperFamily20 n i n < F20 n := by
++  simpa [F20] using
++    (oracle_lt_reflectLFamily (hyperFamily20 n) (i := i) (n := n) hi)
++
++/-- At every input, `F20` exceeds Contender 19's complete family. -/
++theorem family19_lt_F20 (n : Nat) : family19 n < F20 n :=
++  Nat.lt_trans (family19_lt_hyperFamily20 n)
++    (hyperFamily20_lt_F20 (n := n) (i := 0) (Nat.zero_le n))
++
++/-- Even the raw large-Veblen reflection over the old seed is below the
++third-order family. -/
++theorem raw_reflection_lt_hyperFamily20 (n : Nat) :
++    reflectLFamily seed19 n < hyperFamily20 n 0 n := by
++  have h := (lift20_strictlyInflationary n)
++    lTransformer lTransformer_progressive seed19 n 0 n (Nat.le_refl n)
++  simpa [lTransformer, hyperFamily20] using h
++
++/-- The raw large-Veblen reflection over the old seed is below `F20`. -/
++theorem raw_reflection_lt_F20 (n : Nat) :
++    reflectLFamily seed19 n < F20 n :=
++  Nat.lt_trans (raw_reflection_lt_hyperFamily20 n)
++    (hyperFamily20_lt_F20 (n := n) (i := 0) (Nat.zero_le n))
++
++/-- Every enumerated large-Veblen-ladder program run against the final packed
++third-order family is below `F20 n`. -/
++theorem final_lvalue_lt_F20 {n : Nat}
++    {t : FL.CTm Ordinal.LargeVeblen}
++    (ht : t ∈ FL.lveblenLadderUpTo n) :
++    FL.lvalue (packFamily (hyperFamily20 n)) n t < F20 n := by
++  simpa [F20] using
++    (lvalue_lt_reflectLFamily (hyperFamily20 n) ht)
++
++/-- The numerical input is below the preceding family. -/
++theorem input_lt_family19 (n : Nat) : n < family19 n := by
++  simpa [family19] using
++    (Nat.lt_trans (input_lt_F19 n) (input_lt_F19 (F19 n)))
++
++/-- The numerical input is below `F20`. -/
++theorem input_lt_F20 (n : Nat) : n < F20 n :=
++  Nat.lt_trans (input_lt_family19 n) (family19_lt_F20 n)
++
++/-- The required comparison: Contender 19 is strictly below Contender 20. -/
++theorem contender_19_lt_contender_20 : contender_19 < contender_20 := by
++  simpa [family19, contender_19, contender_20] using
++    (Nat.lt_trans (family19_lt_F20 42)
++      (input_lt_F20 (F20 42)))
++
++/-- A convenient transitive comparison with Contender 18. -/
++theorem contender_18_lt_contender_20 : contender_18 < contender_20 :=
++  Nat.lt_trans contender_18_lt_contender_19 contender_19_lt_contender_20
++
++end BusyLean
+diff --git a/BusyLean/Contender20.lean b/BusyLean/Contender20.lean
+new file mode 100644
+index 0000000..95d848b
+--- /dev/null
++++ b/BusyLean/Contender20.lean
+@@ -0,0 +1,64 @@
++import BusyLean.SuperReflection
++import BusyLean.Contender19
++
++/-!
++# Contender 20: third-order autonomous hyperreflection
++
++The preceding construction already forms a hierarchy of transformer lifts.
++This contender reflects over those lifts themselves.
++
++At input `n`:
++
++1. `family19 n = F19 (F19 n)` supplies the preceding construction as a seed;
++2. `schedule20 n` is an autonomous W-tree with `family19 n + 42` higher
++   closures above `tree12`;
++3. an ordinary `diagonalLift` of rank `family19 n + 1` is the initial lift;
++4. `superIterate` applies a third-order autonomous closure
++   `family19 n + 1` times to that entire lift;
++5. the resulting lift acts on large-Veblen reflection and yields a countable
++   family;
++6. one final large-Veblen reflection sees that whole family.
++
++All recursion is structural and the definition is a closed computable `Nat`.
++Never evaluate `contender_20`.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Contender 19's construction as a function of its input. -/
++def family19 (n : Nat) : Nat := F19 (F19 n)
++
++/-- Contender 19's construction repeated at every seed coordinate. -/
++def seed19 : Family := fun _ => family19
++
++/-- A previous-number-controlled autonomous schedule. -/
++def schedule20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (family19 n + 42) (Autonomous.encode tree12))
++
++/-- Rank of the initial, current-style diagonal lift. -/
++def innerRank20 (n : Nat) : Nat := family19 n + 1
++
++/-- Rank of the new third-order iteration. -/
++def metaRank20 (n : Nat) : Nat := family19 n + 1
++
++/-- The third-order lift used at input `n`. -/
++def lift20 (n : Nat) : TransformerLift :=
++  superIterate (schedule20 n) (metaRank20 n)
++    (diagonalLift (schedule20 n) (innerRank20 n))
++
++/-- The complete family produced by the third-order lift. -/
++def hyperFamily20 (n : Nat) : Family :=
++  lift20 n lTransformer seed19
++
++/-- One final large-Veblen reflection over the complete third-order family. -/
++def F20 (n : Nat) : Nat :=
++  reflectLFamily (hyperFamily20 n) n
++
++/-- Contender 20.  Never evaluate it. -/
++def contender_20 : Nat := F20 (F20 42)
++
++end BusyLean
+diff --git a/BusyLean/SuperReflection.lean b/BusyLean/SuperReflection.lean
+new file mode 100644
+index 0000000..a35c606
+--- /dev/null
++++ b/BusyLean/SuperReflection.lean
+@@ -0,0 +1,71 @@
++import BusyLean.HyperReflection
++
++/-!
++# Third-order autonomous hyperreflection
++
++The accepted hyperreflection layer acts on `Transformer`s through
++`TransformerLift = Transformer → Transformer`.  This module raises the
++construction one more type level.
++
++A `LiftTransformer` maps transformer lifts to transformer lifts.  We can splice
++a countable family of lifts coordinatewise, promote a lift by one ordinary
++hyperreflection step, iterate an arbitrary lift transformer along a W-tree, and
++then iterate that whole autonomous closure through a finite meta-rank.
++
++Every definition is structural recursion on `Nat` or `WTree Nat`.  There is no
++partiality, oracle, or evaluation-time metaprogramming.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- One type level above `TransformerLift`. -/
++abbrev LiftTransformer := TransformerLift → TransformerLift
++
++/-- Splice a countable family of transformer lifts.
++
++Output coordinate `i` selects lift `i`; the selected transformer uses its
++canonical output coordinate `0`, exactly as `spliceTransformers` does one level
++below.
++-/
++def spliceLifts (lifts : Nat → TransformerLift) : TransformerLift :=
++  fun base => spliceTransformers (fun i => lifts i base)
++
++/-- Promote a transformer lift by one schedule-driven hyperreflection step.
++
++This abstracts the successor clause of `diagonalLift`: the incoming lift is
++used both to amplify the base transformer and as the local lifting operation
++at every node of the schedule.
++-/
++def promoteLift (schedule : WTree Nat) : LiftTransformer :=
++  fun lift base => stageLift lift (lift base) schedule
++
++/-- Iterate a lift transformer along a well-founded tree.
++
++This is the exact next-type analogue of `stageLift`.
++-/
++def liftStage (amp : LiftTransformer) (base : TransformerLift) :
++    WTree Nat → TransformerLift
++  | .leaf => amp base
++  | .node f =>
++      amp (spliceLifts (fun i => liftStage amp base (f i)))
++
++/-- One autonomous third-order closure.
++
++The same schedule is used internally by `promoteLift` and externally by
++`liftStage`.  Thus the schedule controls both the local hyperreflection and the
++branching reflection over whole lifts.
++-/
++def superClosure (schedule : WTree Nat) (base : TransformerLift) :
++    TransformerLift :=
++  liftStage (promoteLift schedule) base schedule
++
++/-- Iterate the third-order closure through a finite meta-rank. -/
++def superIterate (schedule : WTree Nat) :
++    Nat → TransformerLift → TransformerLift
++  | 0, base => base
++  | k + 1, base => superClosure schedule (superIterate schedule k base)
++
++end BusyLean
+diff --git a/BusyLean/SuperReflectionFacts.lean b/BusyLean/SuperReflectionFacts.lean
+new file mode 100644
+index 0000000..c0af818
+--- /dev/null
++++ b/BusyLean/SuperReflectionFacts.lean
+@@ -0,0 +1,218 @@
++import BusyLean.SuperReflection
++import BusyLean.HyperReflectionFacts
++
++/-!
++# Growth facts for third-order autonomous hyperreflection
++
++The crucial invariant is `GoodLift`: a transformer lift preserves progressive
++transformers and is strictly inflationary on every progressive transformer.
++The proofs below never assume semantic monotonicity in an oracle family.  Such
++monotonicity is false for reflective object languages because programs may
++branch on oracle values.  Instead every inequality follows an explicit visible
++coordinate or the explicit zero child of a tree node.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- A lift has both properties needed by the higher construction. -/
++def GoodLift (lift : TransformerLift) : Prop :=
++  PreservesProgressive lift ∧ StrictlyInflationary lift
++
++/-- A lift transformer maps good lifts to good lifts. -/
++def PreservesGoodLifts (amp : LiftTransformer) : Prop :=
++  ∀ lift, GoodLift lift → GoodLift (amp lift)
++
++/-- A lift transformer strictly exceeds its input lift on every progressive
++base transformer and every visible coordinate. -/
++def LiftStrictlyInflationary (amp : LiftTransformer) : Prop :=
++  ∀ lift, GoodLift lift →
++    ∀ (base : Transformer), Progressive base →
++    ∀ (seed : Family) (i o n : Nat), i ≤ n →
++      lift base seed i n < amp lift base seed o n
++
++/-- Coordinatewise splicing preserves the good-lift invariant. -/
++theorem spliceLifts_good (lifts : Nat → TransformerLift)
++    (hlifts : ∀ i, GoodLift (lifts i)) :
++    GoodLift (spliceLifts lifts) := by
++  constructor
++  · intro base hbase
++    exact spliceTransformers_progressive
++      (fun i => (hlifts i).1 base hbase)
++  · intro base hbase seed i o n hi
++    change base seed i n < lifts o base seed 0 n
++    exact (hlifts o).2 base hbase seed i 0 n hi
++
++/-- Promotion maps every good lift to another good lift. -/
++theorem promoteLift_good (schedule : WTree Nat) (lift : TransformerLift)
++    (hlift : GoodLift lift) :
++    GoodLift (promoteLift schedule lift) := by
++  constructor
++  · intro base hbase
++    exact stageLift_progressive lift hlift.1
++      (lift base) (hlift.1 base hbase) schedule
++  · intro base hbase seed i o n hi
++    have hfirst : base seed i n < lift base seed i n :=
++      hlift.2 base hbase seed i i n hi
++    have hsecond :
++        lift base seed i n <
++          stageLift lift (lift base) schedule seed o n :=
++      base_lt_stageLift lift hlift.1 hlift.2
++        (lift base) (hlift.1 base hbase)
++        schedule seed i o n hi
++    exact Nat.lt_trans hfirst hsecond
++
++/-- Promotion preserves good lifts. -/
++theorem promoteLift_preservesGood (schedule : WTree Nat) :
++    PreservesGoodLifts (promoteLift schedule) :=
++  fun lift hlift => promoteLift_good schedule lift hlift
++
++/-- Promotion strictly exceeds the promoted lift itself. -/
++theorem lift_lt_promoteLift (schedule : WTree Nat)
++    (lift : TransformerLift) (hlift : GoodLift lift)
++    (base : Transformer) (hbase : Progressive base)
++    (seed : Family) (i o n : Nat) (hi : i ≤ n) :
++    lift base seed i n < promoteLift schedule lift base seed o n :=
++  base_lt_stageLift lift hlift.1 hlift.2
++    (lift base) (hlift.1 base hbase)
++    schedule seed i o n hi
++
++/-- Promotion is strictly inflationary at the lift level. -/
++theorem promoteLift_liftStrict (schedule : WTree Nat) :
++    LiftStrictlyInflationary (promoteLift schedule) :=
++  fun lift hlift base hbase seed i o n hi =>
++    lift_lt_promoteLift schedule lift hlift base hbase seed i o n hi
++
++/-- Tree iteration preserves the good-lift invariant. -/
++theorem liftStage_good (amp : LiftTransformer)
++    (hamp : PreservesGoodLifts amp)
++    (baseLift : TransformerLift) (hbaseLift : GoodLift baseLift) :
++    (a : WTree Nat) → GoodLift (liftStage amp baseLift a)
++  | .leaf => hamp baseLift hbaseLift
++  | .node f => by
++      apply hamp
++      exact spliceLifts_good
++        (fun i => liftStage amp baseLift (f i))
++        (fun i => liftStage_good amp hamp baseLift hbaseLift (f i))
++
++/-- If the local lift transformer is strict, every tree stage strictly exceeds
++its original base lift.
++
++The node case follows child zero explicitly, identifies it with coordinate zero
++of the splice, and then applies strictness at the parent. -/
++theorem baseLift_lt_liftStage (amp : LiftTransformer)
++    (hpres : PreservesGoodLifts amp)
++    (hstrict : LiftStrictlyInflationary amp)
++    (baseLift : TransformerLift) (hbaseLift : GoodLift baseLift) :
++    (a : WTree Nat) →
++      ∀ (base : Transformer), Progressive base →
++      ∀ (seed : Family) (i o n : Nat), i ≤ n →
++        baseLift base seed i n < liftStage amp baseLift a base seed o n
++  | .leaf, base, hbase, seed, i, o, n, hi =>
++      hstrict baseLift hbaseLift base hbase seed i o n hi
++  | .node f, base, hbase, seed, i, o, n, hi => by
++      have hchild :
++          baseLift base seed i n <
++            liftStage amp baseLift (f 0) base seed 0 n :=
++        baseLift_lt_liftStage amp hpres hstrict baseLift hbaseLift
++          (f 0) base hbase seed i 0 n hi
++      have hchildren :
++          ∀ j, GoodLift (liftStage amp baseLift (f j)) :=
++        fun j => liftStage_good amp hpres baseLift hbaseLift (f j)
++      have hsplice :
++          GoodLift (spliceLifts (fun j => liftStage amp baseLift (f j))) :=
++        spliceLifts_good
++          (fun j => liftStage amp baseLift (f j)) hchildren
++      have hparent :
++          liftStage amp baseLift (f 0) base seed 0 n <
++            liftStage amp baseLift (.node f) base seed o n := by
++        change
++          spliceLifts (fun j => liftStage amp baseLift (f j))
++              base seed 0 n <
++            amp (spliceLifts (fun j => liftStage amp baseLift (f j)))
++              base seed o n
++        exact hstrict
++          (spliceLifts (fun j => liftStage amp baseLift (f j)))
++          hsplice base hbase seed 0 o n (Nat.zero_le n)
++      exact Nat.lt_trans hchild hparent
++
++/-- One autonomous third-order closure preserves the good-lift invariant. -/
++theorem superClosure_good (schedule : WTree Nat)
++    (lift : TransformerLift) (hlift : GoodLift lift) :
++    GoodLift (superClosure schedule lift) :=
++  liftStage_good (promoteLift schedule)
++    (promoteLift_preservesGood schedule) lift hlift schedule
++
++/-- One autonomous third-order closure strictly exceeds its input lift. -/
++theorem lift_lt_superClosure (schedule : WTree Nat)
++    (lift : TransformerLift) (hlift : GoodLift lift)
++    (base : Transformer) (hbase : Progressive base)
++    (seed : Family) (i o n : Nat) (hi : i ≤ n) :
++    lift base seed i n < superClosure schedule lift base seed o n :=
++  baseLift_lt_liftStage (promoteLift schedule)
++    (promoteLift_preservesGood schedule)
++    (promoteLift_liftStrict schedule)
++    lift hlift schedule base hbase seed i o n hi
++
++/-- Every finite meta-rank is a good lift. -/
++theorem superIterate_good (schedule : WTree Nat)
++    (initial : TransformerLift) (hinitial : GoodLift initial) :
++    ∀ k, GoodLift (superIterate schedule k initial)
++  | 0 => hinitial
++  | k + 1 =>
++      superClosure_good schedule
++        (superIterate schedule k initial)
++        (superIterate_good schedule initial hinitial k)
++
++/-- Convenient progressivity projection for a finite meta-rank. -/
++theorem superIterate_preservesProgressive (schedule : WTree Nat)
++    (initial : TransformerLift) (hinitial : GoodLift initial) (k : Nat) :
++    PreservesProgressive (superIterate schedule k initial) :=
++  (superIterate_good schedule initial hinitial k).1
++
++/-- Convenient strictness projection for a finite meta-rank. -/
++theorem superIterate_strictlyInflationary (schedule : WTree Nat)
++    (initial : TransformerLift) (hinitial : GoodLift initial) (k : Nat) :
++    StrictlyInflationary (superIterate schedule k initial) :=
++  (superIterate_good schedule initial hinitial k).2
++
++/-- The meta-rank hierarchy is strictly increasing at every successor. -/
++theorem superIterate_step_lt (schedule : WTree Nat) (k : Nat)
++    (initial : TransformerLift) (hinitial : GoodLift initial)
++    (base : Transformer) (hbase : Progressive base)
++    (seed : Family) (i o n : Nat) (hi : i ≤ n) :
++    superIterate schedule k initial base seed i n <
++      superIterate schedule (k + 1) initial base seed o n := by
++  simpa [superIterate] using
++    (lift_lt_superClosure schedule
++      (superIterate schedule k initial)
++      (superIterate_good schedule initial hinitial k)
++      base hbase seed i o n hi)
++
++/-- Every positive meta-rank strictly exceeds the initial lift. -/
++theorem lift_lt_superIterate_succ (schedule : WTree Nat)
++    (initial : TransformerLift) (hinitial : GoodLift initial) :
++    ∀ (k : Nat) (base : Transformer), Progressive base →
++      ∀ (seed : Family) (i o n : Nat), i ≤ n →
++        initial base seed i n <
++          superIterate schedule (k + 1) initial base seed o n
++  | 0, base, hbase, seed, i, o, n, hi => by
++      simpa using
++        (superIterate_step_lt schedule 0 initial hinitial
++          base hbase seed i o n hi)
++  | k + 1, base, hbase, seed, i, o, n, hi => by
++      have hfirst :
++          initial base seed i n <
++            superIterate schedule (k + 1) initial base seed i n :=
++        lift_lt_superIterate_succ schedule initial hinitial
++          k base hbase seed i i n hi
++      have hsecond :
++          superIterate schedule (k + 1) initial base seed i n <
++            superIterate schedule ((k + 1) + 1) initial base seed o n :=
++        superIterate_step_lt schedule (k + 1) initial hinitial
++          base hbase seed i o n hi
++      exact Nat.lt_trans hfirst hsecond
++
++end BusyLean
+diff --git a/scripts/check20.py b/scripts/check20.py
+new file mode 100755
+index 0000000..65f6a07
+--- /dev/null
++++ b/scripts/check20.py
+@@ -0,0 +1,101 @@
++#!/usr/bin/env python3
++"""Clean-build and audit the Contender 20 proposal.
++
++Run from an installed BusyLean checkout:
++
++    python3 scripts/check20.py
++
++The accepted Contender 19 stack is built first and is not charged to the new
++entry.  The new definition and proof phases are checked against the repository's
++15 s / 60 s budgets.  Then the focused kernel audit is run and every printed
++axiom set is restricted to propext and Quot.sound.
++"""
++
++from __future__ import annotations
++
++import re
++import shutil
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++BUILD_DIRS = [
++    ROOT / ".lake" / "build",
++    ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build",
++]
++PERMITTED = {"propext", "Quot.sound"}
++PREVIOUS = "BusyLean.Comparison19"
++CURRENT_DEF = "BusyLean.Contender20"
++CURRENT_PROOF = "BusyLean.Comparison20"
++DEFINITION_BUDGET = 15.0
++PROOF_BUDGET = 60.0
++LAKE = shutil.which("lake") or "lake"
++
++
++def run(args: list[str]) -> subprocess.CompletedProcess[str]:
++    return subprocess.run(
++        [LAKE, *args], cwd=ROOT, capture_output=True, text=True, check=False
++    )
++
++
++def timed_build(label: str, target: str, budget: float | None) -> float:
++    start = time.monotonic()
++    build = run(["build", target])
++    elapsed = time.monotonic() - start
++    if build.returncode != 0:
++        print(build.stdout, build.stderr)
++        raise SystemExit(f"FAIL: {label} build failed")
++    note = (
++        f"(budget {budget:.0f} s)"
++        if budget is not None
++        else "(accepted earlier; not budgeted)"
++    )
++    print(f"{label}: {elapsed:.1f} s {note}")
++    if budget is not None and elapsed > budget:
++        raise SystemExit(f"FAIL: {label} exceeded the budget")
++    return elapsed
++
++
++def main() -> None:
++    if shutil.which("lake") is None:
++        raise SystemExit("FAIL: lake is not on PATH")
++
++    for directory in BUILD_DIRS:
++        shutil.rmtree(directory, ignore_errors=True)
++
++    total = timed_build("previous contender", PREVIOUS, None)
++    total += timed_build("definitions", CURRENT_DEF, DEFINITION_BUDGET)
++    total += timed_build("proofs", CURRENT_PROOF, PROOF_BUDGET)
++    print(f"total clean build: {total:.1f} s")
++
++    audit = run(["env", "lean", "test/Audit20.lean"])
++    output = audit.stdout + audit.stderr
++    print(output)
++    if audit.returncode != 0:
++        raise SystemExit("FAIL: focused audit did not run cleanly")
++
++    reports = re.findall(
++        r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)",
++        output,
++    )
++    bad = [
++        (name, axioms)
++        for name, axioms in reports
++        if axioms
++        and set(item.strip() for item in axioms.split(",")) - PERMITTED
++    ]
++    if not reports:
++        raise SystemExit("FAIL: no #print axioms reports were detected")
++    if bad:
++        raise SystemExit(f"FAIL: forbidden axioms: {bad}")
++
++    print(
++        "PASS: "
++        f"{len(reports)} declarations audited; axioms within {sorted(PERMITTED)}"
++    )
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/test/Audit20.lean b/test/Audit20.lean
+new file mode 100644
+index 0000000..a5070a9
+--- /dev/null
++++ b/test/Audit20.lean
+@@ -0,0 +1,63 @@
++import BusyLean.Comparison20
++import Lean
++
++/-!
++Focused kernel audit for Contender 20.
++
++Run after installation with:
++
++  lake env lean test/Audit20.lean
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through types and values. -/
++def constClosure20 (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant is in the transitive closure of `root`. -/
++elab "#assert_not_in_closure20 " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := constClosure20 env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then
++      throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.spliceLifts_good
++#print axioms BusyLean.promoteLift_good
++#print axioms BusyLean.baseLift_lt_liftStage
++#print axioms BusyLean.superIterate_good
++#print axioms BusyLean.lift_lt_superIterate_succ
++#print axioms BusyLean.contender_20
++#print axioms BusyLean.diagonalLift_lt_lift20
++#print axioms BusyLean.family19_lt_F20
++#print axioms BusyLean.final_lvalue_lt_F20
++#print axioms BusyLean.contender_19_lt_contender_20
++
++#assert_not_in_closure20 BusyLean.contender_20 :
++  BusyLean.contender_19 BusyLean.contender_18 BusyLean.contender_17
++  BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_19_lt_contender_20
++#check @BusyLean.diagonalLift_lt_lift20
++#check @BusyLean.final_lvalue_lt_F20

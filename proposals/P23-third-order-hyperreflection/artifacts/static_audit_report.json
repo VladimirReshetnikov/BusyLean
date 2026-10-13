@@ -1,0 +1,51 @@
+{
+  "audit_kind": "static_source_audit_not_kernel_replay",
+  "checks": {
+    "contender_20_is_declared_closed_Nat": true,
+    "definition_source_avoids_previous_contender_constant": true,
+    "definition_source_uses_previous_construction_F19": true,
+    "kernel_replay_performed": false,
+    "meta_rank_is_structural_Nat_recursion": true
+  },
+  "failures": [],
+  "files": {
+    "Comparison20.lean": {
+      "bytes": 4440,
+      "forbidden_commands": [],
+      "forbidden_words": [],
+      "lines": 113,
+      "lines_over_100_columns": [],
+      "missing_expected_declarations": [],
+      "sha256": "f050e0be8a9f83ff32d2814aa8d3933a084e6e11ed06b2adbf66c25ae678418a"
+    },
+    "Contender20.lean": {
+      "bytes": 2113,
+      "forbidden_commands": [],
+      "forbidden_words": [],
+      "lines": 64,
+      "lines_over_100_columns": [],
+      "missing_expected_declarations": [],
+      "sha256": "3e12d1992b4b73b4e628b9a0f2f0114655a5e4b94d1c24a99563498bde75a542"
+    },
+    "SuperReflection.lean": {
+      "bytes": 2545,
+      "forbidden_commands": [],
+      "forbidden_words": [],
+      "lines": 71,
+      "lines_over_100_columns": [],
+      "missing_expected_declarations": [],
+      "sha256": "401280905bfe1f7915594135eb512ed135a9655c0d406527354c957bc79cab18"
+    },
+    "SuperReflectionFacts.lean": {
+      "bytes": 9452,
+      "forbidden_commands": [],
+      "forbidden_words": [],
+      "lines": 218,
+      "lines_over_100_columns": [],
+      "missing_expected_declarations": [],
+      "sha256": "33b7703c42f87b0167f13a5c0b6e78a812ef52837b9ee3c198f68d457484b933"
+    }
+  },
+  "package": "BusyLean_Contender20_ThirdOrder_Hyperreflection",
+  "status": "PASS"
+}

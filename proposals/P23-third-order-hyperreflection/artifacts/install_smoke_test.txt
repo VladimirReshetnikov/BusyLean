@@ -1,0 +1,6 @@
+warning: package targets 64d31a0cf6f1aa4477a088be5554957de6e87a61 but checkout is 1b1495991afcd5829aeaa5c0bc01656584eda8b0
+Installed Contender 20 overlay into /tmp/tmp.53iw3FLzFa
+Next: cd '/tmp/tmp.53iw3FLzFa' && python3 scripts/check20.py
+warning: package targets 64d31a0cf6f1aa4477a088be5554957de6e87a61 but checkout is 1b1495991afcd5829aeaa5c0bc01656584eda8b0
+error: /tmp/tmp.53iw3FLzFa/BusyLean/SuperReflection.lean already exists; use --force to replace it
+second install correctly refused with status 1

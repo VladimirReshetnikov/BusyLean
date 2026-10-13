@@ -1,0 +1,17 @@
+digraph TypeLadder {
+  graph [rankdir=TB, bgcolor="white", fontname="Helvetica", fontsize=11,
+         label="Reflection raised through four explicit type levels", labelloc=t,
+         pad=0.25, nodesep=0.55, ranksep=0.55];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10,
+        color="#555555", margin="0.16,0.09"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", arrowsize=0.75];
+
+  F [label="Family\nNat -> Nat -> Nat", fillcolor="#E8F1FA"];
+  T [label="Transformer\nFamily -> Family", fillcolor="#E7F3E7"];
+  TL [label="TransformerLift\nTransformer -> Transformer", fillcolor="#FFF1D6"];
+  LT [label="LiftTransformer\nTransformerLift -> TransformerLift", fillcolor="#FBE3E3"];
+
+  F -> T [label="reflectionTransformer / runTransformer"];
+  T -> TL [label="liftTransformer / stageLift / diagonalLift"];
+  TL -> LT [label="promoteLift / liftStage / superIterate"];
+}

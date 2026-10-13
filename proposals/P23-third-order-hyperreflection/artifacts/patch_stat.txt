@@ -1,0 +1,8 @@
+ BusyLean.lean                      |    4 +
+ BusyLean/Comparison20.lean         |  113 +++++++++++++++++++
+ BusyLean/Contender20.lean          |   64 +++++++++++
+ BusyLean/SuperReflection.lean      |   71 ++++++++++++
+ BusyLean/SuperReflectionFacts.lean |  218 ++++++++++++++++++++++++++++++++++++
+ scripts/check20.py                 |  101 +++++++++++++++++
+ test/Audit20.lean                  |   63 ++++++++++
+ 7 files changed, 634 insertions(+)

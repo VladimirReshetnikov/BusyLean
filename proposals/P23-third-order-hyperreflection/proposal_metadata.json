@@ -1,0 +1,31 @@
+{
+  "proposal": "Contender 20: Third-Order Autonomous Hyperreflection",
+  "repository": "https://github.com/VladimirReshetnikov/BusyLean",
+  "baseline_commit": "64d31a0cf6f1aa4477a088be5554957de6e87a61",
+  "baseline_contender": 19,
+  "proposed_contender": 20,
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "closed_definition": "BusyLean.contender_20",
+  "required_comparison": "BusyLean.contender_19_lt_contender_20",
+  "architectural_comparison": "BusyLean.diagonalLift_lt_lift20",
+  "program_bound": "BusyLean.final_lvalue_lt_F20",
+  "executable_core": [
+    "BusyLean.spliceLifts",
+    "BusyLean.promoteLift",
+    "BusyLean.liftStage",
+    "BusyLean.superClosure",
+    "BusyLean.superIterate",
+    "BusyLean.F20",
+    "BusyLean.contender_20"
+  ],
+  "validation": {
+    "static_source_audit": "pass",
+    "latex_compilation": "pass",
+    "pdf_visual_qa": "pass",
+    "installer_smoke_test": "pass",
+    "patch_apply_check": "pass",
+    "lean_kernel_replay": "not_performed_toolchain_absent",
+    "axiom_closure": "pending_kernel_replay",
+    "timing_budgets": "pending_kernel_replay"
+  }
+}

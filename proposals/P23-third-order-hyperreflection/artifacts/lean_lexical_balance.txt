@@ -1,0 +1,5 @@
+PASS BusyLean/Comparison20.lean
+PASS BusyLean/Contender20.lean
+PASS BusyLean/SuperReflection.lean
+PASS BusyLean/SuperReflectionFacts.lean
+PASS test/Audit20.lean

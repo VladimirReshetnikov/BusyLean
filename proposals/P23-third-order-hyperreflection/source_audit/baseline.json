@@ -1,0 +1,25 @@
+{
+  "repository": "https://github.com/VladimirReshetnikov/BusyLean",
+  "branch": "main",
+  "audited_head_commit": "64d31a0cf6f1aa4477a088be5554957de6e87a61",
+  "audited_head_message": "New proposals",
+  "audited_head_timestamp_utc": "2026-10-13T15:34:49Z",
+  "audit_date": "2026-10-13",
+  "toolchain": "leanprover/lean4:v4.34.0",
+  "key_blobs": {
+    "README.md": "74d67c79a03efe8a4337fcaee4749bd7bd2e1be6",
+    "lean-toolchain": "12359f928f18e4a89ebd1444a0310b025931b17d",
+    "BusyLean.lean": "0bf75e162614d0587feed4bce45d13467be706a2",
+    "BusyLean/MetaReflection.lean": "d3926cca1be43254f93e25029ea575597cdc0dbc",
+    "BusyLean/MetaReflectionFacts.lean": "8f30eee48c3341176f2b723dd181a7cc650acaa4",
+    "BusyLean/HyperReflection.lean": "ddf41c81a859fd24e277410bb2086d59a27e5688",
+    "BusyLean/HyperReflectionFacts.lean": "3d3d24bd71dffbae3a90e1ddb8037e088f3134a9",
+    "BusyLean/Contender19.lean": "5a98a9ca0c80d0363d973f8f9f45f94e566383c7",
+    "BusyLean/Comparison19.lean": "791debcb25ad903b54e42f0b56a8d9b4eb8aa09f"
+  },
+  "notes": [
+    "Contender 19 is the accepted baseline in the audited README.",
+    "The package does not alter or rely on unreviewed archives under incoming/.",
+    "The baseline metadata was collected through the authenticated GitHub connector."
+  ]
+}
