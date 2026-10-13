@@ -547,6 +547,7 @@ theorem tappCong_sound {k : (Kind α)} {A B C : (Ty α)} {sA sB : Option (Ty α)
       | none => cases h
       | some B' => cases h; exact TStep.appR _ _ (hB B' rfl)
 
+omit [DecidableEq α] in
 theorem tappStep_sound {k : (Kind α)} {A B C : (Ty α)} {sA sB : Option (Ty α)}
     (hA : ∀ A', sA = some A' → TStep A A') (hB : ∀ B', sB = some B' → TStep B B')
     (h : tappStep k A B sA sB = some C) : TStep (app k A B) C := by
@@ -710,8 +711,8 @@ def inferKind : List (Kind α) → (Ty α) → Option (Kind α)
       | some .dyn => if k.dynFree = true then some k else none
       | _ => none
 
-/-- The kind-inference cases that only check a `★` result. -/
 omit [DecidableEq α] in
+/-- The kind-inference cases that only check a `★` result. -/
 theorem star_of_match {o : Option (Kind α)} {k : (Kind α)}
     (h : (match o with
       | some .star => some Kind.star
