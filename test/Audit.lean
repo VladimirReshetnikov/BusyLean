@@ -65,6 +65,11 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.contender_6_lt_contender_7
 #print axioms BusyLean.fvalue_lt_contender_7
 #print axioms BusyLean.F.sn_of_typed
+#print axioms BusyLean.contender_8
+#print axioms BusyLean.contender_7_lt_contender_8
+#print axioms BusyLean.fvalue_lt_contender_8
+#print axioms BusyLean.Fw.sn_of_typed
+#print axioms BusyLean.Fw.infer_sound
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -82,11 +87,18 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #assert_not_in_closure BusyLean.contender_7 :
   BusyLean.contender_6 BusyLean.contender_5 BigNumber.contender_6
 
+-- Contender 8's definition uses System F-omega normalization and Contender 7's
+-- family as its oracle, but never the constant `contender_7` itself.
+#assert_not_in_closure BusyLean.contender_8 :
+  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
 #check @BusyLean.contender_6_lt_contender_7
 #check @BusyLean.F.sn_of_typed
+#check @BusyLean.contender_7_lt_contender_8
+#check @BusyLean.Fw.sn_of_typed
 
 -- The final family is a genuine computable function (only input 0 is feasible).
 #eval BusyLean.finalFamily 0

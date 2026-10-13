@@ -6,3 +6,5 @@ import BusyLean.Contender6
 import BusyLean.Comparison
 import BusyLean.Contender7
 import BusyLean.Comparison7
+import BusyLean.Contender8
+import BusyLean.Comparison8

@@ -6,10 +6,10 @@ Usage (from the repository root):  python3 scripts/check.py
 Two timed phases, both from a clean build directory (the Lean core library is
 precompiled, as the rules allow):
 
-1. definitions: `lake build BusyLean.Contender7`, which checks the definition
-   of the current contender and everything it imports (Contender 6's
-   definitions, P5's definitions, and the System F normalization proof that the
-   definition of `fvalue` needs); budget 15 s;
+1. definitions: `lake build BusyLean.Contender8`, which checks the definition
+   of the current contender and everything it imports (the earlier contenders'
+   definitions, P5's definitions, and the System F / F-omega normalization
+   proofs that the definitions of the program values need); budget 15 s;
 2. proofs: the remaining modules (the Contender 5 port, the port-agreement
    proof, all comparison theorems); budget 60 s.
 
@@ -39,7 +39,7 @@ def main():
     for d in BUILD_DIRS:
         shutil.rmtree(d, ignore_errors=True)
 
-    for label, target, budget in [("definitions", ["BusyLean.Contender7"], DEFINITION_BUDGET),
+    for label, target, budget in [("definitions", ["BusyLean.Contender8"], DEFINITION_BUDGET),
                                   ("proofs", [], PROOF_BUDGET)]:
         start = time.monotonic()
         build = run(["build", *target])
