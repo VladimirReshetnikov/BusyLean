@@ -129,6 +129,7 @@ Contender~47 iterates that self-based iteration itself.
 Contender~48 indexes such iteration levels by a tree.
 Contender~49 reads its final tree with impredicative programs instead of a
 fixed hierarchy.
+Contender~50 reads it with numeric ladder programs.
 \end{abstract}
 
 \tableofcontents
@@ -1975,6 +1976,28 @@ reflection), \lean{family48\_lt\_F49} and
 1.0\,s and the proofs in 3.6\,s.
 
 %======================================================================
+\section{Contender 50: ladder reflection over the tree}
+
+Contender~49 read its tree with System~FT2 programs. The ladder language is
+stronger: it has dynamic kinds and a universe for every named atom. A ladder
+program of the \emph{numeric reader type}
+\[
+\forall X.\ \bigl(\forall Y.\ Y\to(Y\to Y)\to((\mathsf{nat}\to Y)\to Y)\to X\to Y\bigr)\to X\to\mathsf{nat}
+\]
+is applied, after erasure, to the FT2 recursor and the oracle tree. Adequacy
+with $X$ set to the tree candidate puts the result in the interpretation of
+$\mathsf{nat}$, so it is strongly normalizing (\lean{FLT2.sn\_of\_natReaderTy}),
+and its normal form is read off as a numeral (\lean{FLT2.readNat}). The
+reflection $L^{g,T}(m)$ exceeds Contender~49's reflection and every such
+program of depth $\le m$ over $\mathrm{Addr}(T)$, and
+\[
+F_{50}(n)=h^{L^{\mathrm{family}_{49},T}}_{T}(N),\qquad N=\mathrm{family}_{49}(n),\ T=\mathrm{levelIterTree}(N).
+\]
+Proved: \lean{readNat\_lt\_ladderReflect}, \lean{family49\_lt\_F50} and
+\lean{contender\_49\_lt\_\allowbreak contender\_50}. The definitions check in
+3.2\,s and the proofs in 2.3\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -2058,6 +2081,7 @@ Contender & idea & informal size\\
 47 (Lean) & the self-based iteration, iterated along a tree & $h_{\mathrm{psiTree}}$ over $F_{46}$\\
 48 (Lean) & tree-indexed hierarchy of iteration levels & $h_{\mathrm{levelIterTree}}$ over $F_{47}$\\
 49 (Lean) & FT2 programs of type nat reading the tree, as the hierarchy's base & $h_T$ over FT2 reflection on $T$\\
+50 (Lean) & numeric ladder reader programs as the hierarchy's base & $h_T$ over ladder reflection on $T$\\
 \bottomrule
 \end{tabular}
 \end{center}
