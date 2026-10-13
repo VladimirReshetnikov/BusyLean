@@ -130,6 +130,8 @@ Contender~48 indexes such iteration levels by a tree.
 Contender~49 reads its final tree with impredicative programs instead of a
 fixed hierarchy.
 Contender~50 reads it with numeric ladder programs.
+Contender~51 makes the iteration operators primitives of a language over
+trees.
 \end{abstract}
 
 \tableofcontents
@@ -1998,6 +2000,28 @@ Proved: \lean{readNat\_lt\_ladderReflect}, \lean{family49\_lt\_F50} and
 3.2\,s and the proofs in 2.3\,s.
 
 %======================================================================
+\section{Contender 51: programs over the iteration operators}
+
+Contenders~45--48 apply the iteration operators along trees chosen from
+outside. \lean{PrimLanguage.lean} generalizes System~T over trees to an arbitrary
+typed environment of primitives: terms refer to primitives by index, and the
+interpreter is still structural recursion on typed terms. Contender~51's
+primitives are the seed tree (Contender~48's tree), the meta-jump, the
+universe-collapsing closure, and the iteration operators
+\[
+\Theta:\Phi,\qquad \mathrm{iterOf}:\Phi\to\Phi,\qquad
+\Phi=(\mathsf{tree}\to\mathsf{tree})\to\mathsf{tree}\to\mathsf{tree}\to\mathsf{tree}.
+\]
+The level hierarchy of Contender~48 is then a program,
+$\mathrm{iterLevel}=\mathsf{treeRec}\ \Theta\ \mathrm{iterOf}\ (\text{pointwise limit})$,
+which programs can apply at levels, heights and arguments they compute
+themselves, nested and diagonalized at higher types. The tree joins all closed
+tree programs of every size, and the number is read off by Contender~50's
+ladder reflection along it. Proved: \lean{family50\_lt\_F51} and
+\lean{contender\_50\_lt\_\allowbreak contender\_51}. The definitions check in
+3.9\,s and the proofs in 3.3\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2091,6 +2115,7 @@ Contender & idea & informal size\\
 48 (Lean) & tree-indexed hierarchy of iteration levels & $h_{\mathrm{levelIterTree}}$ over $F_{47}$\\
 49 (Lean) & FT2 programs of type nat reading the tree, as the hierarchy's base & $h_T$ over FT2 reflection on $T$\\
 50 (Lean) & numeric ladder reader programs as the hierarchy's base & $h_T$ over ladder reflection on $T$\\
+51 (Lean) & System T over trees with the iteration operators as primitives & ladder reflection along the program tree\\
 \bottomrule
 \end{tabular}
 \end{center}

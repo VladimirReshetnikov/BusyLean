@@ -9,7 +9,36 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 50
+## Current contender: Contender 51
+
+```lean
+def prims51 : List TL.Ty :=                                   -- BusyLean/Contender51.lean
+  [.tree, .arr .tree .tree, .arr (.arr .tree .tree) (.arr .tree .tree), phiTy, .arr phiTy phiTy]
+def primEnv51 (N : Nat) : TL.Env prims51 :=
+  (levelIterTree N, metaJump N, closeU N, thetaFrom N, iterOf, ())
+def primTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then levelIterTree N else primLangTree prims51 (primEnv51 N)
+def family50 (n : Nat) : Nat := F50 (F50 n)                  -- Contender 50 = family50 42
+def F51 (n : Nat) : Nat :=
+  hier (ladderReflect family50 (primTree (family50 n))) (primTree (family50 n)) (family50 n)
+def contender_51 : Nat := F51 (F51 42)
+
+theorem contender_50_lt_contender_51 : contender_50 < contender_51   -- BusyLean/Comparison51.lean
+```
+
+[`Ordinal/PrimLanguage.lean`](BusyLean/Ordinal/PrimLanguage.lean) is System T
+over trees with an arbitrary typed environment of primitives. Contender 51's
+primitives are Contender 48's tree, the meta-jump, the universe-collapsing
+closure, `thetaFrom`, and `iterOf`. So Contender 48's level hierarchy is a
+program, applied at levels and heights that programs compute. All closed tree
+programs of every size form the tree, read by Contender 50's ladder reflection.
+
+| Theorem | Statement |
+|---|---|
+| `contender_50_lt_contender_51` | Contender 50 < Contender 51 |
+| `family50_lt_F51` | Contender 50's family is beaten at every input |
+
+## Contender 50
 
 ```lean
 def ladderReflect (g : Nat → Nat) (T : CTree) (m : Nat) : Nat := -- BusyLean/Contender50.lean
@@ -1319,8 +1348,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 50's definition modules take
-about 3.2 s and its proofs about 2.3 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 51's definition modules take
+about 3.9 s and its proofs about 3.3 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1394,6 +1423,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender48.lean`](BusyLean/Contender48.lean), [`Comparison48.lean`](BusyLean/Comparison48.lean) | Contender 48 definitions and theorems |
 | [`BusyLean/Contender49.lean`](BusyLean/Contender49.lean), [`Comparison49.lean`](BusyLean/Comparison49.lean) | Contender 49 definitions and theorems |
 | [`BusyLean/Contender50.lean`](BusyLean/Contender50.lean), [`Comparison50.lean`](BusyLean/Comparison50.lean) | Contender 50 definitions and theorems |
+| [`BusyLean/Contender51.lean`](BusyLean/Contender51.lean), [`Comparison51.lean`](BusyLean/Comparison51.lean) | Contender 51 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1451,6 +1481,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 48 | Lean | this repository | Veblen-style hierarchy of iteration levels indexed by a tree |
 | 49 | Lean | this repository | System FT2 programs of type nat reading the tree, as the base of the hierarchy along it |
 | 50 | Lean | this repository | numeric ladder reader programs (SystemFLT2) as the base of the hierarchy along the tree |
+| 51 | Lean | this repository | System T over trees with the iteration operators as primitives |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
