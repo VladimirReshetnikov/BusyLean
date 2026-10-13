@@ -401,3 +401,52 @@ and therefore below this repository's Contender 14 (the ladder language). It
 is far below the current Contender 20. Nothing new is adopted: the
 self-height parameter is the same diagonal device Contender 15 uses for its
 rank.
+
+# Late arrival: P22
+
+`BusyLean_Contender20_WRanked_Hyperreflection.zip` proposes a "Contender 20"
+over Contender 19 (base commit `64d31a0`). It arrived after this repository's
+Contenders 20–22.
+
+## Build and audit
+
+Overlaid on a scratch worktree at `64d31a0` and built with Lean 4.34.0, with
+the reviewer's own audit:
+
+| | Author's status | Definitions | Proofs | Axioms (`contender_20`, comparison, every new constant) |
+|---|---|---|---|---|
+| P22 | CI-validated | compile, 2.9 s | **compile**, 1.2 s | `propext, Quot.sound` |
+
+The closure of its `contender_20` (4,186 constants) avoids `contender_5` …
+`contender_19`.
+
+## What it builds
+
+It generalizes P17's rank hierarchy of lifts from natural-number ranks to
+**well-founded W-tree ranks**:
+
+```lean
+def wDiagonalLift (schedule : WTree Nat) : WTree Nat → TransformerLift
+  | .leaf => liftTransformer
+  | .node f =>
+      let lower := spliceLifts (fun i => wDiagonalLift schedule (f i))
+      fun base => stageLift lower (lower base) schedule
+```
+
+At a node, the lifts of all children are spliced into one lift. That lift both
+pre-amplifies the base and serves as the local lift along the schedule. The
+rank tree is an autonomous notation above the schedule
+(`realize (hyper (family19 n + 42) (encode (schedule20 n)))`), so the rank is a
+large countable ordinal rather than `ω`. Over Contender 19's large-Veblen
+ladder this gives about |FL_LVO|·(lift hierarchy of transfinite rank).
+
+## Comparison and adoption
+
+It proves `contender_19 < contender_20` for its own number. It keeps
+Contender 19's language, so by the base-language heuristic it is below this
+repository's Contender 20 (the Bachmann–Howard ladder) and its successors.
+
+The transfinite rank is a genuine improvement of the amplifier, and it composes
+with any ladder. **Adopted** in Contender 23: `TreeHyperReflection` and its
+facts are taken unchanged, with attribution, and applied to Contender 22's
+tower ladders.
