@@ -62,3 +62,6 @@ import BusyLean.Ordinal.TreeAddress
 import BusyLean.Ordinal.TreeCollapse
 import BusyLean.Contender25
 import BusyLean.Comparison25
+import BusyLean.Ordinal.TreeLevels
+import BusyLean.Contender26
+import BusyLean.Comparison26
