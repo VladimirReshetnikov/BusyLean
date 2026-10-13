@@ -155,6 +155,7 @@ hierarchies themselves.
 Contender~67 raises the closing operator itself along a tree.
 Contender~68 makes that tower's step a value.
 Contender~69 raises the step language's own closure operator along a tree.
+Contender~70 repeats this reflection cycle $N$ times.
 \end{abstract}
 
 \tableofcontents
@@ -2421,6 +2422,26 @@ good closure pair for every family. Proved: \lean{family68\_lt\_F69} and
 2.6\,s and the proofs in 4.5\,s.
 
 %======================================================================
+\section{Contender 70: the reflection cycle repeated}
+
+Contenders~67 and~68 form a cycle. First a language's closure operator is
+raised along a tree (\lean{cwTowerP}). Then that tower's step and the tower
+itself become values, which gives a stronger language. Contender~69 started the
+cycle again. Contender~70 repeats it $N$ times:
+\[
+P^R_0=P_{66},\qquad
+P^R_{k+1}=\mathsf{cwStep}_{k}::\mathsf{cwAt}_{k}::P^R_k,
+\]
+where $\mathsf{cwStep}_k$ and $\mathsf{cwAt}_k$ are the step and the tower of the
+reflective tower over the level-$k$ language. The first cycle reproduces
+Contender~68's language. The reflective tower over the top language runs along
+Contender~69's tree to build a tree $T$, then along $T$ for the number closure:
+$F_{70}(n)=h^{cw^{P^R_N}_T(\cdot).2(\mathrm{family}_{69})}_T(N)$ with
+$N=\mathrm{family}_{69}(n)$. Proved: \lean{good\_cycleTower},
+\lean{family69\_lt\_F70} and \lean{contender\_69\_lt\_\allowbreak contender\_70}.
+The definitions check in 1.6\,s and the proofs in 4.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2533,6 +2554,7 @@ Contender & idea & informal size\\
 67 (Lean) & reflective tower of closure-with-family operators & $h_T$ over $cw_T$\\
 68 (Lean) & the reflective tower's step and the tower as values & $h_T$ over the language's closure\\
 69 (Lean) & reflective tower over the step language & $h_T$ over $cw^{P_{68}}_T$\\
+70 (Lean) & the reflection cycle of 67--68 repeated $N$ times & $h_T$ over the top reflective tower\\
 \bottomrule
 \end{tabular}
 \end{center}

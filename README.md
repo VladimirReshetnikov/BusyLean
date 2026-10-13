@@ -9,7 +9,37 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 69
+## Current contender: Contender 70
+
+```lean
+def primsR : Nat → List PTL2.Ty                                -- BusyLean/Contender70.lean
+  | 0 => prims66
+  | k + 1 => .arr cwTy cwTy :: .arr .tree cwTy :: primsR k
+def envR (N : Nat) (g : Nat → Nat) : (k : Nat) → PTL2.Env (primsR k)
+  | 0 => primEnv66 N g
+  | k + 1 => (cwStepP (primsR k) (envR N g k), cwTowerP (primsR k) (envR N g k), envR N g k)
+def cycleTower (N : Nat) (g : Nat → Nat) (T : CTree) : Closures :=
+  cwTowerP (primsR N) (envR N g N) T (const61 N g)
+def family69 (n : Nat) : Nat := F69 (F69 n)                  -- Contender 69 = family69 42
+def F70 (n : Nat) : Nat :=
+  hier (cycleClosure (family69 n) family69 (cycleTree (family69 n))) (cycleTree (family69 n)) (family69 n)
+def contender_70 : Nat := F70 (F70 42)
+
+theorem contender_69_lt_contender_70 : contender_69 < contender_70   -- BusyLean/Comparison70.lean
+```
+
+The cycle of Contenders 67–68 (raise a language's closure operator along a
+tree, then add that tower's step and the tower as values) is **repeated `N`
+times**. The reflective tower over the top language gives the tree and the
+number closure.
+
+| Theorem | Statement |
+|---|---|
+| `contender_69_lt_contender_70` | Contender 69 < Contender 70 |
+| `family69_lt_F70` | Contender 69's family is beaten at every input |
+| `good_cycleTower` | the top reflective tower is a good closure pair |
+
+## Contender 69
 
 ```lean
 def cwTowerP (P : List PTL2.Ty) (σ : PTL2.Env P) : CTree → (CTree → Closures) → Closures
@@ -1855,8 +1885,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 69's definition modules take
-about 2.6 s and its proofs about 4.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 70's definition modules take
+about 1.6 s and its proofs about 4.9 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1949,6 +1979,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender67.lean`](BusyLean/Contender67.lean), [`Comparison67.lean`](BusyLean/Comparison67.lean) | Contender 67 definitions and theorems |
 | [`BusyLean/Contender68.lean`](BusyLean/Contender68.lean), [`Comparison68.lean`](BusyLean/Comparison68.lean) | Contender 68 definitions and theorems |
 | [`BusyLean/Contender69.lean`](BusyLean/Contender69.lean), [`Comparison69.lean`](BusyLean/Comparison69.lean) | Contender 69 definitions and theorems |
+| [`BusyLean/Contender70.lean`](BusyLean/Contender70.lean), [`Comparison70.lean`](BusyLean/Comparison70.lean) | Contender 70 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -2025,6 +2056,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 67 | Lean | this repository | a reflective tower of closure-with-family operators along a tree |
 | 68 | Lean | this repository | the reflective tower's step and the tower as values of the language |
 | 69 | Lean | this repository | the reflective tower of closure operators over Contender 68's language |
+| 70 | Lean | this repository | the reflection cycle of Contenders 67–68 repeated N times |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
