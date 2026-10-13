@@ -9,7 +9,37 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 51
+## Current contender: Contender 52
+
+```lean
+def ptlStack (P : List TL.Ty) (σ : TL.Env P) : CTree → (CTree → CTree) → CTree → CTree
+  | .zero => ptlLift P σ                                      -- BusyLean/Ordinal/PrimLanguage.lean
+  | .succ a => ptlLift (liftTy :: P) (ptlStack P σ a, σ)
+  | .lim f => fun b t => .lim fun i => ptlStack P σ (f i) b t
+  | _ => ptlLift P σ
+def family51 (n : Nat) : Nat := F51 (F51 n)                  -- Contender 51 = family51 42
+def stackTree (N : Nat) : CTree :=                            -- BusyLean/Contender52.lean
+  .lim fun i => if i = 0 then primTree N
+    else ptlStack prims51 (primEnv51 N) (primTree N) (metaJump N) (primTree N)
+def F52 (n : Nat) : Nat :=
+  hier (ladderReflect family51 (stackTree (family51 n))) (stackTree (family51 n)) (family51 n)
+def contender_52 : Nat := F52 (F52 42)
+
+theorem contender_51_lt_contender_52 : contender_51 < contender_52   -- BusyLean/Comparison52.lean
+```
+
+`ptlLift P σ b` closes an operator `b` under every program over the primitives
+`P` plus `b`. `ptlStack` stacks these languages along a tree, each successor
+level adding the previous level's closure as a primitive `lift`. Contender 52
+stacks Contender 51's languages over the iteration operators to the height of
+Contender 51's tree.
+
+| Theorem | Statement |
+|---|---|
+| `contender_51_lt_contender_52` | Contender 51 < Contender 52 |
+| `family51_lt_F52` | Contender 51's family is beaten at every input |
+
+## Contender 51
 
 ```lean
 def prims51 : List TL.Ty :=                                   -- BusyLean/Contender51.lean
@@ -1348,8 +1378,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 51's definition modules take
-about 3.9 s and its proofs about 3.3 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 52's definition modules take
+about 1.7 s and its proofs about 2.7 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1424,6 +1454,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender49.lean`](BusyLean/Contender49.lean), [`Comparison49.lean`](BusyLean/Comparison49.lean) | Contender 49 definitions and theorems |
 | [`BusyLean/Contender50.lean`](BusyLean/Contender50.lean), [`Comparison50.lean`](BusyLean/Comparison50.lean) | Contender 50 definitions and theorems |
 | [`BusyLean/Contender51.lean`](BusyLean/Contender51.lean), [`Comparison51.lean`](BusyLean/Comparison51.lean) | Contender 51 definitions and theorems |
+| [`BusyLean/Contender52.lean`](BusyLean/Contender52.lean), [`Comparison52.lean`](BusyLean/Comparison52.lean) | Contender 52 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1482,6 +1513,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 49 | Lean | this repository | System FT2 programs of type nat reading the tree, as the base of the hierarchy along it |
 | 50 | Lean | this repository | numeric ladder reader programs (SystemFLT2) as the base of the hierarchy along the tree |
 | 51 | Lean | this repository | System T over trees with the iteration operators as primitives |
+| 52 | Lean | this repository | the languages over the iteration operators, stacked along a tree with first-class closure |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see

@@ -132,6 +132,7 @@ fixed hierarchy.
 Contender~50 reads it with numeric ladder programs.
 Contender~51 makes the iteration operators primitives of a language over
 trees.
+Contender~52 stacks those languages along a tree.
 \end{abstract}
 
 \tableofcontents
@@ -2022,6 +2023,24 @@ ladder reflection along it. Proved: \lean{family50\_lt\_F51} and
 3.9\,s and the proofs in 3.3\,s.
 
 %======================================================================
+\section{Contender 52: languages over the iteration operators, stacked}
+
+Contender~51's language is itself a closure operator:
+$\mathrm{ptlLift}_{P,\sigma}(b)(t)$ applies every closed
+$\mathsf{tree}\to\mathsf{tree}$ program over the primitives $P$ plus $b$ to $t$.
+\lean{ptlStack} stacks these languages along a tree, as P27 did for System~T
+over a single primitive. Each successor level adds the previous level's
+closure as a first-class primitive
+$\mathsf{lift}:(\mathsf{tree}\to\mathsf{tree})\to\mathsf{tree}\to\mathsf{tree}$,
+and limits are pointwise. With Contender~51's primitives (the seed, the
+meta-jump, the universe-collapsing closure and the iteration operators), the
+stack runs to the height of Contender~51's tree over the meta-jump:
+$F_{52}(n)=h^{L^{\mathrm{family}_{51},T}}_T(N)$ with $N=\mathrm{family}_{51}(n)$ and
+$T=\mathrm{stackTree}(N)$. Proved: \lean{family51\_lt\_F52} and
+\lean{contender\_51\_lt\_\allowbreak contender\_52}. The definitions check in
+1.7\,s and the proofs in 2.7\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2116,6 +2135,7 @@ Contender & idea & informal size\\
 49 (Lean) & FT2 programs of type nat reading the tree, as the hierarchy's base & $h_T$ over FT2 reflection on $T$\\
 50 (Lean) & numeric ladder reader programs as the hierarchy's base & $h_T$ over ladder reflection on $T$\\
 51 (Lean) & System T over trees with the iteration operators as primitives & ladder reflection along the program tree\\
+52 (Lean) & the languages of Contender 51 stacked along a tree & ladder reflection along the stacked tree\\
 \bottomrule
 \end{tabular}
 \end{center}
