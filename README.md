@@ -9,7 +9,33 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 23
+## Current contender: Contender 24
+
+```lean
+def family23 (n : Nat) : Nat := F23 (F23 n)                  -- Contender 23 = family23 42
+def F24 (n : Nat) : Nat :=                                   -- BusyLean/Contender24.lean
+  wDiagonalLift (schedule24 n) (rank24 n) rTransformer (fun _ => family23) n n
+def contender_24 : Nat := F24 (F24 42)
+
+theorem contender_23_lt_contender_24 : contender_23 < contender_24   -- BusyLean/Comparison24.lean
+```
+
+Contender 22's tower of relativized Buchholz systems now runs along **any
+well-founded index** ([`Ordinal/TowerAlong.lean`](BusyLean/Ordinal/TowerAlong.lean)).
+The stage at `j` collapses over the union of all stages below `j`, and the union
+of all stages is again a well-founded order. So it indexes the next round:
+`roundTower (k+1) = limitAlong (roundTower k)`. Input `n` uses the ladder over
+`roundTower n`, with Contender 23's W-ranked amplifier. Heuristically the rounds
+climb the fixed points of `x ↦ ψ₀(Ω_ω·x)`.
+
+| Theorem | Statement |
+|---|---|
+| `Ordinal.roundTower_wf` | every round is well-founded |
+| `contender_23_lt_contender_24` | Contender 23 < Contender 24 |
+| `family23_lt_F24` | Contender 23's family is beaten at every input |
+| `rvalue_lt_F24` | every program of depth ≤ `n` over the atoms of `roundTower n` is below `F24 n` |
+
+## Contender 23
 
 ```lean
 def family22 (n : Nat) : Nat := F22 (F22 n)                  -- Contender 22 = family22 42
@@ -601,8 +627,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 23's definition modules take
-about 3 s and its proofs about 4 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 24's definition modules take
+about 2.5 s and its proofs about 2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -645,6 +671,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender22.lean`](BusyLean/Contender22.lean), [`Comparison22.lean`](BusyLean/Comparison22.lean) | Contender 22 definitions and theorems |
 | [`BusyLean/TreeHyperReflection.lean`](BusyLean/TreeHyperReflection.lean), [`TreeHyperReflectionFacts.lean`](BusyLean/TreeHyperReflectionFacts.lean) | W-tree-ranked lift hierarchy (adopted from P22) |
 | [`BusyLean/Contender23.lean`](BusyLean/Contender23.lean), [`Comparison23.lean`](BusyLean/Comparison23.lean) | Contender 23 definitions and theorems |
+| [`BusyLean/Contender24.lean`](BusyLean/Contender24.lean), [`Comparison24.lean`](BusyLean/Comparison24.lean) | Contender 24 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-two reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -675,6 +702,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 21 | Lean | this repository | Buchholz ladders with level bound `n` at input `n`, lengths up to `ψ₀(Ω_ω)` |
 | 22 | Lean | this repository | ladders over a tower of Buchholz notations relativized to well-founded bases |
 | 23 | Lean | this repository | 22 with P22's transfinite (W-tree) rank for the lift hierarchy |
+| 24 | Lean | this repository | towers along well-founded indices, each round indexed by the previous one |
 
 Proposals P1–P22 (four batches and two late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

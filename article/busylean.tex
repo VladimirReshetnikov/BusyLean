@@ -90,7 +90,8 @@ into a downward induction over relativized scopes. It then diagonalizes over the
 bound, so ladder lengths climb to Buchholz's ordinal $\psi_0(\Omega_\omega)$.
 Contender~22 relativizes the bounded systems to a well-founded base and
 iterates, which goes beyond $\psi_0(\Omega_\omega)$. Contender~23 adds a
-proposal's transfinite-rank hierarchy of lifts.
+proposal's transfinite-rank hierarchy of lifts, and Contender~24 iterates the
+towers along well-founded indices, each round indexed by the previous one.
 \end{abstract}
 
 \tableofcontents
@@ -1159,6 +1160,41 @@ Proved: \lean{contender\_22\_lt\_\allowbreak contender\_23},
 2.6\,s and the proofs in 3.9\,s.
 
 %======================================================================
+\section{Contender 24: towers along well-founded indices}
+
+Contender~22's tower iterates ``all level-bounded systems over the previous
+stage'' along $\mathbb N$. Nothing forces the index to be $\mathbb N$.
+\lean{TowerAlong.lean} builds the tower along any well-founded index $J$:
+\begin{lstlisting}
+def towerAlong (J : WFO) (j : J.T) : WFO :=
+  (sigma (sub J j) (fun i => towerAlong J i.1)).next   -- over all stages below j
+termination_by j
+def limitAlong (J : WFO) : WFO := sigma J (towerAlong J)
+def roundTower : ℕ → WFO
+  | 0 => tower 1
+  | k + 1 => (roundTower k).limitAlong                  -- indexed by the last round
+\end{lstlisting}
+\lean{sigma J F} is the union of a family of orders, ordered by index first.
+Its decidable equality, transitivity and well-foundedness (induction on the
+index, then on the element) are proved once and for all. The stage at $j$ is
+heuristically of order type $\psi_0(\Omega_\omega\cdot(j+1))$. Since each
+round is indexed by the previous one, the rounds climb the fixed points of
+$x\mapsto\psi_0(\Omega_\omega\cdot x)$.
+
+One implementation point. \lean{WellFounded.fix} producing \emph{data}, here
+records with order functions and enumerations, would need
+\lean{noncomputable}, which the rules forbid. Recursion via
+\lean{termination\_by}, with a high-priority \lean{WellFoundedRelation}
+instance built from $J$'s well-foundedness, compiles normally. The smoke test
+computes 165 atoms of \lean{roundTower 1} at depth~2 and runs a pack/unpack
+program between two of them.
+
+Input $n$ uses the ladder over \lean{roundTower n}, with Contender~23's W-ranked
+lift hierarchy seeded with Contender~23's family. Proved:
+\lean{contender\_23\_lt\_\allowbreak contender\_24}, \lean{family23\_lt\_F24} and
+\lean{rvalue\_lt\_F24}. The definitions check in 2.5\,s and the proofs in 2.2\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1207,6 +1243,7 @@ Contender & idea & informal size\\
 21 (Lean) & 15 over Buchholz ladders, level bound $n$ at input $n$ & lengths up to $\psi_0(\Omega_\omega)$\\
 22 (Lean) & 15 over a tower of relativized Buchholz notations & beyond $\psi_0(\Omega_\omega)$\\
 23 (Lean) & 22 with P22's W-ranked lift hierarchy & transfinite rank over 22\\
+24 (Lean) & towers along well-founded indices, self-indexed rounds & fixed points of $x\mapsto\psi_0(\Omega_\omega x)$\\
 \bottomrule
 \end{tabular}
 \end{center}
