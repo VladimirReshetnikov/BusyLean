@@ -186,6 +186,12 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.contender_33_lt_contender_34
 #print axioms BusyLean.tsvalue_lt_F34
 #print axioms BusyLean.Ordinal.treeStackedTree
+#print axioms BusyLean.contender_35
+#print axioms BusyLean.contender_34_lt_contender_35
+#print axioms BusyLean.ftvalue_lt_F35
+#print axioms BusyLean.ftTree
+#print axioms BusyLean.FT.wt_of_typed
+#print axioms BusyLean.FT.toTree
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -411,6 +417,23 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
   BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_35 :
+  BusyLean.contender_34
+  BusyLean.contender_33
+  BusyLean.contender_32
+  BusyLean.contender_31
+  BusyLean.contender_30
+  BusyLean.contender_29
+  BusyLean.contender_28
+  BusyLean.contender_27
+  BusyLean.contender_26
+  BusyLean.contender_25 BusyLean.contender_24 BusyLean.contender_23 BusyLean.contender_22
+  BusyLean.contender_21 BusyLean.contender_20 BusyLean.contender_19 BusyLean.contender_18
+  BusyLean.contender_17 BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
+  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11 BusyLean.contender_10
+  BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
+  BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -446,6 +469,8 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_31_lt_contender_32
 #check @BusyLean.contender_32_lt_contender_33
 #check @BusyLean.contender_33_lt_contender_34
+#check @BusyLean.contender_34_lt_contender_35
+#check @BusyLean.FT.wt_of_typed
 #check @BusyLean.Ordinal.addr_wf
 #check @BusyLean.Ordinal.roundTower_wf
 #check @BusyLean.Ordinal.tower_wf
