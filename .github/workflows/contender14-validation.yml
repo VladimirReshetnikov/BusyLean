@@ -57,17 +57,17 @@ jobs:
           rc=0
           run_one () {
             local label="$1"
-            local file="$2"
-            echo "===== ${label}: ${file} =====" | tee "validation/${label}.log"
+            shift
+            echo "===== ${label}: $* =====" | tee "validation/${label}.log"
             /usr/bin/time -f $'elapsed_seconds=%e\nuser_seconds=%U\nsystem_seconds=%S\nmax_rss_kb=%M' \
-              lake env lean "$file" >> "validation/${label}.log" 2>&1
+              "$@" >> "validation/${label}.log" 2>&1
             local status=$?
             echo "exit_status=${status}" | tee -a "validation/${label}.log"
             if [ "$status" -ne 0 ]; then rc=1; fi
           }
-          run_one definition BusyLean/Contender14.lean
-          run_one comparison BusyLean/Comparison14.lean
-          run_one audit test/Contender14Audit.lean
+          run_one definition lake build BusyLean.Contender14
+          run_one comparison lake build BusyLean.Comparison14
+          run_one audit lake env lean test/Contender14Audit.lean
           exit "$rc"
 
       - name: Upload validation bundle
