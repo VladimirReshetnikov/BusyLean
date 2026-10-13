@@ -1,0 +1,70 @@
+name: Research Contender 52
+
+on:
+  push:
+    branches:
+      - research/contender52-first-class-universes-20261013
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build-args: BusyLean.Comparison52
+
+      - name: Clean timed build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verification-ci
+          rm -rf .lake/build
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/previous.time \
+              lake build BusyLean.Comparison51
+          } 2>&1 | tee verification-ci/previous-build.log
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/definitions.time \
+              lake build BusyLean.Contender52
+          } 2>&1 | tee verification-ci/definitions-build.log
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/proofs.time \
+              lake build BusyLean.Comparison52
+          } 2>&1 | tee verification-ci/proofs-build.log
+          cat verification-ci/*.time | tee verification-ci/timings.txt
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def seconds(name: str) -> float:
+              text = Path('verification-ci', name).read_text().strip()
+              return float(text.split('=', 1)[1])
+
+          definitions = seconds('definitions.time')
+          proofs = seconds('proofs.time')
+          assert definitions <= 30.0, f'definition budget exceeded: {definitions}'
+          assert proofs <= 60.0, f'proof budget exceeded: {proofs}'
+          PY
+          printf 'baseline_commit=b6c05bb5f387f8937654b55e6315b2bc2338f6f8\n' \
+            > verification-ci/context.txt
+          printf 'branch_head=%s\n' "$GITHUB_SHA" >> verification-ci/context.txt
+          printf 'lean_toolchain=' >> verification-ci/context.txt
+          cat lean-toolchain >> verification-ci/context.txt
+
+      - name: Universe-language smoke tests
+        run: |
+          lake env lean test/UniverseLanguageSmoke52.lean \
+            2>&1 | tee verification-ci/smoke.log
+
+      - name: Axiom and dependency audit
+        run: |
+          lake env lean test/Contender52Audit.lean \
+            2>&1 | tee verification-ci/audit.log
+
+      - name: Upload verification record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender52-verification
+          path: verification-ci
