@@ -133,6 +133,8 @@ Contender~50 reads it with numeric ladder programs.
 Contender~51 makes the iteration operators primitives of a language over
 trees.
 Contender~52 stacks those languages along a tree.
+Contender~53 iterates the reflection along the tree, each level an oracle of
+the next.
 \end{abstract}
 
 \tableofcontents
@@ -2041,6 +2043,25 @@ $T=\mathrm{stackTree}(N)$. Proved: \lean{family51\_lt\_F52} and
 1.7\,s and the proofs in 2.7\,s.
 
 %======================================================================
+\section{Contender 53: reflection iterated along the tree}
+
+Contenders~49--52 read the final tree with one reflection, whose programs
+recurse over the tree with a fixed number oracle. Contender~53 iterates the
+reflection along the tree itself:
+\[
+\rho_0=g,\qquad \rho_{a+1}=L^{\rho_a,T},\qquad \rho_{\lim f}(m)=\max_{i\le m}\rho_{f\,i}(m).
+\]
+At a successor level, every FT2 and ladder program reading $T$ may call the
+previous level as its number oracle. So each level closes the previous one
+under all programs over $T$. This is hyperreflection (Contenders~17 and~23)
+along the giant tree. \lean{le\_reflAlong} shows that every level dominates
+the base and the argument, and
+$F_{53}(n)=h^{\rho_T}_T(N)$ with $g=\mathrm{family}_{52}$,
+$N=\mathrm{family}_{52}(n)$ and $T=\mathrm{stackTree}(N)$. Proved:
+\lean{family52\_lt\_F53} and \lean{contender\_52\_lt\_\allowbreak contender\_53}.
+The definitions check in 1.6\,s and the proofs in 4.7\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2136,6 +2157,7 @@ Contender & idea & informal size\\
 50 (Lean) & numeric ladder reader programs as the hierarchy's base & $h_T$ over ladder reflection on $T$\\
 51 (Lean) & System T over trees with the iteration operators as primitives & ladder reflection along the program tree\\
 52 (Lean) & the languages of Contender 51 stacked along a tree & ladder reflection along the stacked tree\\
+53 (Lean) & ladder reflection iterated along the tree & hyperreflection along the stacked tree\\
 \bottomrule
 \end{tabular}
 \end{center}

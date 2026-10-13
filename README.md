@@ -9,7 +9,35 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 52
+## Current contender: Contender 53
+
+```lean
+def reflAlong (T : CTree) (g : Nat → Nat) : CTree → Nat → Nat   -- BusyLean/Contender53.lean
+  | .zero => g
+  | .succ a => ladderReflect (reflAlong T g a) T
+  | .lim f => fun m => maxUpTo (fun i => reflAlong T g (f i) m) m
+  | _ => g
+def family52 (n : Nat) : Nat := F52 (F52 n)                  -- Contender 52 = family52 42
+def F53 (n : Nat) : Nat :=
+  hier (reflAlong (stackTree (family52 n)) family52 (stackTree (family52 n)))
+    (stackTree (family52 n)) (family52 n)
+def contender_53 : Nat := F53 (F53 42)
+
+theorem contender_52_lt_contender_53 : contender_52 < contender_53   -- BusyLean/Comparison53.lean
+```
+
+The reflection that reads the tree is **iterated along the tree**. At each
+successor level, FT2 and ladder programs reading `T` may call the previous level
+as their number oracle, so the levels form a hyperreflection along the giant
+tree. `hier` runs along the tree with this base.
+
+| Theorem | Statement |
+|---|---|
+| `contender_52_lt_contender_53` | Contender 52 < Contender 53 |
+| `family52_lt_F53` | Contender 52's family is beaten at every input |
+| `le_reflAlong` | every level of the iterated reflection dominates its base and argument |
+
+## Contender 52
 
 ```lean
 def ptlStack (P : List TL.Ty) (σ : TL.Env P) : CTree → (CTree → CTree) → CTree → CTree
@@ -1378,8 +1406,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 52's definition modules take
-about 1.7 s and its proofs about 2.7 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 53's definition modules take
+about 1.6 s and its proofs about 4.7 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1455,6 +1483,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender50.lean`](BusyLean/Contender50.lean), [`Comparison50.lean`](BusyLean/Comparison50.lean) | Contender 50 definitions and theorems |
 | [`BusyLean/Contender51.lean`](BusyLean/Contender51.lean), [`Comparison51.lean`](BusyLean/Comparison51.lean) | Contender 51 definitions and theorems |
 | [`BusyLean/Contender52.lean`](BusyLean/Contender52.lean), [`Comparison52.lean`](BusyLean/Comparison52.lean) | Contender 52 definitions and theorems |
+| [`BusyLean/Contender53.lean`](BusyLean/Contender53.lean), [`Comparison53.lean`](BusyLean/Comparison53.lean) | Contender 53 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1514,6 +1543,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 50 | Lean | this repository | numeric ladder reader programs (SystemFLT2) as the base of the hierarchy along the tree |
 | 51 | Lean | this repository | System T over trees with the iteration operators as primitives |
 | 52 | Lean | this repository | the languages over the iteration operators, stacked along a tree with first-class closure |
+| 53 | Lean | this repository | ladder reflection iterated along the tree (hyperreflection along it) |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
