@@ -45,3 +45,6 @@ import BusyLean.Comparison19
 import BusyLean.Ordinal.BachmannHoward
 import BusyLean.Contender20
 import BusyLean.Comparison20
+import BusyLean.Ordinal.Buchholz
+import BusyLean.Contender21
+import BusyLean.Comparison21
