@@ -622,3 +622,17 @@ imported, and deleted:
 | `Contender54_Birkhoff_Sperner_Tower` | C53 | iterated order-ideal lattices of finite posets (Dedekind-number growth), iterated `family53 n + 1` times | a finite combinatorial amplifier of tower-like growth, far below the hierarchy machinery; not kernel-checked |
 | `Contender54_SemanticWorldClosure` | C53 | iterate a pair (number oracle, tree): jumps with the current oracle enlarge the tree, then reflection over it gives the next oracle | number oracles change trees only by finite amounts; the tree iteration is covered by Θ/Ψ/`iterLevel` and the reflection by Contender 54's `reflT` primitive; not kernel-checked |
 | `Contender54_TILED` | C53 | large elimination of a tree into `Type` (leaf `Nat`, successor endomorphisms, limit Π) with canonical iterators, observed as numbers | the pattern of Contender 31's transfinite types `AT` (there over universes), here over `Nat`. It gives about ε-type speed-ups along the tree, which the trees already absorb. It was CI-checked, but the idea is already in the repository |
+
+# Retired without import (2026-10-13, fifth batch)
+
+All three are finite combinatorial amplifiers: at most an `N`-fold iteration of
+an elementary function, with tower-of-exponentials growth. That is negligible
+next to one application of the predecessor family they are seeded with, the
+same category as the retired `Contender54_Birkhoff_Sperner_Tower`. None was
+kernel-checked.
+
+| Archive | Target | Idea | Why retired |
+|---|---|---|---|
+| `Contender54_YonedaDedekind` | C53 | iterated "Yoneda–Dedekind" completion `Y(P) = P ⊔ Idl(P)` of finite posets from a Boolean lattice, `N` times (the closed term is `F54 42`, not `F54 (F54 42)`) | Dedekind-number, tower-type growth; a finite amplifier |
+| `Contender55_Plethystic_FreeMonad_Reactor` | C54 | polynomial containers with plethysm, jets, feedback arities and bounded free-monad trees, iterated `N + 1` times | primitive-recursive-style growth; a finite amplifier |
+| `Contender60_SelfWreath` | C59 | iterated self-wreath products `G ↦ G^G ⋊ Sym(G)`, order `a ↦ a^a·a!`, `N + 1` steps | an exponential tower of height about `N`; a finite amplifier |
