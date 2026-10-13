@@ -293,6 +293,10 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.contender_60_lt_contender_61
 #print axioms BusyLean.towerProgTree
 #print axioms BusyLean.Ordinal.PTL2.Tm.eval
+#print axioms BusyLean.contender_62
+#print axioms BusyLean.contender_61_lt_contender_62
+#print axioms BusyLean.Ordinal.lt_stack2
+#print axioms BusyLean.stack2Tree
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -1328,6 +1332,50 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
   BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_62 :
+  BusyLean.contender_61
+  BusyLean.contender_60
+  BusyLean.contender_59
+  BusyLean.contender_58
+  BusyLean.contender_57
+  BusyLean.contender_56
+  BusyLean.contender_55
+  BusyLean.contender_54
+  BusyLean.contender_53
+  BusyLean.contender_52
+  BusyLean.contender_51
+  BusyLean.contender_50
+  BusyLean.contender_49
+  BusyLean.contender_48
+  BusyLean.contender_47
+  BusyLean.contender_46
+  BusyLean.contender_45
+  BusyLean.contender_44
+  BusyLean.contender_43
+  BusyLean.contender_42
+  BusyLean.contender_41
+  BusyLean.contender_40
+  BusyLean.contender_39
+  BusyLean.contender_38
+  BusyLean.contender_37
+  BusyLean.contender_36
+  BusyLean.contender_35
+  BusyLean.contender_34
+  BusyLean.contender_33
+  BusyLean.contender_32
+  BusyLean.contender_31
+  BusyLean.contender_30
+  BusyLean.contender_29
+  BusyLean.contender_28
+  BusyLean.contender_27
+  BusyLean.contender_26
+  BusyLean.contender_25 BusyLean.contender_24 BusyLean.contender_23 BusyLean.contender_22
+  BusyLean.contender_21 BusyLean.contender_20 BusyLean.contender_19 BusyLean.contender_18
+  BusyLean.contender_17 BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
+  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11 BusyLean.contender_10
+  BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
+  BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -1392,6 +1440,7 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_58_lt_contender_59
 #check @BusyLean.contender_59_lt_contender_60
 #check @BusyLean.contender_60_lt_contender_61
+#check @BusyLean.contender_61_lt_contender_62
 #check @BusyLean.FLT2.wt_of_readerTy
 #check @BusyLean.FT2.wt_of_typed
 #check @BusyLean.Ordinal.addr_wf
