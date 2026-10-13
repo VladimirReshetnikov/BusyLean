@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 56
+## Current contender: Contender 57
+
+```lean
+def prims57 : List TL.Ty := .arr .tree liftTy :: .arr .tree liftNTy :: prims54
+def primEnv57 (N : Nat) (g : Nat → Nat) : TL.Env prims57 :=    -- BusyLean/Contender57.lean
+  (fun t => (jointStack prims54 (primEnv54 N g) t).1,
+   fun t => (jointStack prims54 (primEnv54 N g) t).2, primEnv54 N g)
+def family56 (n : Nat) : Nat := F56 (F56 n)                  -- Contender 56 = family56 42
+def heightTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then jointTree N else ptlLift prims57 (primEnv57 N family56) (metaJump N) (jointTree N)
+def F57 (n : Nat) : Nat :=
+  hier (numLift prims57 (primEnv57 (family56 n) family56) family56) (heightTree (family56 n)) (family56 n)
+def contender_57 : Nat := F57 (F57 42)
+
+theorem contender_56_lt_contender_57 : contender_56 < contender_57   -- BusyLean/Comparison57.lean
+```
+
+The joint stack of Contender 56 becomes a primitive at **any program-computed
+height**: `stackT t` and `stackN t` are its tree and number closures at height
+`t`. Programs build heights, for example from other stacks' outputs, and stack
+languages to them.
+
+| Theorem | Statement |
+|---|---|
+| `contender_56_lt_contender_57` | Contender 56 < Contender 57 |
+| `family56_lt_F57` | Contender 56's family is beaten at every input |
+
+## Contender 56
 
 ```lean
 def jointStack (P : List TL.Ty) (σ : TL.Env P) : CTree → Closures   -- Contender56.lean
@@ -1496,8 +1523,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 56's definition modules take
-about 1.6 s and its proofs about 2.8 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 57's definition modules take
+about 1.5 s and its proofs about 2.6 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1577,6 +1604,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender54.lean`](BusyLean/Contender54.lean), [`Comparison54.lean`](BusyLean/Comparison54.lean) | Contender 54 definitions and theorems |
 | [`BusyLean/Contender55.lean`](BusyLean/Contender55.lean), [`Comparison55.lean`](BusyLean/Comparison55.lean) | Contender 55 definitions and theorems |
 | [`BusyLean/Contender56.lean`](BusyLean/Contender56.lean), [`Comparison56.lean`](BusyLean/Comparison56.lean) | Contender 56 definitions and theorems |
+| [`BusyLean/Contender57.lean`](BusyLean/Contender57.lean), [`Comparison57.lean`](BusyLean/Comparison57.lean) | Contender 57 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1640,6 +1668,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 54 | Lean | this repository | reflection over any program-built tree as a primitive of the language |
 | 55 | Lean | this repository | number languages with reflection, stacked along the tree with first-class closure |
 | 56 | Lean | this repository | tree and number languages stacked jointly, each level's two closures primitives of the next |
+| 57 | Lean | this repository | joint stacks as primitives at program-chosen heights |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see

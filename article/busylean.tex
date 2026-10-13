@@ -140,6 +140,7 @@ to any tree a program builds.
 Contender~55 stacks the number languages along the tree, each level a
 first-class closure for the next.
 Contender~56 stacks the tree and number languages jointly.
+Contender~57 lets programs choose the stacking heights.
 \end{abstract}
 
 \tableofcontents
@@ -2134,6 +2135,26 @@ strictly dominates its oracle and argument. Proved: \lean{family55\_lt\_F56} and
 1.6\,s and the proofs in 2.8\,s.
 
 %======================================================================
+\section{Contender 57: stacking heights chosen by programs}
+
+Contender~56's joint stack runs to heights fixed from outside. Contender~57
+makes it a primitive at any height a program computes:
+\[
+\mathsf{stackT}:\mathsf{tree}\to(\mathsf{tree}\to\mathsf{tree})\to\mathsf{tree}\to\mathsf{tree},\qquad
+\mathsf{stackN}:\mathsf{tree}\to(\mathsf{nat}\to\mathsf{nat})\to\mathsf{nat}\to\mathsf{nat},
+\]
+the tree and number closures of the joint stack at height $t$. These sit next to
+Contender~54's primitives (tree operators, iteration operators, reflection, the
+number oracle). Programs build a height, for instance from another stack's
+output, stack languages to it, and repeat this at higher types. The tree joins
+Contender~56's tree with the closure of the meta-jump under this language, and
+the language's number closure is the hierarchy's base:
+$F_{57}(n)=h^{\mathrm{numLift}(\mathrm{family}_{56})}_{T}(N)$ with
+$N=\mathrm{family}_{56}(n)$ and $T=\mathrm{heightTree}(N)$. Proved:
+\lean{family56\_lt\_F57} and \lean{contender\_56\_lt\_\allowbreak contender\_57}.
+The definitions check in 1.5\,s and the proofs in 2.6\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2233,6 +2254,7 @@ Contender & idea & informal size\\
 54 (Lean) & reflection over any program-built tree as a primitive & closed nat programs over reflection\\
 55 (Lean) & number languages (with reflection) stacked along the tree & $h_T$ over the stacked number closure\\
 56 (Lean) & tree and number languages stacked jointly & $h_{T'}$ over the joint number closure\\
+57 (Lean) & joint stacks at program-chosen heights & $h_T$ over the height-choosing number closure\\
 \bottomrule
 \end{tabular}
 \end{center}
