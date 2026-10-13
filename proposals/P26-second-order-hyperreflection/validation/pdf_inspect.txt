@@ -1,0 +1,46 @@
+PDF: /mnt/data/BusyLean_Contender20_SecondOrder_Hyperreflection/article/contender20_second_order_hyperreflection.pdf
+Pages: 20
+Encrypted: False
+Page sizes (pt, rounded):
+  - 612 x 792 (20 page(s))
+Metadata:
+  /Author: BusyLean research package
+  /CreationDate: D:20261013155411Z
+  /Creator: LaTeX with hyperref
+  /Keywords: 
+  /ModDate: D:20261013155411Z
+  /PTEX.Fullbanner: This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) kpathsea version 6.4.0/dev
+  /Producer: pdfTeX-1.40.26
+  /Subject: 
+  /Title: Contender 20: Second-Order Diagonal Hyperreflection in BusyLean
+  /Trapped: /False
+Outline items: 65
+Form fields: 0
+Attachments: 0
+Annotations: 71
+
+Fonts (pdffonts, first 25 lines):
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+EOQFHW+LMRoman12-Bold                Type 1            Custom           yes yes yes    278  0
+OCNROM+LMRoman12-Regular             Type 1            Custom           yes yes yes    279  0
+LAJCPG+LMRoman10-Bold                Type 1            Custom           yes yes yes    280  0
+TUWFXV+LMRoman10-Regular             Type 1            Custom           yes yes yes    281  0
+NKLXJN+LMRoman10-Italic              Type 1            Custom           yes yes yes    282  0
+TLKFJP+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    283  0
+TUWFXV+LMRoman10-Regular             Type 1            Custom           yes yes yes    284  0
+PJSPAQ+LMRoman7-Regular              Type 1            Custom           yes yes yes    285  0
+OQHCBE+LMMono10-Regular              Type 1            Custom           yes yes yes    353  0
+FGFMZU+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    363  0
+PEPIWQ+LMMono9-Regular               Type 1            Custom           yes yes yes    364  0
+MFTCYA+LMMathItalic9-Regular         Type 1            Custom           yes yes yes    372  0
+FQOFNN+LMRoman8-Regular              Type 1            Custom           yes yes yes    386  0
+HCNXWA+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    387  0
+CBSDZS+LMSans10-Regular              Type 1            Custom           yes yes yes    388  0
+TBISJC+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    389  0
+TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    394  0
+EOARAG+LMMathSymbols9-Regular        Type 1            Custom           yes yes yes    403  0
+YGUZDS+LMMono10-Italic               Type 1            Custom           yes yes yes    432  0
+TUWFXV+LMRoman10-Regular             Type 1            Custom           yes yes yes    471  0
+OGPYDV+DejaVuSans                    TrueType          WinAnsi          yes yes yes    504  0
+SMZSKE+DejaVuSans                    CID TrueType      Identity-H       yes yes yes    505  0

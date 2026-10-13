@@ -1,0 +1,42 @@
+{
+  "audit": "static source hygiene only; not a Lean kernel build",
+  "status": "PASS",
+  "files": [
+    {
+      "file": "BusyLean/Comparison20.lean",
+      "lines": 75,
+      "sha256": "9667d6c464792f7454f3d817c362797d3425fa28987f0fd791d873e8c427896e",
+      "forbidden_hits": [],
+      "missing_expected": []
+    },
+    {
+      "file": "BusyLean/Contender20.lean",
+      "lines": 64,
+      "sha256": "8b9d5155a92e7d91c43ac5441751fc0a86b6b525988c8f33a242de1793e8be6b",
+      "forbidden_hits": [],
+      "missing_expected": []
+    },
+    {
+      "file": "BusyLean/SecondOrderReflection.lean",
+      "lines": 68,
+      "sha256": "8ba816b36b833d3f843c5328ec57b4fe48897d3313876a528195140eae9d6ba3",
+      "forbidden_hits": [],
+      "missing_expected": []
+    },
+    {
+      "file": "BusyLean/SecondOrderReflectionFacts.lean",
+      "lines": 185,
+      "sha256": "d6fda80989a4a9556a0abd3740b250ff5ad7a699ff459a94127b2c4fb78a4c5f",
+      "forbidden_hits": [],
+      "missing_expected": []
+    },
+    {
+      "file": "test/SecondOrderReflectionSmoke.lean",
+      "lines": 12,
+      "sha256": "bcdb62e512d5910914ef8fa31db9a8baeae80a9cef9fb9477800bb47189e43a5",
+      "forbidden_hits": [],
+      "missing_expected": []
+    }
+  ],
+  "failures": []
+}

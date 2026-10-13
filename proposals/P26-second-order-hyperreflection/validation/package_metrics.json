@@ -1,0 +1,30 @@
+{
+  "lean_files": 5,
+  "lean_lines": 404,
+  "article_tex_lines": 1224,
+  "article_pdf_bytes": 420707,
+  "article_pdf_pages": 20,
+  "patch_bytes": 18442,
+  "files": {
+    "repo_overlay/test/SecondOrderReflectionSmoke.lean": {
+      "bytes": 348,
+      "lines": 12
+    },
+    "repo_overlay/BusyLean/Contender20.lean": {
+      "bytes": 2307,
+      "lines": 64
+    },
+    "repo_overlay/BusyLean/SecondOrderReflection.lean": {
+      "bytes": 2813,
+      "lines": 68
+    },
+    "repo_overlay/BusyLean/Comparison20.lean": {
+      "bytes": 2952,
+      "lines": 75
+    },
+    "repo_overlay/BusyLean/SecondOrderReflectionFacts.lean": {
+      "bytes": 7969,
+      "lines": 185
+    }
+  }
+}

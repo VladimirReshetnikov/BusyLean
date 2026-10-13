@@ -1,0 +1,22 @@
+Title:           Contender 20: Second-Order Diagonal Hyperreflection in BusyLean
+Subject:         
+Keywords:        
+Author:          BusyLean research package
+Creator:         LaTeX with hyperref
+Producer:        pdfTeX-1.40.26
+CreationDate:    Tue Oct 13 15:54:11 2026 UTC
+ModDate:         Tue Oct 13 15:54:11 2026 UTC
+Custom Metadata: yes
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           20
+Encrypted:       no
+Page size:       612 x 792 pts (letter)
+Page rot:        0
+File size:       420707 bytes
+Optimized:       no
+PDF version:     1.7

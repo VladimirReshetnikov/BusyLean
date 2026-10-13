@@ -1,0 +1,12 @@
+Patch integrity validation
+Baseline: BusyLean.lean at audited tree 64d31a0cf6f1aa4477a088be5554957de6e87a61
+
+git apply --check: PASS
+git apply: PASS
+
+overlay match BusyLean/SecondOrderReflection.lean: PASS
+overlay match BusyLean/SecondOrderReflectionFacts.lean: PASS
+overlay match BusyLean/Contender20.lean: PASS
+overlay match BusyLean/Comparison20.lean: PASS
+overlay match test/SecondOrderReflectionSmoke.lean: PASS
+BusyLean.lean import tail: PASS

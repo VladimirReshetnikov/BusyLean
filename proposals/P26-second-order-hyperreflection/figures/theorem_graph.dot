@@ -1,0 +1,45 @@
+digraph Contender20 {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.2, nodesep=0.35, ranksep=0.55];
+  node [shape=box, style="rounded", fontname="DejaVu Sans", fontsize=10];
+  edge [fontname="DejaVu Sans", fontsize=9];
+
+  P0 [label="Existing: lTransformer_progressive"];
+  D0 [label="Existing: diagonalLift\npreserves + strictly inflationary"];
+
+  S1 [label="spliceLifts_good"];
+  L1 [label="liftLift_preservesGoodLifts"];
+  L2 [label="liftLift_strictlyLiftInflationary"];
+  H1 [label="stageHyperLift_good"];
+  H2 [label="base_lt_stageHyperLift"];
+  DH1 [label="diagonalHyperLift_preservesGoodLifts"];
+  DH2 [label="diagonalHyperLift_strictlyLiftInflationary"];
+  R [label="diagonalHyperLift_rank_lt_succ"];
+
+  B [label="baseLift20_good"];
+  F1 [label="family19_lt_firstOrder20"];
+  F2 [label="firstOrder20_lt_F20"];
+  F3 [label="family19_lt_F20"];
+  C [label="contender_19_lt_contender_20", shape=doubleoctagon];
+
+  D0 -> B;
+  P0 -> F1;
+  B -> F1;
+
+  S1 -> H1;
+  S1 -> H2;
+  L1 -> DH1;
+  L2 -> DH2;
+  H1 -> DH1;
+  H2 -> DH2;
+  DH1 -> DH2;
+  DH1 -> R;
+  DH2 -> R;
+
+  B -> F2;
+  P0 -> F2;
+  DH2 -> F2;
+
+  F1 -> F3;
+  F2 -> F3;
+  F3 -> C;
+}

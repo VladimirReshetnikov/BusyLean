@@ -1,0 +1,9 @@
+Lean 4.34.0 kernel build: NOT RUN
+Reason: no Lean executable was installed in the package-generation environment,
+and network installation of the pinned toolchain was unavailable.
+Required focused commands:
+  lake build BusyLean.Comparison20
+  lake env lean test/SecondOrderReflectionSmoke.lean
+Required full commands:
+  lake build
+  lake env lean test/Audit.lean
