@@ -37,6 +37,20 @@ def LargeTy : CTree → Type
   | .supL _ => Nat
   | .supH _ => Nat
 
+/-- Polymorphic finite iteration.  BusyLean's existing `Ordinal.iterN` is
+specialized to `Nat`; large elimination must iterate endomorphisms at arbitrary
+tree-computed types. -/
+def iterAt {α : Type} (h : α → α) : Nat → α → α
+  | 0, x => x
+  | k + 1, x => iterAt h k (h x)
+
+/-- On naturals, polymorphic iteration agrees with BusyLean's existing
+iterator. -/
+@[simp] theorem iterAt_nat (g : Nat → Nat) :
+    ∀ (k x : Nat), iterAt g k x = Ordinal.iterN g k x
+  | 0, _ => rfl
+  | k + 1, x => iterAt_nat g k (g x)
+
 /-- The canonical endomorphism at the type computed by `a`.
 
 At zero it is the numeric base `g`.  At a successor it performs `n`-fold
@@ -45,7 +59,7 @@ fiber types `LargeTy (f i)`.
 -/
 def largeStep (g : Nat → Nat) : (a : CTree) → Nat → LargeTy a → LargeTy a
   | .zero, _, x => g x
-  | .succ _, n, h => Ordinal.iterN h n
+  | .succ _, n, h => iterAt h n
   | .lim f, n, x => fun i => largeStep g (f i) n (x i)
   | .supL _, _, x => g x
   | .supH _, _, x => g x
@@ -91,8 +105,12 @@ def ramify (a : CTree) : Nat → CTree
 
 /-- At semantic order two, large elimination is already diagonal iteration of
 `g`: apply the `n`-fold iterator to `g`, then to `n`. -/
+theorem largeElim_two_raw (g : Nat → Nat) (n : Nat) :
+    largeElim g (.succ (.succ .zero)) n = iterAt g n n := rfl
+
 @[simp] theorem largeElim_two (g : Nat → Nat) (n : Nat) :
-    largeElim g (.succ (.succ .zero)) n = Ordinal.iterN g n n := rfl
+    largeElim g (.succ (.succ .zero)) n = Ordinal.iterN g n n := by
+  rw [largeElim_two_raw, iterAt_nat]
 
 @[simp] theorem largeElim_lim (g : Nat → Nat) (f : Nat → CTree) (n : Nat) :
     largeElim g (.lim f) n =
