@@ -9,7 +9,32 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 36
+## Current contender: Contender 37
+
+```lean
+def family36 (n : Nat) : Nat := F36 (F36 n)                  -- Contender 36 = family36 42
+def jump (n : Nat) (t : CTree) : CTree := FLT.bootT family36 n t t
+def jumpTree (n : Nat) : CTree :=
+  .lim fun i => if i = 0 then bootTree n else stackOver (jump n) (bootTree n) (bootTree n)
+def F37 (n : Nat) : Nat :=                                   -- BusyLean/Contender37.lean
+  wDiagonalLift (schedule37 n) (rank37 n) jtTransformer (fun _ => family36) n n
+def contender_37 : Nat := F37 (F37 42)
+
+theorem contender_36_lt_contender_37 : contender_36 < contender_37   -- BusyLean/Comparison37.lean
+```
+
+Contender 36's bootstrap, read as an operator on trees, is a **jump**. `stackOver b`
+stacks the System T language over trees on the primitive `b`, along a tree
+(Contender 34's `boostT` used the fixed primitive `boost31`). With `b = jump n`,
+the language levels iterate the impredicative jump transfinitely.
+
+| Theorem | Statement |
+|---|---|
+| `contender_36_lt_contender_37` | Contender 36 < Contender 37 |
+| `family36_lt_F37` | Contender 36's family is beaten at every input |
+| `jtvalue_lt_F37` | every program of depth ≤ `n` over the addresses of `jumpTree n` is below `F37 n` |
+
+## Contender 36
 
 ```lean
 def family35 (n : Nat) : Nat := F35 (F35 n)                  -- Contender 35 = family35 42
@@ -938,8 +963,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 36's definition modules take
-about 10 s (including System FT and SystemFLT) and its proofs about 3 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 37's definition modules take
+about 2 s and its proofs about 2.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -997,6 +1022,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender34.lean`](BusyLean/Contender34.lean), [`Comparison34.lean`](BusyLean/Comparison34.lean) | Contender 34 definitions and theorems |
 | [`BusyLean/Contender35.lean`](BusyLean/Contender35.lean), [`Comparison35.lean`](BusyLean/Comparison35.lean) | Contender 35 definitions and theorems |
 | [`BusyLean/Contender36.lean`](BusyLean/Contender36.lean), [`Comparison36.lean`](BusyLean/Comparison36.lean) | Contender 36 definitions and theorems |
+| [`BusyLean/Contender37.lean`](BusyLean/Contender37.lean), [`Comparison37.lean`](BusyLean/Comparison37.lean) | Contender 37 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1040,6 +1066,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 34 | Lean | this repository | the language stacked along a collapsed tree ordinal |
 | 35 | Lean | this repository | ladder over trees built by impredicative System F programs |
 | 36 | Lean | this repository | ladder programs build the next ladder's tree, iterated along a tree |
+| 37 | Lean | this repository | tree languages stacked over the ladder jump |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
