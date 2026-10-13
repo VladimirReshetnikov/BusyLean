@@ -1,0 +1,26 @@
+name: Export current incoming proposals
+
+on:
+  push:
+    branches:
+      - ai/contender15-ramified-diagonal-validation-20261012
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: b4c71bad189e34068951d00a4f6b0e6939ce57e7
+      - name: Upload incoming proposals
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-incoming-proposals
+          path: incoming/*.zip
+          if-no-files-found: error
+          retention-days: 2
