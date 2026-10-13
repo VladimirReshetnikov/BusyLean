@@ -67,10 +67,9 @@ omit [DecidableEq β] in
 theorem mem_of_mem_append_right {x : β} {l r : List β} (h : x ∈ r) : x ∈ l ++ r :=
   List.mem_append.2 (Or.inr h)
 
-/-- Every sorted list of good elements headed by `h` is accessible. -/
-theorem accQ_head (hacc : ∀ a, Q a → Acc (LTQ Q lt) a) {h : β} (qh : Q h) :
+/-- Every sorted list of good elements headed by an accessible good `h` is accessible. -/
+theorem accQ_head_of_acc {h : β} (hh : Acc (LTQ Q lt) h) (qh : Q h) :
     ∀ (l : List β), (∀ x ∈ l, Q x) → sorted lt l = true → l.head? = some h → Acc (SRQ Q lt) l := by
-  have hh := hacc h qh
   induction hh with
   | intro h hacc' ih =>
     have hh : Acc (LTQ Q lt) h := Acc.intro h hacc'
@@ -113,6 +112,11 @@ theorem accQ_head (hacc : ∀ a, Q a → Acc (LTQ Q lt) a) {h : β} (qh : Q h) :
     have hrq : ∀ x ∈ r, Q x := fun x hx => hq x (by rw [er]; exact mem_of_mem_append_right hx)
     rw [er]
     exact runs (k + 1) r (below r hrq hr hb) hrq hb
+
+/-- Every sorted list of good elements headed by `h` is accessible. -/
+theorem accQ_head (hacc : ∀ a, Q a → Acc (LTQ Q lt) a) {h : β} (qh : Q h) :
+    ∀ (l : List β), (∀ x ∈ l, Q x) → sorted lt l = true → l.head? = some h → Acc (SRQ Q lt) l :=
+  accQ_head_of_acc (hacc h qh) qh
 
 /-- If every good element is accessible, so is every sorted list of good elements. -/
 theorem accQ_sorted (hacc : ∀ a, Q a → Acc (LTQ Q lt) a) :
