@@ -1,0 +1,64 @@
+name: Research Contender 48
+
+on:
+  push:
+    branches:
+      - research/contender48-universal-reflection-20261013
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build-args: BusyLean.Comparison48
+
+      - name: Clean timed build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verification-ci
+          rm -rf .lake/build proposals/P5-w-reflection/lean/.lake/build
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/previous.time \
+              lake build BusyLean.Comparison47
+          } 2>&1 | tee verification-ci/previous-build.log
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/definitions.time \
+              lake build BusyLean.Contender48
+          } 2>&1 | tee verification-ci/definitions-build.log
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/proofs.time \
+              lake build BusyLean.Comparison48
+          } 2>&1 | tee verification-ci/proofs-build.log
+          cat verification-ci/*.time | tee verification-ci/timings.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          def seconds(name):
+              text = Path('verification-ci', name).read_text().strip()
+              return float(text.split('=', 1)[1])
+          definitions = seconds('definitions.time')
+          proofs = seconds('proofs.time')
+          assert definitions <= 15.0, f'definition budget exceeded: {definitions}'
+          assert proofs <= 60.0, f'proof budget exceeded: {proofs}'
+          PY
+          printf 'baseline_commit=7021b20ea9203e86dcfc6dff4bf38f88efa26bcd\n' \
+            > verification-ci/context.txt
+          printf 'branch_head=%s\n' "$GITHUB_SHA" >> verification-ci/context.txt
+          printf 'lean_toolchain=' >> verification-ci/context.txt
+          cat lean-toolchain >> verification-ci/context.txt
+
+      - name: Universal-language smoke tests
+        run: lake env lean test/UniversalLanguageSmoke48.lean 2>&1 | tee verification-ci/smoke.log
+
+      - name: Axiom and dependency audit
+        run: lake env lean test/Contender48Audit.lean 2>&1 | tee verification-ci/audit.log
+
+      - name: Upload verification record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender48-verification
+          path: verification-ci
