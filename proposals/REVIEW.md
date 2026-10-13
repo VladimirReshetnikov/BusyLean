@@ -288,3 +288,81 @@ Self-fed iteration counts (P11, P14), crowns (P12) and finite diagonal ranks
 by the tree-indexed operator stage of Contender 12, so nothing in this batch
 is adopted. P15 independently arrived at Contender 11's exact construction,
 which corroborates it.
+
+# Fourth batch: P17–P20
+
+Four archives arrived, all proposing a "Contender 14" over Contender 13
+(dynamic-kind Fω, Fd), written against commit `1ee50c7`. They predate this
+repository's Contender 14, the ladder of universes. Each defines `family13 n =
+F13 (F13 n)` and a *family-aware* Fd reflection: Fd programs receive a packed
+oracle family, and a prefix maximum makes the transformer progressive without
+monotonicity.
+
+## Build and audit results
+
+Each proposal was overlaid on a scratch worktree at `1ee50c7` and built with
+Lean 4.34.0 (`lake build BusyLean.Contender14`, then `BusyLean.Comparison14`).
+The axiom, closure and per-module checks are my own; the proposals' audit
+files and scripts were not run. Timings are for the new modules only, with
+the base precompiled.
+
+| | Archive | Author's status | Definitions | Proofs | Axioms (`contender_14`, comparison, every new constant) |
+|---|---|---|---|---|---|
+| P17 | `…_DiagonalHyperreflection.zip` | CI-validated | compile, 0.5 s | **compile**, 0.5 s | `propext, Quot.sound` |
+| P18 | `…_DiagonalOperatorTower.zip` | static validation only | compile, 1.6 s | fail: type mismatch at `Comparison14.lean:81` | n/a as submitted |
+| P19 | `…_RDOR.zip` | build receipt template | compile, 1.3 s | **compile**, 2.2 s | `propext, Quot.sound` |
+| P20 | `…_RankDiagonal.zip` | "Lean not run" | compile, 4.2 s | **compile**, 1.7 s | `propext, Quot.sound` |
+
+The closure of each `contender_14` (about 1,920 constants) avoids
+`contender_5` … `contender_13`. P18's failure is cosmetic. `simpa [f,
+schedule14] using h2` normalizes `operatorStage base .leaf` differently from
+the goal's `liftTransformer base`, although the two are definitionally equal.
+Replacing it with `exact h2` makes the proof module compile, and the audit
+then passes with the same axioms. That repair was only tested on the scratch
+worktree; the imported sources are unmodified.
+
+## What they build
+
+Write τ for the autonomous schedule above `tree12` (a Γ-like closure over the
+W-language's index) and |Fd| for the dynamic-kind language's ordinal. Every
+proposal keeps Fd as its language and amplifies the index ordinal:
+
+* **P17, diagonal hyperreflection.** A hierarchy of *transformer lifts*. Rank 0
+  is the autonomous lift. Rank k+1 traverses the schedule using rank k as the
+  lift at every node, and also pre-amplifies the base with rank k. Each rank
+  roughly exponentiates the previous one, and the rank is diagonalized at
+  `family13 n + 1`: about |Fd|·ε(τ).
+* **P18, diagonal operator tower.** Operator stages stacked to height
+  `family13 n`. Each level wraps the previous transformer in a stage along a
+  schedule with a leaf at branch 0: about |Fd|·τ^ω.
+* **P19, ramified dynamic operator reflection.** Feedback steps
+  `towerStep base = operatorStage base tree14 ∘ base`, stacked to height n+1,
+  with `tree14` one more hyper-closure above `tree12`. The seed includes all
+  finite iterations of F13: about |Fd|·τ^ω.
+* **P20, bi-diagonal rank reflection.** The same idea as P17, found
+  independently: `rankLift (r+1)` lifts a splice whose branches are
+  `metaStage (rankLift r)` along the schedule, diagonalized at
+  `family13 n + 1`. About |Fd|·ε(τ).
+
+## Comparison with the current contenders
+
+Each proposal proves `contender_13 < contender_14` for its own number. So
+informally all four exceed Contender 13, with P17 ≈ P20 > P18 ≈ P19.
+
+The repository's Contender 14 changes the language instead: the ladder of
+universes, with level n at input n. By the "base language dominates"
+heuristic, the ladder exceeds every |Fd|-based amplification. A stronger
+language proves that recursive amplifications over the weaker language
+terminate. The whole batch is therefore informally below this repository's
+Contender 14. No theorem relates their constants to mine (they are all named
+`contender_14`).
+
+## Ideas adopted
+
+The rank hierarchy of lifts (P17, independently P20) is the strongest generic
+amplifier received so far. It strictly generalizes the single operator stage
+of Contender 12, and its proofs are short and generic over `Transformer`.
+Contender 15 adopts P17's `HyperReflection` and `HyperReflectionFacts`
+modules, with attribution, and applies them to a family-aware **ladder**
+reflection seeded with Contender 14's family. That combines both routes: the
+strongest language here and the strongest amplifier received.
