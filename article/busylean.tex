@@ -154,6 +154,7 @@ Contender~66 makes closing and towering values, so programs build such
 hierarchies themselves.
 Contender~67 raises the closing operator itself along a tree.
 Contender~68 makes that tower's step a value.
+Contender~69 raises the step language's own closure operator along a tree.
 \end{abstract}
 
 \tableofcontents
@@ -2401,6 +2402,25 @@ $N=\mathrm{family}_{67}(n)$. Proved: \lean{family67\_lt\_F68} and
 1.9\,s and the proofs in 3.5\,s.
 
 %======================================================================
+\section{Contender 69: the reflective tower over the step language}
+
+Contender~67 raised the closure operator of Contender~66's language along a
+tree. Contender~68's language is stronger, because it contains that tower's step
+and the tower itself as values. \lean{cwTowerP} is Contender~67's construction
+for any base language $(P,\sigma)$:
+\[
+cw^P_0(H)=\text{closures of }P+[H],\qquad
+cw^P_{a+1}(H)=\text{closures of }P+[H,\ cw^P_a],
+\]
+with pointwise limits. Contender~69 runs it over Contender~68's language, along
+Contender~68's tree, then along the tree this builds:
+$F_{69}(n)=h^{cw^{P_{68}}_T(\cdot).2(\mathrm{family}_{68})}_T(N)$ with
+$N=\mathrm{family}_{68}(n)$. \lean{good\_cwTowerP} shows that every level is a
+good closure pair for every family. Proved: \lean{family68\_lt\_F69} and
+\lean{contender\_68\_lt\_\allowbreak contender\_69}. The definitions check in
+2.6\,s and the proofs in 4.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2512,6 +2532,7 @@ Contender & idea & informal size\\
 66 (Lean) & closure-with-family and towering as values & $h_T$ over the language's closure\\
 67 (Lean) & reflective tower of closure-with-family operators & $h_T$ over $cw_T$\\
 68 (Lean) & the reflective tower's step and the tower as values & $h_T$ over the language's closure\\
+69 (Lean) & reflective tower over the step language & $h_T$ over $cw^{P_{68}}_T$\\
 \bottomrule
 \end{tabular}
 \end{center}

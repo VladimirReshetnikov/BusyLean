@@ -9,7 +9,33 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 68
+## Current contender: Contender 69
+
+```lean
+def cwTowerP (P : List PTL2.Ty) (σ : PTL2.Env P) : CTree → (CTree → Closures) → Closures
+  | .zero => fun H => closures of (famTy :: P) with H        -- BusyLean/Contender69.lean
+  | .succ a => fun H => closures of (famTy :: cwTy :: P) with (H, cwTowerP P σ a)
+  | .lim f => pointwise
+  | _ => level 0
+def family68 (n : Nat) : Nat := F68 (F68 n)                  -- Contender 68 = family68 42
+def F69 (n : Nat) : Nat :=
+  hier (cwClosureP (family68 n) family68 (cwTreeP (family68 n))) (cwTreeP (family68 n)) (family68 n)
+def contender_69 : Nat := F69 (F69 42)
+
+theorem contender_68_lt_contender_69 : contender_68 < contender_69   -- BusyLean/Comparison69.lean
+```
+
+Contender 67's reflective tower, written for **any** base language
+(`cwTowerP`), runs over Contender 68's stronger language, which already has the
+tower's step as a value.
+
+| Theorem | Statement |
+|---|---|
+| `contender_68_lt_contender_69` | Contender 68 < Contender 69 |
+| `family68_lt_F69` | Contender 68's family is beaten at every input |
+| `good_cwTowerP` | every level of the generic reflective tower is good for every family |
+
+## Contender 68
 
 ```lean
 def cwStep (N : Nat) (g : Nat → Nat) (X : (CTree → Closures) → Closures) (H : CTree → Closures) :
@@ -1829,8 +1855,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 68's definition modules take
-about 1.9 s and its proofs about 3.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 69's definition modules take
+about 2.6 s and its proofs about 4.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1922,6 +1948,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender66.lean`](BusyLean/Contender66.lean), [`Comparison66.lean`](BusyLean/Comparison66.lean) | Contender 66 definitions and theorems |
 | [`BusyLean/Contender67.lean`](BusyLean/Contender67.lean), [`Comparison67.lean`](BusyLean/Comparison67.lean) | Contender 67 definitions and theorems |
 | [`BusyLean/Contender68.lean`](BusyLean/Contender68.lean), [`Comparison68.lean`](BusyLean/Comparison68.lean) | Contender 68 definitions and theorems |
+| [`BusyLean/Contender69.lean`](BusyLean/Contender69.lean), [`Comparison69.lean`](BusyLean/Comparison69.lean) | Contender 69 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1997,6 +2024,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 66 | Lean | this repository | closure-with-family and towering as values; hierarchies of steps become programs |
 | 67 | Lean | this repository | a reflective tower of closure-with-family operators along a tree |
 | 68 | Lean | this repository | the reflective tower's step and the tower as values of the language |
+| 69 | Lean | this repository | the reflective tower of closure operators over Contender 68's language |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
