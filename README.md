@@ -9,7 +9,39 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 55
+## Current contender: Contender 56
+
+```lean
+def jointStack (P : List TL.Ty) (σ : TL.Env P) : CTree → Closures   -- Contender56.lean
+  | .zero => (ptlLift P σ, numLift P σ)
+  | .succ a => let c := jointStack P σ a
+      (ptlLift (liftTy :: liftNTy :: P) (c.1, c.2, σ), numLift (liftTy :: liftNTy :: P) (c.1, c.2, σ))
+  | .lim f => (pointwise tree limit, maxima of number closures)
+  | _ => (ptlLift P σ, numLift P σ)
+def family55 (n : Nat) : Nat := F55 (F55 n)                  -- Contender 55 = family55 42
+def jointTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then stackTree N
+    else (jointStack prims54 (primEnv54 N family55) (stackTree N)).1 (metaJump N) (stackTree N)
+def F56 (n : Nat) : Nat :=
+  hier ((jointStack prims54 (primEnv54 (family55 n) family55) (jointTree (family55 n))).2 family55)
+    (jointTree (family55 n)) (family55 n)
+def contender_56 : Nat := F56 (F56 42)
+
+theorem contender_55_lt_contender_56 : contender_55 < contender_56   -- BusyLean/Comparison56.lean
+```
+
+Tree languages (Contender 52) and number languages (Contender 55) are stacked
+**jointly**: each level's language gets both of the previous level's closures as
+primitives, so number programs build trees with the full tree-language stack and
+reflect over them.
+
+| Theorem | Statement |
+|---|---|
+| `contender_55_lt_contender_56` | Contender 55 < Contender 56 |
+| `family55_lt_F56` | Contender 55's family is beaten at every input |
+| `Ordinal.lt_jointStack` | every level of the joint number closure strictly dominates its oracle and argument |
+
+## Contender 55
 
 ```lean
 def numLift (P : List TL.Ty) (σ : TL.Env P) (g : Nat → Nat) (m : Nat) : Nat :=  -- Contender55.lean
@@ -1464,8 +1496,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 55's definition modules take
-about 1.8 s and its proofs about 2.3 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 56's definition modules take
+about 1.6 s and its proofs about 2.8 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1544,6 +1576,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender53.lean`](BusyLean/Contender53.lean), [`Comparison53.lean`](BusyLean/Comparison53.lean) | Contender 53 definitions and theorems |
 | [`BusyLean/Contender54.lean`](BusyLean/Contender54.lean), [`Comparison54.lean`](BusyLean/Comparison54.lean) | Contender 54 definitions and theorems |
 | [`BusyLean/Contender55.lean`](BusyLean/Contender55.lean), [`Comparison55.lean`](BusyLean/Comparison55.lean) | Contender 55 definitions and theorems |
+| [`BusyLean/Contender56.lean`](BusyLean/Contender56.lean), [`Comparison56.lean`](BusyLean/Comparison56.lean) | Contender 56 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1606,6 +1639,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 53 | Lean | this repository | ladder reflection iterated along the tree (hyperreflection along it) |
 | 54 | Lean | this repository | reflection over any program-built tree as a primitive of the language |
 | 55 | Lean | this repository | number languages with reflection, stacked along the tree with first-class closure |
+| 56 | Lean | this repository | tree and number languages stacked jointly, each level's two closures primitives of the next |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
