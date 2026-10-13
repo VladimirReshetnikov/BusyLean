@@ -12,8 +12,14 @@ inductive WTree (A : Type) : Type where
   | node : (A → WTree A) → WTree A
 
 /-- Reindexing the branches, contravariantly in the branching type. -/
-def wmap {A B : Type} (g : B → A) : WTree A → WTree B :=
-  WTree.rec WTree.leaf (fun _ ih => WTree.node (fun b => ih (g b)))
+def wmap {A B : Type} (g : B → A) : WTree A → WTree B
+  | .leaf => .leaf
+  | .node f => .node (fun b => wmap g (f (g b)))
+
+/-- Structural recursion on trees (the code generator rejects raw `WTree.rec`). -/
+def wfold {A R : Type} (z : R) (s : (A → WTree A) → (A → R) → R) : WTree A → R
+  | .leaf => z
+  | .node f => s f (fun a => wfold z s (f a))
 
 inductive Ty where
   | nat : Ty
@@ -32,7 +38,7 @@ def den : Ty → Type
   | .wt a => WTree (den a)
 
 def defaultValue : (a : Ty) → den a
-  | .nat => 0
+  | .nat => (0 : Nat)
   | .arr _ b => fun _ => defaultValue b
   | .wt _ => .leaf
 
@@ -87,7 +93,7 @@ def interpret (env : Env) : Term → Value
   | .var n =>
       match lookup env n with
       | some v => v
-      | none => ⟨.nat, 0⟩
+      | none => ⟨.nat, (0 : Nat)⟩
   | .lam a b body =>
       ⟨.arr a b, fun x =>
         let r := interpret (⟨a, x⟩ :: env) body
@@ -96,10 +102,10 @@ def interpret (env : Env) : Term → Value
       let v := interpret env t
       let w := interpret env u
       match v with
-      | ⟨.nat, _⟩ => ⟨.nat, 0⟩
-      | ⟨.wt _, _⟩ => ⟨.nat, 0⟩
+      | ⟨.nat, _⟩ => ⟨.nat, (0 : Nat)⟩
+      | ⟨.wt _, _⟩ => ⟨.nat, (0 : Nat)⟩
       | ⟨.arr a b, f⟩ => ⟨b, f (castValue a w.2)⟩
-  | .zero => ⟨.nat, 0⟩
+  | .zero => ⟨.nat, (0 : Nat)⟩
   | .succ => ⟨.arr .nat .nat, Nat.succ⟩
   | .natrec r =>
       ⟨.arr r (.arr (.arr .nat (.arr r r)) (.arr .nat r)),
@@ -111,7 +117,7 @@ def interpret (env : Env) : Term → Value
       ⟨.arr r
         (.arr (.arr (.arr a (.wt a)) (.arr (.arr a r) r))
           (.arr (.wt a) r)),
-       fun z s w => WTree.rec z (fun f ih => s f ih) w⟩
+       fun z s w => wfold z s w⟩
 termination_by structural t => t
 
 def evaluate (t : Term) : Nat :=

@@ -65,9 +65,12 @@ theorem le_iterate (f : Nat → Nat) (hf : ∀ x, x ≤ f x) :
 /-- Exact strict comparison with the numerical port of the old selector. -/
 def contender_5 : Nat := oldMaximum 42
 
-theorem contender_5_lt_contender_6 : contender_5 < contender_6 :=
+theorem old_lt_iterate (k n : Nat) : oldMaximum n < iterate diagonal (k+1) n :=
   Nat.lt_of_lt_of_le
-    (Nat.lt_of_lt_of_le (old_lt_seed 42) (seed_le_diagonal 42))
-    (le_iterate diagonal self_le_diagonal 41 (diagonal 42))
+    (Nat.lt_of_lt_of_le (old_lt_seed n) (seed_le_diagonal n))
+    (le_iterate diagonal self_le_diagonal k (diagonal n))
+
+theorem contender_5_lt_contender_6 : contender_5 < contender_6 :=
+  old_lt_iterate 41 42
 
 end BigNumber
