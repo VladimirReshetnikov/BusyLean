@@ -1,0 +1,19 @@
+{
+  "repository": "VladimirReshetnikov/BusyLean",
+  "base": "64d31a0cf6f1aa4477a088be5554957de6e87a61",
+  "head": "fd43cae755356719c907fde0b0b131d258a30e18",
+  "status": "ahead",
+  "ahead_by": 12,
+  "behind_by": 0,
+  "total_commits": 12,
+  "files": [
+    {"path": ".github/workflows/contender20-check.yml", "additions": 32},
+    {"path": "BusyLean/Comparison20.lean", "additions": 125},
+    {"path": "BusyLean/Contender20.lean", "additions": 105},
+    {"path": "BusyLean/Ordinal/WTreeLadder.lean", "additions": 144},
+    {"path": "scripts/check_contender20.py", "additions": 100},
+    {"path": "test/Contender20Audit.lean", "additions": 62},
+    {"path": "test/WTreeLadderSmoke.lean", "additions": 21}
+  ],
+  "total_additions": 589
+}

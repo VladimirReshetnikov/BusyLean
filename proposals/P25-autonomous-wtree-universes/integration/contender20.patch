@@ -1,0 +1,624 @@
+diff --git a/.github/workflows/contender20-check.yml b/.github/workflows/contender20-check.yml
+new file mode 100644
+--- /dev/null
++++ b/.github/workflows/contender20-check.yml
+@@ -0,0 +1,32 @@
++name: Contender 20 validation
++
++on:
++  push:
++    branches:
++      - research/contender20-autonomous-wtree-ladder
++  workflow_dispatch:
++
++jobs:
++  kernel-check:
++    runs-on: ubuntu-latest
++    timeout-minutes: 20
++    steps:
++      - name: Check out branch
++        uses: actions/checkout@v4
++
++      - name: Install Lean toolchain through elan
++        shell: bash
++        run: |
++          set -euxo pipefail
++          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
++            | sh -s -- -y
++          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
++          source "$HOME/.elan/env"
++          lean --version
++          lake --version
++
++      - name: Run clean budget and axiom audit
++        shell: bash
++        run: |
++          set -euxo pipefail
++          python3 scripts/check_contender20.py
+diff --git a/BusyLean/Ordinal/WTreeLadder.lean b/BusyLean/Ordinal/WTreeLadder.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Ordinal/WTreeLadder.lean
+@@ -0,0 +1,144 @@
++import BusyLean.Contender12
++import BusyLean.SystemFL.Transfinite
++
++/-!
++# A ramified universe hierarchy indexed by a language-generated W-tree
++
++The earlier transfinite contenders use explicit, linearly ordered ordinal
++notations as atoms.  This module instead uses *addresses in a fixed
++countably-branching well-founded tree*.  A level is a finite path from the
++root; a level lies immediately below its parent exactly when that path is
++valid in the tree.  Well-foundedness is inherited directly from structural
++well-foundedness of `WTree`.
++
++The particular tree `autonomousUniverseTree` contains `tree12` as branch zero
++and, on the remaining branches, every finite autonomous hyper-closure above
++`tree12`.  Thus the object language receives a genuinely ramified hierarchy
++whose index is built from the W-language's own language-generated tree, rather
++than from a fixed explicit notation system.
++-/
++
++namespace BusyLean.Ordinal
++
++open BigNumber (WTree)
++
++/-- A finite address in a countably branching tree.  The constructor is
++"snoc-like": `child p i` appends branch `i` to the path `p`. -/
++inductive TreePath : Type where
++  | root : TreePath
++  | child : TreePath → Nat → TreePath
++  deriving DecidableEq, Repr
++
++namespace TreePath
++
++/-- Follow a finite address.  Invalid addresses return `none`. -/
++def follow (t : WTree Nat) : TreePath → Option (WTree Nat)
++  | .root => some t
++  | .child p i =>
++      match follow t p with
++      | some (.node f) => some (f i)
++      | _ => none
++
++/-- Boolean validity of an address in a tree. -/
++def valid (t : WTree Nat) (p : TreePath) : Bool :=
++  match follow t p with
++  | some _ => true
++  | none => false
++
++/-- `childLt t b a` says that `b` is a valid immediate child of `a` in `t`. -/
++def childLt (t : WTree Nat) : TreePath → TreePath → Bool
++  | .root, _ => false
++  | .child p i, a => decide (p = a) && valid t (.child p i)
++
++/-- Accessibility of a valid address, proved by structural recursion on the
++subtree reached by that address. -/
++theorem acc_follow (root : WTree Nat) :
++    ∀ (cur : WTree Nat) (p : TreePath),
++      follow root p = some cur →
++      Acc (fun b a => childLt root b a = true) p
++  | .leaf, p, hp => by
++      refine Acc.intro p ?_
++      intro b hb
++      cases b with
++      | root =>
++          simp [childLt] at hb
++      | child q i =>
++          simp only [childLt, Bool.and_eq_true] at hb
++          have hq : q = p := of_decide_eq_true hb.1
++          subst q
++          have hv : valid root (.child p i) = true := hb.2
++          simp [valid, follow, hp] at hv
++  | .node f, p, hp => by
++      refine Acc.intro p ?_
++      intro b hb
++      cases b with
++      | root =>
++          simp [childLt] at hb
++      | child q i =>
++          simp only [childLt, Bool.and_eq_true] at hb
++          have hq : q = p := of_decide_eq_true hb.1
++          subst q
++          exact acc_follow root (f i) (.child p i) (by
++            simp [follow, hp])
++
++/-- The immediate-valid-child relation is well-founded for every `WTree`. -/
++theorem childLt_wf (root : WTree Nat) :
++    WellFounded (fun b a => childLt root b a = true) := by
++  refine ⟨fun p => ?_⟩
++  cases hp : follow root p with
++  | none =>
++      refine Acc.intro p ?_
++      intro b hb
++      cases b with
++      | root =>
++          simp [childLt] at hb
++      | child q i =>
++          simp only [childLt, Bool.and_eq_true] at hb
++          have hq : q = p := of_decide_eq_true hb.1
++          subst q
++          have hv : valid root (.child p i) = true := hb.2
++          simp [valid, follow, hp] at hv
++  | some cur =>
++      exact acc_follow root cur p hp
++
++/-- A simple increasing finite enumeration of paths.  Every finite path occurs
++at some stage; duplicates are harmless for finite maxima. -/
++def pathsUpTo : Nat → List TreePath
++  | 0 => [.root]
++  | n + 1 =>
++      let ps := pathsUpTo n
++      ps ++ ps.flatMap (fun p =>
++        (List.range (n + 1)).map (fun i => .child p i))
++
++end TreePath
++
++/-- A fixed countable join containing `tree12` and all finite autonomous
++hyper-closures above it.  Branch zero is exactly `tree12`. -/
++def autonomousUniverseTree : WTree Nat :=
++  .node fun k =>
++    match k with
++    | 0 => tree12
++    | n + 1 =>
++        Autonomous.realize
++          (Autonomous.hyper n (Autonomous.encode tree12))
++
++/-- Atoms for the ramified W-tree universe hierarchy. -/
++abbrev WLevel := TreePath
++
++instance : FL.AtomOrder WLevel where
++  lt := TreePath.childLt autonomousUniverseTree
++
++/-- Structural well-foundedness of the W-tree universe hierarchy. -/
++theorem wLevel_wf : WellFounded (FL.ALt (α := WLevel)) :=
++  TreePath.childLt_wf autonomousUniverseTree
++
++/-- Valid W-tree levels of enumeration depth `n`. -/
++def wLevelsUpTo (n : Nat) : List WLevel :=
++  (TreePath.pathsUpTo n).filter
++    (TreePath.valid autonomousUniverseTree)
++
++/-- The old language-generated index is visibly present at branch zero. -/
++theorem follow_tree12 :
++    TreePath.follow autonomousUniverseTree (.child .root 0) = some tree12 := rfl
++
++end BusyLean.Ordinal
+diff --git a/BusyLean/Contender20.lean b/BusyLean/Contender20.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Contender20.lean
+@@ -0,0 +1,105 @@
++import BusyLean.Ordinal.WTreeLadder
++import BusyLean.Contender19
++
++/-!
++# Contender 20: autonomous W-tree universe reflection
++
++```
++contender_20 := F20 (F20 42)
++F20 n        := diagonalLift (schedule20 n) (rank20 n)
++                  aTransformer orbit19 n n
++```
++
++Contender 19 uses a linearly ordered ladder of explicit large-Veblen
++notations.  Here the atoms are valid finite addresses in
++`Ordinal.autonomousUniverseTree`, a countably branching well-founded tree that
++contains the W-language-generated `tree12` and every finite autonomous
++hyper-closure above it.  The resulting object language is a ramified tree of
++predicative universes.  Its strong normalization is an immediate instance of
++`FL.sn_of_typed` over the generic well-founded universe `FL.wfUniv`.
++
++The seed family exposes the finite orbit of `F19`: coordinate `i` contains the
++`(i+2)`-fold iterate of `F19`.  In particular coordinate zero is exactly
++Contender 19's family.  The schedule and diagonal rank are then self-fed from
++an orbit whose length is itself `family19 n`.
++
++All recursion is structural.  The definition is computable in principle, but
++it must never be evaluated at the contest input.
++-/
++
++namespace BusyLean.FL
++
++open Ordinal
++
++theorem sn_erase_wlevel {f : Nat → Nat} {fuel : Nat} {t : CTm WLevel}
++    (h : infer fuel [] [] t = some Ty.nat) : F.SN f (erase t) :=
++  sn_of_typed (wfUniv f wLevel_wf) (infer_sound fuel t (goodCtx_nil []) h).1
++
++/-- The value of a ramified W-tree-universe program, type checked with `fuel`,
++relative to the oracle `f`. -/
++def avalue (f : Nat → Nat) (fuel : Nat) (t : CTm WLevel) : Nat :=
++  match h : infer fuel [] [] t with
++  | some A =>
++      if hA : A = Ty.nat then
++        F.decode (F.nf f ⟨erase t, sn_erase_wlevel (h.trans (congrArg some hA))⟩)
++      else 0
++  | none => 0
++
++/-- Ramified W-tree-universe programs of depth `≤ n`. -/
++def autonomousLadderUpTo (n : Nat) : List (CTm WLevel) :=
++  ctmsUpTo (wLevelsUpTo n) n
++
++end BusyLean.FL
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- Reflection over the ramified W-tree universe hierarchy, with a countable
++oracle family. -/
++def reflectAFamily (fs : Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN (prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum (FL.avalue (packFamily fs) n)
++      (FL.autonomousLadderUpTo n))
++
++/-- The family-aware ramified-universe reflection transformer. -/
++def aTransformer : Transformer := fun fs _ n => reflectAFamily fs n
++
++/-- Contender 19's construction as a function of its input:
++`family19 42 = contender_19`. -/
++def family19 (n : Nat) : Nat := F19 (F19 n)
++
++/-- Finite iteration of `F19`, with the next iterate exposed at the outermost
++constructor.  This orientation makes strict growth use only `input_lt_F19`;
++no monotonicity of reflection is assumed. -/
++def iterateF19 : Nat → Nat → Nat
++  | 0, n => n
++  | k + 1, n => F19 (iterateF19 k n)
++
++/-- Coordinate `i` is the `(i+2)`-fold finite orbit of `F19` from `n`.
++Coordinate zero is definitionally `family19 n`. -/
++def orbit19 : Family := fun i n => iterateF19 (i + 2) n
++
++/-- A self-fed orbit value used for the schedule and the lift rank. -/
++def seedHeight20 (n : Nat) : Nat := orbit19 (family19 n) n
++
++/-- The autonomous schedule is now built above the same W-tree that indexes the
++object language, at a self-fed hyper level. -/
++def schedule20 (n : Nat) : WTree Nat :=
++  Autonomous.realize
++    (Autonomous.hyper (seedHeight20 n + 42)
++      (Autonomous.encode Ordinal.autonomousUniverseTree))
++
++/-- Self-fed rank for diagonal hyperreflection. -/
++def rank20 (n : Nat) : Nat := seedHeight20 n + 1
++
++/-- Diagonal hyperreflection of the ramified W-tree universe language. -/
++def F20 (n : Nat) : Nat :=
++  diagonalLift (schedule20 n) (rank20 n)
++    aTransformer orbit19 n n
++
++/-- **Contender 20.** Never evaluate it. -/
++def contender_20 : Nat := F20 (F20 42)
++
++end BusyLean
+diff --git a/BusyLean/Comparison20.lean b/BusyLean/Comparison20.lean
+new file mode 100644
+--- /dev/null
++++ b/BusyLean/Comparison20.lean
+@@ -0,0 +1,125 @@
++import BusyLean.Contender20
++import BusyLean.Comparison19
++
++/-! # Contender 20: exact comparison theorems -/
++
++namespace BusyLean
++
++open BusyLean.W
++
++/-- The additive guard in `reflectAFamily` strictly exceeds the finite maximum
++it reflects. -/
++theorem lt_reflectAFamily {fs : Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN (prefixMax (fun i => fs i n) n)
++      (BigNumber.maximum (FL.avalue (packFamily fs) n)
++        (FL.autonomousLadderUpTo n))) :
++    m < reflectAFamily fs n := by
++  show m < n + 1 + _
++  have hM : ∀ M : Nat, M + 1 ≤ n + 1 + M := fun M => by
++    rw [Nat.add_comm M 1]
++    exact Nat.add_le_add_right (Nat.le_add_left 1 n) M
++  exact Nat.lt_of_le_of_lt h
++    (Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (hM _))
++
++/-- Every visible oracle coordinate lies below one autonomous-universe
++reflection step. -/
++theorem oracle_lt_reflectAFamily (fs : Family) {i n : Nat} (hi : i ≤ n) :
++    fs i n < reflectAFamily fs n :=
++  lt_reflectAFamily
++    (Nat.le_trans (le_prefixMax (fun j => fs j n) hi)
++      (BigNumber.le_maxN_left _ _))
++
++/-- Every enumerated ramified-universe program lies below one reflection step. -/
++theorem avalue_lt_reflectAFamily (fs : Family) {n : Nat}
++    {t : FL.CTm Ordinal.WLevel} (ht : t ∈ FL.autonomousLadderUpTo n) :
++    FL.avalue (packFamily fs) n t < reflectAFamily fs n :=
++  lt_reflectAFamily
++    (Nat.le_trans (le_maximum (FL.avalue (packFamily fs) n) ht)
++      (BigNumber.le_maxN_right _ _))
++
++/-- Autonomous-universe reflection is progressive. -/
++theorem aTransformer_progressive : Progressive aTransformer :=
++  fun seed _ _ _ hi => oracle_lt_reflectAFamily seed hi
++
++/-- One more finite `F19` iterate is strictly larger.  No monotonicity of
++`F19` is used. -/
++theorem iterateF19_lt_succ (k n : Nat) :
++    iterateF19 k n < iterateF19 (k + 1) n := by
++  simpa only [iterateF19] using input_lt_F19 (iterateF19 k n)
++
++/-- Coordinate zero of the seed orbit is exactly Contender 19's family. -/
++theorem orbit19_zero (n : Nat) : orbit19 0 n = family19 n := rfl
++
++/-- The exposed orbit is strictly increasing coordinate by coordinate. -/
++theorem orbit19_lt_next (i n : Nat) : orbit19 i n < orbit19 (i + 1) n := by
++  simpa only [orbit19, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
++    using iterateF19_lt_succ (i + 2) n
++
++/-- Every seed-orbit coordinate visible at input `n` lies below `F20 n`.
++This is a substantially stronger lower bound than merely embedding coordinate
++zero. -/
++theorem orbit19_lt_F20 {i n : Nat} (hi : i ≤ n) : orbit19 i n < F20 n := by
++  have h :=
++    ((diagonalLift_preservesProgressive (schedule20 n) (rank20 n))
++      aTransformer aTransformer_progressive)
++      orbit19 i n n hi
++  simpa only [F20] using h
++
++/-- At every input, `F20` strictly exceeds Contender 19's family. -/
++theorem family19_lt_F20 (n : Nat) : family19 n < F20 n := by
++  have h :=
++    ((diagonalLift_preservesProgressive (schedule20 n) (rank20 n))
++      aTransformer aTransformer_progressive)
++      orbit19 0 n n (Nat.zero_le n)
++  simpa only [orbit19_zero, F20] using h
++
++/-- The raw autonomous-universe reflection step is strictly below the full
++ranked hyperreflection. -/
++theorem raw_reflection_lt_F20 (n : Nat) :
++    reflectAFamily orbit19 n < F20 n :=
++  (diagonalLift_strictlyInflationary (schedule20 n) (rank20 n))
++    aTransformer aTransformer_progressive orbit19 n n n (Nat.le_refl n)
++
++/-- Every ramified-universe program of depth at most `n`, run with the packed
++seed orbit, is below `F20 n`. -/
++theorem avalue_lt_F20 {n : Nat} {t : FL.CTm Ordinal.WLevel}
++    (ht : t ∈ FL.autonomousLadderUpTo n) :
++    FL.avalue (packFamily orbit19) n t < F20 n :=
++  Nat.lt_trans (avalue_lt_reflectAFamily orbit19 ht)
++    (raw_reflection_lt_F20 n)
++
++/-- The input lies below Contender 19's family. -/
++theorem input_lt_family19 (n : Nat) : n < family19 n :=
++  Nat.lt_trans (input_lt_F19 n) (input_lt_F19 (F19 n))
++
++/-- `F20` is strictly inflationary on numerical inputs. -/
++theorem input_lt_F20 (n : Nat) : n < F20 n :=
++  Nat.lt_trans (input_lt_family19 n) (family19_lt_F20 n)
++
++/-- Pointwise, the old function `F19` is already below the new function. -/
++theorem F19_lt_F20 (n : Nat) : F19 n < F20 n :=
++  Nat.lt_trans (input_lt_F19 (F19 n)) (family19_lt_F20 n)
++
++/-- The inner stage already dominates 44 finite iterates of `F19` from 42. -/
++theorem iterateF19_44_42_lt_F20_42 : iterateF19 44 42 < F20 42 := by
++  simpa only [orbit19] using
++    (orbit19_lt_F20 (i := 42) (n := 42) (Nat.le_refl 42))
++
++/-- A strong closed lower bound for the final contender: it exceeds an
++`F19`-orbit whose length is itself `F20 42 + 2`. -/
++theorem long_F19_orbit_lt_contender_20 :
++    iterateF19 (F20 42 + 2) (F20 42) < contender_20 := by
++  simpa only [orbit19, contender_20] using
++    (orbit19_lt_F20 (i := F20 42) (n := F20 42) (Nat.le_refl _))
++
++/-- **The required exact comparison:** Contender 19 is strictly smaller than
++Contender 20. -/
++theorem contender_19_lt_contender_20 : contender_19 < contender_20 :=
++  Nat.lt_trans (family19_lt_F20 42) (input_lt_F20 (F20 42))
++
++/-- The new contender also strictly exceeds every earlier accepted contender
++by transitivity. -/
++theorem contender_18_lt_contender_20 : contender_18 < contender_20 :=
++  Nat.lt_trans contender_18_lt_contender_19 contender_19_lt_contender_20
++
++end BusyLean
+diff --git a/scripts/check_contender20.py b/scripts/check_contender20.py
+new file mode 100755
+--- /dev/null
++++ b/scripts/check_contender20.py
+@@ -0,0 +1,100 @@
++#!/usr/bin/env python3
++"""Clean-build and audit the proposed BusyLean Contender 20.
++
++Run from the BusyLean repository root after copying the proposal modules into
++place:
++
++    python3 scripts/check_contender20.py
++
++The previous accepted contender is prebuilt and treated like an existing
++library. Only the incremental definition and proof phases are compared with
++the repository's 15 s / 60 s contest budgets.
++"""
++from __future__ import annotations
++
++import re
++import shutil
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++BUILD_DIRS = [
++    ROOT / ".lake" / "build",
++    ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build",
++]
++PERMITTED = {"propext", "Quot.sound"}
++PREVIOUS = "BusyLean.Comparison19"
++CURRENT_DEF = "BusyLean.Contender20"
++CURRENT_PROOF = "BusyLean.Comparison20"
++DEFINITION_BUDGET = 15.0
++PROOF_BUDGET = 60.0
++LAKE = shutil.which("lake") or "lake"
++
++
++def run(args: list[str]) -> subprocess.CompletedProcess[str]:
++    return subprocess.run(
++        [LAKE, *args], cwd=ROOT, capture_output=True, text=True, check=False
++    )
++
++
++def timed_build(label: str, target: str, budget: float | None) -> float:
++    start = time.monotonic()
++    build = run(["build", target])
++    elapsed = time.monotonic() - start
++    if build.returncode != 0:
++        print(build.stdout, build.stderr, sep="\n", file=sys.stderr)
++        raise SystemExit(f"FAIL: {label} build failed")
++    note = (
++        f"(budget {budget:.0f} s)"
++        if budget is not None
++        else "(accepted earlier; not budgeted)"
++    )
++    print(f"{label}: {elapsed:.3f} s {note}")
++    if budget is not None and elapsed > budget:
++        raise SystemExit(f"FAIL: {label} exceeded the budget")
++    return elapsed
++
++
++def run_lean(path: str) -> str:
++    proc = run(["env", "lean", path])
++    out = proc.stdout + proc.stderr
++    print(out)
++    if proc.returncode != 0:
++        raise SystemExit(f"FAIL: {path} did not run cleanly")
++    return out
++
++
++def main() -> None:
++    for directory in BUILD_DIRS:
++        shutil.rmtree(directory, ignore_errors=True)
++
++    total = timed_build("previous contender", PREVIOUS, None)
++    total += timed_build("Contender 20 definitions", CURRENT_DEF, DEFINITION_BUDGET)
++    total += timed_build("Contender 20 proofs", CURRENT_PROOF, PROOF_BUDGET)
++    print(f"total clean build: {total:.3f} s")
++
++    run_lean("test/WTreeLadderSmoke.lean")
++    audit = run_lean("test/Contender20Audit.lean")
++    reports = re.findall(
++        r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)", audit
++    )
++    bad = [
++        (name, axioms)
++        for name, axioms in reports
++        if axioms
++        and {a.strip() for a in axioms.split(",")} - PERMITTED
++    ]
++    if not reports:
++        raise SystemExit("FAIL: the axiom audit printed no declarations")
++    if bad:
++        raise SystemExit(f"FAIL: forbidden axioms: {bad}")
++    print(
++        f"PASS: {len(reports)} declarations audited; "
++        f"axioms within {sorted(PERMITTED)}"
++    )
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/test/WTreeLadderSmoke.lean b/test/WTreeLadderSmoke.lean
+new file mode 100644
+--- /dev/null
++++ b/test/WTreeLadderSmoke.lean
+@@ -0,0 +1,21 @@
++import BusyLean.Ordinal.WTreeLadder
++
++open BigNumber (WTree)
++open BusyLean.Ordinal
++
++private def tinyTree : WTree Nat :=
++  .node fun i =>
++    match i with
++    | 0 => .node (fun _ => .leaf)
++    | _ + 1 => .leaf
++
++#eval TreePath.valid tinyTree .root
++#eval TreePath.valid tinyTree (.child .root 0)
++#eval TreePath.valid tinyTree (.child (.child .root 0) 37)
++#eval TreePath.childLt tinyTree (.child .root 0) .root
++#eval TreePath.childLt tinyTree (.child (.child .root 0) 37) (.child .root 0)
++#eval TreePath.childLt tinyTree .root .root
++
++#check @TreePath.childLt_wf
++#check @wLevel_wf
++#check @follow_tree12
+diff --git a/test/Contender20Audit.lean b/test/Contender20Audit.lean
+new file mode 100644
+--- /dev/null
++++ b/test/Contender20Audit.lean
+@@ -0,0 +1,62 @@
++import BusyLean.Comparison20
++import Lean
++
++/-!
++A focused audit for the proposed Contender 20.  The repository-wide audit can
++adopt the same declarations after integration.
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through types and values. -/
++def contender20ConstClosure (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant is in the closure of the first one. -/
++elab "#assert_c20_not_in_closure " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := contender20ConstClosure env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.contender_20
++#print axioms BusyLean.contender_19_lt_contender_20
++#print axioms BusyLean.family19_lt_F20
++#print axioms BusyLean.orbit19_lt_F20
++#print axioms BusyLean.long_F19_orbit_lt_contender_20
++#print axioms BusyLean.avalue_lt_F20
++#print axioms BusyLean.orbit19_lt_next
++#print axioms BusyLean.Ordinal.wLevel_wf
++#print axioms BusyLean.FL.sn_erase_wlevel
++
++#assert_c20_not_in_closure BusyLean.contender_20 :
++  BusyLean.contender_19 BusyLean.contender_18 BusyLean.contender_17
++  BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
++  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_19_lt_contender_20
++#check @BusyLean.family19_lt_F20
++#check @BusyLean.orbit19_lt_F20
++#check @BusyLean.long_F19_orbit_lt_contender_20
++#check @BusyLean.avalue_lt_F20
++#check @BusyLean.Ordinal.wLevel_wf
++#check @BusyLean.FL.sn_erase_wlevel

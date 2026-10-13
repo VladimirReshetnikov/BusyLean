@@ -1,0 +1,24 @@
+BusyLean Contender 20 artifact manifest
+Validated research revision: fd43cae755356719c907fde0b0b131d258a30e18
+Generated: 2026-10-13
+
+Files:
+.github/workflows/contender20-check.yml
+BusyLean/Comparison20.lean
+BusyLean/Contender20.lean
+BusyLean/Ordinal/WTreeLadder.lean
+README.md
+RESEARCH_NOTES.md
+article/contender20.pdf
+article/contender20.tex
+article/references.bib
+integration/INTEGRATION.md
+integration/contender20.patch
+scripts/check_contender20.py
+test/Contender20Audit.lean
+test/WTreeLadderSmoke.lean
+validation/VALIDATION.md
+validation/branch-compare.json
+validation/ci-log.txt
+MANIFEST.txt
+SHA256SUMS
