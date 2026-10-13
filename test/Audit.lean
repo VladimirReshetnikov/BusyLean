@@ -115,6 +115,12 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.gvalue_lt_F18
 #print axioms BusyLean.Ordinal.gamma0_wf
 #print axioms BusyLean.Ordinal.Veblen.acc_phi
+#print axioms BusyLean.contender_19
+#print axioms BusyLean.contender_18_lt_contender_19
+#print axioms BusyLean.lvalue_lt_F19
+#print axioms BusyLean.Ordinal.largeVeblen_wf
+#print axioms BusyLean.Ordinal.LVeblen.acc_phi
+#print axioms BusyLean.Ordinal.accQ_sorted
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -186,6 +192,12 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
   BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_19 :
+  BusyLean.contender_18 BusyLean.contender_17 BusyLean.contender_16 BusyLean.contender_15
+  BusyLean.contender_14 BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11
+  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7
+  BusyLean.contender_6 BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -205,6 +217,8 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_15_lt_contender_16
 #check @BusyLean.contender_16_lt_contender_17
 #check @BusyLean.contender_17_lt_contender_18
+#check @BusyLean.contender_18_lt_contender_19
+#check @BusyLean.Ordinal.largeVeblen_wf
 #check @BusyLean.Ordinal.gamma0_wf
 #check @BusyLean.Ordinal.epsilon0_wf
 #check @BusyLean.FL.wfUniv

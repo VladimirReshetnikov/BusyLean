@@ -38,3 +38,7 @@ import BusyLean.Comparison17
 import BusyLean.Ordinal.Veblen
 import BusyLean.Contender18
 import BusyLean.Comparison18
+import BusyLean.Ordinal.SortedLexQ
+import BusyLean.Ordinal.LargeVeblen
+import BusyLean.Contender19
+import BusyLean.Comparison19
