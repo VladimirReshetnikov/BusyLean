@@ -95,3 +95,5 @@ import BusyLean.Comparison35
 import BusyLean.SystemFLT.Trees
 import BusyLean.Contender36
 import BusyLean.Comparison36
+import BusyLean.Contender37
+import BusyLean.Comparison37
