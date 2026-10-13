@@ -11,9 +11,16 @@ defined by the finite-level W-language.  Here we first regard that tree as the
 base of a separate, transparent Brouwer-tree notation language.  We close the
 base under ordinal-style addition, multiplication, exponentiation, derivatives
 (first fixed points above a parameter), a finite critical-function hierarchy,
-and then a diagonal/common-critical-point constructor.  Forty-two visible
-branches expose successively stronger higher derivatives; branch zero is the
-old `index`, which permits a direct comparison without any monotonicity claim.
+and then a diagonal/common-critical-point constructor.
+
+The final schedule has two independent sources of margin.
+
+* `contender7RawBranch k` realizes the `k`-th higher derivative of the
+  autonomous closure above the encoded Contender 6 index.
+* `contender7Branch (k+1)` contains `contender7Branch k` as child zero and
+  `contender7RawBranch k` as child one.  Thus branch 42 carries a visible
+  42-step strict guard chain above the old index, as well as the level-41
+  autonomous payload.  The outer root adds one more strict reflection step.
 
 All recursion is structural on `Nat`, `OTree`, or `WTree`.  In particular the
 number is a closed computable `Nat`; it contains no `noncomputable`, `partial`,
@@ -113,15 +120,22 @@ end Autonomous
 /-- Contender 6's self-generated index, imported only as structural seed data. -/
 def contender7Base : Autonomous.OTree := Autonomous.encode index
 
-/-- Branch zero is exactly the old index.  Branch `k+1` is the `k`-th higher
-fixed-point closure of a successor of that seed. -/
+/-- The autonomous payload at level `k`. -/
+def contender7RawBranch (k : Nat) : WTree Nat :=
+  Autonomous.realize
+    (Autonomous.hyper k (Autonomous.OTree.succ contender7Base))
+
+/-- A guarded branch tower.  At each successor, child zero is the whole
+preceding branch and child one is the next autonomous payload. -/
 def contender7Branch : Nat -> WTree Nat
   | 0 => index
   | k + 1 =>
-      Autonomous.realize
-        (Autonomous.hyper k (Autonomous.OTree.succ contender7Base))
+      .node (fun i =>
+        match i with
+        | 0 => contender7Branch k
+        | _ + 1 => contender7RawBranch k)
 
-/-- The new autonomous reflection schedule. -/
+/-- The new autonomous reflection schedule.  At input 42, branch 42 is visible. -/
 def contender7Index : WTree Nat := .node contender7Branch
 
 /-- The new reflection family. -/
