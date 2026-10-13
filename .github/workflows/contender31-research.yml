@@ -1,0 +1,54 @@
+name: Contender 31 research validation
+
+on:
+  push:
+    branches:
+      - research/reflection-indexed-finite-types-contender31-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: "false"
+          build: "false"
+          test: "false"
+          lint: "false"
+          use-github-cache: "false"
+      - name: Record toolchain
+        run: |
+          set -o pipefail
+          {
+            echo "base snapshot: f457994e1657234252890ddce1a98b364db540c7"
+            echo "commit: $GITHUB_SHA"
+            lake env lean --version
+            lake --version
+          } 2>&1 | tee validation-ci.log
+      - name: Precompile accepted base
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "accepted base: %e s" lake build BusyLean.Comparison30; } 2>&1 | tee -a validation-ci.log
+      - name: Check Contender 31 definitions
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "definition phase: %e s" lake build BusyLean.Contender31; } 2>&1 | tee -a validation-ci.log
+      - name: Check Contender 31 proofs
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "proof phase: %e s" lake build BusyLean.Comparison31; } 2>&1 | tee -a validation-ci.log
+      - name: Run focused axiom and closure audit
+        run: |
+          set -o pipefail
+          lake env lean test/Contender31Audit.lean 2>&1 | tee -a validation-ci.log
+      - name: Upload validation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender31-validation
+          path: validation-ci.log
