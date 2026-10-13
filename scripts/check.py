@@ -28,8 +28,8 @@ ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIRS = [ROOT / ".lake" / "build",
               ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
 PERMITTED = {"propext", "Quot.sound"}
-PREVIOUS = "BusyLean.Comparison12"   # previous contender: definitions + proofs
-CURRENT_DEF = "BusyLean.Contender13"  # current contender's definition module
+PREVIOUS = "BusyLean.Comparison13"   # previous contender: definitions + proofs
+CURRENT_DEF = "BusyLean.Contender14"  # current contender's definition module
 DEFINITION_BUDGET = 15.0  # seconds
 PROOF_BUDGET = 60.0
 LAKE = shutil.which("lake") or "lake"

@@ -843,54 +843,123 @@ theorem kctxOf_klift1 (Δ : List (Kind α)) : kctxOf (Δ.map Kind.sh₁) = (kctx
   rw [nth?_map]
   cases nth? Δ n <;> rfl
 
+/-- `some ★` exactly when the argument is `some ★`. -/
+def starK : Option (Kind α) → Option (Kind α)
+  | some .star => some .star
+  | _ => none
+
+def arrK (x y : Option (Kind α)) : Option (Kind α) := (starK x).bind fun _ => starK y
+
+def appK (k : Kind α) : Option (Kind α) → Option (Kind α) → Option (Kind α)
+  | some (.arr k₁ k₂), some k' => if k₁ = k ∧ k' = k then some k₂ else none
+  | _, _ => none
+
+def packK (k : Kind α) : Option (Kind α) → Option (Kind α)
+  | some k' => if k' = k ∧ k.dynFree = true then some .dyn else none
+  | none => none
+
+def unpackK (k : Kind α) : Option (Kind α) → Option (Kind α)
+  | some .dyn => if k.dynFree = true then some k else none
+  | _ => none
+
+def apackK (a : α) (k : Kind α) : Option (Kind α) → Option (Kind α)
+  | some k' => if k' = k ∧ k.fits a = true then some (.atom a) else none
+  | none => none
+
+def aunpackK (a : α) (k : Kind α) : Option (Kind α) → Option (Kind α)
+  | some (.atom b) => if b = a ∧ k.fits a = true then some k else none
+  | _ => none
+
 def inferKind : List (Kind α) → (Ty α) → Option (Kind α)
   | Δ, tvar n => nth? Δ n
-  | Δ, arr A B =>
-      match inferKind Δ A, inferKind Δ B with
-      | some .star, some .star => some .star
-      | _, _ => none
-  | Δ, all k A =>
-      match inferKind (k :: Δ) A with
-      | some .star => some .star
-      | _ => none
+  | Δ, arr A B => arrK (inferKind Δ A) (inferKind Δ B)
+  | Δ, all k A => starK (inferKind (k :: Δ) A)
   | Δ, lam k A => (inferKind (k :: Δ) A).map (Kind.arr k)
-  | Δ, app k A B =>
-      match inferKind Δ A, inferKind Δ B with
-      | some (.arr k₁ k₂), some k' => if k₁ = k ∧ k' = k then some k₂ else none
-      | _, _ => none
-  | Δ, kall0 A =>
-      match inferKind (Δ.map Kind.sh₀) A with
-      | some .star => some .star
-      | _ => none
-  | Δ, kall1 A =>
-      match inferKind (Δ.map Kind.sh₁) A with
-      | some .star => some .star
-      | _ => none
-  | Δ, pack k A =>
-      match inferKind Δ A with
-      | some k' => if k' = k ∧ k.dynFree = true then some .dyn else none
-      | none => none
-  | Δ, unpack k A =>
-      match inferKind Δ A with
-      | some .dyn => if k.dynFree = true then some k else none
-      | _ => none
-  | Δ, apack a k A =>
-      match inferKind Δ A with
-      | some k' => if k' = k ∧ k.fits a = true then some (.atom a) else none
-      | none => none
-  | Δ, aunpack a k A =>
-      match inferKind Δ A with
-      | some (.atom b) => if b = a ∧ k.fits a = true then some k else none
-      | _ => none
+  | Δ, app k A B => appK k (inferKind Δ A) (inferKind Δ B)
+  | Δ, kall0 A => starK (inferKind (Δ.map Kind.sh₀) A)
+  | Δ, kall1 A => starK (inferKind (Δ.map Kind.sh₁) A)
+  | Δ, pack k A => packK k (inferKind Δ A)
+  | Δ, unpack k A => unpackK k (inferKind Δ A)
+  | Δ, apack a k A => apackK a k (inferKind Δ A)
+  | Δ, aunpack a k A => aunpackK a k (inferKind Δ A)
 
-omit [DecidableEq α] [AtomOrder α] in
-/-- The kind-inference cases that only check a `★` result. -/
-theorem star_of_match {o : Option (Kind α)} {k : (Kind α)}
-    (h : (match o with
-      | some .star => some Kind.star
-      | _ => none) = some k) : o = some .star ∧ k = .star := by
+omit [AtomOrder α] [DecidableEq α] in
+theorem starK_inv {o : Option (Kind α)} {k : Kind α} (h : starK o = some k) :
+    o = some .star ∧ k = .star := by
   match o, h with
   | some .star, h => cases h; exact ⟨rfl, rfl⟩
+
+omit [AtomOrder α] [DecidableEq α] in
+theorem arrK_inv {x y : Option (Kind α)} {k : Kind α} (h : arrK x y = some k) :
+    x = some .star ∧ y = some .star ∧ k = .star := by
+  cases hx : starK x with
+  | none => rw [arrK, hx] at h; cases h
+  | some s =>
+      rw [arrK, hx] at h
+      obtain ⟨hy, rfl⟩ := starK_inv (o := y) h
+      exact ⟨(starK_inv hx).1, hy, rfl⟩
+
+omit [AtomOrder α] in
+theorem appK_inv {k r : Kind α} {x y : Option (Kind α)} (h : appK k x y = some r) :
+    x = some (.arr k r) ∧ y = some k := by
+  match x, y, h with
+  | some (.arr k₁ k₂), some k', h =>
+      change (if k₁ = k ∧ k' = k then some k₂ else none) = some r at h
+      by_cases e : k₁ = k ∧ k' = k
+      · rw [ite_eq_left e] at h
+        cases h
+        obtain ⟨rfl, rfl⟩ := e
+        exact ⟨rfl, rfl⟩
+      · rw [ite_eq_right e] at h; cases h
+
+omit [AtomOrder α] in
+theorem packK_inv {k r : Kind α} {x : Option (Kind α)} (h : packK k x = some r) :
+    x = some k ∧ k.DynFree ∧ r = .dyn := by
+  match x, h with
+  | some k', h =>
+      change (if k' = k ∧ k.dynFree = true then some Kind.dyn else none) = some r at h
+      by_cases e : k' = k ∧ k.dynFree = true
+      · rw [ite_eq_left e] at h
+        cases h
+        obtain ⟨rfl, hk⟩ := e
+        exact ⟨rfl, (Kind.dynFree_iff _).1 hk, rfl⟩
+      · rw [ite_eq_right e] at h; cases h
+
+omit [AtomOrder α] [DecidableEq α] in
+theorem unpackK_inv {k r : Kind α} {x : Option (Kind α)} (h : unpackK k x = some r) :
+    x = some .dyn ∧ k.DynFree ∧ r = k := by
+  match x, h with
+  | some .dyn, h =>
+      change (if k.dynFree = true then some k else none) = some r at h
+      by_cases e : k.dynFree = true
+      · rw [ite_eq_left e] at h
+        cases h
+        exact ⟨rfl, (Kind.dynFree_iff _).1 e, rfl⟩
+      · rw [ite_eq_right e] at h; cases h
+
+theorem apackK_inv {a : α} {k r : Kind α} {x : Option (Kind α)} (h : apackK a k x = some r) :
+    x = some k ∧ k.Fits a ∧ r = .atom a := by
+  match x, h with
+  | some k', h =>
+      change (if k' = k ∧ k.fits a = true then some (Kind.atom a) else none) = some r at h
+      by_cases e : k' = k ∧ k.fits a = true
+      · rw [ite_eq_left e] at h
+        cases h
+        obtain ⟨rfl, hk⟩ := e
+        exact ⟨rfl, (Kind.fits_iff _ _).1 hk, rfl⟩
+      · rw [ite_eq_right e] at h; cases h
+
+theorem aunpackK_inv {a : α} {k r : Kind α} {x : Option (Kind α)} (h : aunpackK a k x = some r) :
+    x = some (.atom a) ∧ k.Fits a ∧ r = k := by
+  match x, h with
+  | some (.atom b), h =>
+      change (if b = a ∧ k.fits a = true then some k else none) = some r at h
+      by_cases e : b = a ∧ k.fits a = true
+      · rw [ite_eq_left e] at h
+        cases h
+        obtain ⟨rfl, hk⟩ := e
+        exact ⟨rfl, (Kind.fits_iff _ _).1 hk, rfl⟩
+      · rw [ite_eq_right e] at h; cases h
 
 theorem inferKind_sound : ∀ (A : (Ty α)) {Δ : List (Kind α)} {k : (Kind α)},
     inferKind Δ A = some k → Kinded (kctxOf Δ) A k
@@ -900,24 +969,15 @@ theorem inferKind_sound : ∀ (A : (Ty α)) {Δ : List (Kind α)} {k : (Kind α)
         rw [show nth? Δ n = some k from h]; rfl
       rw [← e]; exact Kinded.tvar n
   | arr A B, Δ, k, h => by
-      simp only [inferKind] at h
-      cases hA : inferKind Δ A with
-      | none => rw [hA] at h; cases h
-      | some kA =>
-          cases hB : inferKind Δ B with
-          | none => rw [hA, hB] at h; cases kA <;> cases h
-          | some kB =>
-              rw [hA, hB] at h
-              cases kA <;> cases kB <;> cases h
-              exact Kinded.arr (inferKind_sound A hA) (inferKind_sound B hB)
+      obtain ⟨hA, hB, rfl⟩ := arrK_inv (x := inferKind Δ A) (y := inferKind Δ B) h
+      exact Kinded.arr (inferKind_sound A hA) (inferKind_sound B hB)
   | all k' A, Δ, k, h => by
-      simp only [inferKind] at h
-      obtain ⟨hA, rfl⟩ := star_of_match h
+      obtain ⟨hA, rfl⟩ := starK_inv (o := inferKind (k' :: Δ) A) h
       have ih := inferKind_sound A hA
       rw [kctxOf_cons] at ih
       exact Kinded.all ih
   | lam k' A, Δ, k, h => by
-      simp only [inferKind] at h
+      change (inferKind (k' :: Δ) A).map (Kind.arr k') = some k at h
       cases hA : inferKind (k' :: Δ) A with
       | none => rw [hA] at h; cases h
       | some kA =>
@@ -927,104 +987,29 @@ theorem inferKind_sound : ∀ (A : (Ty α)) {Δ : List (Kind α)} {k : (Kind α)
           rw [kctxOf_cons] at ih
           exact Kinded.lam ih
   | app k' A B, Δ, k, h => by
-      simp only [inferKind] at h
-      cases hA : inferKind Δ A with
-      | none => rw [hA] at h; cases h
-      | some kA =>
-          cases hB : inferKind Δ B with
-          | none => rw [hA, hB] at h; cases kA <;> cases h
-          | some kB =>
-              rw [hA, hB] at h
-              cases kA with
-              | arr k₁ k₂ =>
-                  change (if k₁ = k' ∧ kB = k' then some k₂ else none) = some k at h
-                  by_cases e : k₁ = k' ∧ kB = k'
-                  · rw [ite_eq_left e] at h
-                    cases h
-                    obtain ⟨rfl, rfl⟩ := e
-                    exact Kinded.app (inferKind_sound A hA) (inferKind_sound B hB)
-                  · rw [ite_eq_right e] at h; cases h
-              | star => cases h
-              | kvar _ => cases h
-              | dvar _ => cases h
-              | dyn => cases h
-              | atom _ => cases h
+      obtain ⟨hA, hB⟩ := appK_inv (x := inferKind Δ A) (y := inferKind Δ B) h
+      exact Kinded.app (inferKind_sound A hA) (inferKind_sound B hB)
   | kall0 A, Δ, k, h => by
-      simp only [inferKind] at h
-      obtain ⟨hA, rfl⟩ := star_of_match h
+      obtain ⟨hA, rfl⟩ := starK_inv (o := inferKind (Δ.map Kind.sh₀) A) h
       have ih := inferKind_sound A hA
       rw [kctxOf_klift0] at ih
       exact Kinded.kall0 ih
   | kall1 A, Δ, k, h => by
-      simp only [inferKind] at h
-      obtain ⟨hA, rfl⟩ := star_of_match h
+      obtain ⟨hA, rfl⟩ := starK_inv (o := inferKind (Δ.map Kind.sh₁) A) h
       have ih := inferKind_sound A hA
       rw [kctxOf_klift1] at ih
       exact Kinded.kall1 ih
   | pack k' A, Δ, k, h => by
-      simp only [inferKind] at h
-      cases hA : inferKind Δ A with
-      | none => rw [hA] at h; cases h
-      | some kA =>
-          rw [hA] at h
-          change (if kA = k' ∧ k'.dynFree = true then some Kind.dyn else none) = some k at h
-          by_cases e : kA = k' ∧ k'.dynFree = true
-          · rw [ite_eq_left e] at h
-            cases h
-            obtain ⟨rfl, hk⟩ := e
-            exact Kinded.pack (inferKind_sound A hA) ((Kind.dynFree_iff _).1 hk)
-          · rw [ite_eq_right e] at h; cases h
+      obtain ⟨hA, hk, rfl⟩ := packK_inv (x := inferKind Δ A) h
+      exact Kinded.pack (inferKind_sound A hA) hk
   | unpack k' A, Δ, k, h => by
-      simp only [inferKind] at h
-      cases hA : inferKind Δ A with
-      | none => rw [hA] at h; cases h
-      | some kA =>
-          rw [hA] at h
-          cases kA with
-          | dyn =>
-              change (if k'.dynFree = true then some k' else none) = some k at h
-              by_cases e : k'.dynFree = true
-              · rw [ite_eq_left e] at h
-                cases h
-                exact Kinded.unpack (inferKind_sound A hA) ((Kind.dynFree_iff _).1 e)
-              · rw [ite_eq_right e] at h; cases h
-          | star => cases h
-          | arr _ _ => cases h
-          | kvar _ => cases h
-          | dvar _ => cases h
-          | atom _ => cases h
+      obtain ⟨hA, hk, rfl⟩ := unpackK_inv (x := inferKind Δ A) h
+      exact Kinded.unpack (inferKind_sound A hA) hk
   | apack a k' A, Δ, k, h => by
-      simp only [inferKind] at h
-      cases hA : inferKind Δ A with
-      | none => rw [hA] at h; cases h
-      | some kA =>
-          rw [hA] at h
-          change (if kA = k' ∧ k'.fits a = true then some (Kind.atom a) else none) = some k at h
-          by_cases e : kA = k' ∧ k'.fits a = true
-          · rw [ite_eq_left e] at h
-            cases h
-            obtain ⟨rfl, hk⟩ := e
-            exact Kinded.apack (inferKind_sound A hA) ((Kind.fits_iff _ _).1 hk)
-          · rw [ite_eq_right e] at h; cases h
+      obtain ⟨hA, hk, rfl⟩ := apackK_inv (x := inferKind Δ A) h
+      exact Kinded.apack (inferKind_sound A hA) hk
   | aunpack a k' A, Δ, k, h => by
-      simp only [inferKind] at h
-      cases hA : inferKind Δ A with
-      | none => rw [hA] at h; cases h
-      | some kA =>
-          rw [hA] at h
-          cases kA with
-          | atom b =>
-              change (if b = a ∧ k'.fits a = true then some k' else none) = some k at h
-              by_cases e : b = a ∧ k'.fits a = true
-              · rw [ite_eq_left e] at h
-                cases h
-                obtain ⟨rfl, hk⟩ := e
-                exact Kinded.aunpack (inferKind_sound A hA) ((Kind.fits_iff _ _).1 hk)
-              · rw [ite_eq_right e] at h; cases h
-          | star => cases h
-          | arr _ _ => cases h
-          | kvar _ => cases h
-          | dvar _ => cases h
-          | dyn => cases h
+      obtain ⟨hA, hk, rfl⟩ := aunpackK_inv (x := inferKind Δ A) h
+      exact Kinded.aunpack (inferKind_sound A hA) hk
 
 end BusyLean.FL
