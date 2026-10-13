@@ -9,7 +9,38 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 9
+## Current contender: Contender 10
+
+```lean
+def family9 (n : Nat) : Nat := F9 (F9 n)                  -- Contender 9 = family9 42
+def F10 (n : Nat) : Nat := Fk.reflectFk family9 n         -- BusyLean/Contender10.lean
+def contender_10 : Nat := F10 (F10 42)
+
+theorem contender_9_lt_contender_10 : contender_9 < contender_10   -- BusyLean/Comparison10.lean
+```
+
+`reflectFk f n` exceeds `f n` and the value of every closed program of
+**kind-polymorphic System Fω** of depth `≤ n` with the Church numeral type.
+Types may quantify over kinds (`∀κ. A`), so a single program can iterate
+through kinds of unbounded order chosen at run time, via existential packages
+`∃κ. B κ`. Proving such programs total needs candidates for all finite types
+uniformly, beyond higher-order arithmetic (the limit of Fω).
+
+* **Consistency and normalization** (`Fk.sn_of_typed`): kinds cannot quantify
+  over kinds (no rule (△,□), so no Girard–Hurkens paradox). `∀κ. A` is modeled
+  as a countable intersection over closed kinds.
+* **Type checking** (`Fk.infer_sound`): Contender 8's sound checker plus kind
+  abstraction and application.
+
+| Theorem | Statement |
+|---|---|
+| `Fk.sn_of_typed` | every kind-polymorphic Fω term (with oracle) is strongly normalizing |
+| `Fk.infer_sound` | the checker is sound |
+| `contender_9_lt_contender_10` | Contender 9 < Contender 10 |
+| `family9_lt_F10` | Contender 9's family is beaten at every input |
+| `fvalue_lt_contender_10` | every program of depth ≤ `F10 42` is exceeded |
+
+## Contender 9
 
 ```lean
 def stage9 (seed : Family) : WTree ℕ → ℕ → ℕ               -- BusyLean/Contender9.lean
@@ -193,9 +224,9 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 9's definition takes about 2 s
-and its proofs about 3 s; the full clean build of all contenders takes about
-28 s. Plain `lake build` also works, and
+On an Intel i7-1355U (Windows 11), Contender 10's definition modules take
+about 12 s and its proofs about 3 s; the full clean build of all contenders
+takes about 39 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 
@@ -215,6 +246,8 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/SystemFw/`](BusyLean/SystemFw) | System Fω: kinds and type β, typing, candidates over kinds (SN), sound checker |
 | [`BusyLean/Contender8.lean`](BusyLean/Contender8.lean), [`Comparison8.lean`](BusyLean/Comparison8.lean) | Contender 8 definitions and theorems |
 | [`BusyLean/Contender9.lean`](BusyLean/Contender9.lean), [`Comparison9.lean`](BusyLean/Comparison9.lean) | Contender 9 definitions and theorems |
+| [`BusyLean/SystemFk/`](BusyLean/SystemFk) | kind-polymorphic Fω: syntax, typing, candidates with kind valuations (SN), sound checker |
+| [`BusyLean/Contender10.lean`](BusyLean/Contender10.lean), [`Comparison10.lean`](BusyLean/Comparison10.lean) | Contender 10 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the five reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -230,6 +263,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 7 | Lean | this repository | System F (impredicative polymorphism) with Contender 6 as oracle; strong normalization proved in Lean |
 | 8 | Lean | this repository | System Fω (type operators) with Contender 7 as oracle; candidates over kinds |
 | 9 | Lean | this repository | System Fω reflected along the W-language's own trees, seeded with Contender 8 |
+| 10 | Lean | this repository | kind-polymorphic System Fω (unbounded orders at run time), seeded with Contender 9 |
 
 Proposals P1–P5 were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

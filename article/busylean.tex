@@ -64,7 +64,9 @@ and normalization runs as a certified total function. Contender~8 adds type
 operators (System~F$_\omega$), with candidates lifted to kinds and a sound,
 fuel-bounded type checker. Contender~9 reflects
 F$_\omega$ along the W-language's trees, and we explain why the Calculus of
-Constructions is not a growth-rate jump, whereas large elimination is.
+Constructions is not a growth-rate jump. Contender~10 makes the jump
+cheaply: kind polymorphism lets one program reach kinds of unbounded order
+at run time, beyond higher-order arithmetic.
 \end{abstract}
 
 \tableofcontents
@@ -428,26 +430,79 @@ the new contender. Contender~9's definition checks in about 2\,s and its proofs
 in about 3\,s, and the full clean build of all contenders takes about 28\,s.
 
 %======================================================================
+\section{Contender 10: kind polymorphism}
+
+\subsection{Unbounded orders without dependent types}
+Each F$_\omega$ program uses finitely many kinds, fixed in its text, and is
+provably total in higher-order arithmetic of some finite order. To get past
+that, a single program must reach kinds of \emph{unbounded} order, chosen at
+run time. Full dependent types with large elimination would do it. A much
+cheaper mechanism suffices: types that quantify over \emph{kinds},
+$\forall\kappa.A$ (of kind $\star$). A step function
+\[g:\ \forall\kappa.\ B(\kappa)\to B(\kappa\to\star),\]
+iterated $m$ times through the impredicatively encoded existential
+$\exists\kappa.B(\kappa)=\forall Y{:}\star.\,(\forall\kappa.\,B(\kappa)\to Y)\to Y$,
+climbs $m$ orders, where $m$ is a run-time number. A totality proof for such
+programs needs reducibility candidates for all finite types uniformly, which is
+beyond higher-order arithmetic.
+
+\paragraph{Consistency.} In pure type system terms this adds the rule
+$(\triangle,\star)$, types quantifying over the sort of kinds, but not
+$(\triangle,\Box)$, kinds quantifying over kinds. The latter would give
+Girard's System~U$^-$, which is inconsistent by Hurkens' paradox. With only
+$(\triangle,\star)$, kinds have no binders, so kind variables always range over
+closed kinds, a countable set. The Lean proof below is semantic, so it
+certifies normalization, and with it consistency.
+
+\subsection{The model}
+A \emph{kind valuation} $\theta$ maps kind variables to closed F$_\omega$ kinds,
+and kind annotations are evaluated under~$\theta$. The single new semantic
+ingredient is
+\[\llbracket\forall\kappa.A\rrbracket_{\theta,\rho} = \bigcap_{K\ \text{closed}}\llbracket A\rrbracket_{K\cdot\theta,\rho},\]
+a countable intersection of candidates. The renaming and substitution lemmas
+for kind variables hold unconditionally. Adequacy gains two cases: kind
+generalization (a fresh kind extends $\theta$, and contexts are kind-shifted)
+and kind instantiation (choose the evaluated kind).
+\begin{theorem}[\lean{Fk.sn\_of\_typed}]
+Every term typable in kind-polymorphic System~F$_\omega$ with the oracle is
+strongly normalizing, using only \lean{propext} and \lean{Quot.sound}.
+\end{theorem}
+The Church-style checker extends Contender~8's with kind abstraction and
+application, again proved sound. A smoke test types
+$\Lambda\kappa.\Lambda F{:}\kappa.\lambda x{:}\mathtt{nat}.x$ as
+$\forall\kappa.\forall F{:}\kappa.\,\mathtt{nat}\to\mathtt{nat}$. It runs it at
+kind $\star$ (giving 4) and at kind $\star\to\star$ with the identity operator
+(giving 6), and rejects an ill-kinded instantiation.
+
+\subsection{The contender}
+\begin{lstlisting}
+def family9 (n : ℕ) : ℕ := F9 (F9 n)      -- family9 42 = contender_9
+def F10 (n : ℕ) : ℕ := reflectFk family9 n
+def contender_10 : ℕ := F10 (F10 42)
+\end{lstlisting}
+Proved: \lean{contender\_9\_lt\_\allowbreak contender\_10}, \lean{family9\_lt\_F10} (at
+every input), and \lean{fvalue\_lt\_\allowbreak contender\_10}. The new definition modules,
+four for the language plus the contender, check in about 12\,s.
+
+%======================================================================
 \section{Roadmap}
 
-\paragraph{Large elimination.} The next qualitative jump is a dependently typed
-language with an inductive type of natural numbers whose recursor eliminates
-into \emph{types}, together with impredicative propositions: a fragment of the
-Calculus of Inductive Constructions. Its normalization can be modeled by
-realizability. Types are interpreted as Lean types paired with sets of
-realizers, the untyped terms of Contender~7. Propositions are interpreted as
-saturated sets, and large elimination is just Lean recursion into
-\lean{Type}. Lean is strong enough to host such a model for any fixed number of
-universes, even though it cannot model itself.
+\paragraph{A ladder of kind universes.} Kind polymorphism is the first rung
+of a predicative ladder. Kinds may quantify over kinds if the result lives
+one level \emph{higher}, giving universes of kinds
+$\Box_0\subset\Box_1\subset\cdots$ over the impredicative~$\star$. That
+reproduces the stratification that keeps Agda and Lean consistent, now at the
+kind level of an impredicative system. Each level is modeled by a dependent
+function space over countable syntax, which stays inside Lean's \lean{Type}.
+A contender that diagonalizes over the number of levels would climb the whole
+ladder.
 
-\paragraph{Universes.} Each additional predicative universe in the object
-language is modeled by one more Lean universe. The far horizon of the ladder
-is Lean's own type theory, the one system whose normalization Lean cannot
-prove.
+\paragraph{Large elimination.} Runtime-to-type dependency with large
+elimination remains the route to a CIC-like system, through a realizability
+model with Lean types and untyped realizers.
 
 \paragraph{Amplifiers.} Forest reflection along language-definable trees
-applies to every new language with an oracle, as Contender~9 shows, at a
-multiplicative gain.
+applies to each new language.
 
 %======================================================================
 \section{Status}
@@ -462,7 +517,7 @@ Contender & idea & informal size\\
 7 (Lean) & System F with Contender 6 as oracle & $f_{|\mathsf{Z}_2|}(>\!C_6)$\\
 8 (Lean) & System F$_\omega$ with Contender 7 as oracle & $f_{|\mathsf{Z}_\omega|}(>\!C_7)$\\
 9 (Lean) & F$_\omega$ reflected along W-trees & $f_{|\mathsf{Z}_\omega|\cdot\psi(\Omega_\omega)^2}(>\!C_8)$\\
-10 (planned) & dependent types with large elimination & beyond higher-order arithmetic\\
+10 (Lean) & kind-polymorphic F$_\omega$ & beyond higher-order arithmetic\\
 \bottomrule
 \end{tabular}
 \end{center}
