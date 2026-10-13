@@ -84,7 +84,10 @@ case split. Contender~19 extends the same technique to Schütte's Klammersymbole
 whose argument positions are themselves terms, giving a ladder of
 large-Veblen length. Contender~20 reaches the Bachmann--Howard ordinal with a
 Buchholz-style collapsing notation, whose well-foundedness proof is the
-classical impredicative argument carried by Lean's \lean{Acc}.
+classical impredicative argument carried by Lean's \lean{Acc}. Contender~21
+bounds the number of collapsing levels, which turns the multi-level argument
+into a downward induction over relativized scopes. It then diagonalizes over the
+bound, so ladder lengths climb to Buchholz's ordinal $\psi_0(\Omega_\omega)$.
 \end{abstract}
 
 \tableofcontents
@@ -1019,14 +1022,66 @@ $\psi_0(\Omega)$ into the universe at $\Omega$ (value~8). The definitions check
 in 2.9\,s and the proofs in 1.9\,s.
 
 %======================================================================
+\section{Contender 21: Buchholz ladders up to \texorpdfstring{$\psi_0(\Omega_\omega)$}{psi0(Omega omega)}}
+
+\subsection{Why more levels are hard}
+With levels $0,1,2,\dots$ the two-level argument of Contender~20 regresses.
+The order restricted to $M_0$ contains every $D_1d$ with $d\in M_0$ arbitrary,
+and every $D_2b$ lies above all of them. So Claim~1 at level~0 needs a level-1
+collapse \emph{relative to} $M_0$, which needs a level-2 collapse relative to a
+smaller scope, and so on. There is no bound, because high levels hide inside
+low arguments: $\psi_0(\Omega_9)<\Omega_1$. The literature resolves this with
+Buchholz's distinguished sets.
+
+\subsection{A level bound turns it into a downward induction}
+For a fixed bound $L$ on all levels, the regress stops. A \emph{scope} is a
+predicate $Z$ on principal terms, and the order is restricted to normal
+in-scope terms. For $u\le L+1$ let
+\begin{quote}
+$R(u)$: if every in-scope term of level ${<}\,u$ is accessible and scopes are
+closed under arguments at levels $\ge u$, then every in-scope normal principal
+term is accessible.
+\end{quote}
+$R(L+1)$ holds because every level is below $L+1$. \lean{Buch.stepR} derives
+$R(u)$ from $R(u+1)$:
+\begin{enumerate}
+\item Restrict the scope to $Z'$, the in-scope terms whose top-level
+  $u$-components (through sums and higher levels) are accessible. $R(u+1)$
+  applied to $Z'$ makes the $Z'$-order well-founded (Claim~1).
+\item Induction along it, an inner size induction and transitivity make
+  $D_ua$ accessible for every $a$ accessible within $Z'$ (Claim~2).
+\item Every in-scope $D_uc$ is then accessible (Claim~3).
+\item $R(u+1)$ applied to $Z$ itself gives the conclusion.
+\end{enumerate}
+$R(0)$ for the full scope gives \lean{buchholz\_wf L}: the notation with levels
+$\le L$ is well-founded. Its normal forms (for $D_ua$: $f<a$ for every top-level
+$u$-component $D_uf$ of $a$) include Buchholz's, so the order type is at least
+$\psi_0(\varepsilon_{\Omega_L+1})$. Relations are written as \lean{LTQ (scope
+$\wedge$ nf) ltP}, so \lean{SortedLexQ} and \lean{Subrelation.accessible} do
+all the bookkeeping between scopes.
+
+\subsection{The contender}
+As in Contender~14, the ladder is diagonalized at the meta level. Input $n$
+uses the atoms \lean{Buchholz n}, with the universe
+\lean{wfUniv f (buchholz\_wf n)}. The ladder lengths therefore climb through
+$\psi_0(\varepsilon_{\Omega_n+1})$ towards Buchholz's ordinal $\psi_0(\Omega_\omega)$,
+the proof-theoretic ordinal of $\Pi^1_1$-$\mathsf{CA}_0$.
+\lean{F21 n := diagonalLift (schedule21 n) (family20 n + 1) zTransformer (fun \_ => family20) n n}.
+Proved: \lean{contender\_20\_lt\_\allowbreak contender\_21}, \lean{family20\_lt\_F21} and
+\lean{zvalue\_lt\_F21}. The smoke test (level bound~2) packs an operator over
+level $\psi_0(\Omega_2)$ into the universe at $\Omega_1$ (value~9). The
+definitions check in 4.0\,s and the proofs in 2.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
 prove well-founded; $\varepsilon_0$, $\Gamma_0$ and the large Veblen ordinal are
 done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
-collapsing (Contender~20). Buchholz's full system with $\Omega_\nu$ for all
-$\nu<\omega$ needs the same argument once per level, by downward induction on
-levels. Collapsing functions need genuine normal forms: in Buchholz's raw order,
+collapsing (Contender~20), and $\psi_0(\Omega_\omega)$ in the limit of bounded
+Buchholz systems (Contender~21). Next would be a single notation for all levels
+at once (with $D_\omega$, reaching $\psi_0(\varepsilon_{\Omega_\omega+1})$), which
+needs distinguished sets or an inductive definition doing their job. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
@@ -1062,6 +1117,7 @@ Contender & idea & informal size\\
 18 (Lean) & 15 over a ladder of length $\Gamma_0$ & $\varphi$-towers of height $n$ at input $n$\\
 19 (Lean) & 15 over a ladder of large-Veblen length & Klammersymbole of height $n$ at input $n$\\
 20 (Lean) & 15 over a ladder of Bachmann--Howard length & $\psi$-terms of height $n$ at input $n$\\
+21 (Lean) & 15 over Buchholz ladders, level bound $n$ at input $n$ & lengths up to $\psi_0(\Omega_\omega)$\\
 \bottomrule
 \end{tabular}
 \end{center}

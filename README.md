@@ -9,7 +9,38 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 20
+## Current contender: Contender 21
+
+```lean
+def family20 (n : Nat) : Nat := F20 (F20 n)                  -- Contender 20 = family20 42
+def F21 (n : Nat) : Nat :=                                   -- BusyLean/Contender21.lean
+  diagonalLift (schedule21 n) (family20 n + 1) zTransformer (fun _ => family20) n n
+def contender_21 : Nat := F21 (F21 42)
+
+theorem contender_20_lt_contender_21 : contender_20 < contender_21   -- BusyLean/Comparison21.lean
+```
+
+The ladders now use **Buchholz-style collapsing terms with `L+1` levels**
+(`D u a = ψ_u(a)`, [`Ordinal/Buchholz.lean`](BusyLean/Ordinal/Buchholz.lean)),
+whose normal forms reach `ψ₀(ε_{Ω_L+1})`. Input `n` uses the level bound `n`,
+so the ladder lengths climb to Buchholz's ordinal `ψ₀(Ω_ω)`.
+
+With unbounded levels, the impredicative argument of Contender 20 regresses
+forever (`ψ₀(Ω₉) < Ω₁`). With a level bound it becomes a downward induction:
+`Buch.stepR` derives "every in-scope term is accessible, given that all
+in-scope terms below level `u` are" from the same statement at level `u+1`. It
+applies the level-`u+1` statement twice: once to the scope restricted to terms
+with accessible `u`-components, and once to the original scope.
+
+| Theorem | Statement |
+|---|---|
+| `Ordinal.Buch.stepR` | the level step of the relativized well-foundedness argument |
+| `Ordinal.buchholz_wf` | for every `L`, the order on normal terms with levels `≤ L` is well-founded |
+| `contender_20_lt_contender_21` | Contender 20 < Contender 21 |
+| `family20_lt_F21` | Contender 20's family is beaten at every input |
+| `zvalue_lt_F21` | every program of depth ≤ `n` over the level-`n` atoms is below `F21 n` |
+
+## Contender 20
 
 ```lean
 def family19 (n : Nat) : Nat := F19 (F19 n)                  -- Contender 19 = family19 42
@@ -511,8 +542,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 20's definition modules take
-about 3 s and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 21's definition modules take
+about 4 s and its proofs about 2.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -545,12 +576,13 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender14.lean`](BusyLean/Contender14.lean), [`Comparison14.lean`](BusyLean/Comparison14.lean) | Contender 14 definitions and theorems |
 | [`BusyLean/HyperReflection.lean`](BusyLean/HyperReflection.lean), [`HyperReflectionFacts.lean`](BusyLean/HyperReflectionFacts.lean) | rank hierarchy of transformer lifts (adopted from P17) |
 | [`BusyLean/Contender15.lean`](BusyLean/Contender15.lean), [`Comparison15.lean`](BusyLean/Comparison15.lean) | Contender 15 definitions and theorems |
-| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded ordinal notations: sorted lists, atoms below `ω^ω`, `ε₀`, `Γ₀`, the large Veblen ordinal and the Bachmann–Howard ordinal |
+| [`BusyLean/Ordinal/`](BusyLean/Ordinal) | well-founded ordinal notations: sorted lists, atoms below `ω^ω`, `ε₀`, `Γ₀`, the large Veblen ordinal, Bachmann–Howard, and Buchholz-style `ψ₀(ε_{Ω_L+1})` |
 | [`BusyLean/Contender16.lean`](BusyLean/Contender16.lean), [`Comparison16.lean`](BusyLean/Comparison16.lean) | Contender 16 definitions and theorems |
 | [`BusyLean/Contender17.lean`](BusyLean/Contender17.lean), [`Comparison17.lean`](BusyLean/Comparison17.lean) | Contender 17 definitions and theorems |
 | [`BusyLean/Contender18.lean`](BusyLean/Contender18.lean), [`Comparison18.lean`](BusyLean/Comparison18.lean) | Contender 18 definitions and theorems |
 | [`BusyLean/Contender19.lean`](BusyLean/Contender19.lean), [`Comparison19.lean`](BusyLean/Comparison19.lean) | Contender 19 definitions and theorems |
 | [`BusyLean/Contender20.lean`](BusyLean/Contender20.lean), [`Comparison20.lean`](BusyLean/Comparison20.lean) | Contender 20 definitions and theorems |
+| [`BusyLean/Contender21.lean`](BusyLean/Contender21.lean), [`Comparison21.lean`](BusyLean/Comparison21.lean) | Contender 21 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-one reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -578,6 +610,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 18 | Lean | this repository | the ladder extended to length `Γ₀` (binary Veblen terms, case-split Schütte proof) |
 | 19 | Lean | this repository | the ladder extended to large-Veblen length (Klammersymbole with term positions) |
 | 20 | Lean | this repository | the ladder extended to Bachmann–Howard length (collapsing; impredicative WF proof) |
+| 21 | Lean | this repository | Buchholz ladders with level bound `n` at input `n`, lengths up to `ψ₀(Ω_ω)` |
 
 Proposals P1–P21 (four batches and a late arrival) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed
