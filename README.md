@@ -9,7 +9,39 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 64
+## Current contender: Contender 65
+
+```lean
+def towerFrom (S : Closures → Closures) (c0 : Closures) : CTree → Closures   -- Contender65.lean
+def metaStep (N : Nat) (g : Nat → Nat) (S : Closures → Closures) (c : Closures) : Closures :=
+  (ptl2Lift (famTy :: prims61) (towerFrom S c, primEnv61 N g),
+   num2Lift (famTy :: prims61) (towerFrom S c, primEnv61 N g))
+def metaS (N : Nat) (g : Nat → Nat) : CTree → Closures → Closures
+  | .zero => step2 N g
+  | .succ a => metaStep N g (metaS N g a)
+  | .lim f => pointwise
+  | _ => step2 N g
+def family64 (n : Nat) : Nat := F64 (F64 n)                  -- Contender 64 = family64 42
+def F65 (n : Nat) : Nat :=
+  hier (metaSClosure (family64 n) family64 (metaSTree (family64 n))) (metaSTree (family64 n)) (family64 n)
+def contender_65 : Nat := F65 (F65 42)
+
+theorem contender_64_lt_contender_65 : contender_64 < contender_65   -- BusyLean/Comparison65.lean
+```
+
+Contenders 57–64 repeat one pattern: a step on closure pairs is towered along a
+tree, and the tower becomes a value of a new language, giving a new step.
+`metaS` makes this pattern a hierarchy along a tree. The proofs use one
+invariant: every step produces closure pairs whose number closure dominates its
+oracle and argument.
+
+| Theorem | Statement |
+|---|---|
+| `contender_64_lt_contender_65` | Contender 64 < Contender 65 |
+| `family64_lt_F65` | Contender 64's family is beaten at every input |
+| `good_metaSClosure` | the meta-hierarchy's closure pair is good (dominates oracle and argument) |
+
+## Contender 64
 
 ```lean
 def step2 (N : Nat) (g : Nat → Nat) (c : Closures) : Closures :=   -- BusyLean/Contender64.lean
@@ -1721,8 +1753,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 64's definition modules take
-about 1.3 s and its proofs about 2.1 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 65's definition modules take
+about 1.4 s and its proofs about 2.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1810,6 +1842,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender62.lean`](BusyLean/Contender62.lean), [`Comparison62.lean`](BusyLean/Comparison62.lean) | Contender 62 definitions and theorems |
 | [`BusyLean/Contender63.lean`](BusyLean/Contender63.lean), [`Comparison63.lean`](BusyLean/Comparison63.lean) | Contender 63 definitions and theorems |
 | [`BusyLean/Contender64.lean`](BusyLean/Contender64.lean), [`Comparison64.lean`](BusyLean/Comparison64.lean) | Contender 64 definitions and theorems |
+| [`BusyLean/Contender65.lean`](BusyLean/Contender65.lean), [`Comparison65.lean`](BusyLean/Comparison65.lean) | Contender 65 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1881,6 +1914,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 62 | Lean | this repository | the language over the tower operators, stacked along a tree |
 | 63 | Lean | this repository | programs over the stacking operator of the tower language (stack2, up2 as values) |
 | 64 | Lean | this repository | Contender 63's stacking-operator step, towered along a tree |
+| 65 | Lean | this repository | the pattern of Contenders 57–64 as a hierarchy of step operators along a tree |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
