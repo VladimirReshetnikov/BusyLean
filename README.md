@@ -9,7 +9,39 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 24
+## Current contender: Contender 25
+
+```lean
+def family24 (n : Nat) : Nat := F24 (F24 n)                  -- Contender 24 = family24 42
+def F25 (n : Nat) : Nat :=                                   -- BusyLean/Contender25.lean
+  wDiagonalLift (schedule25 n) (rank25 n) aTransformer (fun _ => family24) n n
+def contender_25 : Nat := F25 (F25 42)
+
+theorem contender_24_lt_contender_25 : contender_24 < contender_25   -- BusyLean/Comparison25.lean
+```
+
+**Well-foundedness for free.** Following proposal P25, the atoms are finite
+*addresses* in a Lean-defined tree ordinal, ordered by strict descent
+([`Ordinal/TreeAddress.lean`](BusyLean/Ordinal/TreeAddress.lean)). The order is
+decidable and well-founded by structural recursion on the tree, so the ladder
+length is just the tree's rank, with no ordinal-notation proof.
+
+The tree at input `n` comes from Buchholz-style **collapsing functions on tree
+ordinals** for all finite levels
+([`Ordinal/TreeCollapse.lean`](BusyLean/Ordinal/TreeCollapse.lean)). `D v`
+collapses arguments with suprema at every finite level, using Buchholz's
+diagonal for higher-level suprema. It is defined by plain structural recursion
+and uses no axioms. `bigTree n` is heuristically `ψ₀(ε_{Ω_ω+n})`, beyond the
+reach of the notation-based Contenders 16–24.
+
+| Theorem | Statement |
+|---|---|
+| `Ordinal.addr_wf` | the strict-descendant order on addresses of any tree is well-founded |
+| `contender_24_lt_contender_25` | Contender 24 < Contender 25 |
+| `family24_lt_F25` | Contender 24's family is beaten at every input |
+| `avalue_lt_F25` | every program of depth ≤ `n` over the addresses of `bigTree n` is below `F25 n` |
+
+## Contender 24
 
 ```lean
 def family23 (n : Nat) : Nat := F23 (F23 n)                  -- Contender 23 = family23 42
@@ -627,8 +659,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 24's definition modules take
-about 2.5 s and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 25's definition modules take
+about 3.5 s and its proofs about 2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -672,6 +704,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/TreeHyperReflection.lean`](BusyLean/TreeHyperReflection.lean), [`TreeHyperReflectionFacts.lean`](BusyLean/TreeHyperReflectionFacts.lean) | W-tree-ranked lift hierarchy (adopted from P22) |
 | [`BusyLean/Contender23.lean`](BusyLean/Contender23.lean), [`Comparison23.lean`](BusyLean/Comparison23.lean) | Contender 23 definitions and theorems |
 | [`BusyLean/Contender24.lean`](BusyLean/Contender24.lean), [`Comparison24.lean`](BusyLean/Comparison24.lean) | Contender 24 definitions and theorems |
+| [`BusyLean/Contender25.lean`](BusyLean/Contender25.lean), [`Comparison25.lean`](BusyLean/Comparison25.lean) | Contender 25 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -703,6 +736,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 22 | Lean | this repository | ladders over a tower of Buchholz notations relativized to well-founded bases |
 | 23 | Lean | this repository | 22 with P22's transfinite (W-tree) rank for the lift hierarchy |
 | 24 | Lean | this repository | towers along well-founded indices, each round indexed by the previous one |
+| 25 | Lean | this repository | ladders over addresses in collapsed tree ordinals (P25's idea; well-foundedness for free) |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

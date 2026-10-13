@@ -92,6 +92,10 @@ Contender~22 relativizes the bounded systems to a well-founded base and
 iterates, which goes beyond $\psi_0(\Omega_\omega)$. Contender~23 adds a
 proposal's transfinite-rank hierarchy of lifts, and Contender~24 iterates the
 towers along well-founded indices, each round indexed by the previous one.
+Contender~25 adopts a proposal's key idea: atoms are addresses in a Lean-defined
+tree, so well-foundedness is structural and free. The ladder then runs over
+trees built by Buchholz-style collapsing functions defined by plain structural
+recursion, heuristically to $\psi_0(\varepsilon_{\Omega_\omega+n})$.
 \end{abstract}
 
 \tableofcontents
@@ -1195,6 +1199,64 @@ lift hierarchy seeded with Contender~23's family. Proved:
 \lean{rvalue\_lt\_F24}. The definitions check in 2.5\,s and the proofs in 2.2\,s.
 
 %======================================================================
+\section{Contender 25: well-foundedness for free}
+
+\subsection{More proposals, and one decisive idea}
+Four more proposals arrived (P23--P26), all over Contender~19's language. P23
+and P26 raise the lift hierarchy one type level (lifts of lifts). P24
+rediscovers P22's W-tree-ranked hierarchy. They all compile, P23 after the
+same one-step \lean{simpa} repair as P18, and none exceeds the current
+contenders. P25 contributes the decisive idea. Its atoms are \emph{finite
+addresses in a computable W-tree}. Following an address is a computation, so
+validity is decidable. The order between addresses is well-founded \emph{by
+structural recursion on the tree}, whatever ordinal the tree denotes.
+
+All ladders since Contender~16 paid for their length with a hand-written
+well-foundedness proof, and that cost stopped the notations at Buchholz's
+ordinal. With addresses, the cost disappears. The ladder length is the rank of
+\emph{any} tree that Lean can define, and Lean defines trees by structural
+recursion, with no proof obligations.
+
+\subsection{Addresses}
+\lean{TreeAddress.lean} uses tree ordinals (zero, successor, countable limits,
+and suprema over two index types, used by collapsing) and the \emph{strict
+descendant} order on valid addresses. P25 used immediate children. Accessibility
+of an address follows by recursion on the subtree it reaches
+(\lean{acc\_follow}). A strict descendant of $a$ is a descendant of some child
+of $a$ (\lean{isDesc\_split}), and addresses below a dead end are invalid.
+\lean{addr\_wf} uses only \lean{propext}.
+
+\subsection{Collapsing functions by structural recursion}
+\lean{TreeCollapse.lean} defines Buchholz-style collapsing on tree ordinals for
+all finite levels at once. Level-$(w{+}1)$ trees have suprema over all lower
+levels (lumped in one index type) and over level~$w$. The argument space has
+suprema at every finite level. Then
+\begin{lstlisting}
+def D : (v : ℕ) → TopT → LevT v
+  | v, .zero => LevT.Omega v
+  | v, .succ t => LevT.epsNext v (D v t)
+  | v, .lim f => LevT.lim v fun n => D v (f n)
+  | v, .supH g =>        -- below v: keep the supremum; for every j >= v: diagonalize
+      ... D v (g (v + i, seq (v + i) n)) ...   -- seq j (n+1) = D j (g (j, seq j n))
+\end{lstlisting}
+Lean accepts this as structural recursion: every recursive call is on
+\lean{g x} for some~\lean{x}. \lean{D} depends on no axioms at all.
+The countable tree \lean{bigTree n} collapses $n{+}1$ further $\varepsilon$-numbers
+above $\Omega_\omega+1$, where $\Omega_\omega=\lim_k\Omega_k$. Heuristically
+its rank is $\psi_0(\varepsilon_{\Omega_\omega+n})$. That is beyond Buchholz's
+ordinal, and in exactly the range where a notation-based proof would need
+distinguished sets.
+
+\subsection{The contender}
+Input $n$ uses the ladder over \lean{Addr (bigTree n)}, with the universe
+\lean{wfUniv f (addr\_wf (bigTree n))} and the W-ranked lift hierarchy seeded
+with Contender~24's family. Proved:
+\lean{contender\_24\_lt\_\allowbreak contender\_25}, \lean{family24\_lt\_F25} and
+\lean{avalue\_lt\_F25}. In the smoke test, an operator over the universe at
+address $(3,5)$ packs into the root's universe (value~12). The definitions check
+in 3.5\,s and the proofs in 2.2\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1202,9 +1264,10 @@ prove well-founded; $\varepsilon_0$, $\Gamma_0$ and the large Veblen ordinal are
 done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
 collapsing (Contender~20), and $\psi_0(\Omega_\omega)$ in the limit of bounded
 Buchholz systems (Contender~21). Contender~22 iterates bounded systems over a
-base. The next real step is a single notation for all levels at once (with
-$D_\omega$, reaching $\psi_0(\varepsilon_{\Omega_\omega+1})$), which needs
-Buchholz's distinguished sets. Collapsing functions need genuine normal forms: in Buchholz's raw order,
+base. Contender~25 sidesteps notations entirely: tree ordinals defined by
+structural recursion need no well-foundedness proof. The next steps there are
+collapsing functions with transfinitely many levels ($\Omega_\alpha$ for tree
+ordinals $\alpha$, reaching $\psi_0(\Omega_{\Omega_{\cdots}})$), and beyond. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
@@ -1244,6 +1307,7 @@ Contender & idea & informal size\\
 22 (Lean) & 15 over a tower of relativized Buchholz notations & beyond $\psi_0(\Omega_\omega)$\\
 23 (Lean) & 22 with P22's W-ranked lift hierarchy & transfinite rank over 22\\
 24 (Lean) & towers along well-founded indices, self-indexed rounds & fixed points of $x\mapsto\psi_0(\Omega_\omega x)$\\
+25 (Lean) & ladders over addresses in collapsed tree ordinals & $\psi_0(\varepsilon_{\Omega_\omega+n})$ at input $n$\\
 \bottomrule
 \end{tabular}
 \end{center}
