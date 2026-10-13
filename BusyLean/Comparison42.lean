@@ -34,7 +34,7 @@ theorem universal_stack_le_F42 (n : Nat) :
          (base42 (family41 n)) (readerTree (family41 n)))
       (family41 n))
     h1
-  simpa using h
+  simpa [Ordinal.hier] using h
 
 /-- `F42` is strictly inflationary. -/
 theorem input_lt_F42 (n : Nat) : n < F42 n :=
