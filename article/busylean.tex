@@ -152,6 +152,7 @@ Contender~65 makes the pattern of Contenders~57--64 a hierarchy of step
 operators along a tree.
 Contender~66 makes closing and towering values, so programs build such
 hierarchies themselves.
+Contender~67 raises the closing operator itself along a tree.
 \end{abstract}
 
 \tableofcontents
@@ -2357,6 +2358,27 @@ $N=\mathrm{family}_{65}(n)$. Proved: \lean{family65\_lt\_F66} and
 1.7\,s and the proofs in 3.0\,s.
 
 %======================================================================
+\section{Contender 67: a reflective tower of closure operators}
+
+Contender~66's $\mathsf{closeWith}$ closes the \emph{base} language with a
+family of closures. Contender~67 raises the closing operator itself along a tree:
+\[
+cw_0(H)=\text{closures of }P_{66}+[H],\qquad
+cw_{a+1}(H)=\text{closures of }P_{66}+[H,\ cw_a:(\mathsf{tree}\to C)\to C],
+\]
+with pointwise limits. The primitive types are the same at every successor
+level, so one recursion on the operator suffices. A program at level $a{+}1$ can
+close level~$a$'s language with families it builds, including towers of steps
+built from $cw_a$ itself. Stacking (Contender~62) is the special case of a
+constant family. Every level is a good closure pair for every family
+(\lean{good\_cwTower}). The tower runs to the height of Contender~66's tree to
+build a tree $T$, then to height $T$ for the number closure:
+$F_{67}(n)=h^{cw_T(\cdot).2(\mathrm{family}_{66})}_T(N)$ with
+$N=\mathrm{family}_{66}(n)$. Proved: \lean{family66\_lt\_F67} and
+\lean{contender\_66\_lt\_\allowbreak contender\_67}. The definitions check in
+1.8\,s and the proofs in 2.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2466,6 +2488,7 @@ Contender & idea & informal size\\
 64 (Lean) & Contender 63's step towered along a tree & $h_T$ over the tree-indexed tower\\
 65 (Lean) & hierarchy of step operators (the pattern of 57--64 iterated) & $h_T$ over $M_T$-towers\\
 66 (Lean) & closure-with-family and towering as values & $h_T$ over the language's closure\\
+67 (Lean) & reflective tower of closure-with-family operators & $h_T$ over $cw_T$\\
 \bottomrule
 \end{tabular}
 \end{center}
