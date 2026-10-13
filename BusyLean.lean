@@ -83,3 +83,6 @@ import BusyLean.Comparison31
 import BusyLean.Ordinal.TreeLanguage
 import BusyLean.Contender32
 import BusyLean.Comparison32
+import BusyLean.Ordinal.TreeLanguage2
+import BusyLean.Contender33
+import BusyLean.Comparison33
