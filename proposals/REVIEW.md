@@ -612,3 +612,13 @@ imported, and deleted:
 | `Contender42_ReaderTree_HyperHierarchy` | C41 | `hyperHier`: iterate the hierarchy-forming operator `g ↦ hier g T` along a second tree (here `succ T`) | a hierarchy along roughly `T·2`. Ordinal arithmetic on the index adds nothing: the trees `hier` runs along (Contender 38 on) are already closed under such operations, and later contenders' trees dwarf it |
 | `Contender42_StratifiedSemanticRayo` | C41 | a first-order language with arithmetic, iteration, an oracle, and rank-lowering semantic reflection; diagonal over ranks ≤ `n` | number-level reflection over a weak base language, the pattern of Contenders 6–14 over much stronger languages (System F, Fω, ladders); no kernel replay was run |
 | `Contender25_OmegaRound_Closure` (third batch) | C24 | atoms from the ω-limit of Contender 24's round towers (`WFO.sigma omegaIndex roundTower`) and `limitAlong` above it; `F24` orbit seed | a larger atom order, which a depth-`n` ladder cannot see; the orbit seed is a number-level iteration subsumed by `hier` |
+
+# Retired without import (2026-10-13, fourth batch)
+
+| Archive | Target | Idea | Why retired |
+|---|---|---|---|
+| `Contender50-ImpredicativeResourceReflection` | C49 | reflection values become the resource bounds (program depths, rounds, collapse parameters) of the next stage; two passes; successor-based final hierarchy | a number-level diagonal (composition). Contender 54's programs already build trees, reflect over them and iterate; not kernel-checked |
+| `Contender48_CertifiedDescent` | C47 | a first-order programming model whose recursion must descend a certificate tree | weaker than tree recursion at all types in FT2 and PTL; not kernel-checked |
+| `Contender54_Birkhoff_Sperner_Tower` | C53 | iterated order-ideal lattices of finite posets (Dedekind-number growth), iterated `family53 n + 1` times | a finite combinatorial amplifier of tower-like growth, far below the hierarchy machinery; not kernel-checked |
+| `Contender54_SemanticWorldClosure` | C53 | iterate a pair (number oracle, tree): jumps with the current oracle enlarge the tree, then reflection over it gives the next oracle | number oracles change trees only by finite amounts; the tree iteration is covered by Θ/Ψ/`iterLevel` and the reflection by Contender 54's `reflT` primitive; not kernel-checked |
+| `Contender54_TILED` | C53 | large elimination of a tree into `Type` (leaf `Nat`, successor endomorphisms, limit Π) with canonical iterators, observed as numbers | the pattern of Contender 31's transfinite types `AT` (there over universes), here over `Nat`. It gives about ε-type speed-ups along the tree, which the trees already absorb. It was CI-checked, but the idea is already in the repository |
