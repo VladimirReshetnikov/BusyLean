@@ -38,9 +38,13 @@ elab "#c7_assert_not_in_closure " root:ident " : " bad:ident* : command => do
   logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
 
 #print axioms BusyLean.contender_7
+#print axioms BusyLean.contender7_branch_step_lt
+#print axioms BusyLean.contender7_branch_zero_lt_succ
+#print axioms BusyLean.finalFamily_lt_contender7Branch42
 #print axioms BusyLean.contender_6_lt_contender_7
 #print axioms BusyLean.contender_5_lt_contender_7
 #print axioms BusyLean.finalFamily_lt_contender7Family
+#print axioms BusyLean.hyper41_lt_contender7Branch42
 #print axioms BusyLean.hyper41_lt_contender_7
 
 -- The definition is independent of the previous named values and comparison
