@@ -38,6 +38,11 @@ superseded target, a duplicate of an imported idea, or a construction made void
 by a known limitation. For example, a larger atom order for a ladder adds
 nothing, because a depth-`n` ladder program sees only a finite truncation of it
 (see the article's section "A correction: what a ladder sees").
+Likewise, a *finite combinatorial amplifier* (iterated lattice completions,
+wreath products, polynomial or free-monad towers, and similar) grows at most
+like an `N`-fold iteration of an elementary function, a tower of exponentials.
+That is negligible next to one application of the predecessor family it would
+be seeded with, so such proposals are retired as a class.
 
 So an empty `incoming/` (apart from this file) means every proposal received
 so far has been processed.
