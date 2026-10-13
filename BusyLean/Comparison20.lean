@@ -61,7 +61,7 @@ theorem family19_lt_F20 (n : Nat) : family19 n < F20 n := by
     ((diagonalLift_preservesProgressive (schedule20 n) (rank20 n))
       aTransformer aTransformer_progressive)
       orbit19 0 n n (Nat.zero_le n)
-  simpa only [orbit19_zero] using h
+  simpa only [orbit19_zero, F20] using h
 
 /-- The raw autonomous-universe reflection step is strictly below the full
 ranked hyperreflection. -/
