@@ -126,6 +126,7 @@ next, iterated along a tree.
 Contender~46 collapses the universes of codes of Contenders~27--31
 relative to the closure's operator.
 Contender~47 iterates that self-based iteration itself.
+Contender~48 indexes such iteration levels by a tree.
 \end{abstract}
 
 \tableofcontents
@@ -1929,6 +1930,27 @@ $N=\mathrm{family}_{46}(n)$. Proved: \lean{family46\_lt\_F47} and
 1.5\,s and the proofs in 2.1\,s.
 
 %======================================================================
+\section{Contender 48: a tree-indexed hierarchy of iteration levels}
+
+Contender~45's $\Theta$ (a base turned into an iteration along a tree) and
+Contender~47's $\Psi$ are the first two levels of a pattern. For any $\Phi$
+that turns a base into an iteration, $\mathrm{iterOf}(\Phi)$ iterates ``run
+$\Phi$ from the previous stage'':
+\[
+\mathrm{iterOf}(\Phi)(B)_0=B,\qquad
+\mathrm{iterOf}(\Phi)(B)_{a+1}(t)=\Phi\bigl(\mathrm{iterOf}(\Phi)(B)_a\bigr)_t(t),
+\]
+with pointwise limits, so $\Psi=\mathrm{iterOf}(\Theta)(\mathrm{metaJump})$.
+\lean{iterLevel} indexes these levels by a tree: level~0 is $\Theta$, level
+$k{+}1$ is $\mathrm{iterOf}$ of level~$k$, and limit levels are pointwise
+limits. This is a Veblen-style hierarchy of iteration operators. The level
+index, the iteration height and the argument are all Contender~47's tree:
+$F_{48}(n)=h^{\mathrm{family}_{47}}_{\mathrm{levelIterTree}(N)}(N)$ with
+$N=\mathrm{family}_{47}(n)$. Proved: \lean{family47\_lt\_F48} and
+\lean{contender\_47\_lt\_\allowbreak contender\_48}. The definitions check in
+1.5\,s and the proofs in 4.4\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -2010,6 +2032,7 @@ Contender & idea & informal size\\
 45 (Lean) & the construction as its own base, iterated along a tree & $h_{\mathrm{thetaTree}}$ over $F_{44}$\\
 46 (Lean) & universes of codes collapsed relative to the operator & $h_{\mathrm{univTree46}}$ over $F_{45}$\\
 47 (Lean) & the self-based iteration, iterated along a tree & $h_{\mathrm{psiTree}}$ over $F_{46}$\\
+48 (Lean) & tree-indexed hierarchy of iteration levels & $h_{\mathrm{levelIterTree}}$ over $F_{47}$\\
 \bottomrule
 \end{tabular}
 \end{center}

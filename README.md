@@ -9,7 +9,42 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 47
+## Current contender: Contender 48
+
+```lean
+def family47 (n : Nat) : Nat := F47 (F47 n)                  -- Contender 47 = family47 42
+def iterOf (Φ : (CTree → CTree) → CTree → CTree → CTree) (B : CTree → CTree) :
+    CTree → CTree → CTree                                     -- BusyLean/Contender48.lean
+  | .zero => B
+  | .succ a => fun t => Φ (iterOf Φ B a) t t
+  | .lim f => fun t => .lim fun i => iterOf Φ B (f i) t
+  | _ => B
+def iterLevel (N : Nat) : CTree → (CTree → CTree) → CTree → CTree → CTree
+  | .zero => thetaFrom N
+  | .succ k => iterOf (iterLevel N k)
+  | .lim f => fun B a t => .lim fun i => iterLevel N (f i) B a t
+  | _ => thetaFrom N
+def levelIterTree (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then psiTree N
+    else iterLevel N (psiTree N) (metaJump N) (psiTree N) (psiTree N)
+def F48 (n : Nat) : Nat := hier family47 (levelIterTree (family47 n)) (family47 n)
+def contender_48 : Nat := F48 (F48 42)
+
+theorem contender_47_lt_contender_48 : contender_47 < contender_48   -- BusyLean/Comparison48.lean
+```
+
+`Θ` (Contender 45) and `Ψ` (Contender 47) are the first levels of a pattern:
+`iterOf Φ` iterates "run `Φ` from the previous stage". `iterLevel` indexes these
+levels by a tree (level `k+1` is `iterOf` of level `k`, limits pointwise), a
+Veblen-style hierarchy of iteration operators. Level, height and argument are
+Contender 47's tree.
+
+| Theorem | Statement |
+|---|---|
+| `contender_47_lt_contender_48` | Contender 47 < Contender 48 |
+| `family47_lt_F48` | Contender 47's family is beaten at every input |
+
+## Contender 47
 
 ```lean
 def family46 (n : Nat) : Nat := F46 (F46 n)                  -- Contender 46 = family46 42
@@ -1235,8 +1270,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 47's definition modules take
-about 1.5 s and its proofs about 2.1 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 48's definition modules take
+about 1.5 s and its proofs about 4.4 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1307,6 +1342,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender45.lean`](BusyLean/Contender45.lean), [`Comparison45.lean`](BusyLean/Comparison45.lean) | Contender 45 definitions and theorems |
 | [`BusyLean/Contender46.lean`](BusyLean/Contender46.lean), [`Comparison46.lean`](BusyLean/Comparison46.lean) | Contender 46 definitions and theorems |
 | [`BusyLean/Contender47.lean`](BusyLean/Contender47.lean), [`Comparison47.lean`](BusyLean/Comparison47.lean) | Contender 47 definitions and theorems |
+| [`BusyLean/Contender48.lean`](BusyLean/Contender48.lean), [`Comparison48.lean`](BusyLean/Comparison48.lean) | Contender 48 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1361,6 +1397,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 45 | Lean | this repository | each stage of the construction is the base primitive of the next, along a tree |
 | 46 | Lean | this repository | universes of codes (Contenders 27–31) collapsed relative to the closure's operator |
 | 47 | Lean | this repository | the self-based iteration of Contender 45, itself iterated along a tree |
+| 48 | Lean | this repository | Veblen-style hierarchy of iteration levels indexed by a tree |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
