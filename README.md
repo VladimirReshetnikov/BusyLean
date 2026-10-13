@@ -9,7 +9,36 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 59
+## Current contender: Contender 60
+
+```lean
+def towerH (P : List TL.Ty) (σ : TL.Env P) (H : CTree → Closures) : CTree → Closures
+  -- Contender 59's tower whose languages also contain H t for every height t
+def upLevels (P : List TL.Ty) (σ : TL.Env P) : CTree → CTree → Closures   -- Contender60.lean
+  | .zero => towerT P σ
+  | .succ k => towerH P σ (upLevels P σ k)
+  | .lim f => pointwise
+  | _ => towerT P σ
+def family59 (n : Nat) : Nat := F59 (F59 n)                  -- Contender 59 = family59 42
+def F60 (n : Nat) : Nat :=
+  hier (upClosure (family59 n) family59 (upTree (family59 n))) (upTree (family59 n)) (family59 n)
+def contender_60 : Nat := F60 (F60 42)
+
+theorem contender_59_lt_contender_60 : contender_59 < contender_60   -- BusyLean/Comparison60.lean
+```
+
+A tower can carry a height-indexed family of closures as extra primitives
+(`towerH`). Iterating `H ↦ towerH H` along a tree gives a hierarchy of tower
+operators: level `k+1`'s towers contain level `k`'s towers at every height.
+Level, height and argument are Contender 59's tree.
+
+| Theorem | Statement |
+|---|---|
+| `contender_59_lt_contender_60` | Contender 59 < Contender 60 |
+| `family59_lt_F60` | Contender 59's family is beaten at every input |
+| `Ordinal.lt_upLevels` | every level and height strictly dominates its oracle and argument |
+
+## Contender 59
 
 ```lean
 def towerStep (P : List TL.Ty) (σ : TL.Env P) (c : Closures) : Closures :=  -- Contender59.lean
@@ -1581,8 +1610,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 59's definition modules take
-about 1.1 s and its proofs about 2.0 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 60's definition modules take
+about 1.0 s and its proofs about 1.9 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1665,6 +1694,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender57.lean`](BusyLean/Contender57.lean), [`Comparison57.lean`](BusyLean/Comparison57.lean) | Contender 57 definitions and theorems |
 | [`BusyLean/Contender58.lean`](BusyLean/Contender58.lean), [`Comparison58.lean`](BusyLean/Comparison58.lean) | Contender 58 definitions and theorems |
 | [`BusyLean/Contender59.lean`](BusyLean/Contender59.lean), [`Comparison59.lean`](BusyLean/Comparison59.lean) | Contender 59 definitions and theorems |
+| [`BusyLean/Contender60.lean`](BusyLean/Contender60.lean), [`Comparison60.lean`](BusyLean/Comparison60.lean) | Contender 60 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1731,6 +1761,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 57 | Lean | this repository | joint stacks as primitives at program-chosen heights |
 | 58 | Lean | this repository | a tower of N languages, each with the joint stacks over the previous one as primitives |
 | 59 | Lean | this repository | the tower of stack-reflecting languages, indexed by a tree |
+| 60 | Lean | this repository | a hierarchy of tower operators, each level's towers primitives of the next |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
