@@ -135,6 +135,8 @@ trees.
 Contender~52 stacks those languages along a tree.
 Contender~53 iterates the reflection along the tree, each level an oracle of
 the next.
+Contender~54 makes that reflection a primitive of the language, applicable
+to any tree a program builds.
 \end{abstract}
 
 \tableofcontents
@@ -2062,6 +2064,27 @@ $N=\mathrm{family}_{52}(n)$ and $T=\mathrm{stackTree}(N)$. Proved:
 The definitions check in 1.6\,s and the proofs in 4.7\,s.
 
 %======================================================================
+\section{Contender 54: reflection as a primitive}
+
+Contender~53 iterates ladder reflection along one fixed tree, which is one
+particular recursion. Contender~54 makes reflection a primitive of Contender~51's
+language over the iteration operators:
+\[
+\mathsf{reflT}:\mathsf{tree}\to(\mathsf{nat}\to\mathsf{nat})\to\mathsf{nat}\to\mathsf{nat},\qquad
+\mathsf{reflT}\ t\ g=L^{g,t},
+\]
+next to the number oracle $g$ and all of Contender~51's tree primitives. Closed
+programs of type $\mathsf{nat}$ can build trees with the jumps, collapses and
+iteration operators, reflect over \emph{any} tree they build, and iterate this
+at higher types. Contender~53's $\rho$ is one such program. The reflection
+$\mathrm{numReflect}_N(g)(m)$ exceeds $g(m)$ and every closed $\mathsf{nat}$
+program of size $\le m$ (\lean{program\_lt\_numReflect}), and
+$F_{54}(n)=h^{\mathrm{numReflect}_N(\mathrm{family}_{53})}_T(N)$ with
+$N=\mathrm{family}_{53}(n)$ and $T=\mathrm{stackTree}(N)$. Proved:
+\lean{family53\_lt\_F54} and \lean{contender\_53\_lt\_\allowbreak contender\_54}.
+The definitions check in 1.9\,s and the proofs in 2.5\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2158,6 +2181,7 @@ Contender & idea & informal size\\
 51 (Lean) & System T over trees with the iteration operators as primitives & ladder reflection along the program tree\\
 52 (Lean) & the languages of Contender 51 stacked along a tree & ladder reflection along the stacked tree\\
 53 (Lean) & ladder reflection iterated along the tree & hyperreflection along the stacked tree\\
+54 (Lean) & reflection over any program-built tree as a primitive & closed nat programs over reflection\\
 \bottomrule
 \end{tabular}
 \end{center}

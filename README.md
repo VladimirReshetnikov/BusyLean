@@ -9,7 +9,35 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 53
+## Current contender: Contender 54
+
+```lean
+def prims54 : List TL.Ty :=                                   -- BusyLean/Contender54.lean
+  prims51 ++ [.arr .tree (.arr (.arr .nat .nat) (.arr .nat .nat)), .arr .nat .nat]
+def primEnv54 (N : Nat) (g : Nat → Nat) : TL.Env prims54 :=
+  (levelIterTree N, metaJump N, closeU N, thetaFrom N, iterOf, fun t h => ladderReflect h t, g, ())
+def numReflect (N : Nat) (g : Nat → Nat) (m : Nat) : Nat :=
+  m + 1 + maxN (g m) (maximum id (PTL.natsUpTo prims54 (primEnv54 N g) m))
+def family53 (n : Nat) : Nat := F53 (F53 n)                  -- Contender 53 = family53 42
+def F54 (n : Nat) : Nat := hier (numReflect (family53 n) family53) (stackTree (family53 n)) (family53 n)
+def contender_54 : Nat := F54 (F54 42)
+
+theorem contender_53_lt_contender_54 : contender_53 < contender_54   -- BusyLean/Comparison54.lean
+```
+
+Reflection is a **primitive** of Contender 51's language:
+`reflT t g = ladderReflect g t` reflects over any tree a program builds. With the
+number oracle and the tree primitives, closed `nat` programs can build trees,
+reflect over them, and iterate this at higher types. Contender 53's `reflAlong`
+is one such program.
+
+| Theorem | Statement |
+|---|---|
+| `contender_53_lt_contender_54` | Contender 53 < Contender 54 |
+| `family53_lt_F54` | Contender 53's family is beaten at every input |
+| `program_lt_numReflect` | every closed `nat` program of size ≤ `m` over the primitives is below the reflection |
+
+## Contender 53
 
 ```lean
 def reflAlong (T : CTree) (g : Nat → Nat) : CTree → Nat → Nat   -- BusyLean/Contender53.lean
@@ -1406,8 +1434,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 53's definition modules take
-about 1.6 s and its proofs about 4.7 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 54's definition modules take
+about 1.9 s and its proofs about 2.5 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1484,6 +1512,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender51.lean`](BusyLean/Contender51.lean), [`Comparison51.lean`](BusyLean/Comparison51.lean) | Contender 51 definitions and theorems |
 | [`BusyLean/Contender52.lean`](BusyLean/Contender52.lean), [`Comparison52.lean`](BusyLean/Comparison52.lean) | Contender 52 definitions and theorems |
 | [`BusyLean/Contender53.lean`](BusyLean/Contender53.lean), [`Comparison53.lean`](BusyLean/Comparison53.lean) | Contender 53 definitions and theorems |
+| [`BusyLean/Contender54.lean`](BusyLean/Contender54.lean), [`Comparison54.lean`](BusyLean/Comparison54.lean) | Contender 54 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1544,6 +1573,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 51 | Lean | this repository | System T over trees with the iteration operators as primitives |
 | 52 | Lean | this repository | the languages over the iteration operators, stacked along a tree with first-class closure |
 | 53 | Lean | this repository | ladder reflection iterated along the tree (hyperreflection along it) |
+| 54 | Lean | this repository | reflection over any program-built tree as a primitive of the language |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
