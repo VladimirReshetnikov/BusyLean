@@ -118,7 +118,8 @@ the impredicative jump with predicative collapse. System~FT2 adds tree recursion
 over an input tree, which makes the jump a genuine operator, and Contender~40
 places it under a metalanguage with first-class language closure. Contender~41
 gives the ladder language the same recursor over its input tree, and
-Contender~42 collapses relative to these jumps.
+Contender~42 collapses relative to these jumps, and Contender~43 makes the
+collapse a first-class closure inside the metalanguages.
 \end{abstract}
 
 \tableofcontents
@@ -1813,6 +1814,28 @@ Proved: \lean{family41\_lt\_F42} and \lean{contender\_41\_lt\_\allowbreak conten
 The definitions check in 1.9\,s and the proofs in 1.9\,s.
 
 %======================================================================
+\section{Contender 43: collapse as a first-class closure}
+
+Contender~42 collapsed relative to one fixed operator. P27's metalanguage takes
+its closure operator $\mathsf{lift}:(\mathsf{tree}\to\mathsf{tree})\to\mathsf{tree}\to\mathsf{tree}$
+as a parameter, and so far it was language closure (\lean{langLift}).
+Contender~43's closure also collapses:
+\[
+\mathrm{closeC}_N(J)(t)=\lim\bigl(\mathrm{langLift}(J)(t),\ \mathrm{relCollapse}(J)(t)\bigr).
+\]
+\lean{metaBoostC} stacks metalanguages along a tree with this closure at
+level~0. A level-1 program builds operators from the meta-jump, collapses
+relative to them, and iterates the results by tree recursion. A level-$(a{+}1)$
+program calls the whole closure of level~$a$ as a value, so it can collapse
+relative to collapses. The stack runs to the height of Contender~42's tree,
+over the meta-jump, applied to that tree:
+\[
+F_{43}(n)=h^{\mathrm{family}_{42}}_{\mathrm{collapseTree43}(N)}(N),\qquad N=\mathrm{family}_{42}(n).
+\]
+Proved: \lean{family42\_lt\_F43} and \lean{contender\_42\_lt\_\allowbreak contender\_43}.
+The definitions check in 1.4\,s and the proofs in 2.2\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1889,6 +1912,7 @@ Contender & idea & informal size\\
 40 (Lean) & FT2 jump (tree recursion) under metalanguages & $h_{\mathrm{metaTree}}$ over $F_{39}$\\
 41 (Lean) & ladder reader programs (FLT2) under metalanguages & $h_{\mathrm{readerTree}}$ over $F_{40}$\\
 42 (Lean) & Buchholz collapse relative to the meta-jump & $h_{\mathrm{collapseTree}}$ over $F_{41}$\\
+43 (Lean) & metalanguages whose closure collapses & $h_{\mathrm{collapseTree43}}$ over $F_{42}$\\
 \bottomrule
 \end{tabular}
 \end{center}

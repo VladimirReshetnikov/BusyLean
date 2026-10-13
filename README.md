@@ -9,7 +9,33 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 42
+## Current contender: Contender 43
+
+```lean
+def family42 (n : Nat) : Nat := F42 (F42 n)                  -- Contender 42 = family42 42
+def closeC (N : Nat) (J : CTree → CTree) (t : CTree) : CTree := -- BusyLean/Contender43.lean
+  .lim fun i => if i = 0 then langLift J t else relCollapse J N t
+def collapseTree43 (N : Nat) : CTree :=
+  .lim fun i => if i = 0 then collapseTree N
+    else metaBoostC (closeC N) (collapseTree N) (metaJump N) (collapseTree N)
+def F43 (n : Nat) : Nat := hier family42 (collapseTree43 (family42 n)) (family42 n)
+def contender_43 : Nat := F43 (F43 42)
+
+theorem contender_42_lt_contender_43 : contender_42 < contender_43   -- BusyLean/Comparison43.lean
+```
+
+P27's metalanguages take their closure operator as a parameter. In Contender 43
+it joins language closure with collapse relative to the operator (`closeC`), so
+programs can collapse relative to operators they build, including collapses of
+the previous level. `metaBoostC` stacks these metalanguages to the height of
+Contender 42's tree over the meta-jump.
+
+| Theorem | Statement |
+|---|---|
+| `contender_42_lt_contender_43` | Contender 42 < Contender 43 |
+| `family42_lt_F43` | Contender 42's family is beaten at every input |
+
+## Contender 42
 
 ```lean
 def family41 (n : Nat) : Nat := F41 (F41 n)                  -- Contender 41 = family41 42
@@ -1102,8 +1128,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 42's definition modules take
-about 2 s and its proofs about 2 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 43's definition modules take
+about 1.4 s and its proofs about 2.2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1169,6 +1195,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender40.lean`](BusyLean/Contender40.lean), [`Comparison40.lean`](BusyLean/Comparison40.lean) | Contender 40 definitions and theorems |
 | [`BusyLean/Contender41.lean`](BusyLean/Contender41.lean), [`Comparison41.lean`](BusyLean/Comparison41.lean) | Contender 41 definitions and theorems |
 | [`BusyLean/Contender42.lean`](BusyLean/Contender42.lean), [`Comparison42.lean`](BusyLean/Comparison42.lean) | Contender 42 definitions and theorems |
+| [`BusyLean/Contender43.lean`](BusyLean/Contender43.lean), [`Comparison43.lean`](BusyLean/Comparison43.lean) | Contender 43 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1218,6 +1245,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 40 | Lean | this repository | System FT2 jump (tree recursion over the input) under P27's metalanguages |
 | 41 | Lean | this repository | ladder reader programs (SystemFLT2) as the jump, under the metalanguages |
 | 42 | Lean | this repository | Buchholz-style collapse relative to the meta-jump |
+| 43 | Lean | this repository | metalanguages whose first-class closure also collapses |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see
