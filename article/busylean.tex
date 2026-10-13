@@ -101,7 +101,8 @@ heuristically climbing toward the fixed points of $\alpha\mapsto\psi_0(\Omega_\a
 Contender~27 stratifies level codes into universes, toward an inaccessible-like
 level, and Contender~28 stacks the universes along tree ordinals given by
 earlier collapses. Contender~29 iterates the universe-building operators
-themselves, indexed by tree ordinals.
+themselves, indexed by tree ordinals, and Contender~30 lifts closure to all
+finite types over universes.
 \end{abstract}
 
 \tableofcontents
@@ -1382,6 +1383,27 @@ family. Proved: \lean{contender\_28\_lt\_\allowbreak contender\_29},
 2.4\,s and the proofs in 2.3\,s.
 
 %======================================================================
+\section{Contender 30: closure functionals of all finite types}
+
+Contender~29 closes universe operators under iteration. The closure operation
+itself can be lifted to every finite type over universes
+(\lean{TreeUniverses4.lean}):
+\[
+A_0=\mathrm{Univ},\qquad A_{k+1}=A_k\to A_k,\qquad
+\mathrm{closure}_k\,f\,a=\textstyle\bigcup_m f^m(a)\quad(f\in A_{k+1}),
+\]
+with unions taken pointwise at every type. $\mathrm{closure}_0$ is Contender~29's
+$\Phi$. $\mathrm{closure}_1$ closes $\Phi$-like functionals under iteration, and
+so on. At input $n$ the chain $\mathrm{closure}_n,\dots,\mathrm{closure}_0$ is
+applied to Contender~29's operator $\Phi_\Lambda$ and then to the base universe.
+The resulting universe is collapsed to a countable tree, and the ladder runs over
+its addresses. No axioms are used. Heuristically each type level adds a further
+layer of closure points, a hierarchy of inaccessible-like universes of higher
+type. Proved: \lean{contender\_29\_lt\_\allowbreak contender\_30},
+\lean{family29\_lt\_F30} and \lean{tlvalue\_lt\_F30}. The definitions check in
+2.1\,s and the proofs in 2.0\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1439,6 +1461,7 @@ Contender & idea & informal size\\
 27 (Lean) & universes of level codes & toward the first fixed point of $\alpha\mapsto\Omega_\alpha$\\
 28 (Lean) & universes stacked along collapsed trees & iterated universe heights\\
 29 (Lean) & higher-order universe operators along trees & hierarchy of inaccessible-like closures\\
+30 (Lean) & closure functionals of all finite types & higher-type closure hierarchies\\
 \bottomrule
 \end{tabular}
 \end{center}
