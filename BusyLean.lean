@@ -170,3 +170,5 @@ import BusyLean.Contender68
 import BusyLean.Comparison68
 import BusyLean.Contender69
 import BusyLean.Comparison69
+import BusyLean.Contender70
+import BusyLean.Comparison70
