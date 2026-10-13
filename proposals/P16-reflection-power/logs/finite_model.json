@@ -1,0 +1,162 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "n": 0,
+      "orders_0_through_3": [
+        6,
+        12,
+        30,
+        84
+      ]
+    },
+    {
+      "n": 1,
+      "orders_0_through_3": [
+        14,
+        38,
+        134,
+        518
+      ]
+    },
+    {
+      "n": 2,
+      "orders_0_through_3": [
+        24,
+        60,
+        204,
+        780
+      ]
+    }
+  ],
+  "comparison_chains": [
+    {
+      "n": 0,
+      "scheduler_order": 0,
+      "leaf": 6,
+      "depth0": 9,
+      "index": 12
+    },
+    {
+      "n": 0,
+      "scheduler_order": 1,
+      "leaf": 12,
+      "depth0": 21,
+      "index": 30
+    },
+    {
+      "n": 0,
+      "scheduler_order": 2,
+      "leaf": 30,
+      "depth0": 57,
+      "index": 84
+    },
+    {
+      "n": 0,
+      "scheduler_order": 3,
+      "leaf": 84,
+      "depth0": 165,
+      "index": 246
+    },
+    {
+      "n": 1,
+      "scheduler_order": 0,
+      "leaf": 14,
+      "depth0": 22,
+      "index": 38
+    },
+    {
+      "n": 1,
+      "scheduler_order": 1,
+      "leaf": 38,
+      "depth0": 70,
+      "index": 134
+    },
+    {
+      "n": 1,
+      "scheduler_order": 2,
+      "leaf": 134,
+      "depth0": 262,
+      "index": 518
+    },
+    {
+      "n": 1,
+      "scheduler_order": 3,
+      "leaf": 518,
+      "depth0": 1030,
+      "index": 2054
+    },
+    {
+      "n": 2,
+      "scheduler_order": 0,
+      "leaf": 24,
+      "depth0": 36,
+      "index": 60
+    },
+    {
+      "n": 2,
+      "scheduler_order": 1,
+      "leaf": 60,
+      "depth0": 108,
+      "index": 204
+    },
+    {
+      "n": 2,
+      "scheduler_order": 2,
+      "leaf": 204,
+      "depth0": 396,
+      "index": 780
+    },
+    {
+      "n": 2,
+      "scheduler_order": 3,
+      "leaf": 780,
+      "depth0": 1548,
+      "index": 3084
+    }
+  ],
+  "tested_orders": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "tested_inputs": [
+    0,
+    1,
+    2
+  ],
+  "interned_family_count": 625,
+  "cache": {
+    "family_value": {
+      "hits": 24,
+      "misses": 3206,
+      "maxsize": null,
+      "currsize": 3206
+    },
+    "stage_eval": {
+      "hits": 7500,
+      "misses": 6493,
+      "maxsize": null,
+      "currsize": 6493
+    },
+    "order_eval": {
+      "hits": 36,
+      "misses": 1680,
+      "maxsize": null,
+      "currsize": 1680
+    },
+    "lift_eval": {
+      "hits": 1905,
+      "misses": 1680,
+      "maxsize": null,
+      "currsize": 1680
+    }
+  },
+  "claims_checked": [
+    "visible base-seed values are dominated at every tested order",
+    "each scheduler order is strictly larger than its predecessor",
+    "the leaf -> depth-0 join -> universal-index chain is strict"
+  ],
+  "disclaimer": "Finite analogue only; not a Lean kernel proof."
+}

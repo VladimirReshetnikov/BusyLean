@@ -1,0 +1,33 @@
+BusyLean seeded reflection-power package inventory
+Target commit: 86b360648163f0249eab79539438b6a83dfe8215
+
+BUILD.md	785 bytes
+INVENTORY.txt	108 bytes
+Makefile	237 bytes
+README.md	757 bytes
+VALIDATION.md	1282 bytes
+article/reflection_power_contender.pdf	448406 bytes
+article/reflection_power_contender.tex	37336 bytes
+ci/contender7.yml	832 bytes
+lean/BusyLean.lean.append	79 bytes
+lean/BusyLean/Comparison7.lean	4772 bytes
+lean/BusyLean/Contender7.lean	1765 bytes
+lean/patches/contender7.patch	10103 bytes
+lean/test/Contender7Audit.lean	2261 bytes
+logs/article_build.txt	343 bytes
+logs/finite_model.json	2658 bytes
+logs/finite_model.txt	2658 bytes
+logs/ordinal_calibration.json	622 bytes
+logs/ordinal_calibration.txt	622 bytes
+logs/pdf_inspect.txt	3016 bytes
+logs/pdf_preflight.txt	173 bytes
+logs/static_audit.json	746 bytes
+logs/static_audit.txt	746 bytes
+proposal.json	799 bytes
+research/ordinal_calibration.md	1000 bytes
+research/repository_audit.md	1339 bytes
+scripts/finite_model.py	5102 bytes
+scripts/ordinal_calibration.py	968 bytes
+scripts/run_checks.sh	321 bytes
+scripts/static_audit.py	4773 bytes
+scripts/verify_manifest.py	861 bytes

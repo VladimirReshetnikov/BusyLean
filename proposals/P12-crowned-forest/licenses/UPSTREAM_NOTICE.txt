@@ -1,0 +1,4 @@
+BusyLean is distributed under the MIT-0 license at the pinned repository
+revision.  This package does not redistribute the whole repository; it records
+provenance and supplies additive candidate modules intended for integration.
+Consult the upstream LICENSE before redistribution.

@@ -1,0 +1,25 @@
+{
+  "commit": "4c4b03d0e2003c479e3bee90a21c8bea13f66c40",
+  "commit_message": "Document Contender 10, the kind-polymorphic jump",
+  "current_comparison": "BusyLean.contender_9_lt_contender_10",
+  "current_contender": "BusyLean.contender_10",
+  "current_definition": "F10 (F10 42)",
+  "important_blob_sha1": {
+    "BusyLean.lean": "5ab18188ce3c67ab09ab70f9bd48cc241c5b8516",
+    "BusyLean/Comparison10.lean": "b69515597a4b0999e490a34d6aa650131fd3cd93",
+    "BusyLean/Comparison9.lean": "586cd3949d512ae39d3ac620315da85aae12c39a6",
+    "BusyLean/Contender10.lean": "55c4e44637b640666b927a842b0825d9551e51d2",
+    "BusyLean/Contender6.lean": "248aa97049d0045b9635bb816842870d4a19eaed",
+    "BusyLean/Contender9.lean": "9673d7308f0e1ade6d6b8520937a6362197e111c",
+    "README.md": "67e836116afa1e3507e65aa9992c39a6c1e6a819"
+  },
+  "lean_release": {
+    "linux_asset": "lean-4.34.0-linux.tar.zst",
+    "linux_asset_sha256": "caaa98356098c85dc0fcbbd28e1ec66f39eb6551829972b752ff20e1286b646b",
+    "linux_asset_size_bytes": 580367391,
+    "published_at": "2026-09-14T14:04:36Z",
+    "version": "4.34.0"
+  },
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "repository": "VladimirReshetnikov/BusyLean"
+}

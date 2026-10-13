@@ -1,0 +1,7 @@
+{
+  "status": "not_run",
+  "pinned_commit": "4c4b03d0e2003c479e3bee90a21c8bea13f66c40",
+  "repo": "/mnt/data",
+  "phases": [],
+  "reason": "lake is not available on PATH"
+}

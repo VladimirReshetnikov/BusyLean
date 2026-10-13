@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "scope": "installer dry-run, first installation, and idempotent second installation on a synthetic compatible checkout",
+  "commands": [
+    "python3 scripts/install_into_repo.py --repo <synthetic> --dry-run",
+    "python3 scripts/install_into_repo.py --repo <synthetic>",
+    "python3 scripts/install_into_repo.py --repo <synthetic>"
+  ]
+}

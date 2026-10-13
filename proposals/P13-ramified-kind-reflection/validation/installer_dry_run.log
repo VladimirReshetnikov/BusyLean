@@ -1,0 +1,8 @@
+would copy /mnt/data/BusyLean_Contender11_DRKR/lean/BusyLean/Contender11.lean -> /tmp/tmp.QTyT0bK6Wr/BusyLean/Contender11.lean
+would copy /mnt/data/BusyLean_Contender11_DRKR/lean/BusyLean/Comparison11.lean -> /tmp/tmp.QTyT0bK6Wr/BusyLean/Comparison11.lean
+would copy /mnt/data/BusyLean_Contender11_DRKR/lean/test/Contender11Audit.lean -> /tmp/tmp.QTyT0bK6Wr/test/Contender11Audit.lean
+would copy /mnt/data/BusyLean_Contender11_DRKR/scripts/check_contender11.py -> /tmp/tmp.QTyT0bK6Wr/scripts/check_contender11.py
+would write /tmp/tmp.QTyT0bK6Wr/BusyLean.lean
+would write /tmp/tmp.QTyT0bK6Wr/scripts/check.py
+would write /tmp/tmp.QTyT0bK6Wr/test/Audit.lean
+installation edits complete

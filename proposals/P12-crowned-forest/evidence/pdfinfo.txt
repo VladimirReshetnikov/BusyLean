@@ -1,0 +1,22 @@
+Title:           Crowned Kind-Polymorphic Forest Reflection
+Subject:         
+Keywords:        
+Author:          OpenAI research package for BusyLean
+Creator:         LaTeX with hyperref
+Producer:        pdfTeX-1.40.26
+CreationDate:    Tue Oct 13 03:22:22 2026 UTC
+ModDate:         Tue Oct 13 03:22:22 2026 UTC
+Custom Metadata: yes
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           22
+Encrypted:       no
+Page size:       612 x 792 pts (letter)
+Page rot:        0
+File size:       522905 bytes
+Optimized:       no
+PDF version:     1.7

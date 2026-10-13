@@ -1,0 +1,122 @@
+{
+  "checks": [
+    {
+      "detail": "comments may discuss contender_10; executable syntax must not reference it",
+      "name": "definition avoids named previous scalar",
+      "passed": true
+    },
+    {
+      "detail": "keeps proof modules out of the definition dependency closure",
+      "name": "definition imports only prior definition phase",
+      "passed": true
+    },
+    {
+      "detail": "reflect11",
+      "name": "definition reflect11 present",
+      "passed": true
+    },
+    {
+      "detail": "stage11",
+      "name": "definition stage11 present",
+      "passed": true
+    },
+    {
+      "detail": "crown11",
+      "name": "definition crown11 present",
+      "passed": true
+    },
+    {
+      "detail": "family10",
+      "name": "definition family10 present",
+      "passed": true
+    },
+    {
+      "detail": "F11",
+      "name": "definition F11 present",
+      "passed": true
+    },
+    {
+      "detail": "contender_11",
+      "name": "definition contender_11 present",
+      "passed": true
+    },
+    {
+      "detail": "oracle_lt_reflect11",
+      "name": "theorem oracle_lt_reflect11 present",
+      "passed": true
+    },
+    {
+      "detail": "fvalue_lt_reflect11",
+      "name": "theorem fvalue_lt_reflect11 present",
+      "passed": true
+    },
+    {
+      "detail": "stage11_crown_step_lt",
+      "name": "theorem stage11_crown_step_lt present",
+      "passed": true
+    },
+    {
+      "detail": "family10_lt_F11",
+      "name": "theorem family10_lt_F11 present",
+      "passed": true
+    },
+    {
+      "detail": "defined_tree_eventually_lt11",
+      "name": "theorem defined_tree_eventually_lt11 present",
+      "passed": true
+    },
+    {
+      "detail": "root_program_lt_F11",
+      "name": "theorem root_program_lt_F11 present",
+      "passed": true
+    },
+    {
+      "detail": "contender_10_lt_contender_11",
+      "name": "theorem contender_10_lt_contender_11 present",
+      "passed": true
+    },
+    {
+      "detail": "strict comparison statement",
+      "name": "required comparison has strict target",
+      "passed": true
+    },
+    {
+      "detail": "kernel-side transitive dependency audit supplied",
+      "name": "audit checks closure hygiene",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "files": {
+    "candidate/BusyLean/Comparison11.lean": {
+      "bytes": 6748,
+      "delimiter_check": "balanced",
+      "forbidden_tokens": [],
+      "lines": 160,
+      "sha256": "a8b18d2de427071a0a93d89255aec01c0a455906e99a54d13f5b81c5e6ee2abf"
+    },
+    "candidate/BusyLean/Contender11.lean": {
+      "bytes": 2224,
+      "delimiter_check": "balanced",
+      "forbidden_tokens": [],
+      "lines": 59,
+      "sha256": "7101c5c154265b86adbce0aba13ef5dbd417107b0156df5bececf129760b1912"
+    },
+    "candidate/test/Audit11.lean": {
+      "bytes": 2211,
+      "delimiter_check": "balanced",
+      "forbidden_tokens": [],
+      "lines": 63,
+      "sha256": "3fb6203b080e7bc6df57cd6946d36d9516cb3eea90cf5e1ddabf9eb5205e787f"
+    },
+    "candidate/test/Contender11Smoke.lean": {
+      "bytes": 523,
+      "delimiter_check": "balanced",
+      "forbidden_tokens": [],
+      "lines": 22,
+      "sha256": "974b0c0aa3a0949aa0bf3d0f71b2f596611c4ec551b6c5e2286ed5b74a391de3"
+    }
+  },
+  "scope": "static source audit only; not parsing/elaboration/kernel checking",
+  "status": "passed"
+}

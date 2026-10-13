@@ -1,0 +1,24 @@
+PDF visual inspection record
+============================
+
+File: article/contender11.pdf
+Renderer: /home/oai/skills/pdfs/scripts/render_pdf.py
+Resolution: 170 dpi
+Rendered pages: 20
+Inspection method: four contact sheets covering pages 1-5, 6-10, 11-15, and 16-20, with spot checks of the construction diagram and code-heavy appendix pages.
+
+Observed result:
+- no clipped body text;
+- no overlapping paragraphs, tables, listings, or headers;
+- no black squares or broken mathematical glyphs;
+- construction diagram remains within page bounds;
+- code listings wrap within their frames;
+- table rules and page numbers render correctly;
+- title, table of contents, theorem statements, verification caveat, appendices, and bibliography are visible.
+
+The page-render PNGs were removed after inspection so the deliverable contains only the final PDF and textual validation records.
+
+Final re-render after the `Nat.succ` code-listing edit:
+- all 20 pages rendered successfully at 170 dpi;
+- pages 1, 7, 9, 18, and 20 were spot-checked;
+- layout and glyph quality remained correct.

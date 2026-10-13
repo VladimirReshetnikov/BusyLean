@@ -1,0 +1,5 @@
+{
+  "status": "passed",
+  "check": "executable Contender11.lean syntax contains no identifier contender_10",
+  "method": "nested-comment/string stripping followed by tokenization"
+}

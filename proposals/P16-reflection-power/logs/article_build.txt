@@ -1,0 +1,10 @@
+Article build command:
+  cd article && latexmk -pdf -interaction=nonstopmode -halt-on-error reflection_power_contender.tex
+
+Result:
+  PASS
+  20 US-letter pages
+  All references resolved
+  No overfull boxes after final rebuild
+  Rendered at 160 dpi and visually inspected page by page
+  PDF preflight: openable, unencrypted, text-based, no XFA

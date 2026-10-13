@@ -1,0 +1,1265 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{fancyhdr}
+
+\definecolor{deepblue}{RGB}{29,66,123}
+\definecolor{softgray}{RGB}{245,246,248}
+\definecolor{darkred}{RGB}{130,25,25}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=deepblue,
+  urlcolor=deepblue,
+  citecolor=deepblue,
+  pdftitle={An Omega-Diagonal Forest Reflection Above BusyLean Contender 10},
+  pdfauthor={Research proposal for BusyLean}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{BusyLean Contender 11 proposal}
+\rhead{October 2026}
+\cfoot{\thepage}
+\setlength{\headheight}{14pt}
+
+\lstdefinelanguage{lean}{
+  keywords={def,theorem,inductive,structure,where,match,with,fun,let,in,
+    namespace,end,open,abbrev,import,by,have,show,exact,termination_by,
+    unfold,change,simpa,using,cases,obtain,refine},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]"
+}
+\lstset{
+  language=lean,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\bfseries\color{deepblue},
+  commentstyle=\itshape\color{black!58},
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{black!25},
+  backgroundcolor=\color{softgray},
+  xleftmargin=0.8em,
+  xrightmargin=0.8em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  breaklines=true,
+  breakatwhitespace=false,
+  literate=
+    {→}{{$\to$}}1
+    {←}{{$\leftarrow$}}1
+    {ℕ}{{$\mathbb N$}}1
+    {∀}{{$\forall$}}1
+    {∃}{{$\exists$}}1
+    {≤}{{$\le$}}1
+    {<}{{$<$}}1
+    {∈}{{$\in$}}1
+    {×}{{$\times$}}1
+    {λ}{{$\lambda$}}1
+    {ω}{{$\omega$}}1
+    {κ}{{$\kappa$}}1
+    {·}{{$\cdot$}}1
+    {₁}{{$_1$}}1
+    {₂}{{$_2$}}1
+    {₃}{{$_3$}}1
+    {⟨}{{$\langle$}}1
+    {⟩}{{$\rangle$}}1
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{construction}[theorem]{Construction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{warning}[theorem]{Verification warning}
+
+\newcommand{\N}{\mathbb N}
+\newcommand{\Fk}{\mathrm{F}_{\kappa}}
+\newcommand{\WTree}{\mathsf W}
+\newcommand{\Round}{\mathcal R}
+\newcommand{\Tower}{\mathcal T}
+\newcommand{\lean}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\Cten}{C_{10}}
+\newcommand{\Celeven}{C_{11}}
+\newcommand{\Bfam}{B}
+\newcommand{\defeq}{\mathrel{:=}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\title{\textbf{An Omega-Diagonal Forest Reflection\\Above BusyLean Contender 10}\\[0.5em]
+  \large A computable Lean proposal with an explicit comparison architecture}
+\author{Research proposal prepared for the BusyLean project}
+\date{October 12, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+BusyLean asks for closed computable natural numbers in Lean, together with
+kernel-checkable proofs that each new entry exceeds its predecessor. The current
+repository entry, Contender~10, reflects kind-polymorphic System~F$_\omega$
+programs over Contender~9's family. We propose Contender~11, which combines that
+language-level reflection with the repository's strongest existing structural
+amplifier: forest reflection along the self-generated W-tree index that joins
+every tree denoted by the W-language. One traversal is promoted to a function
+operator $\Round$. We then define a self-accelerated tower
+$\Tower_{0}=\Bfam$ and
+$\Tower_{k+1}(n)=\Round(\Tower_k)(\Tower_k(n))$, where
+$\Bfam(n)=F_{10}(F_{10}(n))$ is Contender~10's construction as a family. The
+new diagonal is
+\[
+  F_{11}(n)=\Tower_{\Bfam(n)+1}(\Bfam(n)),
+  \qquad
+  \Celeven=F_{11}(F_{11}(42)).
+\]
+Every component is computable in principle. The comparison avoids any invalid
+monotonicity assumption about oracle reflection: it exhibits the seed explicitly
+inside the index tree, proves that every tower successor is larger by the
+round's input bound, and derives
+$\Cten < F_{11}(42)<\Celeven$. The package contains Lean definitions, proposed
+proofs, a transitive dependency audit, a clean-build checker, and this article.
+Proof-theoretic size claims are deliberately separated from the exact formal
+inequality.
+\end{abstract}
+
+\begin{center}
+\fcolorbox{darkred}{softgray}{\parbox{0.91\textwidth}{
+\textbf{Verification status.} The article has been compiled and visually
+checked. The Lean source has passed a conservative source-level audit, but the
+execution environment used to prepare this package did not contain Lean~4.34.0.
+Consequently, the modules in this archive are a serious, integration-ready
+\emph{proposal}, not a claim of completed kernel verification. The bundled
+\code{check11.py} and \code{Contender11Audit.lean} specify the exact final
+checks.}}
+\end{center}
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Problem, constraints, and baseline}
+
+\subsection{The BusyLean game}
+
+The public BusyLean repository is a Lean~4 continuation of Cody Roux's
+``name the biggest number'' contest. A successful entry is not merely a concise
+large-number notation. It must be a closed term of type \lean{Nat}, computable
+in principle, and it must be accompanied by a formal strict inequality against
+the preceding entry. The repository rules further prohibit escape hatches such
+as custom axioms, \lean{noncomputable}, \lean{partial}, \lean{unsafe}, opaque
+stand-ins, external implementations, and \lean{native_decide}. The only allowed
+logical axioms are \lean{propext} and \lean{Quot.sound}; the current target is
+Lean~4.34.0. Definition and proof modules are also subject to separate time
+budgets. These constraints make the problem a useful synthesis of proof theory,
+programming-language semantics, formal verification, and careful software
+engineering \cite{BusyLean,Roux}.
+
+The no-laziness rule matters. A successor may use the preceding
+\emph{construction} as a seed or oracle for a qualitatively stronger operation,
+but it may not simply mention the previous constant and add one, exponentiate
+it, or wrap it in a fixed arithmetic expression. A convincing successor must
+expose a new source of growth and prove that the predecessor occurs inside it.
+
+\subsection{The current incumbent}
+
+At the inspected repository revision, Contender~10 is
+
+\begin{lstlisting}
+def family9 (n : Nat) : Nat := F9 (F9 n)
+def F10 (n : Nat) : Nat := Fk.reflectFk family9 n
+def contender_10 : Nat := F10 (F10 42)
+\end{lstlisting}
+
+Here \lean{Fk.reflectFk} takes a finite maximum over accepted, closed programs
+of kind-polymorphic System~F$_\omega$ at a syntax/fuel budget~$n$, evaluated
+relative to an oracle~$f$, and also exceeds $f(n)$ and~$n$. The repository has a
+strong-normalization theorem for the object language, so program evaluation is
+a total Lean function rather than a bounded simulation or a semantic oracle.
+The accepted comparison proves
+\lean{contender_9_lt_contender_10} \cite{BusyLeanC10,BusyLeanComp10}.
+
+Contender~10 is already far beyond elementary or primitive-recursive
+large-number games. The problem is therefore not to add a familiar fast-growing
+function. A meaningful successor should exploit a structural operation that is
+not already compressed into the single bounded reflection step.
+
+\subsection{Available machinery that has not yet been combined}
+
+Two ingredients coexist in the repository:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Kind-polymorphic reflection.} Contender~10 can normalize and
+  decode accepted programs of a language stronger than plain System~F$_\omega$,
+  with a computable oracle.
+\item \textbf{Self-generated forest reflection.} Contenders~6 and~9 use a
+  well-founded, countably branching tree \lean{index}. Its children join all
+  W-trees denoted by programs of the repository's W-language. At every node,
+  the reflected program sees the family of child stages as an oracle, so it can
+  select a child dynamically instead of losing information in a pointwise
+  maximum \cite{BusyLeanC6,BusyLeanC9}.
+\end{enumerate}
+
+The repository's own roadmap observes that forest reflection can be applied to
+new languages. The first move of the present proposal is precisely to apply the
+Contender~9 amplifier to Contender~10's stronger reflected language. The second
+move is to iterate the resulting complete operation and diagonalize over the
+number of iterations.
+
+%======================================================================
+\section{Design criteria}
+
+A serious successor should satisfy more than the final inequality. We impose the
+following criteria.
+
+\paragraph{C1: closed computability.}
+The final declaration must reduce, in principle, to a natural number by Lean's
+ordinary evaluator. All recursion must be structural or justified by an already
+formalized well-founded argument.
+
+\paragraph{C2: no predecessor constant.}
+The definition may refer to \lean{F10} and the preceding construction as a
+function, but its transitive declaration closure must not contain
+\lean{contender_10} or any earlier contender constant.
+
+\paragraph{C3: qualitative amplification.}
+The new operation must do more than evaluate the old family at a larger fixed
+argument. It should expand the reflected program class, the iteration
+structure, or both.
+
+\paragraph{C4: explicit comparison.}
+Reflection relative to an oracle is generally not monotone: a program may branch
+on an oracle value, so pointwise larger oracle answers can produce a smaller
+result. Every inequality must therefore come from an explicit occurrence in a
+finite maximum or from a child embedded in a known tree.
+
+\paragraph{C5: modest proof surface.}
+The construction should reuse the repository's difficult semantic theorem,
+namely strong normalization for kind-polymorphic System~F$_\omega$, instead of
+introducing a new object language whose metatheory cannot be completed within
+the contest budgets.
+
+\paragraph{C6: honest calibration.}
+Lean will certify the strict numerical comparison. It will not automatically
+certify an informal ordinal assignment. The article must distinguish exact
+formal statements from proof-theoretic heuristics.
+
+These criteria rule out a number of superficially attractive definitions. For
+example, $2^{\Cten}$ is computable and larger, but it violates C2 and C3. A
+fixed tenfold iterate of \lean{F10} uses the construction rather than the
+constant, but still offers no new language or reflection structure. At the
+other extreme, formalizing a Calculus of Inductive Constructions with large
+elimination could provide a dramatic language-level jump, but violates C5 for a
+compact successor proposal.
+
+%======================================================================
+\section{Reused formal ingredients}
+
+\subsection{Countable oracle families}
+
+A forest node has countably many children. The reflected language accepts one
+unary oracle, so Contender~9 uses the computable coding
+\[
+  \langle i,m\rangle_2 = 2^i(2m+1).
+\]
+The decoder takes the $2$-adic valuation to recover~$i$ and then recovers~$m$.
+The theorem \lean{unpair2_code} proves that the code is inverted exactly. Thus
+for a family $fs:\N\to\N\to\N$,
+\[
+  \lean{packFamily}\;fs\;(2^i(2m+1))=fs(i,m).
+\]
+The coding is not itself the source of growth. Its role is information
+preservation: a program can compute a child index and an argument at run time,
+then call that exact child stage.
+
+\subsection{The self-generated W-tree index}
+
+The repository's W-language contains W-types over finite types and a total
+interpreter. A program that denotes a tree of type $\WTree\N$ is converted to a
+Lean tree by \lean{defTree}; a non-tree value defaults to a leaf. For each
+syntax depth~$k$, \lean{treesOfDepth k} is a node whose children enumerate the
+trees denoted at that depth. The global index is
+\[
+  \lean{index}=\lean{node}\;(k\mapsto\lean{treesOfDepth}\;k).
+\]
+It is therefore a well-founded tree in Lean, yet it joins every W-tree that the
+object language denotes at some finite syntax depth. The key formal embedding
+used repeatedly in BusyLean is
+\[
+  \text{leaf}
+  \prec \lean{treesOfDepth 0}
+  \prec \lean{index},
+\]
+where each $\prec$ is an actual parent-child relation visible at every
+sufficient input. The first enumerated depth-zero tree is definitionally a leaf,
+recorded by \lean{first_tree_leaf}.
+
+\subsection{Kind-polymorphic program evaluation}
+
+The namespace \lean{BusyLean.Fk} provides:
+
+\begin{itemize}[leftmargin=*]
+\item finite enumerations \lean{kindsUpTo}, \lean{tysUpTo}, and
+  \lean{ctmsUpTo};
+\item a sound fuel-bounded checker;
+\item a strong-normalization theorem for accepted erased terms;
+\item a total normalizer and Church-numeral decoder; and
+\item \lean{fvalue f fuel t}, the numerical value of an accepted program
+  relative to the unary oracle~$f$, with zero as the rejection/default value.
+\end{itemize}
+
+This is the expensive semantic core. The proposal treats it as a verified
+component and builds a stronger reflection geometry around it. Reducibility
+candidates are the classical technique behind strong-normalization arguments for
+polymorphic calculi; related modular normalization results explain why language
+boundaries in the lambda cube are central to proof-theoretic comparisons
+\cite{GeuversNederhof}.
+
+%======================================================================
+\section{The construction}
+
+\subsection{One family-reflection step}
+
+Let $fs:\N\to\N\to\N$ be a countable family. Define
+\begin{align*}
+M_{fs}(n)
+  &= \max\left(
+       \max_{i\le n}fs(i,n),
+       \max_{t\in\mathrm{CTm}_{\le n}}
+         \mathrm{value}_{\Fk}(\mathrm{pack}(fs),n,t)
+     \right),\\
+\mathrm{reflect}_{11}(fs,n)
+  &= n+1+M_{fs}(n).
+\end{align*}
+The Lean definition is:
+
+\begin{lstlisting}
+def reflect11 (fs : W.Family) (n : Nat) : Nat :=
+  n + 1 + BigNumber.maxN
+    (W.prefixMax (fun i => fs i n) n)
+    (BigNumber.maximum
+      (Fk.fvalue (packFamily fs) n)
+      (Fk.ctmsUpTo n))
+\end{lstlisting}
+
+The added $n+1$ is not intended as a growth amplifier. It provides a robust
+strict inequality above the input and above either maximum, simplifying every
+subsequent comparison.
+
+\subsection{Forest reflection}
+
+The family step is iterated structurally over a W-tree:
+
+\begin{lstlisting}
+def stage11 (seed : W.Family) : BigNumber.WTree Nat → Nat → Nat
+  | .leaf   => reflect11 seed
+  | .node g => reflect11 (fun i => stage11 seed (g i))
+\end{lstlisting}
+
+At a leaf, the reflected language receives the seed family. At a node, it
+receives the family of child stages. Notice what is \emph{not} done: the
+children are not collapsed to a pointwise maximum before program evaluation.
+The program sees them through \lean{packFamily}, so it can choose a child based
+on intermediate computation.
+
+\subsection{A complete round}
+
+For a unary seed $f:\N\to\N$, repeat it across the leaf family and traverse the
+full self-generated index:
+
+\begin{lstlisting}
+def round11 (f : Nat → Nat) (n : Nat) : Nat :=
+  stage11 (fun _ => f) index n
+\end{lstlisting}
+
+We write this function operator as $\Round(f)$. A complete round is already a
+substantial candidate successor: it reflects the kind-polymorphic language at
+every node along every W-language-definable tree embedded in \lean{index}.
+However, the operation itself is computable and strictly seed-increasing, so it
+can be iterated.
+
+\subsection{The predecessor family}
+
+The rule against direct use of the old constant is respected by exposing the
+entire preceding construction as a function:
+
+\begin{lstlisting}
+def family10 (n : Nat) : Nat := F10 (F10 n)
+\end{lstlisting}
+
+Write $\Bfam(n)=F_{10}(F_{10}(n))$. Then $\Bfam(42)$ is definitionally equal to
+Contender~10, but the declaration \lean{contender_10} itself does not occur in
+the new definition.
+
+\subsection{Self-accelerated iteration}
+
+A naive iteration would set
+$S_{k+1}(n)=\Round(S_k)(n)$. We use a stronger and still elementary recursion:
+\[
+  \Tower_0(n)=\Bfam(n),
+  \qquad
+  \Tower_{k+1}(n)=\Round(\Tower_k)(\Tower_k(n)).
+\]
+Thus the preceding stage plays two roles. It is the oracle seed throughout the
+next forest, and its value becomes the next syntax/fuel/input budget. The Lean
+code is:
+
+\begin{lstlisting}
+def tower11 : Nat → Nat → Nat
+  | 0     => family10
+  | k + 1 => fun n => round11 (tower11 k) (tower11 k n)
+\end{lstlisting}
+
+This recursion is structural on~$k$. It does not attempt to evaluate the huge
+natural during type checking. As a mathematical function it is total for every
+finite~$k$ and~$n$.
+
+\subsection{The diagonal and final number}
+
+The number of complete rounds should not be a small numeral chosen by the
+paper's author. We take it from the preceding construction itself:
+
+\begin{lstlisting}
+def F11 (n : Nat) : Nat :=
+  tower11 (family10 n + 1) (family10 n)
+
+def contender_11 : Nat := F11 (F11 42)
+\end{lstlisting}
+
+Equivalently,
+\[
+  F_{11}(n)=\Tower_{\Bfam(n)+1}(\Bfam(n)),
+  \qquad
+  \Celeven=F_{11}(F_{11}(42)).
+\]
+The family $\Bfam$ is provably larger than its input, so the iteration depths
+$\Bfam(n)+1$ are unbounded. In this precise but modest sense, $F_{11}$ is an
+$\omega$-diagonal through all finite numbers of complete rounds. It is not a
+literal transfinite recursion of length~$\omega$; every evaluation uses a finite
+but extraordinarily large number of stages.
+
+%======================================================================
+\section{Exact comparison architecture}
+
+This section gives the mathematical content mirrored by
+\lean{Comparison11.lean}. The difficult metatheory is already inside
+\lean{Fk.fvalue}; the new comparison is elementary arithmetic plus explicit
+child inclusions.
+
+\subsection{Local maximum inequalities}
+
+\begin{lemma}[Visible oracle values]
+If $i\le n$, then
+\[
+  fs(i,n)<\mathrm{reflect}_{11}(fs,n).
+\]
+\end{lemma}
+
+\begin{proof}
+The prefix maximum contains $fs(i,n)$. It is at most the outer maximum, which
+is strictly below $n+1$ plus that maximum.
+\end{proof}
+
+\begin{lemma}[Accepted program values]
+If $t$ belongs to \lean{Fk.ctmsUpTo n}, then
+\[
+ \lean{Fk.fvalue}\;(\lean{packFamily}\;fs)\;n\;t
+ <\mathrm{reflect}_{11}(fs,n).
+\]
+\end{lemma}
+
+\begin{proof}
+The finite list maximum contains the displayed value, and the same arithmetic
+argument applies.
+\end{proof}
+
+\begin{lemma}[Input bound]
+For every $fs$ and~$n$,
+\[
+  n<\mathrm{reflect}_{11}(fs,n).
+\]
+\end{lemma}
+
+The Lean proofs reuse the repository's lemmas for prefix and list maxima. No
+normalization or evaluation of a contender is required.
+
+\subsection{Children are below parents}
+
+At a node $\lean{node}\;g$, the oracle family is
+$i\mapsto\lean{stage11}\;seed\;(g(i))$. Therefore, when $i\le n$, the visible
+oracle lemma yields
+\[
+  \mathrm{stage}_{11}(seed,g(i),n)
+  <\mathrm{stage}_{11}(seed,\mathrm{node}(g),n).
+\]
+This is \lean{stage11_child_lt}. The input bound similarly lifts from one
+reflection step to every tree.
+
+\subsection{A full round explicitly contains its seed}
+
+The critical proof is not a monotonicity theorem.
+
+\begin{theorem}[Seed inclusion]
+For every $f:\N\to\N$ and every~$n$,
+\[
+  f(n)<\Round(f)(n).
+\]
+\end{theorem}
+
+\begin{proof}
+Use three strict inequalities.
+
+First, at the leaf the constant family $i\mapsto f$ visibly contains $f(n)$:
+\[
+  f(n)<\mathrm{stage}_{11}(i\mapsto f,\mathrm{leaf},n).
+\]
+Second, the first child of \lean{treesOfDepth 0} is definitionally that leaf, so
+child domination gives
+\[
+ \mathrm{stage}_{11}(i\mapsto f,\mathrm{leaf},n)
+ <\mathrm{stage}_{11}(i\mapsto f,\lean{treesOfDepth 0},n).
+\]
+Third, \lean{treesOfDepth 0} is the zeroth child of \lean{index}, hence
+\[
+ \mathrm{stage}_{11}(i\mapsto f,\lean{treesOfDepth 0},n)
+ <\mathrm{stage}_{11}(i\mapsto f,\lean{index},n)=\Round(f)(n).
+\]
+Transitivity completes the proof.
+\end{proof}
+
+The corresponding Lean theorem is:
+
+\begin{lstlisting}
+theorem seed_lt_round11 (f : Nat → Nat) (n : Nat) :
+    f n < round11 f n := by
+  have h₁ : f n < stage11 (fun _ => f) .leaf n := ...
+  have h₂ : stage11 (fun _ => f)
+      (defTree (nthD (BigNumber.allTerms 0) 0 .zero)) n <
+      stage11 (fun _ => f) (treesOfDepth 0) n := ...
+  have h₃ : stage11 (fun _ => f) (treesOfDepth 0) n <
+      stage11 (fun _ => f) index n := ...
+  rw [first_tree_leaf] at h₂
+  exact Nat.lt_trans h₁ (Nat.lt_trans h₂ h₃)
+\end{lstlisting}
+
+This explicit path is robust under nonmonotone oracle behavior. A reflected
+program may do anything with other oracle entries; the finite maximum still
+contains the particular child needed for the proof.
+
+\subsection{Every tower successor is larger}
+
+\begin{theorem}[Strict tower]
+For all $k,n\in\N$,
+\[
+  \Tower_k(n)<\Tower_{k+1}(n).
+\]
+\end{theorem}
+
+\begin{proof}
+By definition,
+\[
+ \Tower_{k+1}(n)=\Round(\Tower_k)(\Tower_k(n)).
+\]
+Every round exceeds the numerical input at which it is evaluated, so
+\[
+ \Tower_k(n)<\Round(\Tower_k)(\Tower_k(n)).
+\]
+\end{proof}
+
+It follows by ordinary induction and transitivity that every positive tower
+level exceeds the base family at the same input:
+\[
+  \Bfam(n)<\Tower_{k+1}(n).
+\]
+This result is formalized as \lean{family10_lt_tower11_succ}.
+
+\subsection{The predecessor family exceeds its input}
+
+Contender~10's local input theorem says
+$n<F_{10}(n)$. Applying it twice gives
+\[
+  n<F_{10}(n)<F_{10}(F_{10}(n))=\Bfam(n).
+\]
+Thus \lean{input_lt_family10} requires no monotonicity of $F_{10}$: it uses
+the input theorem once at~$n$ and once at the concrete input $F_{10}(n)$.
+
+\subsection{The diagonal dominates the predecessor family}
+
+\begin{theorem}[Family domination]
+For every~$n$,
+\[
+  \Bfam(n)<F_{11}(n).
+\]
+\end{theorem}
+
+\begin{proof}
+First apply the preceding input bound at input $\Bfam(n)$:
+\[
+  \Bfam(n)<\Bfam(\Bfam(n)).
+\]
+The right-hand side is the base level
+$\Tower_0(\Bfam(n))$. Since $\Bfam(n)+1$ is positive, strict tower iteration
+then yields
+\[
+  \Bfam(\Bfam(n))
+  <\Tower_{\Bfam(n)+1}(\Bfam(n))=F_{11}(n).
+\]
+\end{proof}
+
+Combining this theorem with $n<\Bfam(n)$ gives the useful diagonal bound
+$n<F_{11}(n)$.
+
+\subsection{The required comparison}
+
+At~$42$, $\Bfam(42)$ is definitionally Contender~10. Therefore
+\[
+  \Cten=\Bfam(42)<F_{11}(42).
+\]
+The diagonal input theorem, now at the concrete input $F_{11}(42)$, gives
+\[
+  F_{11}(42)<F_{11}(F_{11}(42))=\Celeven.
+\]
+Hence:
+
+\begin{theorem}[Proposed Lean theorem]
+\[
+  \Cten<\Celeven.
+\]
+In the package this is the declaration
+\lean{contender_10_lt_contender_11}.
+\end{theorem}
+
+The proof term never needs to normalize either number. It compares their
+construction trees symbolically.
+
+%======================================================================
+\section{Structural margins beyond the required inequality}
+
+A contest entry is easier to assess when it proves more than one isolated
+comparison. The package includes three structural margins.
+
+\subsection{Every round beats the seed pointwise}
+
+The theorem \lean{seed_lt_round11} holds for an arbitrary unary function, not
+just \lean{family10}. Thus $\Round$ is inflationary on the diagonal values
+needed by the construction, even though no general pointwise monotonicity claim
+is made.
+
+\subsection{Every W-definable tree is eventually absorbed}
+
+Suppose a W-language term~$t$ occurs in the finite enumeration at depth~$k$.
+The repository lemma \lean{exists_nthD_of_mem} supplies an index~$i$ at which
+$t$ occurs. For every $n\ge k+i$, both~$k$ and~$i$ are visible child indices.
+Two applications of child domination establish
+\[
+ \mathrm{stage}_{11}(i\mapsto f,\mathrm{defTree}(t),n)
+ <\Round(f)(n).
+\]
+This is formalized as \lean{defined_tree_eventually_lt11}. It records the
+reason \lean{index} is stronger than a single hand-written tree: every tree
+denoted by the object language is eventually present.
+
+\subsection{Every visible accepted kind-polymorphic program is absorbed}
+
+At the root of \lean{index}, the child family is
+\[
+ i\longmapsto
+ \mathrm{stage}_{11}(j\mapsto f,\lean{treesOfDepth}(i)).
+\]
+For every accepted term in \lean{Fk.ctmsUpTo n}, the program maximum inside the
+root reflection contains its value relative to this exact family. The theorem
+\lean{fvalue_lt_round11} exposes that fact. It is the language-level analogue
+of defined-tree absorption.
+
+Together these statements show that the proposal is not merely a numerically
+larger wrapper. A round absorbs both the relevant program enumeration and the
+relevant tree enumeration, while preserving dynamic access to the family of
+sub-stages.
+
+%======================================================================
+\section{Computability and totality}
+
+The phrase ``computable in principle'' needs a concrete decomposition.
+
+\subsection{Finite syntax enumeration}
+
+For each natural budget~$n$, \lean{Fk.ctmsUpTo n} is a finite list generated by
+primitive recursion. The list may be astronomically large, but finiteness, not
+feasibility, is the contest requirement.
+
+\subsection{Total program evaluation}
+
+For each listed term, the checker either rejects it, returning~$0$, or supplies
+a typing derivation at the Church-numeral type. The repository's reducibility
+argument proves strong normalization of the erasure relative to every total
+oracle function. The normalizer is then a well-founded recursive function and
+the decoder is total. No halting oracle or Busy Beaver occurs.
+
+\subsection{Finite maxima}
+
+The maximum of a finite list of natural values is computable. Prefix maxima over
+indices $0,\ldots,n$ are primitive recursive.
+
+\subsection{Structural recursion over W-trees}
+
+The function \lean{stage11} is defined by the recursor of the inductive W-tree
+type. Although a node has a function of countably many children, every recursive
+call is on an immediate subtree, and Lean's structural recursion principle
+certifies totality.
+
+\subsection{Finite tower recursion}
+
+For each natural~$k$, \lean{tower11 k} is obtained by $k$ structural successor
+steps. The fact that $k=\Bfam(n)+1$ is too large to realize physically does not
+make it noncomputable. The recursion is finite for every input.
+
+\subsection{Closedness}
+
+All parameters are bound before the final declaration. The numeral~$42$, the
+existing computable functions, the syntax enumerators, and the total
+normalizers determine one closed \lean{Nat}. There are no external files,
+random choices, unspecified witnesses, or semantic oracles in its definition.
+
+\begin{remark}
+Practical evaluability is intentionally absent. Even very small budgets for the
+underlying syntax enumerations can be costly. BusyLean's rule is constructive
+definability plus formal comparison, not decimal expansion or execution at the
+contest input.
+\end{remark}
+
+%======================================================================
+\section{Why the growth jump is significant}
+
+\subsection{Three nested amplifiers}
+
+The construction combines three different operations rather than repeatedly
+applying one arithmetic function.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Language reflection.} At each node, take a maximum over accepted
+  kind-polymorphic System~F$_\omega$ programs with an oracle.
+\item \textbf{Tree-indexed reflection.} Arrange these node reflections along a
+  self-generated W-tree that contains every W-language-definable tree.
+\item \textbf{Self-accelerated finite iteration.} Feed the entire preceding
+  round back as the next oracle and use its current value as the next budget;
+  then choose the iteration count from the preceding contender family.
+\end{enumerate}
+
+Contender~10 uses the first operation once. A single \lean{round11} combines the
+first two. The tower repeatedly applies the combined operation, and $F_{11}$
+diagonalizes through a predecessor-sized number of repetitions.
+
+\subsection{A cautious operator heuristic}
+
+Let $\Delta$ denote, only heuristically, the proof-theoretic increment associated
+with one complete $\Fk$ forest-reflection round over \lean{index}. If ordinary
+oracle reflection behaved like ordinal addition, then repeated rounds would
+suggest a progression
+\[
+  \beta,
+  \quad \beta+\Delta,
+  \quad \beta+\Delta\cdot 2,
+  \quad \ldots,
+\]
+and a diagonal through unbounded finite counts would point toward a limit near
+$\beta+\Delta\cdot\omega$. The self-feeding input
+$\Tower_k(n)$ makes the numerical growth substantially more aggressive than
+this schematic index progression alone.
+
+This picture is useful intuition, but it is not a theorem for the implemented
+operator. The reflected program can inspect exact oracle values, and the
+self-generated tree index mixes syntax and semantic evaluation. A defensible
+ordinal calibration would require a separate interpretation theorem connecting
+the Lean hierarchy to a recognized reflection calculus or ordinal notation
+system.
+
+Modern proof theory confirms in many settings that iterated reflection is not a
+cosmetic operation: reflection ranks can recover proof-theoretic ordinals, and
+iterations of uniform reflection produce systematic ordinal progressions
+\cite{PakhomovWalshRank,PakhomovWalshOmega}. Those results motivate the design,
+but they do not identify the exact ordinal of this concrete BusyLean operator.
+
+\subsection{Formal lower bounds that do not rely on the heuristic}
+
+Even without an ordinal assignment, the package proves the following exact
+facts, subject to kernel verification:
+
+\begin{itemize}[leftmargin=*]
+\item $\Bfam(n)<F_{11}(n)$ for every input~$n$;
+\item $\Tower_k(n)<\Tower_{k+1}(n)$ for every finite level;
+\item every W-language-definable tree stage is eventually below a round;
+\item every visible accepted kind-polymorphic program value is below a round;
+  and
+\item $\Cten<\Celeven$.
+\end{itemize}
+
+These are sufficient to justify ``significantly exceeds'' in the contest sense:
+the new number arises from a strict hierarchy of complete reflection rounds,
+not from a one-off arithmetic padding term.
+
+%======================================================================
+\section{Why monotonicity is deliberately avoided}
+
+It is tempting to assert
+\[
+  f\le g\quad\Longrightarrow\quad\Round(f)\le\Round(g).
+\]
+For an arbitrary reflected programming language this is false without strong
+restrictions. A program can query the oracle and return~$100$ when the answer is
+zero but return~$0$ otherwise. Increasing the oracle can therefore lower that
+program's output. Taking a maximum over many programs does not automatically
+repair the issue at every finite budget.
+
+The comparison proofs use only four safe mechanisms:
+
+\begin{enumerate}[leftmargin=*]
+\item membership in a concrete finite maximum;
+\item membership in a concrete prefix maximum;
+\item a concrete parent-child edge in a W-tree; and
+\item transitivity of strict order on natural numbers.
+\end{enumerate}
+
+This proof style is one of the proposal's strongest engineering properties. It
+localizes every inequality and makes the argument insensitive to complicated
+control flow inside the reflected language.
+
+%======================================================================
+\section{Lean engineering and audit plan}
+
+\subsection{Module split}
+
+The proposed definition module imports only \lean{BusyLean.Contender10}. It
+contains the six computable declarations
+\lean{reflect11}, \lean{stage11}, \lean{round11}, \lean{family10},
+\lean{tower11}, \lean{F11}, and \lean{contender_11}. The comparison module
+imports the definition and \lean{BusyLean.Comparison10}; this keeps proof-only
+dependencies out of the number's definition module.
+
+\subsection{Forbidden-feature source audit}
+
+The bundled \code{static_audit.py} removes nested Lean comments and string
+contents, then rejects occurrences of
+\lean{sorry}, \lean{admit}, custom \lean{axiom}, \lean{noncomputable},
+\lean{partial}, \lean{unsafe}, \lean{opaque}, \lean{implemented_by},
+\lean{extern}, \lean{native_decide}, and \lean{Classical.choice}. It also
+rejects any direct earlier contender name in the executable text of the
+definition module and enforces a 100-column source limit.
+
+This check is intentionally conservative and intentionally insufficient. Text
+search cannot establish type correctness, termination, or transitive axiom
+usage.
+
+\subsection{Kernel-level dependency closure}
+
+\code{Contender11Audit.lean} copies the repository's environment traversal. For
+a root declaration it follows every constant in declaration types and bodies,
+then fails if any forbidden earlier contender constant appears. The intended
+assertion is:
+
+\begin{lstlisting}
+#assert_not_in_closure11 BusyLean.contender_11 :
+  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
+  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
+\end{lstlisting}
+
+This is stronger than checking the source file for a name. It detects an
+indirect dependency introduced through helper declarations.
+
+\subsection{Axiom reports}
+
+The audit prints axioms for the new number, required comparison, tower theorem,
+family theorem, tree absorption theorem, and program absorption theorem. The
+checker parses Lean's output and accepts only \lean{propext} and
+\lean{Quot.sound}, matching the current repository policy.
+
+\subsection{Time budgets}
+
+The proposed \code{check11.py} builds \lean{BusyLean.Comparison10} first as the
+accepted predecessor, then times \lean{BusyLean.Contender11} against the
+15-second definition budget and \lean{BusyLean.Comparison11} against the
+60-second proof budget. It finally runs the audit. Actual timings must be
+recorded on a reasonable machine before acceptance; none are fabricated here.
+
+\subsection{Likely elaboration risks}
+
+The mathematical proof uses only existing theorem interfaces, but this package
+was prepared without a local Lean executable. The likely failure modes are
+small elaboration issues rather than conceptual gaps:
+
+\begin{itemize}[leftmargin=*]
+\item definitional reduction may need an explicit \lean{simpa [F11]};
+\item the root reduction in \lean{fvalue_lt_round11} may need
+  \lean{unfold round11 index stage11};
+\item the final comparison may prefer an explicit \lean{change}; or
+\item a theorem name exported transitively by \lean{Comparison10} may need an
+  additional direct import.
+\end{itemize}
+
+The package's \code{PROOF_OBLIGATIONS.md} provides fallback proof forms for
+these points. None changes the construction or argument.
+
+%======================================================================
+\section{Alternatives considered}
+
+\subsection{A single complete round}
+
+The minimal successor
+\[
+  C' = \Round(\Bfam)(\Round(\Bfam)(42))
+\]
+would be easy to compare and already add forest reflection to Contender~10. It
+was rejected as insufficiently ambitious because $\Round$ is itself a total,
+strictly seed-increasing operator. Once that lemma is available, a finite tower
+and diagonal cost little additional proof complexity.
+
+\subsection{Same-input iteration}
+
+One could define
+$S_{k+1}(n)=\Round(S_k)(n)$. The selected recurrence evaluates at $S_k(n)$
+instead. The stronger recurrence has an equally simple proof because every
+round exceeds its input. It also makes the syntax budget, type-checker fuel, and
+visible child prefix grow with the previous stage.
+
+\subsection{Pointwise maxima of child stages}
+
+Replacing the oracle family by
+$\max_{i\le n}\mathrm{child}_i(n)$ would simplify types but destroy dynamic
+child selection. A program would learn only one aggregate value, not the
+identity and behavior of a selected child function. The existing packed-family
+interface is strictly more informative.
+
+\subsection{A universe ladder}
+
+The BusyLean roadmap proposes stratified universes of kinds above the current
+kind-polymorphic language. That is the most natural next language-level
+research program. A complete entry would require syntax, substitution,
+kind-checking, conversion, candidates indexed by universe level, adequacy, a
+sound checker, and a normalizer. It may eventually dominate the present
+amplifier by a qualitative margin, but it is not a low-risk continuation of the
+current formalization.
+
+\subsection{Dependent large elimination}
+
+A CIC-like language with large elimination can let run-time naturals control
+type structure and may surpass fixed finite-order hierarchies more directly.
+Its realizability or normalization proof is substantially more involved. The
+present proposal should be viewed as an immediately available successor and a
+platform from which that larger project can be funded by a still larger oracle
+family.
+
+%======================================================================
+\section{Integration procedure}
+
+The archive is arranged so it can be copied into a BusyLean checkout without
+replacing existing files.
+
+\begin{enumerate}[leftmargin=*]
+\item Copy \code{Contender11.lean} and \code{Comparison11.lean} into
+  \code{BusyLean/}.
+\item Copy \code{Contender11Audit.lean} into \code{test/}.
+\item Copy \code{check11.py} into \code{scripts/}.
+\item Append imports of the two new modules to \code{BusyLean.lean}.
+\item Run \code{python3 scripts/check11.py} from the repository root.
+\item If the build passes, inspect the axiom reports and closure message rather
+  than relying only on the script's final line.
+\item Add the supplied README section and update the main article only after
+  timings and kernel verification are known.
+\end{enumerate}
+
+A unified patch is included for convenience. Because repository development may
+continue, applying the patch with \code{git apply --check} before mutation is
+recommended.
+
+%======================================================================
+\section{Further research}
+
+\subsection{Formalize an abstract reflection-round interface}
+
+The comparison pattern is independent of the details of~$\Fk$. An abstract
+structure could package:
+
+\begin{itemize}[leftmargin=*]
+\item a finite program enumeration;
+\item a total evaluator relative to an oracle family;
+\item local maximum lemmas;
+\item a forest-stage operator; and
+\item a self-generated index with an explicit seed path.
+\end{itemize}
+
+Then seed inclusion, tower strictness, and diagonal comparison could be proved
+once and instantiated for System~F, F$_\omega$, $\Fk$, and future languages.
+This would reduce duplication and make future contenders easier to audit.
+
+\subsection{Prove quantitative embedding theorems}
+
+The current structural theorems show eventual domination of each individual
+W-definable tree. A stronger result would assign each enumerated tree a concrete
+level or path code and give an explicit threshold. This could support machine-
+checked lower bounds against named fast-growing hierarchies.
+
+\subsection{Study monotone sublanguages}
+
+Although the full reflected language is nonmonotone in its oracle, a syntactic
+positive-oracle fragment may admit a monotonicity theorem. Reflecting that
+fragment could enable cleaner ordinal iteration arguments while retaining a
+separate full-language maximum for raw size.
+
+\subsection{Calibrate the round operator}
+
+The main theoretical open problem is to identify an ordinal or reflection
+calculus faithfully represented by $\Round$. Possible approaches include:
+
+\begin{enumerate}[leftmargin=*]
+\item interpreting each W-tree stage as an iterated reflection theory;
+\item extracting a proof-theoretic dilator from the syntax-to-tree operation;
+\item proving upper and lower simulations between the Lean hierarchy and a
+  standard collapsing-function system; and
+\item determining the effect of self-feeding the numeric budget on the
+  function hierarchy at a fixed ordinal index.
+\end{enumerate}
+
+The literature on reflection ranks and reductions of model reflection to
+iterated syntactic reflection offers conceptual tools, but the BusyLean object
+languages and oracle-sensitive maxima require a bespoke theorem
+\cite{PakhomovWalshRank,PakhomovWalshOmega,Rathjen}.
+
+\subsection{Build the stratified kind-universe successor}
+
+A major follow-up should formalize a predicative ladder
+$\Box_0:\Box_1:\Box_2:\cdots$ above the impredicative term sort, with no
+self-typing universe. The research tasks are:
+
+\begin{itemize}[leftmargin=*]
+\item syntax and de Bruijn operations for level-indexed kinds;
+\item a sound checker with fuel-bounded conversion;
+\item semantic domains and candidates indexed by levels;
+\item renaming and substitution across universe contexts;
+\item adequacy and strong normalization;
+\item a total evaluator and reflection operator; and
+\item comparison against Contender~11, preferably using \lean{F11} as oracle.
+\end{itemize}
+
+\subsection{Mechanize the metatheory of the audit itself}
+
+The closure command is a metaprogram that inspects the environment. One can go
+further by generating a signed manifest of declaration names, source hashes,
+Lean version, build timings, and axiom reports. This would make contest entries
+reproducible artifacts rather than informal snapshots.
+
+%======================================================================
+\section{Conclusion}
+
+Contender~11 is designed as the strongest low-risk successor available from the
+current BusyLean components. It does not attempt to win by arithmetic padding.
+Instead, it lifts the incumbent's kind-polymorphic reflection to a family-aware
+forest stage, traverses the self-generated index of all W-language-definable
+trees, iterates complete rounds with self-fed budgets, and diagonalizes through
+a number of rounds supplied by the predecessor construction itself.
+
+The exact mathematical comparison is short because the architecture was chosen
+for explicit inclusions:
+\[
+  \Cten=\Bfam(42)
+  <F_{11}(42)
+  <F_{11}(F_{11}(42))=\Celeven.
+\]
+No monotonicity of oracle reflection is assumed. Every component remains
+computable in principle, and the definition avoids all earlier contender
+constants. The remaining gate is empirical and formal rather than conceptual:
+run Lean~4.34.0, resolve any minor elaboration differences, verify the axiom and
+dependency audits, and record the build budgets. Until that is done, this is an
+integration-ready research proposal; after it is done, it is a natural
+Contender~11 for the repository.
+
+%======================================================================
+\appendix
+\section{Core Lean definition}
+
+For convenient review, the complete proposed definition module is reproduced
+below.
+
+\begin{lstlisting}
+import BusyLean.Contender10
+
+namespace BusyLean
+
+def reflect11 (fs : W.Family) (n : Nat) : Nat :=
+  n + 1 + BigNumber.maxN
+    (W.prefixMax (fun i => fs i n) n)
+    (BigNumber.maximum
+      (Fk.fvalue (packFamily fs) n)
+      (Fk.ctmsUpTo n))
+
+def stage11 (seed : W.Family) : BigNumber.WTree Nat → Nat → Nat
+  | .leaf   => reflect11 seed
+  | .node g => reflect11 (fun i => stage11 seed (g i))
+
+def round11 (f : Nat → Nat) (n : Nat) : Nat :=
+  stage11 (fun _ => f) index n
+
+def family10 (n : Nat) : Nat := F10 (F10 n)
+
+def tower11 : Nat → Nat → Nat
+  | 0     => family10
+  | k + 1 => fun n => round11 (tower11 k) (tower11 k n)
+
+def F11 (n : Nat) : Nat :=
+  tower11 (family10 n + 1) (family10 n)
+
+def contender_11 : Nat := F11 (F11 42)
+
+end BusyLean
+\end{lstlisting}
+
+\section{Theorem dependency graph}
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.34\textwidth}
+                >{\raggedright\arraybackslash}p{0.57\textwidth}}
+\toprule
+Declaration & Main dependencies and role\\
+\midrule
+\lean{lt_reflect11}
+  & arithmetic form of the maximum\\
+\lean{oracle_lt_reflect11}
+  & prefix membership $+$ outer maximum\\
+\lean{fvalue_lt_reflect11}
+  & list-maximum membership $+$ outer maximum\\
+\lean{stage11_child_lt}
+  & visible oracle entry at a parent node\\
+\lean{seed_lt_round11}
+  & leaf $\to$ depth-zero join $\to$ global index\\
+\lean{tower11_step_lt}
+  & round input bound at input $\Tower_k(n)$\\
+\lean{family10_lt_tower11_succ}
+  & induction and transitivity over tower levels\\
+\lean{input_lt_family10}
+  & two applications of Contender 10's input theorem\\
+\lean{family10_lt_F11}
+  & base-family growth plus positive tower level\\
+\lean{input_lt_F11}
+  & $n<\Bfam(n)<F_{11}(n)$\\
+\lean{contender_10_lt_contender_11}
+  & family domination at 42 plus the outer diagonal\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Reproducibility commands}
+
+\begin{lstlisting}[language={}]
+# In the BusyLean repository root, after copying the package files:
+python3 scripts/check11.py
+
+# Individual checks:
+lake build BusyLean.Contender11
+lake build BusyLean.Comparison11
+lake env lean test/Contender11Audit.lean
+
+# Article build from this package:
+cd article
+latexmk -pdf -interaction=nonstopmode -halt-on-error contender11.tex
+\end{lstlisting}
+
+\section{Acceptance checklist}
+
+\begin{enumerate}[leftmargin=*]
+\item Both Lean modules elaborate under exactly Lean~4.34.0.
+\item \lean{contender_11} is accepted as a computable \lean{Nat} definition.
+\item The required strict comparison is kernel-checked without \lean{sorry}.
+\item Every printed axiom set is a subset of
+  $\{\lean{propext},\lean{Quot.sound}\}$.
+\item The transitive closure of \lean{contender_11} contains no earlier
+  contender constant.
+\item Definition time is at most 15 seconds under the repository protocol.
+\item Proof time is at most 60 seconds under the repository protocol.
+\item The main README and article state measured timings, not estimates.
+\item No one attempts to evaluate the contender.
+\end{enumerate}
+
+%======================================================================
+\begin{thebibliography}{99}
+
+\bibitem{BusyLean}
+V. Reshetnikov and contributors.
+\newblock \emph{BusyLean: name the biggest number, in Lean}.
+\newblock \url{https://github.com/VladimirReshetnikov/BusyLean}, inspected
+October 2026.
+
+\bibitem{BusyLeanC6}
+BusyLean contributors.
+\newblock \emph{Contender 6 and forest reflection modules}.
+\newblock Files \code{BusyLean/Reflection.lean},
+\code{BusyLean/Contender6.lean}, and \code{BusyLean/Comparison.lean} in
+\cite{BusyLean}.
+
+\bibitem{BusyLeanC9}
+BusyLean contributors.
+\newblock \emph{Contender 9: System F$_\omega$ reflected along the
+W-language's own trees}.
+\newblock Files \code{BusyLean/Contender9.lean} and
+\code{BusyLean/Comparison9.lean} in \cite{BusyLean}.
+
+\bibitem{BusyLeanC10}
+BusyLean contributors.
+\newblock \emph{Contender 10: kind polymorphism}.
+\newblock File \code{BusyLean/Contender10.lean} in \cite{BusyLean}.
+
+\bibitem{BusyLeanComp10}
+BusyLean contributors.
+\newblock \emph{Contender 10 comparison theorems}.
+\newblock File \code{BusyLean/Comparison10.lean} in \cite{BusyLean}.
+
+\bibitem{Roux}
+C. Roux and contributors.
+\newblock \emph{name-the-biggest-number}.
+\newblock \url{https://github.com/codyroux/name-the-biggest-number}.
+
+\bibitem{Aaronson}
+S. Aaronson.
+\newblock Who can name the bigger number?
+\newblock \url{https://www.scottaaronson.com/writings/bignumbers.html}.
+
+\bibitem{GeuversNederhof}
+H. Geuvers and M.-J. Nederhof.
+\newblock Modular proof of strong normalization for the Calculus of
+Constructions.
+\newblock \emph{Journal of Functional Programming}, 1(2):155--189, 1991.
+\newblock doi:10.1017/S0956796800020037.
+
+\bibitem{PakhomovWalshRank}
+F. Pakhomov and J. Walsh.
+\newblock Reflection ranks and ordinal analysis.
+\newblock \emph{Journal of Symbolic Logic}, 86(4):1350--1384, 2021.
+\newblock doi:10.1017/jsl.2020.9; arXiv:1805.02095.
+
+\bibitem{PakhomovWalshOmega}
+F. Pakhomov and J. Walsh.
+\newblock Reducing $\omega$-model reflection to iterated syntactic reflection.
+\newblock \emph{Journal of Mathematical Logic}, 23(2), 2023.
+\newblock doi:10.1142/S0219061322500015; arXiv:2103.12147.
+
+\bibitem{Rathjen}
+M. Rathjen.
+\newblock Well-ordering principles in proof theory and reverse mathematics.
+\newblock arXiv:2010.12453, 2020.
+
+\end{thebibliography}
+
+\end{document}

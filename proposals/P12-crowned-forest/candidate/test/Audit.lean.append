@@ -1,0 +1,15 @@
+
+-- Contender 11: crowned kind-polymorphic forest reflection.
+#print axioms BusyLean.contender_11
+#print axioms BusyLean.contender_10_lt_contender_11
+#print axioms BusyLean.family10_lt_F11
+#print axioms BusyLean.stage11_crown_step_lt
+#print axioms BusyLean.defined_tree_eventually_lt11
+#print axioms BusyLean.root_program_lt_F11
+
+#assert_not_in_closure BusyLean.contender_11 :
+  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
+  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
+
+#check @BusyLean.contender_10_lt_contender_11
+#check @BusyLean.root_program_lt_F11

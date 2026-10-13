@@ -1,0 +1,20 @@
+{
+  "artifact_name": "BusyLean_Contender11_DiagonalForest",
+  "created_date": "2026-10-12",
+  "repository": "VladimirReshetnikov/BusyLean",
+  "baseline_commit": "4c4b03d0e2003c479e3bee90a21c8bea13f66c40",
+  "target_lean_toolchain": "4.34.0",
+  "incumbent": "BusyLean.contender_10",
+  "proposal": "BusyLean.contender_11",
+  "construction": "self-height diagonal forest closure of family-aware kind-polymorphic reflection",
+  "kernel_replay_in_build_environment": false,
+  "completed_checks": [
+    "LaTeX compilation",
+    "PDF page rendering and visual inspection",
+    "static forbidden-feature scan",
+    "prior-constant source scan",
+    "Python syntax check",
+    "git apply --check against reconstructed pinned-file skeleton",
+    "PDF metadata and text checks"
+  ]
+}

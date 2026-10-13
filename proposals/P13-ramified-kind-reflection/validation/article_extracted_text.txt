@@ -1,0 +1,1628 @@
+Diagonal Ramified
+Kind-Reflection
+A proposed eleventh BusyLean contender
+
+current family
+𝐺(𝑛) = 𝐹10 (𝐹10 (𝑛))
+
+rank 0
+family-aware
+kind reflection
+
+rank 1
+autonomous 𝑊-tree lift
+⋯
+
+proposed value
+𝐹11 (𝑛)
+
+rank 𝐺(𝑛) + 1
+ramified diagonal
+
+Research memorandum for the BusyLean project
+Repository snapshot: commit
+4c4b03d0e2003c479e3bee90a21c8bea13f66c40
+
+Prepared 12 October 2026 (America/Los_Angeles)
+
+The accompanying archive contains the complete LATEX source, compiled PDF, proposed
+Lean modules, audit fragments, an integration patch, installer and build scripts, a finite
+executable reference model, and machine-readable validation records.
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Abstract
+The current BusyLean champion is a single reflection step over a kindpolymorphic extension of System 𝐹𝜔 , seeded by the preceding contender’s
+function. This memorandum proposes a substantially stronger, still constructive successor. First, it turns kind-polymorphic reflection into a family-aware
+operator: an object-language program can address a dynamically selected
+member of an oracle family. Second, it lifts an arbitrary family operator along
+the repository’s existing self-indexing 𝑊-tree, which contains every 𝑊-tree
+definable by the earlier object language. Third, it iterates that autonomous lift
+at the meta-level. At input 𝑛, the selected ramification rank is one more than
+the value of the entire Contender 10 family at 𝑛.
+The proposed closed numeral is
+contender_11 = 𝐹11 (𝐹11 (42)),
+
+𝐹11 (𝑛) = R𝑘𝐺(𝑛)+1 (𝐺,̄ 𝑛),
+
+̄ 𝑛) = 𝐺(𝑛). The accompanying Lean proof
+where 𝐺(𝑛) = 𝐹10 (𝐹10 (𝑛)) and 𝐺(𝑖,
+source establishes, subject to kernel compilation against the specified repository
+snapshot, (i) pointwise domination 𝐺(𝑛) < 𝐹11 (𝑛), (ii) strict growth at every
+ramification successor, (iii) eventual domination of every fixed finite ramification
+rank, and (iv) the required contender_10 < contender_11. All numerical definitions
+are structurally recursive and therefore computable in principle. No earlier
+contender constant occurs in the new numeral’s definition.
+
+Validation status
+The LATEX article was compiled and the resulting PDF was rendered and visually
+inspected. The Python reference model and static source audit pass. The
+execution environment used to prepare this package did not contain Lean
+4.34.0 and could not obtain that toolchain, so the proposed Lean files have not
+been kernel-checked here. This distinction is material: the mathematical proof
+is complete at the paper level, and the code was written to mirror existing
+accepted modules closely, but acceptance still requires running the supplied
+clean-build and axiom audits in a compatible checkout.
+
+Contents
+1 Executive summary
+
+4
+
+1.1 The proposal in four definitions . . . . . . . . . . . . . . . . . . . . . . .
+
+4
+
+1.2 What is formally stronger . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+4
+
+1.3 Why this is not a cosmetic wrapper . . . . . . . . . . . . . . . . . . . . .
+
+4
+
+2 Repository baseline and constraints
+
+5
+
+2.1 Snapshot used . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+5
+
+2.2 Contest rules addressed . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+5
+
+3 The family-aware base reflection
+
+6
+
+3.1 Families and packed access . . . . . . . . . . . . . . . . . . . . . . . . . .
+1
+
+6
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+3.2 Definition of the base operator . . . . . . . . . . . . . . . . . . . . . . . .
+
+6
+
+3.3 The abstract domination predicate . . . . . . . . . . . . . . . . . . . . .
+
+7
+
+4 Autonomous lifting through the self-indexing tree
+
+7
+
+4.1 Generic tree lift . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+7
+
+4.2 The explicit strictness path . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+7
+
+5 Ramification: reflecting whole reflection operators
+
+8
+
+5.1 Definition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+8
+
+5.2 Formal hierarchy theorems . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+8
+
+6 The diagonal family and the proposed numeral
+
+9
+
+6.1 Seeding with the current construction . . . . . . . . . . . . . . . . . . .
+
+9
+
+6.2 Input-dependent rank . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+9
+
+6.3 Pointwise and diagonal domination . . . . . . . . . . . . . . . . . . . . . 10
+6.4 Required contender comparison . . . . . . . . . . . . . . . . . . . . . . . 10
+7 Why the numerical jump is substantial
+
+11
+
+7.1 Three independent amplifiers . . . . . . . . . . . . . . . . . . . . . . . . . 11
+7.2 Comparison with nearby alternatives . . . . . . . . . . . . . . . . . . . . 11
+8 Computability and constructivity
+
+12
+
+8.1 Totality of every layer . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+8.2 Why non-feasibility is irrelevant . . . . . . . . . . . . . . . . . . . . . . . 12
+8.3 Forbidden escape hatches are absent . . . . . . . . . . . . . . . . . . . . 13
+9 Lean implementation architecture
+
+13
+
+9.1 Definition module . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+9.2 Proof module . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+9.3 Audit and clean-build protocol . . . . . . . . . . . . . . . . . . . . . . . . 14
+10 Proof-theoretic calibration: useful heuristic, not theorem
+
+14
+
+11Adversarial review
+
+15
+
+11.1Objection: the prefix maximum makes the proof trivial . . . . . . . . . 15
+11.2Objection: using 𝐺(𝑛) as the rank is lazy . . . . . . . . . . . . . . . . . . 15
+11.3Objection: recursion at a gigantic rank may fail the build budget . . . 15
+11.4Objection: the source has not been kernel-checked in this package . 16
+
+2
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+12 Further research directions
+
+16
+
+13 Conclusion
+
+17
+
+A Complete definition module
+
+17
+
+B Complete comparison module
+
+18
+
+C Artifact and validation inventory
+
+21
+
+3
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+1 Executive summary
+1.1 The proposal in four definitions
+The computational core is intentionally small. In mathematical notation, let a
+family be a function 𝑓 ∶ ℕ → ℕ → ℕ and a family operator be a map from families
+to unary numerical functions. The proposal defines:
+R(𝑓, 𝑛) = 𝑛 + 1 + max(max 𝑓(𝑖, 𝑛), max val𝑓 (𝑡, 𝑛)) ,
+𝑖≤𝑛
+
+𝑡∈𝐸𝑛
+
+L𝒪 (𝑓, leaf)(𝑛) = 𝒪(𝑓)(𝑛),
+L𝒪 (𝑓, node(𝑔))(𝑛) = 𝒪(𝑖 ↦ L𝒪 (𝑓, 𝑔(𝑖))) (𝑛),
+A(𝒪)(𝑓, 𝑛) = L𝒪 (𝑓, I)(𝑛),
+R𝑘0 = R,
+
+R𝑘𝑟+1 = A(R𝑘𝑟 ).
+
+Here 𝐸𝑛 is the finite list of accepted kind-polymorphic System 𝐹𝜔 programs in
+syntax budget 𝑛, and I is the previously accepted self-indexing 𝑊-tree.
+Let
+𝐺(𝑛) = 𝐹10 (𝐹10 (𝑛)),
+
+̄ 𝑛) = 𝐺(𝑛).
+𝐺(𝑖,
+
+Then
+𝐹11 (𝑛) = R𝑘𝐺(𝑛)+1 (𝐺,̄ 𝑛),
+
+𝐶11 = 𝐹11 (𝐹11 (42)).
+
+(1)
+
+At 𝑛 = 42, the selected rank is definitionally 𝐺(42) + 1 = 𝐶10 + 1.
+
+1.2 What is formally stronger
+The proposal does not rely on an informal ordinal comparison to beat the previous
+entry. The exact inequalities are:
+1. 𝐺(𝑛) < 𝐹11 (𝑛) for every 𝑛;
+2. 𝑛 < 𝐹11 (𝑛) for every 𝑛;
+3. R𝑘𝑟 (𝑓, 𝑛) < R𝑘𝑟+1 (𝑓, 𝑛) for every 𝑟, 𝑓, 𝑛;
+4. for every fixed 𝑟, if 𝑛 ≥ 𝑟, then R𝑘𝑟 (𝐺,̄ 𝑛) < 𝐹11 (𝑛);
+5. 𝐶10 < 𝐶11 .
+The fourth item is the diagonal margin: no fixed finite number of autonomous
+reflection layers catches the proposed family at all sufficiently large inputs.
+
+1.3 Why this is not a cosmetic wrapper
+A mere definition 𝐺(𝑛) + 1 would violate the spirit of the contest. Here the previous
+construction is used in the same legitimate way as in accepted entries—as an
+oracle family and as a schedule—but the new mechanism is an operator hierarchy.
+Even rank one recursively exposes all children of the self-indexing 𝑊-tree to kindpolymorphic programs. Rank two does not merely call rank one twice: every node
+applies a complete rank-one autonomous hierarchy to its family of child results.
+Rank 𝑟 + 1 therefore reflects the entire rank-𝑟 operator.
+4
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+The direct comparison is easy because each reflection operator contains an explicit
+dominance guard. That ease is a feature of the proof architecture, not evidence
+that the numerical construction is small.
+
+2 Repository baseline and constraints
+2.1 Snapshot used
+This work targets the BusyLean repository at commit 4c4b03d0e2003c479e3bee90a21c
+8bea13f66c40. At that snapshot the current entry is
+def family9 (n : Nat) : Nat := F9 (F9 n)
+def F10 (n : Nat) : Nat := Fk.reflectFk family9 n
+def contender_10 : Nat := F10 (F10 42)
+
+The object language of Fk.reflectFk is kind-polymorphic System 𝐹𝜔 . Its normalizer
+is total by the repository’s reducibility- candidate proof. The reflector takes the
+maximum of the oracle value and all accepted program values in a finite syntax
+budget, then adds a positive input guard.
+The repository already contains a different autonomous mechanism. Contender
+9 reflects System 𝐹𝜔 along a 𝑊-tree index that joins every 𝑊-tree denoted by
+a program in the earlier 𝑊-language. The proposal combines and then iterates
+these two directions:
+Entry
+
+Reflected language
+
+Amplifier
+
+Contender 9
+
+System 𝐹𝜔 with packed
+family oracle
+kind-polymorphic System
+𝐹𝜔
+kind-polymorphic System
+𝐹𝜔 with packed family
+oracle
+
+one autonomous lift along index
+
+Contender 10
+Proposed 11
+
+one local reflection over family9
+a hierarchy of autonomous lifts,
+diagonalized at rank 𝐺(𝑛) + 1
+
+2.2 Contest rules addressed
+The relevant requirements and the design responses are summarized below.
+Requirement
+
+Response
+
+Closed
+
+contender_11 is a closed application of structurally recur-
+
+computable
+
+sive definitions.
+Every oracle call is to an explicitly supplied total Lean
+function.
+No
+noncomputable, None occurs in executable source.
+partial, unsafe, opaque,
+Nat
+
+No semantic oracle
+
+extern
+
+5
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Requirement
+
+Response
+
+Formal strict comparison
+No direct use of old
+contender constant
+Axiom discipline
+
+The proposed theorem is contender_10_lt_contender_11.
+
+Build budget
+
+No evaluation
+quirement
+
+The numeral uses F10 through family10; contender_10 appears only in theorem statements and documentation.
+The source introduces no axiom and is intended
+to inherit only the repository-permitted propext and
+Quot.sound.
+The definition module adds only four short recursive
+definitions and should be inexpensive after Contender
+10 is prebuilt; the supplied checker measures rather
+than assumes this.
+re- Checking unfolds definitions only as needed for typing
+and proofs; it does not evaluate the numeral.
+
+3 The family-aware base reflection
+3.1 Families and packed access
+Write
+ℱ = (ℕ → ℕ → ℕ),
+
+𝒪 = (ℱ → ℕ → ℕ).
+
+A family 𝑓 ∈ ℱ presents countably many unary functions 𝑓𝑖 (𝑛) = 𝑓(𝑖, 𝑛). The
+existing function packFamily encodes a pair (𝑖, 𝑚) as 2𝑖 (2𝑚 + 1) and exposes the
+family through one unary oracle:
+pack(𝑓, 2𝑖 (2𝑚 + 1)) = 𝑓(𝑖, 𝑚).
+The repository already proves the decoding equation exactly. Consequently a
+kind-polymorphic object-language program can compute an index at run time and
+call any desired family member.
+
+3.2 Definition of the base operator
+Let 𝐸𝑛 be Fk.ctmsUpTo n. For 𝑡 ∈ 𝐸𝑛 , let val𝑓 (𝑡, 𝑛) be Fk.fvalue (packFamily f) n t.
+Define
+R(𝑓, 𝑛) = 𝑛 + 1 + max (max 𝑓(𝑖, 𝑛), max val𝑓 (𝑡, 𝑛)) .
+(2)
+𝑖≤𝑛
+
+𝑡∈𝐸𝑛
+
+The actual Lean definition uses the repository’s prefixMax, maximum, and maxN helpers.
+Lemma 3.1 (Oracle-family domination). For all 𝑓 ∈ ℱ and 𝑖 ≤ 𝑛,
+𝑓(𝑖, 𝑛) < R(𝑓, 𝑛).
+Proof. The value 𝑓(𝑖, 𝑛) is at most the finite prefix maximum in eq. (2). That
+maximum is at most the outer maximum. Adding 𝑛 + 1 > 0 makes the inequality
+strict.
+
+6
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Lemma 3.2 (Program domination). If 𝑡 ∈ 𝐸𝑛 , then
+val𝑓 (𝑡, 𝑛) < R(𝑓, 𝑛).
+Proof. The argument is identical, using membership in the finite program maximum.
+Lemma 3.3 (Input domination). For all 𝑓, 𝑛, 𝑛 < R(𝑓, 𝑛).
+Proof. The maximum is nonnegative, hence R(𝑓, 𝑛) ≥ 𝑛 + 1.
+
+3.3 The abstract domination predicate
+For a family operator 𝒪, define
+Dom(𝒪) ∶⟺ ∀𝑓 ∀𝑖 ≤ 𝑛,
+
+𝑓(𝑖, 𝑛) < 𝒪(𝑓, 𝑛).
+
+(3)
+
+By theorem 3.1, Dom(R). This simple interface is the key abstraction: all later
+strictness theorems are independent of the internal syntax, type system, and
+normalization proof of the object language.
+
+4 Autonomous lifting through the self-indexing tree
+4.1 Generic tree lift
+For an operator 𝒪 and seed family 𝑓, define a numerical function for each 𝑊-tree
+𝑎 by structural recursion:
+L𝒪 (𝑓, leaf, 𝑛) = 𝒪(𝑓, 𝑛),
+L𝒪 (𝑓, node(𝑔), 𝑛) = 𝒪(𝑖 ↦ L𝒪 (𝑓, 𝑔(𝑖), ⋅), 𝑛).
+
+(4)
+(5)
+
+This is exactly the recursion pattern already accepted for stage9. At a node, the
+operator sees the values of all child stages as an oracle family.
+Let I denote the repository’s self-indexing tree. Define
+A(𝒪)(𝑓, 𝑛) = L𝒪 (𝑓, I, 𝑛).
+
+(6)
+
+4.2 The explicit strictness path
+The proof needs only a tiny, concrete part of the large index. The repository proves
+that the first depth-zero denotation is a leaf. Therefore I contains the path
+leaf < treesOfDepth 0 < I,
+where each inequality means “is the zeroth child of.” Since index 0 is visible at
+every input 𝑛, a dominating operator strictly increases at both edges.
+Lemma 4.1 (Visible child is smaller). Suppose Dom(𝒪). If 𝑖 ≤ 𝑛, then
+L𝒪 (𝑓, 𝑔(𝑖), 𝑛) < L𝒪 (𝑓, node(𝑔), 𝑛).
+7
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Proof. By eq. (5), the right side is 𝒪(ℎ, 𝑛) for ℎ(𝑗, 𝑚) = L𝒪 (𝑓, 𝑔(𝑗), 𝑚). Apply Dom(𝒪)
+to ℎ(𝑖, 𝑛).
+Theorem 4.2 (Autonomous strictness). If Dom(𝒪), then for every 𝑓, 𝑛,
+𝒪(𝑓, 𝑛) < A(𝒪)(𝑓, 𝑛).
+Proof. The leaf equation identifies 𝒪(𝑓, 𝑛) with L𝒪 (𝑓, leaf, 𝑛). Apply theorem 4.1
+first to the zeroth child of treesOfDepth 0, then to the zeroth child of I, and use
+transitivity.
+Theorem 4.3 (Domination is preserved). If Dom(𝒪), then Dom(A(𝒪)).
+Proof. For 𝑖 ≤ 𝑛,
+𝑓(𝑖, 𝑛) < 𝒪(𝑓, 𝑛) < A(𝒪)(𝑓, 𝑛),
+using domination and theorem 4.2.
+Remark 4.4. The proof of theorem 4.2 does not require an ordinal assignment to
+I, nor the full theorem that it joins every definable tree. Those features explain
+the expected size, while strictness follows from a fixed length-two path. This
+separation keeps the comparison theorem robust.
+
+5 Ramification: reflecting whole reflection operators
+5.1 Definition
+Define a hierarchy of family operators by primitive recursion on the rank:
+R𝑘0 = R,
+
+R𝑘𝑟+1 = A(R𝑘𝑟 ).
+
+(7)
+
+Thus
+R𝑘0 (𝑓, 𝑛) = R(𝑓, 𝑛),
+R𝑘1 (𝑓, 𝑛) = LR (𝑓, I, 𝑛),
+R𝑘2 (𝑓, 𝑛) = LR𝑘1 (𝑓, I, 𝑛),
+and so on.
+The distinction between R𝑘2 and two sequential calls to R𝑘1 is important. In R𝑘2 ,
+every node of the outer I applies the complete operator R𝑘1 to the family formed by
+its children. Each such application internally traverses another copy of I. Higher
+ranks therefore form a nested hierarchy of tree-indexed reflection operators.
+
+5.2 Formal hierarchy theorems
+Theorem 5.1 (Domination at every rank). For every 𝑟, Dom(R𝑘𝑟 ).
+Proof. Induct on 𝑟. The base case is Dom(R). The successor case follows from
+theorem 4.3.
+
+8
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Theorem 5.2 (Strict successor ranks). For every 𝑟, 𝑓, 𝑛,
+R𝑘𝑟 (𝑓, 𝑛) < R𝑘𝑟+1 (𝑓, 𝑛).
+Proof. Apply theorem 4.2 to R𝑘𝑟 and use theorem 5.1.
+Corollary 5.3 (Strict rank monotonicity). If 𝑟 < 𝑠, then R𝑘𝑟 (𝑓, 𝑛) < R𝑘𝑠 (𝑓, 𝑛).
+Proof. Induct on 𝑠 and chain theorem 5.2.
+These are exact natural-number inequalities. They do not depend on a growthrate conjecture.
+
+6 The diagonal family and the proposed numeral
+6.1 Seeding with the current construction
+Define
+𝐺(𝑛) = 𝐹10 (𝐹10 (𝑛)).
+
+(8)
+
+At input 42, 𝐺(42) is definitionally the current contender 𝐶10 . The seed family is
+constant in its family index:
+̄ 𝑛) = 𝐺(𝑛).
+𝐺(𝑖,
+The previous contender constant is not referenced; only the reusable function 𝐹10
+occurs.
+The existing input guard for 𝐹10 gives
+Lemma 6.1. For every 𝑛, 𝑛 < 𝐺(𝑛).
+Proof. The repository proves 𝑥 < 𝐹10 (𝑥) for all 𝑥. Apply it first at 𝑥 = 𝑛 and then
+at 𝑥 = 𝐹10 (𝑛).
+
+6.2 Input-dependent rank
+The proposed family is
+𝐹11 (𝑛) = R𝑘𝐺(𝑛)+1 (𝐺,̄ 𝑛).
+
+(9)
+
+This rank choice has three useful properties.
+First, it is positive, so at least one autonomous lift lies above the base reflector.
+Second, it is already far larger than the input. Third, at input 42 it is exactly
+𝐶10 + 1:
+𝐹11 (42) = R𝑘𝐶10 +1 (𝐺,̄ 42).
+(10)
+The final closed numeral is
+𝐶11 = 𝐹11 (𝐹11 (42)).
+
+9
+
+(11)
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+6.3 Pointwise and diagonal domination
+Theorem 6.2 (Pointwise domination of the previous family). For every 𝑛, 𝐺(𝑛) <
+𝐹11 (𝑛).
+Proof. By theorem 5.1, the selected operator R𝑘𝐺(𝑛)+1 dominates its seed family.
+Apply the domination property at family index 0 ≤ 𝑛:
+̄
+𝐺(0,
+𝑛) = 𝐺(𝑛) < R𝑘𝐺(𝑛)+1 (𝐺,̄ 𝑛) = 𝐹11 (𝑛).
+
+Corollary 6.3 (Input domination). For every 𝑛, 𝑛 < 𝐹11 (𝑛).
+Proof. Combine theorems 6.1 and 6.2.
+Theorem 6.4 (Every fixed rank is eventually dominated). For every rank 𝑟 and
+every 𝑛 ≥ 𝑟,
+R𝑘𝑟 (𝐺,̄ 𝑛) < 𝐹11 (𝑛).
+Proof. From 𝑟 ≤ 𝑛 < 𝐺(𝑛) < 𝐺(𝑛) + 1 we get 𝑟 < 𝐺(𝑛) + 1. Apply strict rank
+monotonicity theorem 5.3 and unfold eq. (9).
+Theorem 6.5 (Bounded program domination). If 𝑡 ∈ 𝐸𝑛 , then
+val𝐺̄ (𝑡, 𝑛) < 𝐹11 (𝑛).
+Proof. By theorem 3.2, the program value is below R𝑘0 (𝐺,̄ 𝑛). Since 0 < 𝐺(𝑛) + 1,
+strict rank monotonicity places rank zero below the selected rank.
+
+6.4 Required contender comparison
+Theorem 6.6 (Main comparison).
+𝐶10 < 𝐶11 .
+Proof. By definitional equality, 𝐶10 = 𝐺(42). Then
+𝐶10 = 𝐺(42) < 𝐹11 (42) < 𝐹11 (𝐹11 (42)) = 𝐶11 ,
+where the first inequality is theorem 6.2 and the second is theorem 6.3 at input
+𝐹11 (42).
+Formal strength ledger
+The proposed source contains direct counterparts of the central paper results:
+
+10
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Lean theorem
+
+Mathematical content
+
+RK.reflect_dominates
+
+Dom(R)
+𝒪(𝑓, 𝑛) < A(𝒪)(𝑓, 𝑛)
+domination at every rank
+strict successor ranks
+strict rank monotonicity
+𝐺(𝑛) < 𝐹11 (𝑛)
+every fixed rank is eventually below
+the diagonal
+bounded object-language program
+domination
+𝐶10 < 𝐶11
+
+RK.op_lt_autonomous
+RK.ramified_dominates
+RK.ramified_level_lt
+RK.ramified_lt_of_lt
+family10_lt_F11
+fixed_rank_eventually_lt_F11
+fvalue_lt_F11
+contender_10_lt_contender_11
+
+7 Why the numerical jump is substantial
+7.1 Three independent amplifiers
+There are three conceptually separate sources of growth.
+Stronger oracle interface. The base reflector does not receive merely one
+unary oracle value at the current input. Through pairing it exposes a countable
+family, allowing an object-language program to compute both the family index and
+the argument.
+Autonomous transfinite-shaped traversal. Rank one lifts kind-polymorphic
+reflection along I. That tree was built to join every 𝑊-tree definable in the earlier
+language. This is not a fixed-height loop; its recursion follows a higher-type
+inductive object.
+Meta-level ramification. Successor rank does not add one more object-language
+program. It turns the entire previous operator into the node operator of a fresh
+traversal of I. Finally, the rank is not fixed externally: it is 𝐺(𝑛) + 1.
+
+7.2 Comparison with nearby alternatives
+Construction
+
+Formal margin
+
+Structural limitation
+
+𝐺(𝑛) + 1
+
+beats 𝐺(𝑛)
+
+R(𝐺,̄ 𝑛)
+
+cosmetic successor; no new language or hierarchy
+one local reflection only
+
+beats 𝐺(𝑛) and bounded
+programs
+autonomous
+kind- one fixed meta-rank
+reflection
+
+A(R)(𝐺,̄ 𝑛)
+
+11
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Construction
+
+Formal margin
+
+Structural limitation
+
+R𝑘𝑛+1 (𝐺,̄ 𝑛)
+
+beats every fixed rank
+eventually
+pointwise seed domination, strict rank hierarchy,
+rank 𝐶10 + 1 at input 42
+
+rank schedule only linear in input
+exact proof-theoretic calibration remains open
+
+Proposed
+R𝑘𝐺(𝑛)+1 (𝐺,̄ 𝑛)
+
+A useful anti-laziness observation is that the new mechanism does not need the
+large rank merely to establish 𝐺(𝑛) < 𝐹11 (𝑛). Rank zero already dominates the
+seed. The enormous rank is therefore an additional amplifier, not a trick on which
+the required comparison depends.
+
+8 Computability and constructivity
+8.1 Totality of every layer
+The construction is computable in the ordinary, extensional sense: there is a total
+algorithm that returns its natural-number value, although no feasible physical
+process could execute it for the contest input.
+1. Fk.ctmsUpTo n is a finite list generated by primitive recursion.
+2. Type inference uses finite fuel. Accepted terms are strongly normalizing by the
+inherited theorem Fk.sn_of_typed.
+3. Fk.fvalue therefore computes a normal form and decodes a natural number
+using a total function.
+4. Prefix and list maxima are total primitive-recursive operations.
+5. RK.lift recurses structurally on an inductive 𝑊-tree, using the same recursion
+pattern as accepted repository code.
+6. RK.ramified recurses structurally on a natural-number rank.
+7. The rank 𝐺(𝑛) + 1 is itself the output of a total prior construction.
+Closure of total computable functions under composition and structural recursion
+yields total computability of 𝐹11 and 𝐶11 .
+
+8.2 Why non-feasibility is irrelevant
+“Computable in principle” does not mean “practically evaluable.” Even the existing
+contenders are deliberately never evaluated. Kernel checking verifies types and
+proofs about symbolic definitions; it need not normalize the final natural number.
+The proposed rank is itself an uncomputably large practical task while remaining
+a perfectly computable mathematical natural number.
+
+12
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+8.3 Forbidden escape hatches are absent
+The executable definition source contains none of:
+noncomputable, partial, unsafe, opaque, implemented_by, extern, axiom, sorry, or
+native_decide.
+
+The supplied static audit strips nested Lean comments before checking these
+tokens and separately verifies that no contender_5 through contender_10 identifier
+occurs in executable definition text. The kernel-level closure audit remains the
+authoritative check.
+
+9 Lean implementation architecture
+9.1 Definition module
+The proposed definition module imports only the existing Contender 10 construction. Its executable core is:
+namespace BusyLean.RK
+abbrev Operator := W.Family → Nat → Nat
+def reflect (fs : W.Family) (n : Nat) : Nat :=
+n + 1 + BigNumber.maxN
+(W.prefixMax (fun i => fs i n) n)
+(BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))
+def lift (op : Operator) (seed : W.Family) :
+BigNumber.WTree Nat → Nat → Nat
+| .leaf => op seed
+| .node g => op (fun i => lift op seed (g i))
+def autonomous (op : Operator) (seed : W.Family) : Nat → Nat :=
+lift op seed index
+def ramified : Nat → Operator
+| 0 => reflect
+| r + 1 => autonomous (ramified r)
+end BusyLean.RK
+def BusyLean.family10 (n : Nat) : Nat := F10 (F10 n)
+def BusyLean.F11 (n : Nat) : Nat :=
+RK.ramified (family10 n + 1) (fun _ => family10) n
+def BusyLean.contender_11 : Nat := F11 (F11 42)
+
+No new object-language syntax, typing judgment, or normalization theorem is
+required. The proposal reuses the expensive metatheory already established for
+Contender 10 and adds only an amplifier layer.
+13
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+9.2 Proof module
+The proof module factors all later arguments through RK.Dominates. This makes the
+proof robust against future changes to the base language: a different reflector can
+be substituted if it proves the same single interface.
+The only repository-specific structural fact used by the generic autonomous strictness theorem is first_tree_leaf. The remainder is elementary order reasoning and
+induction on the natural-number rank.
+
+9.3 Audit and clean-build protocol
+After integration, the supplied script performs:
+1. a clean build of BusyLean.Comparison10 as the unbudgeted prior entry;
+2. a timed build of BusyLean.Contender11 against the 15-second definition budget;
+3. a timed build of BusyLean.Comparison11 against the 60-second proof budget;
+4. #print axioms checks for the new numeral and principal theorems;
+5. a transitive dependency-closure check forbidding all previous contender constants.
+Suggested commands are:
+python3 scripts/install_into_repo.py --repo /path/to/BusyLean
+cd /path/to/BusyLean
+lake build BusyLean.Contender11 BusyLean.Comparison11
+lake env lean test/Contender11Audit.lean
+python3 scripts/check_contender11.py
+
+10 Proof-theoretic calibration: useful heuristic, not theorem
+No named-ordinal claim is formalized
+The exact natural-number inequalities in earlier sections are the formal results.
+The discussion below is an explanatory growth model. The package does
+not claim a kernel theorem identifying the construction with a specific fastgrowing-hierarchy index.
+Let 𝜆 stand for the effective growth jump contributed by one family-aware kindpolymorphic reflection, and let 𝜄 stand for the transfinite-shaped order represented
+by the self-indexing tree. A common informal model for forest reflection treats
+autonomous lifting as a multiplicative or compositional action by 𝜄. Under such a
+model one would expect a schematic progression resembling
+R𝑘0 ∼ 𝑓𝜆 ,
+
+R𝑘1 ∼ 𝑓𝜆⋅𝜄 ,
+
+14
+
+R𝑘2 ∼ 𝑓𝜆⋅𝜄2 ,
+
+…
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+with the side of multiplication dependent on convention and on how oracle relativization is encoded.
+The proposed diagonal does not stop at any externally fixed finite power. At input
+𝑛 it selects rank 𝐺(𝑛) + 1; hence it eventually exceeds every fixed finite-rank
+member by an exact theorem. The outer evaluation 𝐹11 (𝐹11 (42)) then uses the
+first enormous diagonal value as the next input and rank driver.
+Several caveats block a responsible named-ordinal label:
+• I is semantic and self-generated, not a conventional notation system with a
+proved order-type theorem;
+• kind-polymorphic System 𝐹𝜔 is impredicative at the type level;
+• repeated autonomous lifting is an operator construction, and the correct ordinal
+algebra for such nested oracle relativization has not been formalized here;
+• numerical rank diagonalization and proof-theoretic ordinal strength are related
+but not interchangeable notions.
+The safe conclusion is strong enough: the proposal creates a rigorously strict
+meta-hierarchy of autonomous kind-reflection operators and diagonalizes beyond
+all fixed finite ranks.
+
+11 Adversarial review
+11.1 Objection: the prefix maximum makes the proof trivial
+The local inequality is intentionally trivial. Reflection constructions are useful precisely because a simple maximum packages the values of an entire finite language
+enumeration. The scientific content lies in what is placed under that maximum,
+how the oracle family is exposed, and how the reflector is iterated. Removing the
+explicit maximum would complicate the comparison without making the number
+conceptually larger.
+
+11.2 Objection: using 𝐺(𝑛) as the rank is lazy
+The rule prohibits mentioning the prior constant and adding a margin; it permits
+using the previous construction as an oracle or seed in a qualitatively stronger
+mechanism. This proposal satisfies the stronger test that its new rank hierarchy
+exists independently of 𝐺: for each 𝑟, R𝑘𝑟 is a separately defined operator, and
+successor ranks are formally strict. Moreover R𝑘1 (𝐺,̄ 𝑛) already represents a
+genuine autonomous kind-reflection construction. Choosing rank 𝐺(𝑛) + 1 is an
+amplifier applied to that new mechanism, not its sole source of superiority.
+
+11.3 Objection: recursion at a gigantic rank may fail the build
+budget
+Elaboration and kernel checking do not evaluate the variable expression 𝐺(𝑛)+1 to
+choose recursion branches. The definition of ramified is a small structural recursor.
+15
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+Proofs reason by induction on symbolic ranks. Nevertheless build time is empirical,
+so the package does not assert success without measurement; it supplies the exact
+clean-build harness.
+
+11.4 Objection: the source has not been kernel-checked in this
+package
+This is the principal outstanding engineering risk. The code closely follows accepted patterns from stage9, Comparison9, and Comparison10, and static checks catch
+common packaging mistakes, but only Lean can validate elaboration, termination,
+theorem application, axiom closure, and timing. Any compile repair should preserve the definitions in eqs. (2), (4), (5), (7), (9) and (11); a repair that weakens
+those equations would require renewed mathematical review.
+
+12 Further research directions
+1. Kernel validation and minimization. Compile on Lean 4.34.0, repair only
+elaboration-level issues, measure clean phases, and reduce proof dependencies
+if the closure or timing is unexpectedly large.
+2. A rank indexed by definable trees. Replace the natural rank with an inductive
+meta-index whose constructors themselves are drawn from the self-indexing
+𝑊-language. This would turn finite ramification into a genuinely transfinite
+operator hierarchy.
+3. Internalized operator codes. Define a total object language that codes family
+operators and proves normalization, then reflect over codes for reflection
+operators rather than defining the hierarchy only in the Lean metalanguage.
+4. Predicative kind-universe ladder. Extend the current kind system with a
+stratified sequence of kind universes, retaining normalization and decidable
+checking. The DRKR amplifier can then be applied to each level.
+5. Large elimination. Investigate an object language with inductive families and
+large elimination strong enough to construct its own index trees directly, closing
+the current separation between the 𝐹𝑘 language and the older 𝑊-language.
+6. Exact ordinal semantics. Build a notation system and an interpretation
+theorem for index, then determine whether autonomous operator lifting corresponds to ordinal multiplication, exponentiation, a collapsing operation, or a
+more intricate relativized progression.
+7. Seed-independent lower bounds. Exhibit explicit kind-polymorphic programs
+whose values at each rank witness familiar fast-growing lower bounds, reducing
+reliance on the prefix guard for quantitative comparisons.
+8. Generic library abstraction. Package Dominates, lift, autonomous, and the
+ramification theorems as a reusable module parameterized by an operator and
+an index path.
+9. Formal cost model. Prove bounds on syntax enumeration, type-checking fuel,
+and normalizer recursion separately from numerical output size. This would
+clarify why kernel checking remains feasible despite infeasible evaluation.
+16
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+10. Independent formalization. Reproduce the abstract operator lemmas in
+a second assistant or in a minimal Lean file with a toy reflector, providing a
+cross-check of the higher-order recursion pattern.
+
+13 Conclusion
+Diagonal Ramified Kind-Reflection provides a compact but substantial successor to
+the current BusyLean construction. It reuses the repository’s strongest normalizing
+object language, upgrades it to a family-aware reflector, lifts that reflector along the
+self-indexing 𝑊-tree, and then reflects whole reflection operators through an inputdependent hierarchy. The proposed numeral is closed and computable, avoids
+every earlier contender constant, and comes with exact domination theorems that
+do not rest on speculative ordinal assignments.
+The central mathematical invariant is simple:
+Dom(𝒪) ⟹ Dom(A(𝒪))
+
+and
+
+𝒪 < A(𝒪).
+
+Iterating this invariant yields a strict rank hierarchy; diagonalizing the rank at
+𝐺(𝑛) + 1 yields a family above every fixed rank; and the standard outer selfapplication yields the final contender. The remaining task before repo acceptance
+is concrete and falsifiable: kernel-build the supplied modules, run the axiom and
+closure audit, and measure the stated time budgets.
+
+A Complete definition module
+1
+
+import BusyLean.Contender10
+
+2
+3
+4
+
+/-!
+# Contender 11: diagonal ramified kind-reflection
+
+5
+6
+7
+
+This module contains only the computable definitions. The comparison and
+structural theorems are in `BusyLean/Comparison11.lean`.
+
+8
+9
+
+The construction has three layers.
+
+10
+11
+12
+13
+14
+15
+16
+17
+18
+
+1. `RK.reflect` is a family-aware version of Contender 10's reflection over
+kind-polymorphic System Fω. The unary object-language oracle decodes a
+pair `(i,m)` and calls the family member `fs i m`.
+2. `RK.autonomous` lifts any family operator along Contender 6's self-indexing
+W-tree `index`, which joins every tree definable in the W-language.
+3. `RK.ramified r` iterates the autonomous lift at the meta-level. The rank
+used at input `n` is `family10 n + 1`, already larger than `n`; the current
+accepted construction is also used as the seed family.
+
+19
+20
+21
+22
+
+No earlier contender *constant* occurs in the definition. In particular,
+`contender_10` is not referenced. Only its construction `F10` is reused.
+Every definition below is structurally recursive and executable in principle.
+
+23
+24
+25
+
+**Never evaluate `contender_11`.**
+-/
+
+26
+27
+
+namespace BusyLean
+
+28
+29
+
+namespace RK
+
+30
+31
+32
+
+/-- A transformation from an oracle family to a numerical function. -/
+abbrev Operator := W.Family → Nat → Nat
+
+17
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+33
+34
+
+/-- One family-aware reflection step over kind-polymorphic System Fω.
+
+35
+36
+37
+38
+39
+40
+41
+42
+43
+
+The first maximum sees all oracle-family values `fs i n` with `i ≤ n`.
+The second sees all accepted object-language programs of syntax depth `≤ n`,
+run with the packed unary oracle. The additive guard makes the result also
+strictly exceed the input. -/
+def reflect (fs : W.Family) (n : Nat) : Nat :=
+n + 1 + BigNumber.maxN
+(W.prefixMax (fun i => fs i n) n)
+(BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))
+
+44
+45
+
+/-- Lift a family operator through a W-tree.
+
+46
+47
+48
+49
+50
+51
+52
+
+At a leaf, apply the operator to the seed family. At a node, expose the
+values obtained from every child as the new family seen by the operator. -/
+def lift (op : Operator) (seed : W.Family) :
+BigNumber.WTree Nat → Nat → Nat
+| .leaf => op seed
+| .node g => op (fun i => lift op seed (g i))
+
+53
+54
+55
+56
+57
+
+/-- Autonomous lifting along the join of every W-tree definable by the
+repository's W-language. -/
+def autonomous (op : Operator) (seed : W.Family) : Nat → Nat :=
+lift op seed index
+
+58
+59
+
+/-- Ramified autonomous kind-reflection.
+
+60
+61
+62
+63
+64
+65
+66
+67
+
+Rank zero is one family-aware kind-polymorphic reflection. A successor rank
+lifts the entire previous-rank operator along the self-indexing W-tree. Thus
+rank two is not merely two calls to `reflect`: each outer node invokes a full
+rank-one autonomous hierarchy on its family of children. -/
+def ramified : Nat → Operator
+| 0 => reflect
+| r + 1 => autonomous (ramified r)
+
+68
+69
+
+end RK
+
+70
+71
+
+/-- Contender 10's construction as a function of its input.
+
+72
+73
+74
+75
+
+Definitional equality gives `family10 42 = contender_10`, but the constant
+`contender_10` itself is absent from this module's dependency closure. -/
+def family10 (n : Nat) : Nat := F10 (F10 n)
+
+76
+77
+
+/-- The diagonal ramified family.
+
+78
+79
+80
+81
+82
+
+At input `n`, the ramification rank is `family10 n + 1`, and the constant
+family with value `family10` is the seed. -/
+def F11 (n : Nat) : Nat :=
+RK.ramified (family10 n + 1) (fun _ => family10) n
+
+83
+84
+85
+
+/-- **Contender 11.** Never evaluate it. -/
+def contender_11 : Nat := F11 (F11 42)
+
+86
+87
+
+end BusyLean
+
+B Complete comparison module
+1
+2
+
+import BusyLean.Contender11
+import BusyLean.Comparison10
+
+3
+4
+5
+
+/-!
+# Contender 11: comparison and structural theorems
+
+6
+7
+8
+9
+
+The required theorem is `contender_10_lt_contender_11`. The remaining
+results record the much larger structural margin: every ramification level
+strictly exceeds the preceding one, every fixed level is eventually below the
+
+18
+
+Diagonal Ramified Kind-Reflection
+
+10
+11
+12
+
+BusyLean Contender 11 proposal
+
+diagonal family, and every bounded kind-polymorphic program is already beaten
+at the base reflection level.
+-/
+
+13
+14
+
+namespace BusyLean
+
+15
+16
+
+namespace RK
+
+17
+18
+19
+20
+
+/-- An operator dominates every visible member of its input family. -/
+def Dominates (op : Operator) : Prop :=
+∀ (fs : W.Family) {i n : Nat}, i ≤ n → fs i n < op fs n
+
+21
+22
+
+/-! ## The base reflector -/
+
+23
+24
+25
+26
+27
+28
+29
+30
+
+theorem lt_reflect {fs : W.Family} {n m : Nat}
+(h : m ≤ BigNumber.maxN
+(W.prefixMax (fun i => fs i n) n)
+(BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))) :
+m < reflect fs n := by
+unfold reflect
+omega
+
+31
+32
+33
+34
+35
+36
+37
+
+/-- Every visible oracle-family value is below one reflection step. -/
+theorem oracle_lt_reflect (fs : W.Family) {i n : Nat} (hi : i ≤ n) :
+fs i n < reflect fs n :=
+lt_reflect (Nat.le_trans
+(W.le_prefixMax (fun j => fs j n) hi)
+(BigNumber.le_maxN_left _ _))
+
+38
+39
+40
+41
+42
+43
+44
+45
+46
+
+/-- Every accepted kind-polymorphic program in the current syntax budget is
+below one reflection step. -/
+theorem fvalue_lt_reflect (fs : W.Family) {n : Nat} {t : Fk.CTm}
+(ht : t ∈ Fk.ctmsUpTo n) :
+Fk.fvalue (packFamily fs) n t < reflect fs n :=
+lt_reflect (Nat.le_trans
+(W.le_maximum (Fk.fvalue (packFamily fs) n) ht)
+(BigNumber.le_maxN_right _ _))
+
+47
+48
+49
+50
+51
+
+/-- The input itself is below one reflection step. -/
+theorem input_lt_reflect (fs : W.Family) (n : Nat) : n < reflect fs n := by
+unfold reflect
+omega
+
+52
+53
+54
+55
+56
+
+/-- The base reflector dominates its input family. -/
+theorem reflect_dominates : Dominates reflect := by
+intro fs i n hi
+exact oracle_lt_reflect fs hi
+
+57
+58
+
+/-! ## Generic autonomous lifting -/
+
+59
+60
+61
+62
+63
+64
+65
+66
+67
+
+/-- A node strictly dominates each visible child whenever the operator used at
+that node dominates its input family. -/
+theorem lift_child_lt {op : Operator} (hop : Dominates op)
+(seed : W.Family) (g : Nat → BigNumber.WTree Nat) {i n : Nat}
+(hi : i ≤ n) :
+lift op seed (g i) n < lift op seed (.node g) n := by
+change lift op seed (g i) n < op (fun j => lift op seed (g j)) n
+exact hop (fun j => lift op seed (g j)) hi
+
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+
+/-- The autonomous lift strictly exceeds the unlifted operator at every input.
+The proof follows the concrete path
+`leaf < treesOfDepth 0 < index`. -/
+theorem op_lt_autonomous {op : Operator} (hop : Dominates op)
+(seed : W.Family) (n : Nat) :
+op seed n < autonomous op seed n := by
+have h₂ :
+lift op seed
+(defTree (nthD (BigNumber.allTerms 0) 0 .zero)) n <
+lift op seed (treesOfDepth 0) n :=
+lift_child_lt hop seed
+(fun j => defTree (nthD (BigNumber.allTerms 0) j .zero))
+(Nat.zero_le n)
+have h₃ :
+
+19
+
+Diagonal Ramified Kind-Reflection
+
+83
+84
+85
+86
+87
+88
+89
+
+BusyLean Contender 11 proposal
+
+lift op seed (treesOfDepth 0) n < lift op seed index n := by
+simpa [index] using
+(lift_child_lt hop seed treesOfDepth (i := 0) (n := n)
+(Nat.zero_le n))
+have h₂' : op seed n < lift op seed (treesOfDepth 0) n := by
+simpa [first_tree_leaf, lift] using h₂
+exact Nat.lt_trans h₂' h₃
+
+90
+91
+92
+93
+94
+95
+96
+97
+
+/-- Autonomous lifting preserves family domination. -/
+theorem autonomous_dominates {op : Operator} (hop : Dominates op) :
+Dominates (autonomous op) := by
+intro seed i n hi
+exact Nat.lt_trans
+(hop seed (i := i) (n := n) hi)
+(op_lt_autonomous hop seed n)
+
+98
+99
+
+/-! ## Ramification -/
+
+100
+101
+102
+103
+104
+105
+
+/-- Every ramification level dominates its input family. -/
+theorem ramified_dominates : ∀ r : Nat, Dominates (ramified r)
+| 0 => reflect_dominates
+| r + 1 => by
+simpa [ramified] using autonomous_dominates (ramified_dominates r)
+
+106
+107
+108
+109
+110
+111
+112
+
+/-- Each successor ramification level is strictly larger than its predecessor
+at every seed and input. -/
+theorem ramified_level_lt (r : Nat) (seed : W.Family) (n : Nat) :
+ramified r seed n < ramified (r + 1) seed n := by
+change ramified r seed n < autonomous (ramified r) seed n
+exact op_lt_autonomous (ramified_dominates r) seed n
+
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+
+/-- Strict monotonicity in the ramification rank. -/
+theorem ramified_lt_of_lt {r s : Nat} (hrs : r < s)
+(seed : W.Family) (n : Nat) :
+ramified r seed n < ramified s seed n := by
+induction s generalizing r with
+| zero => omega
+| succ s ih =>
+by_cases h : r = s
+· subst r
+exact ramified_level_lt s seed n
+· have hrs' : r < s := by omega
+exact Nat.lt_trans (ih hrs') (ramified_level_lt s seed n)
+
+126
+127
+
+end RK
+
+128
+129
+
+/-! ## The diagonal contender -/
+
+130
+131
+132
+133
+134
+135
+136
+
+/-- The inherited family already strictly exceeds its input. -/
+theorem input_lt_family10 (n : Nat) : n < family10 n := by
+change n < F10 (F10 n)
+exact Nat.lt_trans
+(Fk.input_lt_reflectFk family9 n)
+(Fk.input_lt_reflectFk family9 (F10 n))
+
+137
+138
+139
+140
+141
+142
+
+/-- At every input, `F11` exceeds the entire Contender 10 family. -/
+theorem family10_lt_F11 (n : Nat) : family10 n < F11 n := by
+unfold F11
+exact RK.ramified_dominates (family10 n + 1)
+(fun _ => family10) (i := 0) (n := n) (Nat.zero_le n)
+
+143
+144
+145
+146
+
+/-- `F11` strictly exceeds its input. -/
+theorem input_lt_F11 (n : Nat) : n < F11 n :=
+Nat.lt_trans (input_lt_family10 n) (family10_lt_F11 n)
+
+147
+148
+149
+150
+151
+152
+153
+154
+155
+
+/-- Every fixed ramification rank is eventually dominated by the diagonal
+family. In fact input `n ≥ r` suffices. -/
+theorem fixed_rank_eventually_lt_F11 (r : Nat) :
+∀ n : Nat, r ≤ n →
+RK.ramified r (fun _ => family10) n < F11 n := by
+intro n hr
+unfold F11
+apply RK.ramified_lt_of_lt
+
+20
+
+Diagonal Ramified Kind-Reflection
+
+156
+157
+
+BusyLean Contender 11 proposal
+
+exact Nat.lt_of_le_of_lt hr
+(Nat.lt_trans (input_lt_family10 n) (Nat.lt_succ_self _))
+
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+
+/-- Every accepted kind-polymorphic program in the input budget is below the
+diagonal family, already because rank zero is below the selected rank. -/
+theorem fvalue_lt_F11 {n : Nat} {t : Fk.CTm} (ht : t ∈ Fk.ctmsUpTo n) :
+Fk.fvalue (packFamily (fun _ => family10)) n t < F11 n := by
+have hbase :
+Fk.fvalue (packFamily (fun _ => family10)) n t <
+RK.ramified 0 (fun _ => family10) n := by
+simpa [RK.ramified] using
+(RK.fvalue_lt_reflect (fun _ => family10) ht)
+have hrank :
+RK.ramified 0 (fun _ => family10) n <
+RK.ramified (family10 n + 1) (fun _ => family10) n :=
+RK.ramified_lt_of_lt (by omega) (fun _ => family10) n
+exact Nat.lt_trans hbase (by simpa [F11] using hrank)
+
+173
+174
+175
+176
+177
+
+/-- At input 42 the chosen ramification rank is exactly one more than the
+current accepted contender. -/
+theorem F11_rank_at_42 :
+F11 42 = RK.ramified (contender_10 + 1) (fun _ => family10) 42 := rfl
+
+178
+179
+180
+181
+182
+183
+
+/-- **Required comparison:** Contender 10 is strictly smaller than
+Contender 11. -/
+theorem contender_10_lt_contender_11 : contender_10 < contender_11 := by
+change family10 42 < F11 (F11 42)
+exact Nat.lt_trans (family10_lt_F11 42) (input_lt_F11 (F11 42))
+
+184
+185
+186
+187
+
+/-- The entire accepted chain is therefore below Contender 11. -/
+theorem contender_9_lt_contender_11 : contender_9 < contender_11 :=
+Nat.lt_trans contender_9_lt_contender_10 contender_10_lt_contender_11
+
+188
+189
+
+end BusyLean
+
+C Artifact and validation inventory
+Path
+
+Purpose
+
+article/ramified_kind_reflection.tex
+article/ramified_kind_reflection.pdf
+lean/BusyLean/Contender11.lean
+lean/BusyLean/Comparison11.lean
+lean/test/Contender11Audit.lean
+patches/0001-contender11-drkr.patch
+scripts/install_into_repo.py
+scripts/check_contender11.py
+scripts/static_audit.py
+python/reference_model.py
+python/test_reference.py
+validation/static_audit.json
+validation/python_tests.json
+validation/lean_build_status.md
+validation/checksums.sha256
+
+This article’s source.
+Compiled article.
+Computable definitions only.
+Strict comparisons and structural theorems.
+Standalone axiom and closure audit.
+Integration patch against the recorded snapshot.
+Idempotent installer for a checkout.
+Clean-build, timing, and axiom harness.
+Non-kernel source audit.
+Hash-consed finite surrogate of the recurrence.
+Regression tests for the surrogate.
+Machine-readable static-audit result.
+Machine-readable reference-test result.
+Explicit record of the unperformed kernel build.
+SHA-256 manifest for the package.
+
+References
+[1] V. Reshetnikov, BusyLean: name the biggest number, in Lean, GitHub repository, snapshot 4c4b03d0e2003c479e3bee90a21c8bea13f66c40, 2026.
+21
+
+Diagonal Ramified Kind-Reflection
+
+BusyLean Contender 11 proposal
+
+[2] C. Roux, name-the-biggest-number, original Coq contest repository; a snapshot is included in BusyLean.
+[3] J.-Y. Girard, Y. Lafont, and P. Taylor, Proofs and Types, Cambridge Tracts in
+Theoretical Computer Science 7, Cambridge University Press, 1989.
+[4] J. C. Reynolds, “Towards a theory of type structure,” in Programming Symposium, Lecture Notes in Computer Science 19, Springer, 1974.
+[5] P. Dybjer, “Inductive sets and families in Martin-Löf’s type theory and
+their set-theoretic semantics,” in G. Huet and G. Plotkin (eds.), Logical Frameworks, pp. 280–306, Cambridge University Press, 1991. DOI:
+10.1017/CBO9780511569807.012.
+[6] W. Buchholz, S. Feferman, W. Pohlers, and W. Sieg, Iterated Inductive Definitions and Subsystems of Analysis: Recent Proof-Theoretical Studies, Lecture
+Notes in Mathematics 897, Springer, 1981. DOI: 10.1007/BFb0091894.
+[7] W. Pohlers, Proof Theory: An Introduction, Lecture Notes in Mathematics
+1407, Springer, 1989. DOI: 10.1007/978-3-540-46825-7.
+[8] P. Martin-Löf, Intuitionistic Type Theory, Studies in Proof Theory, Lecture
+Notes 1, Bibliopolis, 1984.
+
+22
+
+

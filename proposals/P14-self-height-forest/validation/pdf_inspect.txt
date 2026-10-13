@@ -1,0 +1,47 @@
+PDF: /mnt/data/BusyLean_Contender11_DiagonalForest/article/contender11.pdf
+Pages: 20
+Encrypted: False
+Page sizes (pt, rounded):
+  - 612 x 792 (20 page(s))
+Metadata:
+  /Author: Research proposal for BusyLean
+  /CreationDate: D:20261013033718Z
+  /Creator: LaTeX with hyperref
+  /Keywords: 
+  /ModDate: D:20261013033718Z
+  /PTEX.Fullbanner: This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) kpathsea version 6.4.0/dev
+  /Producer: pdfTeX-1.40.26
+  /Subject: 
+  /Title: Contender 11: Self-Height Diagonal Forest Closure of Kind-Polymorphic Reflection
+  /Trapped: /False
+Outline items: 46
+Form fields: 0
+Attachments: 0
+Annotations: 66
+
+Fonts (pdffonts, first 25 lines):
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+TWVSMD+LMRoman12-Bold                Type 1            Custom           yes yes yes    204  0
+WKNHGF+LMRoman12-Regular             Type 1            Custom           yes yes yes    205  0
+NAMJPF+LMRomanCaps10-Regular         Type 1            Custom           yes yes yes    206  0
+SKAFWG+LMRoman10-Bold                Type 1            Custom           yes yes yes    207  0
+TVRQBG+LMRoman10-Regular             Type 1            Custom           yes yes yes    208  0
+DGQBKS+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    209  0
+UCINBL+LMMathItalic7-Regular         Type 1            Custom           yes yes yes    210  0
+UPLGKJ+LMMono10-Regular              Type 1            Custom           yes yes yes    211  0
+WOCORK+LMRoman8-Regular              Type 1            Custom           yes yes yes    264  0
+TVRQBG+LMRoman10-Regular             Type 1            Custom           yes yes yes    265  0
+CVAQVK+LMRoman10-Italic              Type 1            Custom           yes yes yes    267  0
+WXAPZQ+LMRoman8-Bold                 Type 1            Custom           yes yes yes    268  0
+SKAFWG+LMRoman10-Bold                Type 1            Custom           yes yes yes    269  0
+NIKXAX+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    270  0
+TVRQBG+LMRoman10-Regular             Type 1            Custom           yes yes yes    274  0
+KQDWZX+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    277  0
+DEPWKZ+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    285  0
+TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    295  0
+OITRWK+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    296  0
+LTWTGU+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    297  0
+IBTRNJ+LMRoman6-Bold                 Type 1            Custom           yes yes yes    316  0
+DTQCJP+LMMathItalic6-Regular         Type 1            Custom           yes yes yes    330  0
+VSRSUY+LMMono10-Italic               Type 1            Custom           yes yes yes    389  0

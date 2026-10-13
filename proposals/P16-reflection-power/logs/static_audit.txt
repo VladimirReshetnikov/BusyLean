@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "files": {
+    "lean/BusyLean/Contender7.lean": "cbcbafa975d8c92cbaa1c140158baa1f821812faed4d29e77c26d3b04e9bcb8e",
+    "lean/BusyLean/Comparison7.lean": "56f2539c391bc82d61d87182c3b5b349bf7e0bc0d554cd8f2f75c5b2e720ad22",
+    "lean/test/Contender7Audit.lean": "755969eb1323171e3fa45c9de3e5965d8be35ed66926e7c03099a8891b05c6f1"
+  },
+  "checks": {
+    "forbidden_construct_scan": true,
+    "no_incumbent_value_dependency_in_definition": true,
+    "required_definition_fragments": true,
+    "required_proof_fragments": true,
+    "balanced_delimiters": true,
+    "kernel_closure_test_present": true
+  },
+  "failures": [],
+  "disclaimer": "Textual audit only; run lake build and the Lean audit file for kernel verification."
+}

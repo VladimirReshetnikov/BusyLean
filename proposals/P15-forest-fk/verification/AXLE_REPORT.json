@@ -1,0 +1,54 @@
+{
+  "proposal": "BusyLean Contender 11: self-indexed forest reflection of kind-polymorphic System F-omega",
+  "recorded_at": "2026-10-12",
+  "busyLean_snapshot": "4c4b03d0e2003c479e3bee90a21c8bea13f66c40",
+  "lean_environment": "lean-4.34.0",
+  "verification_method": "AXLE check over a reconstructed merged source unit",
+  "base_dependency_closure": {
+    "module_count": 30,
+    "source_characters": 173051,
+    "okay": true,
+    "failed_declarations": [],
+    "total_request_time_ms": 8513
+  },
+  "contender11_proof_run": {
+    "module_count_including_new_modules": 32,
+    "source_characters": 178268,
+    "okay": true,
+    "failed_declarations": [],
+    "total_request_time_ms": 8900,
+    "checked_statements": [
+      "BusyLean.contender_10_lt_contender_11 : BusyLean.contender_10 < BusyLean.contender_11",
+      "BusyLean.fvalue_lt_contender_11"
+    ]
+  },
+  "axiom_reports": {
+    "BusyLean.contender_11": ["propext", "Quot.sound"],
+    "BusyLean.contender_10_lt_contender_11": ["propext", "Quot.sound"],
+    "BusyLean.family10_lt_F11": ["propext", "Quot.sound"],
+    "BusyLean.defined_tree_eventually_lt11": ["propext", "Quot.sound"],
+    "BusyLean.fvalue_lt_contender_11": ["propext", "Quot.sound"]
+  },
+  "dependency_closure_audit": {
+    "okay": true,
+    "failed_declarations": [],
+    "total_request_time_ms": 8918,
+    "closure_size": 1460,
+    "forbidden_names_checked": [
+      "BusyLean.contender_10",
+      "BusyLean.contender_9",
+      "BusyLean.contender_8",
+      "BusyLean.contender_7",
+      "BusyLean.contender_6",
+      "BusyLean.contender_5",
+      "BigNumber.contender_6",
+      "BigNumber.contender_5"
+    ],
+    "report": "BusyLean.contender_11: closure of 1460 constants avoids all 8 forbidden names"
+  },
+  "local_source_sha256": {
+    "BusyLean/Contender11.lean": "61de7940c3c4cda4ee9c3ee45d40f185eec43097911784112f5f4e9e92cd0dc6",
+    "BusyLean/Comparison11.lean": "e68893844e6ca6e9f589357839a1e44c40705fefdd80d7ec52a55fbd368f3166"
+  },
+  "caveat": "The recorded run checks one reconstructed source unit under AXLE's standard header. It does not replace a staged Lake build in the target repository or establish target-machine timing compliance."
+}

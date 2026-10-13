@@ -1,0 +1,21 @@
+{
+  "bytes": 522905,
+  "extracted_word_count": 6944,
+  "missing_character_warnings": 0,
+  "notes": [
+    "Three underfull-box warnings remain in bibliography formatting; no overfull boxes or clipped content."
+  ],
+  "overfull_hboxes": 0,
+  "page_size": "612 x 792 pts (letter)",
+  "pages": 22,
+  "pdf": "article/contender11.pdf",
+  "pdf_version": "1.7",
+  "pdflatex_passes": 3,
+  "qpdf_check": "qpdf unavailable",
+  "rendered_pages": 22,
+  "replacement_characters_in_extracted_text": 0,
+  "sha256": "304c4343debed7b3612d31f97016985a1b87f57ca437322db8fb2debd6b4ce97",
+  "status": "passed",
+  "undefined_reference_warnings": 0,
+  "visual_inspection": "passed; all 22 rendered pages reviewed, with code continuation and table wrapping checked"
+}

@@ -1,0 +1,1030 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{url}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  urlcolor=blue!50!black,
+  citecolor=blue!50!black,
+  pdfauthor={OpenAI research assistant},
+  pdftitle={Seeded Reflection Power: A Proposed BusyLean Contender 7}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Seeded Reflection Power}
+\rhead{BusyLean Contender 7 proposal}
+\cfoot{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\emergencystretch}{2em}
+
+\lstdefinelanguage{LeanFour}{
+  keywords={import,namespace,end,open,abbrev,def,theorem,inductive,structure,where,
+    match,with,fun,let,in,by,have,show,exact,rw,simpa,intro,partial,unsafe,
+    noncomputable,termination_by},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]"
+}
+\lstset{
+  language=LeanFour,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\bfseries\color{blue!45!black},
+  commentstyle=\itshape\color{black!58},
+  stringstyle=\color{green!35!black},
+  frame=single,
+  framerule=0.25pt,
+  rulecolor=\color{black!25},
+  xleftmargin=0.7em,
+  xrightmargin=0.7em,
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  tabsize=2,
+  literate={→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {∀}{{$\forall$}}1
+           {∃}{{$\exists$}}1 {≤}{{$\le$}}1 {≥}{{$\ge$}}1
+           {ℕ}{{$\mathbb N$}}1 {λ}{{$\lambda$}}1 {·}{{$\cdot$}}1
+           {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{construction}[theorem]{Construction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{caution}[theorem]{Caution}
+
+\newcommand{\Nat}{\mathbb N}
+\newcommand{\Fam}{\mathcal F}
+\newcommand{\Tree}{\mathcal W}
+\newcommand{\Lift}{\mathcal L}
+\newcommand{\Idx}{I}
+\newcommand{\Stage}{\mathsf S}
+\newcommand{\Pfive}{P}
+\newcommand{\Height}{H}
+\newcommand{\lean}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\repo}{\textsc{BusyLean}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\title{\textbf{Seeded Reflection Power}\\[0.35em]
+  \Large A Proposed Contender 7 for BusyLean}
+\author{Research package prepared for Vladimir Reshetnikov}
+\date{October 12, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We propose a new closed, constructive Lean natural number that strictly exceeds
+\repo's current Contender~6 without using the incumbent value as an iteration
+counter.  The key observation is that the existing forest-reflection scheduler
+has a reusable higher-order type: it maps an oracle family and a W-tree control
+object to a natural-valued function.  We define an order-raising operator that
+reflects an \emph{entire scheduler} through the repository's universal W-tree
+index.  Iterating this operator yields a strict hierarchy of schedulers.  The
+final number uses a promotion height equal to the P5 seed value at~42, with a
+small successor guard, and evaluates the resulting scheduler at the same
+universal index and input~42.
+
+The supplied Lean development is designed to prove
+\[
+  \texttt{BusyLean.contender\_6}
+  < \texttt{BusyLean.contender\_7},
+\]
+as well as the inherited comparisons with the exact Contender~5 port and P5.
+All recursion is structural or primitive, and the defining closure is intended
+to avoid every named incumbent value.  The archive includes Lean source, a
+kernel-side closure audit, a patch, a pinned CI workflow, executable finite
+models, static audits, this article, and a validation ledger.  The present
+environment did not contain a Lean executable, so the package does not claim
+kernel verification; it records that limitation explicitly and supplies the
+exact commands needed to complete the check under Lean~4.34.0.
+\end{abstract}
+
+\noindent\fbox{\parbox{0.965\linewidth}{
+\textbf{Verification status.} The mathematical construction and proof term have
+been written against the APIs in \repo{} commit
+\code{86b360648163f0249eab79539438b6a83dfe8215}.  Static audits and executable
+finite analogues pass.  The Lean files have \emph{not} been kernel-checked in
+this environment.  No statement below should be read as a claim of completed
+Lean verification until \code{lake build} and the supplied audit file both
+succeed on the pinned toolchain.
+}}
+
+\tableofcontents
+
+%=============================================================================
+\section{Executive summary}
+
+The incumbent has the form
+\begin{equation}\label{eq:c6}
+ C_6=\operatorname{stage}(\operatorname{p5Family},\Idx,42),
+\end{equation}
+where \(\Idx\) is a universal W-tree assembled from all trees denoted by the
+closed programs of P5's W-language.  The repository informally calibrates this
+near \(f_{\Lambda^2}(42)\), with
+\(\Lambda\approx\psi(\Omega_\omega)\).
+
+The new construction promotes the scheduler itself.  If \(S\) is a scheduler,
+its lift \(\Lift S\) recursively traverses a second W-tree.  At a leaf it runs
+\(S\) through \(\Idx\).  At a node it recursively lifts every child and exposes
+those values to \(S\) as a new oracle family, again running \(S\) through
+\(\Idx\).  Let
+\[
+ S_0=\operatorname{stage},\qquad S_{k+1}=\Lift S_k.
+\]
+Let
+\[
+ \Pfive=\operatorname{p5Family}(0,42),\qquad
+ \Height=\operatorname{succ}(42+\Pfive).
+\]
+The proposed number is
+\begin{equation}\label{eq:c7}
+ C_7=S_{\Height}(\operatorname{p5Family},\Idx,42).
+\end{equation}
+
+The formal comparison rests on a single invariant:
+\[
+ \operatorname{Dom}(S):\iff
+ \forall a\,\forall i\le n,
+ \quad a(i,n)<S(a,\Idx,n).
+\]
+The existing scheduler has this property.  If \(S\) has it, then
+\(\Lift S\) has it and, at \(\Idx\), strictly exceeds \(S\).  Therefore
+\[
+ S_0(a,\Idx,n)<S_1(a,\Idx,n)<S_2(a,\Idx,n)<\cdots.
+\]
+Since \(C_6=S_0(\operatorname{p5Family},\Idx,42)\) and \(\Height>0\), the
+required strict inequality follows.
+
+The important qualitative points are these:
+\begin{enumerate}[leftmargin=*,itemsep=0.25em]
+\item The proposal introduces a genuine order-raising operation; it is not only
+      a larger decimal constant.
+\item The final height is huge but constructive and independent of the named
+      incumbent value.
+\item The proof never assumes monotonicity of reflection in its oracle.  That
+      monotonicity is false in general because reflected programs may inspect
+      oracle values.
+\item The huge height remains symbolic in the comparison proof.  Kernel
+      checking should not evaluate \(\Pfive\).
+\end{enumerate}
+
+%=============================================================================
+\section{Repository baseline and constraints}
+
+\subsection{Audited revision}
+
+The development targets \repo{} commit
+\code{86b360648163f0249eab79539438b6a83dfe8215}.  The repository pins
+\code{leanprover/lean4:v4.34.0}.  At that revision the relevant modules are:
+\begin{center}
+\begin{tabular}{>{\ttfamily}p{0.32\linewidth}p{0.58\linewidth}}
+\toprule
+Reflection.lean & Defines oracle evaluation, finite-prefix reflection, and
+                  W-tree scheduling.\\
+ReflectionFacts.lean & Proves visible oracle values, visible programs, seed
+                       values, and child stages are strictly exceeded.\\
+Contender6.lean & Defines the universal tree index, the P5 seed family, the
+                  final family, and the incumbent.\\
+Comparison.lean & Proves the incumbent exceeds P5 and the exact Contender~5
+                  port, plus structural domination results.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The incumbent definitions reduce to:
+\begin{lstlisting}
+def p5Family : Family :=
+  fun _ n => BigNumber.iterate BigNumber.diagonal n n
+
+def finalFamily (n : Nat) : Nat :=
+  stage p5Family index n
+
+def contender_6 : Nat := finalFamily 42
+\end{lstlisting}
+The universal index is
+\begin{lstlisting}
+def treesOfDepth (k : Nat) : WTree Nat :=
+  .node fun i => defTree (nthD (BigNumber.allTerms k) i .zero)
+
+def index : WTree Nat := .node treesOfDepth
+\end{lstlisting}
+The first tree under the first depth join is definitionally a leaf:
+\begin{lstlisting}
+theorem first_tree_leaf :
+  defTree (nthD (BigNumber.allTerms 0) 0 .zero) = .leaf := rfl
+\end{lstlisting}
+This two-edge spine,
+\[
+  \mathrm{leaf}\longrightarrow \mathrm{treesOfDepth}(0)
+  \longrightarrow \Idx,
+\]
+will be reused at every scheduler order.
+
+\subsection{Contest constraints relevant to the proposal}
+
+The proposal is designed around the following repository requirements.
+\begin{enumerate}[leftmargin=*]
+\item The number must be a closed, computable \lean{Nat}.
+\item No partial, unsafe, external, noncomputable, or oracle stand-in is
+      permitted.
+\item A theorem must strictly compare the new number with the incumbent.
+\item The defining closure must not smuggle in the incumbent value as a huge
+      iteration counter.
+\item Definition and proof checking must remain symbolic enough to fit the
+      contest's build limits.
+\item The formal argument must respect the repository's constructive axiom
+      policy.
+\end{enumerate}
+
+The construction below was selected partly because it addresses all six at the
+level of its architecture.  In particular, the comparison theorem unfolds only
+a successor constructor around the height; it never asks Lean to compute the
+height.
+
+%=============================================================================
+\section{The incumbent reflector}
+
+\subsection{Families and visible maxima}
+
+Write
+\[
+ \Fam=\Nat\to\Nat\to\Nat
+\]
+for the type called \lean{Family}.  For \(a\in\Fam\), the repository's
+\lean{reflect} function at input \(n\) includes the finite prefix
+\[
+ \max_{i\le n} a(i,n)
+\]
+and the maximum value of every enumerated object-language term of depth at most
+\(n\), evaluated with \(a\) as an oracle family.  It then adds \(n+1\).
+Consequently the repository proves
+\begin{equation}\label{eq:oracle}
+ i\le n\quad\Longrightarrow\quad a(i,n)<\operatorname{reflect}(a,n).
+\end{equation}
+
+The crucial point is that Equation~\eqref{eq:oracle} is a direct maximum
+inequality.  It does not require \lean{reflect} to be monotone in \(a\).  Such
+monotonicity would be unsafe to assume: a program can compare or otherwise
+inspect oracle values and follow a different branch when the oracle changes.
+
+\subsection{Forest scheduling}
+
+For a W-tree \(t\in\Tree=\operatorname{WTree}(\Nat)\), the incumbent scheduler
+is
+\[
+ \operatorname{stage}(a,\mathrm{leaf},n)=\operatorname{reflect}(a,n),
+\]
+\[
+ \operatorname{stage}(a,\mathrm{node}(f),n)
+ =\operatorname{reflect}\bigl((i,m)\mapsto
+   \operatorname{stage}(a,f(i),m),n\bigr).
+\]
+Equation~\eqref{eq:oracle} immediately gives two facts already proved in
+\lean{ReflectionFacts.lean}:
+\begin{align}
+ a(i,n)&<\operatorname{stage}(a,\mathrm{leaf},n)
+ &&(i\le n),\label{eq:seedleaf}\\
+ \operatorname{stage}(a,f(i),n)
+ &<\operatorname{stage}(a,\mathrm{node}(f),n)
+ &&(i\le n).\label{eq:childparent}
+\end{align}
+
+Applying these along the two-edge spine inside \(\Idx\) proves that the
+incumbent final family exceeds the P5 seed family.  The new proposal repeats the
+same local reasoning one type level higher, with schedulers replacing ordinary
+stages.
+
+%=============================================================================
+\section{Scheduler-level reflection}
+
+\subsection{The scheduler type}
+
+A scheduler has type
+\[
+ \mathsf{Scheduler}
+ =\Fam\to\Tree\to\Nat\to\Nat.
+\]
+This is exactly the Lean abbreviation:
+\begin{lstlisting}
+abbrev StageOperator := Family → WTree Nat → Nat → Nat
+\end{lstlisting}
+The incumbent \lean{stage} is one such scheduler.  The second argument need not
+be interpreted only as an object-level ordinal control.  It can also index a
+family of recursively promoted schedulers.
+
+\subsection{One order lift}
+
+\begin{definition}[Scheduler lift]\label{def:lift}
+For a scheduler \(S\), seed family \(a\), W-tree \(u\), and input \(n\), define
+\[
+ (\Lift S)(a,\mathrm{leaf},n)=S(a,\Idx,n),
+\]
+and
+\[
+ (\Lift S)(a,\mathrm{node}(f),n)
+ =S\bigl((i,m)\mapsto(\Lift S)(a,f(i),m),\Idx,n\bigr).
+\]
+\end{definition}
+
+The Lean definition is almost a transliteration:
+\begin{lstlisting}
+def liftStage (S : StageOperator) (seed : Family) :
+    WTree Nat → Nat → Nat
+  | .leaf => S seed index
+  | .node f =>
+      S (fun i => liftStage S seed (f i)) index
+\end{lstlisting}
+The recursive call is on the immediate W-subtree \(f(i)\), just as in the
+repository's existing \lean{stage}.  There is no general recursion and no
+termination proof beyond the W-tree recursor.
+
+\begin{remark}
+The second W-tree in \(\Lift S\) controls \emph{operator nesting}.  At a leaf,
+we run the entire previous scheduler through the universal object-level index.
+At a node, the recursively promoted child operators become the oracle family
+seen by the previous scheduler.  Thus one lift is not merely one more object
+stage; it reflects the scheduler's complete behavior.
+\end{remark}
+
+\subsection{Finite orders}
+
+\begin{definition}[Reflection-power hierarchy]\label{def:orders}
+Let
+\[
+ S_0=\operatorname{stage},\qquad S_{k+1}=\Lift S_k.
+\]
+\end{definition}
+In Lean:
+\begin{lstlisting}
+def stageOrder : Nat → StageOperator
+  | 0 => stage
+  | k + 1 => liftStage (stageOrder k)
+\end{lstlisting}
+This is primitive recursion on \lean{Nat}.  For every concrete natural \(k\),
+\(S_k\) is a total scheduler.
+
+%=============================================================================
+\section{The proposed number}
+
+\subsection{A seeded height}
+
+Let
+\[
+ \Pfive=\operatorname{p5Family}(0,42)
+ =\operatorname{iterate}(\operatorname{diagonal},42,42).
+\]
+This is definitionally the numerical expression used by P5's proposal, but the
+new definition refers to the seed family rather than to a named contender
+constant.  Define
+\begin{equation}\label{eq:height}
+ \Height=\operatorname{succ}(42+\Pfive).
+\end{equation}
+The successor wrapper has two purposes.  It gives a large positive height and,
+more importantly for the comparison proof, exposes positivity by one
+constructor without normalizing \(\Pfive\).
+
+The exact Lean definition is:
+\begin{lstlisting}
+def metaHeight : Nat := Nat.succ (42 + p5Family 0 42)
+\end{lstlisting}
+
+\subsection{Contender 7}
+
+\begin{construction}[Seeded reflection power]\label{con:c7}
+Define
+\[
+ C_7=S_{\Height}(\operatorname{p5Family},\Idx,42).
+\]
+\end{construction}
+Equivalently:
+\begin{lstlisting}
+def contender_7 : Nat :=
+  stageOrder metaHeight p5Family index 42
+\end{lstlisting}
+
+This definition is intentionally compact.  The large number comes from the
+normalization behavior of a small total program, not from a large source file or
+an embedded numeral.
+
+\subsection{Why the number is computable in principle}
+
+\begin{proposition}\label{prop:computable}
+\(C_7\) is a well-defined computable natural number.
+\end{proposition}
+\begin{proof}
+The P5 interpreter, term enumeration, finite maximum, diagonal function,
+\lean{reflect}, and \lean{stage} are total definitions already present in the
+repository.  The new function \lean{liftStage} is structural recursion on an
+inductive W-tree.  The function \lean{stageOrder} is primitive recursion on a
+natural number.  The height \(\Height\) is a closed application of total
+functions, and every remaining argument in Construction~\ref{con:c7} is closed.
+Therefore normalization terminates in the metatheory, although the required
+resources are incomprehensibly large.
+\end{proof}
+
+\begin{caution}
+``Computable in principle'' does not mean feasible.  Evaluating \(C_7\), or even
+materializing more than tiny toy instances of the hierarchy, is not a practical
+objective.  The contest compares closed normal forms by proof, not by execution.
+\end{caution}
+
+%=============================================================================
+\section{Formal comparison architecture}
+
+This section gives the complete mathematical proof mirrored by
+\lean{Comparison7.lean}.
+
+\subsection{The domination invariant}
+
+\begin{definition}\label{def:dom}
+A scheduler \(S\) is \emph{index-dominating} if
+\[
+ \operatorname{Dom}(S):\iff
+ \forall a\in\Fam\ \forall i,n\in\Nat,
+ \quad i\le n\Longrightarrow a(i,n)<S(a,\Idx,n).
+\]
+\end{definition}
+The Lean predicate is:
+\begin{lstlisting}
+def IndexDominates (S : StageOperator) : Prop :=
+  ∀ (seed : Family) {i n : Nat},
+    i ≤ n → seed i n < S seed index n
+\end{lstlisting}
+
+\subsection{Base scheduler}
+
+\begin{lemma}\label{lem:base}
+The incumbent scheduler \(S_0=\operatorname{stage}\) is index-dominating.
+\end{lemma}
+\begin{proof}
+Fix \(a,i,n\) with \(i\le n\).  By Equation~\eqref{eq:seedleaf},
+\[
+ a(i,n)<\operatorname{stage}(a,\mathrm{leaf},n).
+\]
+The leaf is the zeroth child of \(\operatorname{treesOfDepth}(0)\), and the
+latter is the zeroth child of \(\Idx\).  Applying
+Equation~\eqref{eq:childparent} twice gives
+\[
+ \operatorname{stage}(a,\mathrm{leaf},n)
+ <\operatorname{stage}(a,\operatorname{treesOfDepth}(0),n)
+ <\operatorname{stage}(a,\Idx,n).
+\]
+Transitivity proves the claim.
+\end{proof}
+
+The Lean proof reuses \lean{first_tree_leaf} exactly as the incumbent comparison
+proof does.  It is generic in the seed family, which is what makes the
+higher-order induction possible.
+
+\subsection{A child is below its promoted parent}
+
+\begin{lemma}\label{lem:child}
+Assume \(\operatorname{Dom}(S)\).  If \(i\le n\), then
+\[
+ (\Lift S)(a,f(i),n)<(\Lift S)(a,\mathrm{node}(f),n).
+\]
+\end{lemma}
+\begin{proof}
+Unfold the node clause of Definition~\ref{def:lift}.  Put
+\[
+ b(j,m)=(\Lift S)(a,f(j),m).
+\]
+The right side becomes \(S(b,\Idx,n)\), while the left side is \(b(i,n)\).
+The claim is precisely \(\operatorname{Dom}(S)\) applied to \(b\) and
+\(i\le n\).
+\end{proof}
+
+This is the key higher-order step.  It uses only the domination invariant; it
+does not compare two unrelated oracle families.
+
+\subsection{Leaf lift below universal-index lift}
+
+\begin{lemma}\label{lem:leafindex}
+If \(\operatorname{Dom}(S)\), then for every \(a,n\),
+\[
+ (\Lift S)(a,\mathrm{leaf},n)<(\Lift S)(a,\Idx,n).
+\]
+\end{lemma}
+\begin{proof}
+Apply Lemma~\ref{lem:child} along the same two-edge spine used in
+Lemma~\ref{lem:base}:
+\[
+ (\Lift S)(a,\mathrm{leaf},n)
+ <(\Lift S)(a,\operatorname{treesOfDepth}(0),n)
+ <(\Lift S)(a,\Idx,n).
+\]
+\end{proof}
+
+\subsection{The invariant is preserved}
+
+\begin{lemma}\label{lem:preserve}
+If \(\operatorname{Dom}(S)\), then \(\operatorname{Dom}(\Lift S)\).
+\end{lemma}
+\begin{proof}
+For \(i\le n\), first use \(\operatorname{Dom}(S)\):
+\[
+ a(i,n)<S(a,\Idx,n).
+\]
+By the leaf equation in Definition~\ref{def:lift},
+\[
+ S(a,\Idx,n)=(\Lift S)(a,\mathrm{leaf},n).
+\]
+Lemma~\ref{lem:leafindex} then gives
+\[
+ a(i,n)<(\Lift S)(a,\Idx,n).
+\]
+\end{proof}
+
+\begin{corollary}\label{cor:allorders}
+Every scheduler order \(S_k\) is index-dominating.
+\end{corollary}
+\begin{proof}
+Induction on \(k\), using Lemma~\ref{lem:base} at zero and
+Lemma~\ref{lem:preserve} at successors.
+\end{proof}
+
+\subsection{Strict growth at every successor order}
+
+\begin{theorem}\label{thm:step}
+For every seed family \(a\), input \(n\), and order \(k\),
+\[
+ S_k(a,\Idx,n)<S_{k+1}(a,\Idx,n).
+\]
+\end{theorem}
+\begin{proof}
+By the leaf equation,
+\[
+ S_k(a,\Idx,n)=(\Lift S_k)(a,\mathrm{leaf},n).
+\]
+Corollary~\ref{cor:allorders} gives \(\operatorname{Dom}(S_k)\), so
+Lemma~\ref{lem:leafindex} yields
+\[
+ (\Lift S_k)(a,\mathrm{leaf},n)
+ <(\Lift S_k)(a,\Idx,n)=S_{k+1}(a,\Idx,n).
+\]
+\end{proof}
+
+\begin{corollary}\label{cor:positive}
+For every \(h>0\),
+\[
+ S_0(a,\Idx,n)<S_h(a,\Idx,n).
+\]
+\end{corollary}
+The Lean development packages this as a recursion over a predecessor:
+\begin{lstlisting}
+theorem stageOrder_zero_lt_succ (seed : Family) (n : Nat) :
+    ∀ k,
+      stageOrder 0 seed index n <
+      stageOrder (Nat.succ k) seed index n
+\end{lstlisting}
+
+\subsection{The required comparison}
+
+\begin{theorem}[Proposed kernel theorem]\label{thm:main}
+\[
+ \texttt{BusyLean.contender\_6}
+ <\texttt{BusyLean.contender\_7}.
+\]
+\end{theorem}
+\begin{proof}
+The incumbent is definitionally
+\[
+ C_6=S_0(\operatorname{p5Family},\Idx,42).
+\]
+The proposed number is
+\[
+ C_7=S_{\operatorname{succ}(42+\Pfive)}
+       (\operatorname{p5Family},\Idx,42).
+\]
+Apply Corollary~\ref{cor:positive} with predecessor \(42+\Pfive\).
+\end{proof}
+
+The Lean proof is correspondingly short:
+\begin{lstlisting}
+theorem contender_6_lt_contender_7 :
+    contender_6 < contender_7 := by
+  change stageOrder 0 p5Family index 42 <
+    stageOrder (Nat.succ (42 + p5Family 0 42))
+      p5Family index 42
+  exact stageOrder_zero_lt_succ
+    p5Family 42 (42 + p5Family 0 42)
+\end{lstlisting}
+No reduction of \lean{p5Family 0 42} is required.  The term appears only as a
+symbolic argument to a theorem quantified over every natural predecessor.
+
+\subsection{Inherited comparisons}
+
+Once Theorem~\ref{thm:main} is accepted, the existing repository theorems give
+immediately:
+\[
+ \texttt{contender\_5}<\texttt{contender\_7}
+\]
+and
+\[
+ \texttt{BigNumber.contender\_6}<\texttt{contender\_7}.
+\]
+The latter name is P5's proposal-local constant, not the BusyLean incumbent.
+The archive includes both transitivity proofs.
+
+%=============================================================================
+\section{Magnitude analysis}
+
+\subsection{What is formal}
+
+Only the following magnitude claims are intended as formal Lean theorems:
+\begin{enumerate}[leftmargin=*]
+\item every scheduler order is index-dominating;
+\item each successor scheduler order is strictly larger at the universal index;
+\item the incumbent is strictly below the proposed number;
+\item the exact Contender~5 port and P5's proposal-local number are also below
+      the proposed number by transitivity.
+\end{enumerate}
+These are ordinary inequalities in \(\Nat\).  They do not require ordinal
+notations, well-ordering proofs, or a formal fast-growing hierarchy.
+
+\subsection{Repository calibration}
+
+For scale only, adopt the current repository article's notation
+\[
+ \Lambda\approx\psi(\Omega_\omega)
+\]
+for the strength of P5's W-language.  The repository estimates
+\[
+ \Pfive\quad\hbox{near}\quad f_{\Lambda+\omega^2}(42)
+\]
+and the incumbent near
+\[
+ C_6\quad\hbox{near}\quad f_{\Lambda\cdot\Lambda}(42)
+ =f_{\Lambda^2}(42).
+\]
+These are calibrations, not proved equalities.
+
+\subsection{Effect of one scheduler lift}
+
+A stage along \(\Idx\) traverses an index whose available W-ranks are calibrated
+by \(\Lambda\).  A scheduler lift traverses a fresh copy of that index while
+each node invokes the complete preceding scheduler.  The natural ordinal
+bookkeeping model is therefore right multiplication by \(\Lambda\):
+\[
+ \alpha\longmapsto\alpha\cdot\Lambda.
+\]
+Starting from \(\Lambda^2\), this suggests
+\[
+ S_h(\operatorname{p5Family},\Idx,42)
+ \quad\hbox{near}\quad f_{\Lambda^{h+2}}(42)
+\]
+for finite \(h\).  At the seeded height \(\Height\), the proposal is therefore
+heuristically
+\begin{equation}\label{eq:heuristic}
+ C_7\quad\hbox{near}\quad f_{\Lambda^{\Height+2}}(42),
+ \qquad
+ \Height=\operatorname{succ}(42+\Pfive).
+\end{equation}
+
+Even a fixed height of~42 would move the calibration from \(\Lambda^2\) to
+roughly \(\Lambda^{44}\).  The chosen height is itself the P5 seed value plus a
+guard, producing an incomparably larger finite exponent.
+
+\begin{caution}
+Equation~\eqref{eq:heuristic} is intentionally not advertised as a theorem.  A
+rigorous calibration would require a formal ordinal semantics for the object
+language, the universal index, oracle interpretation, and scheduler lift.  The
+finite exponent \(\Height\) is an actual natural number, however enormous; the
+claim is not that the construction reaches a literal transfinite iteration
+count.
+\end{caution}
+
+\subsection{Why this is more than ``use the old number as a counter''}
+
+The construction has two independent sources of strength.
+\begin{enumerate}[leftmargin=*]
+\item \textbf{New operation.} \(S\mapsto\Lift S\) raises the order of reflection
+      by recursively turning promoted child schedulers into the previous
+      scheduler's oracle family.  This operation already yields an infinite
+      strict hierarchy when iterated through ordinary small naturals.
+\item \textbf{Seeded scale.} The final order count is synchronized with the
+      inherited P5 diagonal value.  It is not the BusyLean incumbent and is not
+      needed to establish the hierarchy's strictness; it only selects a very
+      high member of the new hierarchy.
+\end{enumerate}
+A conservative variant \(S_{42}(\operatorname{p5Family},\Idx,42)\) is therefore
+available if a contest judge prefers a fixed promotion count.  The main package
+uses the seeded height because the repository rules prohibit the incumbent
+value specifically, not all previously defined constructive growth functions,
+and because the strictness proof remains entirely symbolic.
+
+%=============================================================================
+\section{Engineering analysis}
+
+\subsection{Expected definition-check behavior}
+
+The defining module contains only an abbreviation and three short recursive
+definitions.  Lean checks the structural equations for \lean{liftStage} and the
+primitive equations for \lean{stageOrder}; it need not normalize
+\lean{metaHeight} or \lean{contender_7}.  The source therefore has a plausible
+path to the repository's definition-time limit.
+
+\subsection{Expected proof-check behavior}
+
+The proof introduces a generic invariant and proves it once.  The final theorem
+applies a universally quantified lemma at the symbolic predecessor
+\lean{42 + p5Family 0 42}.  It does not construct a transitivity chain of that
+length and does not reduce the P5 term.  Thus proof size is constant in the
+numerical value of the height.
+
+\subsection{Axiom and dependency audit}
+
+The supplied audit computes the constant closure of
+\lean{BusyLean.contender_7}.  It is intended to fail if that closure includes
+any of:
+\begin{lstlisting}
+BusyLean.contender_6
+BusyLean.contender_5
+BigNumber.contender_6
+BigNumber.contender_5
+\end{lstlisting}
+Reusing \lean{p5Family}, \lean{index}, and the total language implementation is
+allowed and visible.  Reusing a named predecessor value as an opaque subterm is
+not.
+
+The audit also runs \texttt{\#print axioms} on the new number and comparison
+theorems.  The expected axiom profile is inherited from the accepted upstream
+modules; the proposal adds no axiom declaration, choice operator, or external
+implementation hook.
+
+\subsection{Why no monotonicity lemma appears}
+
+It would be tempting to prove that a larger oracle produces a larger reflected
+value and then lift inequalities pointwise.  The upstream source explicitly
+warns that this principle fails: interpreted programs may test oracle values.
+The present proof instead arranges for each desired child value to be a
+\emph{visible component of the exact oracle family} passed to the parent.
+Equation~\eqref{eq:oracle} then gives a strict inequality directly.  This is
+both more constructive and more robust.
+
+\subsection{Integration footprint}
+
+The overlay adds:
+\begin{itemize}[leftmargin=*]
+\item \code{BusyLean/Contender7.lean};
+\item \code{BusyLean/Comparison7.lean};
+\item two imports in \code{BusyLean.lean};
+\item \code{test/Contender7Audit.lean}.
+\end{itemize}
+No upstream file needs semantic modification.  The archive contains a complete
+Git patch against the audited revision.
+
+%=============================================================================
+\section{Independent executable checks}
+
+Because a Lean executable was unavailable, the package includes checks that are
+useful but explicitly weaker than kernel verification.
+
+\subsection{Static source audit}
+
+The static audit verifies:
+\begin{enumerate}[leftmargin=*]
+\item absence of \code{noncomputable}, \code{partial}, \code{unsafe},
+      \code{extern}, \code{implemented_by}, \code{native_decide},
+      \code{sorry}, \code{admit}, and custom \code{axiom} declarations from the
+      production overlay;
+\item absence of the token \code{contender_6} from the defining module;
+\item presence of the intended defining equations and all comparison lemmas;
+\item balanced delimiters and the kernel closure test.
+\end{enumerate}
+The check passes for the files in this archive.
+
+\subsection{Finite reflection-power model}
+
+A memoized Python model replaces infinitely branching W-trees by finite trees
+with a leaf default and retains the exact recursive architecture of
+\lean{stageOrder}.  Its reflector exceeds every visible oracle value, matching
+the only property used by the formal proof.  It tests scheduler orders
+\(0,1,2,3\) and inputs \(0,1,2\).
+
+\begin{center}
+\begin{tabular}{crrrr}
+\toprule
+Input & Order 0 & Order 1 & Order 2 & Order 3\\
+\midrule
+0 & 6 & 12 & 30 & 84\\
+1 & 14 & 38 & 134 & 518\\
+2 & 24 & 60 & 204 & 780\\
+\bottomrule
+\end{tabular}
+\end{center}
+Every row is strictly increasing.  The model also checks, at every tested input
+and order, the exact proof spine
+\[
+ (\Lift S)(a,\mathrm{leaf},n)
+ <(\Lift S)(a,\operatorname{treesOfDepth}(0),n)
+ <(\Lift S)(a,\Idx,n).
+\]
+This catches errors in recursion direction and oracle wiring, but it does not
+parse Lean and is not evidence about kernel acceptance.
+
+\subsection{Pinned CI workflow}
+
+The archive provides a GitHub Actions workflow that uses the repository's
+\code{lean-toolchain}, deletes \code{.lake}, runs \code{lake build}, and then
+runs the closure/axiom audit.  This is the intended final acceptance test.
+
+%=============================================================================
+\section{Risks and unresolved verification points}
+
+A serious proposal should distinguish mathematical risk from environment risk.
+
+\subsection{Lean elaboration risk}
+
+The source was written by matching the exact signatures of
+\lean{stage_child_lt}, \lean{seed_lt_stage_leaf},
+\lean{first_tree_leaf}, \lean{treesOfDepth}, and \lean{index} at the audited
+commit.  Nevertheless, only the Lean elaborator and kernel can confirm all
+implicit arguments, definitional reductions, and equation-compiler behavior.
+The supplied code is compact enough that any elaboration repair should be local,
+but no repair is silently assumed here.
+
+\subsection{Timing risk}
+
+The design is intended to avoid normalization of huge terms, but the contest
+limits must be measured on the pinned toolchain from a clean build.  The CI
+workflow should record wall-clock times for the defining module, comparison
+module, and audit separately before repository acceptance.
+
+\subsection{Calibration risk}
+
+The ordinal estimate depends on the repository's informal calibration and on
+the modeling choice \(\alpha\mapsto\alpha\Lambda\) for one scheduler lift.  A
+formal semantics might produce a different expression.  This does not affect
+the strict natural-number comparison.
+
+\subsection{Judging-policy risk}
+
+A judge might prefer a fixed order such as~42 rather than a P5-scaled order,
+even though the stated anti-laziness rule bars the incumbent value rather than
+all large constructive counters.  The new operator and all proofs remain valid
+under the fixed-height variant.  The archive documents this fallback as a
+policy variant, not as the primary proposal.
+
+%=============================================================================
+\section{Further research questions}
+
+\begin{enumerate}[leftmargin=*,label=\textbf{R\arabic*.}]
+\item \textbf{Kernel closure and timing.} Does the overlay build unchanged on
+      Lean~4.34.0, and what are the clean-build times of the definition,
+      comparison, and audit modules?
+
+\item \textbf{Formal ordinal semantics.} Construct an ordinal notation system
+      and interpretation for the P5 term language, \lean{stage}, the universal
+      index, and \lean{liftStage}.  Prove sound upper and lower bounds for each
+      scheduler order rather than relying on the heuristic
+      \(\Lambda^{h+2}\).
+
+\item \textbf{Fixed-height versus seeded-height policy.} Determine a contest
+      standard for large iteration counts inherited from earlier constructive
+      languages.  A formal ``non-laziness margin'' predicate could make this
+      judgment objective.
+
+\item \textbf{Operator-level universal trees.} The present hierarchy iterates
+      the same lift by a natural count.  Can one define a conservative language
+      of scheduler expressions whose own W-trees index heterogeneous sequences
+      of order-raising operators, while retaining an internal normalization
+      proof?
+
+\item \textbf{Transfinite promotion without nontermination.} Develop a notation
+      system for well-founded trees of scheduler lifts and an evaluator by
+      structural recursion.  This could replace the finite count \(\Height\)
+      with a directly represented well-founded control tree.
+
+\item \textbf{System F and higher universes.} The upstream roadmap proposes
+      System~F, System~F$_\omega$, and the Calculus of Constructions as
+      qualitatively stronger base languages.  How does scheduler reflection
+      interact with each normalization proof?  Does ``stronger language first,
+      then reflection power'' dominate pure reflection iteration decisively?
+
+\item \textbf{Parametric comparison theorem.} Abstract the two-edge spine of
+      \lean{index} into a structure containing a distinguished leaf descendant.
+      Prove the entire scheduler-power theorem for any such index and any base
+      scheduler satisfying visible-oracle domination.
+
+\item \textbf{Proof-term minimization.} Can the comparison be expressed using a
+      reusable algebra of progressive schedulers, reducing both source size and
+      kernel-checking time while preserving a transparent closure audit?
+
+\item \textbf{Machine-checked resource bounds.} Formalize a syntactic cost model
+      for elaboration and kernel checking, then prove that the comparison proof
+      avoids evaluating \lean{p5Family 0 42}.
+
+\item \textbf{Independent implementation.} Reimplement the scheduler-power
+      construction in a minimal standalone Lean file and prove agreement with
+      the repository overlay, analogous to the existing port-agreement audit.
+\end{enumerate}
+
+%=============================================================================
+\section{Conclusion}
+
+The universal W-tree index in Contender~6 does more than support one forest
+reflection.  Because the scheduler itself has the type of a family-to-tree
+transformer, the same index can promote the scheduler as an object.  The
+resulting lift preserves a simple domination invariant and is strictly
+progressive at the universal index.  Primitive recursion therefore gives a
+strict hierarchy whose zero level is exactly the incumbent scheduler.
+
+Selecting the P5 seed value, plus a successor guard, as the hierarchy height
+produces a closed constructive number with a very large formal margin:
+\[
+ C_6<C_7.
+\]
+The proof is structurally small and does not normalize the huge height.  The
+proposal is consequently a plausible next BusyLean contender even before the
+more ambitious language-strength jumps in the repository roadmap.
+
+The remaining decisive step is mechanical rather than conceptual: run the
+provided overlay and audit under the exact Lean~4.34.0 toolchain, record timing,
+and accept or locally repair any elaboration issue.  Until that is done, the
+archive should be treated as a rigorous research proposal with executable
+supporting evidence, not as a completed kernel-certified submission.
+
+%=============================================================================
+\appendix
+\section{Complete defining module}
+\lstinputlisting{../lean/BusyLean/Contender7.lean}
+
+\section{Complete comparison module}
+\lstinputlisting{../lean/BusyLean/Comparison7.lean}
+
+\section{Kernel audit module}
+\lstinputlisting{../lean/test/Contender7Audit.lean}
+
+\section{Reproduction commands}
+
+From a checkout of the audited BusyLean commit:
+\begin{lstlisting}[language={}]
+cp lean/BusyLean/Contender7.lean BusyLean/
+cp lean/BusyLean/Comparison7.lean BusyLean/
+cat lean/BusyLean.lean.append >> BusyLean.lean
+cp lean/test/Contender7Audit.lean test/
+rm -rf .lake
+lake build
+lake env lean test/Contender7Audit.lean
+\end{lstlisting}
+The package-side checks are:
+\begin{lstlisting}[language={}]
+./scripts/run_checks.sh
+\end{lstlisting}
+
+\begin{thebibliography}{9}
+\bibitem{BusyLean}
+V. Reshetnikov et al.,
+\emph{BusyLean: Naming Ever Larger Numbers in Lean}, repository and article,
+commit \code{86b360648163f0249eab79539438b6a83dfe8215}, 2026.
+\url{https://github.com/VladimirReshetnikov/BusyLean}
+
+\bibitem{Roux}
+C. Roux,
+\emph{name-the-biggest-number}, Coq large-number contest repository.
+\url{https://github.com/codyroux/name-the-biggest-number}
+
+\bibitem{Lean}
+The Lean developers,
+\emph{Lean 4 theorem prover}, version 4.34.0, 2026.
+\url{https://github.com/leanprover/lean4}
+
+\bibitem{SchwichtenbergWainer}
+H. Schwichtenberg and S. S. Wainer,
+\emph{Proofs and Computations}, Cambridge University Press, 2012.
+
+\bibitem{Girard}
+J.-Y. Girard, Y. Lafont, and P. Taylor,
+\emph{Proofs and Types}, Cambridge University Press, 1989.
+
+\bibitem{Buchholz}
+W. Buchholz,
+A new system of proof-theoretic ordinal functions,
+\emph{Annals of Pure and Applied Logic} 32 (1986), 195--207.
+\end{thebibliography}
+
+\end{document}

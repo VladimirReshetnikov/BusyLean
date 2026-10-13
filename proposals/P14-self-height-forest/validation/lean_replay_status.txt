@@ -1,0 +1,12 @@
+Lean kernel replay status
+=========================
+
+Status: NOT RUN in the artifact-building environment.
+Target: Lean 4.34.0, BusyLean commit 4c4b03d0e2003c479e3bee90a21c8bea13f66c40.
+Reason: no Lean/lake/elan executable was installed, and the official Lean binary could not be materialized through the available file transport.
+
+Required final acceptance command in a pinned checkout:
+
+    python3 scripts/check_contender11.py
+
+This file is an explicit limitation record. Static scans and mathematical review are not substitutes for kernel checking.

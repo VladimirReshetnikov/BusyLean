@@ -1,0 +1,13 @@
+{
+  "critical_boundary": "No claim of Lean elaboration, kernel checking, axiom audit, or timing until check_in_repo.py succeeds.",
+  "finite_reference_model": "passed",
+  "lean_kernel_reason": "lake is not available on PATH",
+  "lean_kernel_status": "not_run",
+  "overall_package_local_status": "passed",
+  "patch_check": "passed",
+  "pdf_overfull_hboxes": 0,
+  "pdf_pages": 22,
+  "pdf_validation": "passed",
+  "reference_assertions": 670,
+  "static_audit": "passed"
+}

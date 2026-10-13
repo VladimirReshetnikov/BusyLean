@@ -1,0 +1,6 @@
+PDF: /mnt/data/busylean_reflection_power/article/reflection_power_contender.pdf
+Pages: 20
+Encrypted: False
+Openable (PyMuPDF): True
+Likely scanned: False
+XFA present: False

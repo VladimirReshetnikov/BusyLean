@@ -1,0 +1,29 @@
+{
+  "repository": "VladimirReshetnikov/BusyLean",
+  "default_branch": "main",
+  "snapshot_commit": "4c4b03d0e2003c479e3bee90a21c8bea13f66c40",
+  "snapshot_commit_title": "Document Contender 10 in the README and the article",
+  "target_toolchain": "leanprover/lean4:v4.34.0",
+  "retrieval_method": "GitHub connector/API inspection; no local full clone was available",
+  "files_materially_reviewed": [
+    "README.md",
+    "BusyLean.lean",
+    "BusyLean/Contender6.lean",
+    "BusyLean/Comparison.lean",
+    "BusyLean/Contender9.lean",
+    "BusyLean/Comparison9.lean",
+    "BusyLean/Contender10.lean",
+    "BusyLean/Comparison10.lean",
+    "test/Audit.lean",
+    "scripts/check.py",
+    "lakefile.toml",
+    "lean-toolchain",
+    "proposals/REVIEW.md"
+  ],
+  "baseline_facts": {
+    "current_contender": "contender_10 = F10 (F10 42)",
+    "current_family": "family9 n = F9 (F9 n)",
+    "current_reflector": "F10 n = Fk.reflectFk family9 n",
+    "existing_self_index": "index = W-tree join of trees defined by the older W-language"
+  }
+}

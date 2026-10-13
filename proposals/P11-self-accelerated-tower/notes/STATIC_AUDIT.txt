@@ -1,0 +1,6 @@
+STATIC AUDIT: PASS
+- no forbidden Lean constructs found outside comments/strings
+- definition module does not mention earlier contender constants
+- all source lines are at most 100 columns
+- required declarations are present
+NOTE: this is not a Lean kernel check; run the bundled Lean audit.

@@ -1,0 +1,415 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index 5ab1818..bb54296 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -12,3 +12,5 @@ import BusyLean.Contender9
+ import BusyLean.Comparison9
+ import BusyLean.Contender10
+ import BusyLean.Comparison10
++import BusyLean.Contender11
++import BusyLean.Comparison11
+diff --git a/BusyLean/Comparison11.lean b/BusyLean/Comparison11.lean
+new file mode 100644
+index 0000000..f02778e
+--- /dev/null
++++ b/BusyLean/Comparison11.lean
+@@ -0,0 +1,153 @@
++import BusyLean.Contender11
++import BusyLean.Comparison10
++
++/-! # Contender 11: comparison and structural-margin theorems -/
++
++namespace BusyLean
++
++/-! ## A single family-reflection step -/
++
++theorem lt_reflect11 {fs : W.Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN (W.prefixMax (fun i => fs i n) n)
++      (BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))) :
++    m < reflect11 fs n := by
++  unfold reflect11
++  omega
++
++/-- Every visible oracle-family value is strictly below the reflection step. -/
++theorem oracle_lt_reflect11 (fs : W.Family) {i n : Nat} (hi : i ≤ n) :
++    fs i n < reflect11 fs n :=
++  lt_reflect11 (Nat.le_trans (W.le_prefixMax (fun j => fs j n) hi)
++    (BigNumber.le_maxN_left _ _))
++
++/-- Every enumerated, accepted kind-polymorphic program is strictly below the
++reflection step. -/
++theorem fvalue_lt_reflect11 (fs : W.Family) {n : Nat} {t : Fk.CTm}
++    (ht : t ∈ Fk.ctmsUpTo n) :
++    Fk.fvalue (packFamily fs) n t < reflect11 fs n :=
++  lt_reflect11 (Nat.le_trans (W.le_maximum _ ht)
++    (BigNumber.le_maxN_right _ _))
++
++/-- The numerical input itself is strictly below every reflection step. -/
++theorem input_lt_reflect11 (fs : W.Family) (n : Nat) :
++    n < reflect11 fs n := by
++  unfold reflect11
++  omega
++
++/-! ## Forest reflection -/
++
++/-- Every visible child stage is strictly below its parent stage. -/
++theorem stage11_child_lt (seed : W.Family)
++    (g : Nat → BigNumber.WTree Nat) {i n : Nat} (hi : i ≤ n) :
++    stage11 seed (g i) n < stage11 seed (.node g) n :=
++  oracle_lt_reflect11 (fun j => stage11 seed (g j)) hi
++
++/-- Forest reflection strictly exceeds its numerical input at every tree. -/
++theorem input_lt_stage11 (seed : W.Family)
++    (a : BigNumber.WTree Nat) (n : Nat) :
++    n < stage11 seed a n := by
++  cases a with
++  | leaf => exact input_lt_reflect11 seed n
++  | node g => exact input_lt_reflect11 _ n
++
++/-- One full round strictly exceeds its seed pointwise.
++
++The proof is by explicit inclusion, not a false monotonicity principle: the
++constant seed occurs at the leaf, that leaf occurs in `treesOfDepth 0`, and
++`treesOfDepth 0` occurs in `index`. -/
++theorem seed_lt_round11 (f : Nat → Nat) (n : Nat) :
++    f n < round11 f n := by
++  have h₁ : f n < stage11 (fun _ => f) .leaf n :=
++    oracle_lt_reflect11 (fun _ => f) (Nat.zero_le n)
++  have h₂ :
++      stage11 (fun _ => f)
++        (defTree (nthD (BigNumber.allTerms 0) 0 .zero)) n <
++      stage11 (fun _ => f) (treesOfDepth 0) n :=
++    stage11_child_lt _
++      (fun j => defTree (nthD (BigNumber.allTerms 0) j .zero))
++      (Nat.zero_le n)
++  have h₃ :
++      stage11 (fun _ => f) (treesOfDepth 0) n <
++      stage11 (fun _ => f) index n :=
++    stage11_child_lt _ treesOfDepth (Nat.zero_le n)
++  rw [first_tree_leaf] at h₂
++  exact Nat.lt_trans h₁ (Nat.lt_trans h₂ h₃)
++
++/-- One full round also strictly exceeds the input at which it is evaluated. -/
++theorem input_lt_round11 (f : Nat → Nat) (n : Nat) :
++    n < round11 f n :=
++  input_lt_stage11 (fun _ => f) index n
++
++/-- Every W-tree denoted by an enumerated W-language program is eventually
++strictly below a full round with the same seed. -/
++theorem defined_tree_eventually_lt11 {f : Nat → Nat} {k : Nat}
++    {t : BigNumber.Term} (ht : t ∈ BigNumber.allTerms k) :
++    ∃ N, ∀ n, N ≤ n →
++      stage11 (fun _ => f) (defTree t) n < round11 f n := by
++  obtain ⟨i, hi⟩ := exists_nthD_of_mem (d := BigNumber.Term.zero) ht
++  refine ⟨k + i, fun n hn => ?_⟩
++  rw [← hi]
++  exact Nat.lt_trans
++    (stage11_child_lt _
++      (fun j => defTree (nthD (BigNumber.allTerms k) j .zero))
++      (by omega))
++    (stage11_child_lt _ treesOfDepth (by omega))
++
++/-- Every accepted kind-polymorphic program at the current budget, run against
++the family of child stages visible at the root of `index`, is below the round. -/
++theorem fvalue_lt_round11 (f : Nat → Nat) {n : Nat} {t : Fk.CTm}
++    (ht : t ∈ Fk.ctmsUpTo n) :
++    Fk.fvalue
++      (packFamily (fun i => stage11 (fun _ => f) (treesOfDepth i))) n t <
++      round11 f n :=
++  fvalue_lt_reflect11 _ ht
++
++/-! ## The self-accelerated tower and the final diagonal -/
++
++/-- Every successor level of the tower strictly exceeds the preceding level. -/
++theorem tower11_step_lt (k n : Nat) :
++    tower11 k n < tower11 (k + 1) n := by
++  change tower11 k n < round11 (tower11 k) (tower11 k n)
++  exact input_lt_round11 _ _
++
++/-- Every positive tower level strictly exceeds the base family. -/
++theorem family10_lt_tower11_succ : ∀ k n,
++    family10 n < tower11 (k + 1) n
++  | 0, n => tower11_step_lt 0 n
++  | k + 1, n =>
++      Nat.lt_trans (family10_lt_tower11_succ k n)
++        (tower11_step_lt (k + 1) n)
++
++/-- Contender 10's family strictly exceeds its input. -/
++theorem input_lt_family10 (n : Nat) : n < family10 n := by
++  unfold family10
++  exact Nat.lt_trans
++    (Fk.input_lt_reflectFk family9 n)
++    (Fk.input_lt_reflectFk family9 (F10 n))
++
++/-- The diagonal family strictly exceeds Contender 10's whole construction at
++every input. -/
++theorem family10_lt_F11 (n : Nat) : family10 n < F11 n := by
++  have h₁ : family10 n < family10 (family10 n) :=
++    input_lt_family10 (family10 n)
++  have h₂ : family10 (family10 n) <
++      tower11 (family10 n + 1) (family10 n) :=
++    family10_lt_tower11_succ (family10 n) (family10 n)
++  exact Nat.lt_trans h₁ h₂
++
++/-- The final diagonal strictly exceeds its own input. -/
++theorem input_lt_F11 (n : Nat) : n < F11 n :=
++  Nat.lt_trans (input_lt_family10 n) (family10_lt_F11 n)
++
++/-- **The required comparison:** Contender 10 is strictly smaller than
++Contender 11. -/
++theorem contender_10_lt_contender_11 : contender_10 < contender_11 := by
++  have h₁ : family10 42 < F11 42 := family10_lt_F11 42
++  have h₂ : F11 42 < F11 (F11 42) := input_lt_F11 (F11 42)
++  simpa [family10, contender_10, contender_11] using Nat.lt_trans h₁ h₂
++
++/-- The previous two accepted contenders are also strictly below Contender 11. -/
++theorem contender_9_lt_contender_11 : contender_9 < contender_11 :=
++  Nat.lt_trans contender_9_lt_contender_10 contender_10_lt_contender_11
++
++end BusyLean
+diff --git a/BusyLean/Contender11.lean b/BusyLean/Contender11.lean
+new file mode 100644
+index 0000000..b3a65ec
+--- /dev/null
++++ b/BusyLean/Contender11.lean
+@@ -0,0 +1,69 @@
++import BusyLean.Contender10
++
++/-!
++# Contender 11: self-accelerated forest reflection
++
++Contender 10 performs one bounded reflection over kind-polymorphic System Fω.
++This successor first lifts that reflection to a countable oracle family, then
++runs it along the W-language's self-generated index tree. One complete traversal
++is a `round11`. The tower repeats complete rounds; at each successor stage the
++previous stage is both the oracle seed and the new input.
++
++```
++B n          := F10 (F10 n)
++T 0          := B
++T (k + 1) n  := round11 (T k) (T k n)
++F11 n        := T (B n + 1) (B n)
++contender_11 := F11 (F11 42)
++```
++
++The definition is closed and computable. It uses Contender 10's construction as
++`B`, but never mentions the constant `contender_10`.
++
++**Do not evaluate `contender_11`.**
++-/
++
++namespace BusyLean
++
++/-- One kind-polymorphic reflection step over a countable oracle family.
++
++The family is packed into the unary oracle already used by Contender 9. Besides
++all visible family values, the result exceeds every accepted closed program of
++kind-polymorphic System Fω at the current syntax/fuel budget. -/
++def reflect11 (fs : W.Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN (W.prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))
++
++/-- Forest reflection of kind-polymorphic System Fω along a well-founded,
++countably branching tree. -/
++def stage11 (seed : W.Family) : BigNumber.WTree Nat → Nat → Nat
++  | .leaf => reflect11 seed
++  | .node g => reflect11 (fun i => stage11 seed (g i))
++
++/-- One complete traversal of the W-language's self-generated index tree,
++starting from a unary seed function. -/
++def round11 (f : Nat → Nat) (n : Nat) : Nat :=
++  stage11 (fun _ => f) index n
++
++/-- Contender 10's construction as a function of its input. In particular,
++`family10 42` is definitionally equal to `contender_10`. -/
++def family10 (n : Nat) : Nat := F10 (F10 n)
++
++/-- A self-accelerated tower of complete forest-reflection rounds.
++
++At a successor stage, the preceding function is supplied as the oracle seed,
++and the round is evaluated at the preceding value. This is deliberately
++stronger than merely repeating all rounds at the original input. -/
++def tower11 : Nat → Nat → Nat
++  | 0 => family10
++  | k + 1 => fun n => round11 (tower11 k) (tower11 k n)
++
++/-- The diagonal family: at input `n`, start at `family10 n`, and carry out
++`family10 n + 1` self-accelerated complete rounds. -/
++def F11 (n : Nat) : Nat :=
++  tower11 (family10 n + 1) (family10 n)
++
++/-- **Contender 11.** Never evaluate it. -/
++def contender_11 : Nat := F11 (F11 42)
++
++end BusyLean
+diff --git a/scripts/check11.py b/scripts/check11.py
+new file mode 100755
+index 0000000..f494f5d
+--- /dev/null
++++ b/scripts/check11.py
+@@ -0,0 +1,88 @@
++#!/usr/bin/env python3
++"""Build and audit the proposed BusyLean Contender 11.
++
++Copy the package's `BusyLean/*.lean` files and `test/Contender11Audit.lean` into
++the BusyLean repository, then run this script from the repository root.
++"""
++from __future__ import annotations
++
++import re
++import shutil
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++BUILD_DIRS = [
++    ROOT / ".lake" / "build",
++    ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build",
++]
++PERMITTED = {"propext", "Quot.sound"}
++PREVIOUS = "BusyLean.Comparison10"
++CURRENT_DEF = "BusyLean.Contender11"
++CURRENT_PROOF = "BusyLean.Comparison11"
++DEFINITION_BUDGET = 15.0
++PROOF_BUDGET = 60.0
++LAKE = shutil.which("lake") or "lake"
++
++
++def run(args: list[str]) -> subprocess.CompletedProcess[str]:
++    return subprocess.run(
++        [LAKE, *args], cwd=ROOT, capture_output=True, text=True, check=False
++    )
++
++
++def timed_build(label: str, targets: list[str], budget: float | None) -> float:
++    start = time.monotonic()
++    build = run(["build", *targets])
++    elapsed = time.monotonic() - start
++    if build.returncode != 0:
++        print(build.stdout, build.stderr)
++        sys.exit(f"FAIL: {label} build failed")
++    note = (
++        f"(budget {budget:.0f} s)"
++        if budget is not None
++        else "(accepted earlier; not budgeted)"
++    )
++    print(f"{label}: {elapsed:.1f} s {note}")
++    if budget is not None and elapsed > budget:
++        sys.exit(f"FAIL: {label} exceeded the budget")
++    return elapsed
++
++
++def main() -> None:
++    for directory in BUILD_DIRS:
++        shutil.rmtree(directory, ignore_errors=True)
++
++    total = timed_build("previous contender", [PREVIOUS], None)
++    total += timed_build("definitions", [CURRENT_DEF], DEFINITION_BUDGET)
++    total += timed_build("proofs", [CURRENT_PROOF], PROOF_BUDGET)
++    print(f"total clean build: {total:.1f} s")
++
++    audit = run(["env", "lean", "test/Contender11Audit.lean"])
++    output = audit.stdout + audit.stderr
++    print(output)
++    if audit.returncode != 0:
++        sys.exit("FAIL: Contender 11 audit did not run cleanly")
++
++    reports = re.findall(
++        r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)",
++        output,
++    )
++    bad = [
++        (name, axioms)
++        for name, axioms in reports
++        if axioms
++        and set(axiom.strip() for axiom in axioms.split(",")) - PERMITTED
++    ]
++    if not reports or bad:
++        sys.exit(f"FAIL: forbidden axioms or missing reports: {bad}")
++    print(
++        f"PASS: {len(reports)} declarations audited; "
++        f"axioms within {sorted(PERMITTED)}"
++    )
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/test/Contender11Audit.lean b/test/Contender11Audit.lean
+new file mode 100644
+index 0000000..05d5aa5
+--- /dev/null
++++ b/test/Contender11Audit.lean
+@@ -0,0 +1,71 @@
++import BusyLean.Comparison11
++import Lean
++
++/-!
++# Contender 11 audit
++
++Run with:
++
++```
++lake env lean test/Contender11Audit.lean
++```
++
++The file prints axiom dependencies, checks the required theorem statements, and
++uses a transitive constant-closure audit to verify that the new definition does
++not mention any earlier contender constant.
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through declaration types and values. -/
++def constClosure11 (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant occurs in the transitive closure of `root`. -/
++elab "#assert_not_in_closure11 " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := constClosure11 env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then
++      throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} names"
++
++-- Axiom reports. The repository checker should accept only `propext` and
++-- `Quot.sound`.
++#print axioms BusyLean.contender_11
++#print axioms BusyLean.contender_10_lt_contender_11
++#print axioms BusyLean.seed_lt_round11
++#print axioms BusyLean.tower11_step_lt
++#print axioms BusyLean.family10_lt_F11
++#print axioms BusyLean.defined_tree_eventually_lt11
++#print axioms BusyLean.fvalue_lt_round11
++
++-- No earlier contender value is used to define the new number. Only the
++-- preceding construction `F10` appears, through `family10`.
++#assert_not_in_closure11 BusyLean.contender_11 :
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++-- Record the central statements in a compact, compiler-checkable form.
++#check @BusyLean.contender_10_lt_contender_11
++#check @BusyLean.family10_lt_F11
++#check @BusyLean.input_lt_F11
++#check @BusyLean.tower11_step_lt
++#check @BusyLean.defined_tree_eventually_lt11
++#check @BusyLean.fvalue_lt_round11

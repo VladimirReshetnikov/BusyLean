@@ -1,0 +1,10 @@
+test_autonomous_lift_is_next_rank_and_strict (python.test_reference.DRKRReferenceTests.test_autonomous_lift_is_next_rank_and_strict) ... ok
+test_diagonal_dominates_seed_and_fixed_visible_ranks (python.test_reference.DRKRReferenceTests.test_diagonal_dominates_seed_and_fixed_visible_ranks) ... ok
+test_index_contains_required_path (python.test_reference.DRKRReferenceTests.test_index_contains_required_path) ... ok
+test_reference_summary (python.test_reference.DRKRReferenceTests.test_reference_summary) ... ok
+test_reflection_dominates_visible_data (python.test_reference.DRKRReferenceTests.test_reflection_dominates_visible_data) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.070s
+
+OK

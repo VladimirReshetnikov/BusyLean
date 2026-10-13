@@ -1,0 +1,8 @@
+Artifact build tool versions
+============================
+
+Python 3.13.5
+git version 2.47.3
+pdfTeX 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian)
+pdfinfo version 25.06.0
+pdftotext version 25.06.0

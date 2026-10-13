@@ -1,0 +1,56 @@
+{
+  "delimiter_counts": {
+    "Comparison11.lean": {
+      "()": 111,
+      "[]": 5,
+      "{}": 13
+    },
+    "Contender11.lean": {
+      "()": 21,
+      "[]": 0,
+      "{}": 0
+    }
+  },
+  "files": {
+    "lean/BusyLean/Comparison11.lean": {
+      "lines": 189,
+      "max_line_length": 78,
+      "sha256": "72b05365dc819e30b4c97016e5653e6d04de635433f4ba3124d7cc0aef37df69"
+    },
+    "lean/BusyLean/Contender11.lean": {
+      "lines": 87,
+      "max_line_length": 78,
+      "sha256": "6777532093e91630d1e576b32be5964367aa4f0467c20f734f425961628a1d66"
+    }
+  },
+  "findings": [],
+  "forbidden_definition_tokens_checked": [
+    "noncomputable",
+    "partial",
+    "unsafe",
+    "opaque",
+    "implemented_by",
+    "extern",
+    "native_decide",
+    "sorry",
+    "admit",
+    "axiom"
+  ],
+  "forbidden_proof_tokens_checked": [
+    "sorry",
+    "admit",
+    "axiom",
+    "native_decide",
+    "Classical.choice"
+  ],
+  "old_contender_constants_checked_in_definition": [
+    "contender_5",
+    "contender_6",
+    "contender_7",
+    "contender_8",
+    "contender_9",
+    "contender_10"
+  ],
+  "scope": "static source and packaging checks; not a Lean kernel check",
+  "status": "PASS"
+}

@@ -1,0 +1,47 @@
+PDF: /mnt/data/busylean_reflection_power/article/reflection_power_contender.pdf
+Pages: 20
+Encrypted: False
+Page sizes (pt, rounded):
+  - 612 x 792 (20 page(s))
+Metadata:
+  /Author: OpenAI research assistant
+  /CreationDate: D:20261013030249Z
+  /Creator: LaTeX with hyperref
+  /Keywords: 
+  /ModDate: D:20261013030249Z
+  /PTEX.Fullbanner: This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2025/dev/Debian) kpathsea version 6.4.0/dev
+  /Producer: pdfTeX-1.40.26
+  /Subject: 
+  /Title: Seeded Reflection Power: A Proposed BusyLean Contender 7
+  /Trapped: /False
+Outline items: 50
+Form fields: 0
+Attachments: 0
+Annotations: 74
+
+Fonts (pdffonts, first 25 lines):
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+UICLPL+LMRoman12-Bold                Type 1            Custom           yes yes yes    218  0
+DQSNFH+LMRoman12-Regular             Type 1            Custom           yes yes yes    219  0
+RNNMIG+LMRoman10-Bold                Type 1            Custom           yes yes yes    220  0
+PEHQSJ+LMRoman10-Regular             Type 1            Custom           yes yes yes    221  0
+NAMJPF+LMRomanCaps10-Regular         Type 1            Custom           yes yes yes    222  0
+ATYCVH+LMRoman10-Italic              Type 1            Custom           yes yes yes    223  0
+ADMOLD+LMMono10-Regular              Type 1            Custom           yes yes yes    224  0
+UUHJBA+LMMathItalic10-Regular        Type 1            Custom           yes yes yes    225  0
+OCGCHW+LMRoman8-Regular              Type 1            Custom           yes yes yes    278  0
+PEHQSJ+LMRoman10-Regular             Type 1            Custom           yes yes yes    279  0
+DUMVWJ+LMRoman6-Regular              Type 1            Custom           yes yes yes    280  0
+FELLIJ+LMMathSymbols10-Regular       Type 1            Custom           yes yes yes    281  0
+IVHSWP+LMMathItalic8-Regular         Type 1            Custom           yes yes yes    282  0
+DWUSEL+LMMonoLt10-Bold               Type 1            Custom           yes yes yes    294  0
+ZUBJYD+LMMono9-Regular               Type 1            Custom           yes yes yes    295  0
+TZYURE+MSBM10                        Type 1            Builtin          yes yes yes    322  0
+FBMYOI+LMMathSymbols8-Regular        Type 1            Custom           yes yes yes    323  0
+WKNEQI+LMMathExtension10-Regular     Type 1            Custom           yes yes yes    325  0
+CDUEKX+LMSans10-Regular              Type 1            Custom           yes yes yes    328  0
+BBQMHS+LMMathSymbols9-Regular        Type 1            Custom           yes yes yes    331  0
+ESDFSJ+LMMono10-Italic               Type 1            Custom           yes yes yes    404  0
+CSFUQA+LMMathItalic6-Regular         Type 1            Custom           yes yes yes    427  0
+PEHQSJ+LMRoman10-Regular             Type 1            Custom           yes yes yes    442  0

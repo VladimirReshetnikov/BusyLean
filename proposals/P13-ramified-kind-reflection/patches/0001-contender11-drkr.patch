@@ -1,0 +1,398 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index 5ab18188ce3c67ab09ab70f9bd48cc241c5b8516..bb54296827676baa1d3262fc9047c2bd5de2b259 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -12,3 +12,5 @@ import BusyLean.Contender9
+ import BusyLean.Comparison9
+ import BusyLean.Contender10
+ import BusyLean.Comparison10
++import BusyLean.Contender11
++import BusyLean.Comparison11
+diff --git a/BusyLean/Comparison11.lean b/BusyLean/Comparison11.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..f380a7d6ed9b42a8eb9e4c0285daac7438058b75
+--- /dev/null
++++ b/BusyLean/Comparison11.lean
+@@ -0,0 +1,189 @@
++import BusyLean.Contender11
++import BusyLean.Comparison10
++
++/-!
++# Contender 11: comparison and structural theorems
++
++The required theorem is `contender_10_lt_contender_11`.  The remaining
++results record the much larger structural margin: every ramification level
++strictly exceeds the preceding one, every fixed level is eventually below the
++diagonal family, and every bounded kind-polymorphic program is already beaten
++at the base reflection level.
++-/
++
++namespace BusyLean
++
++namespace RK
++
++/-- An operator dominates every visible member of its input family. -/
++def Dominates (op : Operator) : Prop :=
++  ∀ (fs : W.Family) {i n : Nat}, i ≤ n → fs i n < op fs n
++
++/-! ## The base reflector -/
++
++theorem lt_reflect {fs : W.Family} {n m : Nat}
++    (h : m ≤ BigNumber.maxN
++      (W.prefixMax (fun i => fs i n) n)
++      (BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))) :
++    m < reflect fs n := by
++  unfold reflect
++  omega
++
++/-- Every visible oracle-family value is below one reflection step. -/
++theorem oracle_lt_reflect (fs : W.Family) {i n : Nat} (hi : i ≤ n) :
++    fs i n < reflect fs n :=
++  lt_reflect (Nat.le_trans
++    (W.le_prefixMax (fun j => fs j n) hi)
++    (BigNumber.le_maxN_left _ _))
++
++/-- Every accepted kind-polymorphic program in the current syntax budget is
++below one reflection step. -/
++theorem fvalue_lt_reflect (fs : W.Family) {n : Nat} {t : Fk.CTm}
++    (ht : t ∈ Fk.ctmsUpTo n) :
++    Fk.fvalue (packFamily fs) n t < reflect fs n :=
++  lt_reflect (Nat.le_trans
++    (W.le_maximum (Fk.fvalue (packFamily fs) n) ht)
++    (BigNumber.le_maxN_right _ _))
++
++/-- The input itself is below one reflection step. -/
++theorem input_lt_reflect (fs : W.Family) (n : Nat) : n < reflect fs n := by
++  unfold reflect
++  omega
++
++/-- The base reflector dominates its input family. -/
++theorem reflect_dominates : Dominates reflect := by
++  intro fs i n hi
++  exact oracle_lt_reflect fs hi
++
++/-! ## Generic autonomous lifting -/
++
++/-- A node strictly dominates each visible child whenever the operator used at
++that node dominates its input family. -/
++theorem lift_child_lt {op : Operator} (hop : Dominates op)
++    (seed : W.Family) (g : Nat → BigNumber.WTree Nat) {i n : Nat}
++    (hi : i ≤ n) :
++    lift op seed (g i) n < lift op seed (.node g) n := by
++  change lift op seed (g i) n < op (fun j => lift op seed (g j)) n
++  exact hop (fun j => lift op seed (g j)) hi
++
++/-- The autonomous lift strictly exceeds the unlifted operator at every input.
++The proof follows the concrete path
++`leaf < treesOfDepth 0 < index`. -/
++theorem op_lt_autonomous {op : Operator} (hop : Dominates op)
++    (seed : W.Family) (n : Nat) :
++    op seed n < autonomous op seed n := by
++  have h₂ :
++      lift op seed
++          (defTree (nthD (BigNumber.allTerms 0) 0 .zero)) n <
++        lift op seed (treesOfDepth 0) n :=
++    lift_child_lt hop seed
++      (fun j => defTree (nthD (BigNumber.allTerms 0) j .zero))
++      (Nat.zero_le n)
++  have h₃ :
++      lift op seed (treesOfDepth 0) n < lift op seed index n := by
++    simpa [index] using
++      (lift_child_lt hop seed treesOfDepth (i := 0) (n := n)
++        (Nat.zero_le n))
++  have h₂' : op seed n < lift op seed (treesOfDepth 0) n := by
++    simpa [first_tree_leaf, lift] using h₂
++  exact Nat.lt_trans h₂' h₃
++
++/-- Autonomous lifting preserves family domination. -/
++theorem autonomous_dominates {op : Operator} (hop : Dominates op) :
++    Dominates (autonomous op) := by
++  intro seed i n hi
++  exact Nat.lt_trans
++    (hop seed (i := i) (n := n) hi)
++    (op_lt_autonomous hop seed n)
++
++/-! ## Ramification -/
++
++/-- Every ramification level dominates its input family. -/
++theorem ramified_dominates : ∀ r : Nat, Dominates (ramified r)
++  | 0 => reflect_dominates
++  | r + 1 => by
++      simpa [ramified] using autonomous_dominates (ramified_dominates r)
++
++/-- Each successor ramification level is strictly larger than its predecessor
++at every seed and input. -/
++theorem ramified_level_lt (r : Nat) (seed : W.Family) (n : Nat) :
++    ramified r seed n < ramified (r + 1) seed n := by
++  change ramified r seed n < autonomous (ramified r) seed n
++  exact op_lt_autonomous (ramified_dominates r) seed n
++
++/-- Strict monotonicity in the ramification rank. -/
++theorem ramified_lt_of_lt {r s : Nat} (hrs : r < s)
++    (seed : W.Family) (n : Nat) :
++    ramified r seed n < ramified s seed n := by
++  induction s generalizing r with
++  | zero => omega
++  | succ s ih =>
++      by_cases h : r = s
++      · subst r
++        exact ramified_level_lt s seed n
++      · have hrs' : r < s := by omega
++        exact Nat.lt_trans (ih hrs') (ramified_level_lt s seed n)
++
++end RK
++
++/-! ## The diagonal contender -/
++
++/-- The inherited family already strictly exceeds its input. -/
++theorem input_lt_family10 (n : Nat) : n < family10 n := by
++  change n < F10 (F10 n)
++  exact Nat.lt_trans
++    (Fk.input_lt_reflectFk family9 n)
++    (Fk.input_lt_reflectFk family9 (F10 n))
++
++/-- At every input, `F11` exceeds the entire Contender 10 family. -/
++theorem family10_lt_F11 (n : Nat) : family10 n < F11 n := by
++  unfold F11
++  exact RK.ramified_dominates (family10 n + 1)
++    (fun _ => family10) (i := 0) (n := n) (Nat.zero_le n)
++
++/-- `F11` strictly exceeds its input. -/
++theorem input_lt_F11 (n : Nat) : n < F11 n :=
++  Nat.lt_trans (input_lt_family10 n) (family10_lt_F11 n)
++
++/-- Every fixed ramification rank is eventually dominated by the diagonal
++family.  In fact input `n ≥ r` suffices. -/
++theorem fixed_rank_eventually_lt_F11 (r : Nat) :
++    ∀ n : Nat, r ≤ n →
++      RK.ramified r (fun _ => family10) n < F11 n := by
++  intro n hr
++  unfold F11
++  apply RK.ramified_lt_of_lt
++  exact Nat.lt_of_le_of_lt hr
++    (Nat.lt_trans (input_lt_family10 n) (Nat.lt_succ_self _))
++
++/-- Every accepted kind-polymorphic program in the input budget is below the
++diagonal family, already because rank zero is below the selected rank. -/
++theorem fvalue_lt_F11 {n : Nat} {t : Fk.CTm} (ht : t ∈ Fk.ctmsUpTo n) :
++    Fk.fvalue (packFamily (fun _ => family10)) n t < F11 n := by
++  have hbase :
++      Fk.fvalue (packFamily (fun _ => family10)) n t <
++        RK.ramified 0 (fun _ => family10) n := by
++    simpa [RK.ramified] using
++      (RK.fvalue_lt_reflect (fun _ => family10) ht)
++  have hrank :
++      RK.ramified 0 (fun _ => family10) n <
++        RK.ramified (family10 n + 1) (fun _ => family10) n :=
++    RK.ramified_lt_of_lt (by omega) (fun _ => family10) n
++  exact Nat.lt_trans hbase (by simpa [F11] using hrank)
++
++/-- At input 42 the chosen ramification rank is exactly one more than the
++current accepted contender. -/
++theorem F11_rank_at_42 :
++    F11 42 = RK.ramified (contender_10 + 1) (fun _ => family10) 42 := rfl
++
++/-- **Required comparison:** Contender 10 is strictly smaller than
++Contender 11. -/
++theorem contender_10_lt_contender_11 : contender_10 < contender_11 := by
++  change family10 42 < F11 (F11 42)
++  exact Nat.lt_trans (family10_lt_F11 42) (input_lt_F11 (F11 42))
++
++/-- The entire accepted chain is therefore below Contender 11. -/
++theorem contender_9_lt_contender_11 : contender_9 < contender_11 :=
++  Nat.lt_trans contender_9_lt_contender_10 contender_10_lt_contender_11
++
++end BusyLean
+diff --git a/BusyLean/Contender11.lean b/BusyLean/Contender11.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..28ced380614f84217346d0efba43c069d75eaa62
+--- /dev/null
++++ b/BusyLean/Contender11.lean
+@@ -0,0 +1,87 @@
++import BusyLean.Contender10
++
++/-!
++# Contender 11: diagonal ramified kind-reflection
++
++This module contains only the computable definitions.  The comparison and
++structural theorems are in `BusyLean/Comparison11.lean`.
++
++The construction has three layers.
++
++1. `RK.reflect` is a family-aware version of Contender 10's reflection over
++   kind-polymorphic System Fω.  The unary object-language oracle decodes a
++   pair `(i,m)` and calls the family member `fs i m`.
++2. `RK.autonomous` lifts any family operator along Contender 6's self-indexing
++   W-tree `index`, which joins every tree definable in the W-language.
++3. `RK.ramified r` iterates the autonomous lift at the meta-level.  The rank
++   used at input `n` is `family10 n + 1`, already larger than `n`; the current
++   accepted construction is also used as the seed family.
++
++No earlier contender *constant* occurs in the definition.  In particular,
++`contender_10` is not referenced.  Only its construction `F10` is reused.
++Every definition below is structurally recursive and executable in principle.
++
++**Never evaluate `contender_11`.**
++-/
++
++namespace BusyLean
++
++namespace RK
++
++/-- A transformation from an oracle family to a numerical function. -/
++abbrev Operator := W.Family → Nat → Nat
++
++/-- One family-aware reflection step over kind-polymorphic System Fω.
++
++The first maximum sees all oracle-family values `fs i n` with `i ≤ n`.
++The second sees all accepted object-language programs of syntax depth `≤ n`,
++run with the packed unary oracle.  The additive guard makes the result also
++strictly exceed the input. -/
++def reflect (fs : W.Family) (n : Nat) : Nat :=
++  n + 1 + BigNumber.maxN
++    (W.prefixMax (fun i => fs i n) n)
++    (BigNumber.maximum (Fk.fvalue (packFamily fs) n) (Fk.ctmsUpTo n))
++
++/-- Lift a family operator through a W-tree.
++
++At a leaf, apply the operator to the seed family.  At a node, expose the
++values obtained from every child as the new family seen by the operator. -/
++def lift (op : Operator) (seed : W.Family) :
++    BigNumber.WTree Nat → Nat → Nat
++  | .leaf => op seed
++  | .node g => op (fun i => lift op seed (g i))
++
++/-- Autonomous lifting along the join of every W-tree definable by the
++repository's W-language. -/
++def autonomous (op : Operator) (seed : W.Family) : Nat → Nat :=
++  lift op seed index
++
++/-- Ramified autonomous kind-reflection.
++
++Rank zero is one family-aware kind-polymorphic reflection.  A successor rank
++lifts the entire previous-rank operator along the self-indexing W-tree.  Thus
++rank two is not merely two calls to `reflect`: each outer node invokes a full
++rank-one autonomous hierarchy on its family of children. -/
++def ramified : Nat → Operator
++  | 0 => reflect
++  | r + 1 => autonomous (ramified r)
++
++end RK
++
++/-- Contender 10's construction as a function of its input.
++
++Definitional equality gives `family10 42 = contender_10`, but the constant
++`contender_10` itself is absent from this module's dependency closure. -/
++def family10 (n : Nat) : Nat := F10 (F10 n)
++
++/-- The diagonal ramified family.
++
++At input `n`, the ramification rank is `family10 n + 1`, and the constant
++family with value `family10` is the seed. -/
++def F11 (n : Nat) : Nat :=
++  RK.ramified (family10 n + 1) (fun _ => family10) n
++
++/-- **Contender 11.** Never evaluate it. -/
++def contender_11 : Nat := F11 (F11 42)
++
++end BusyLean
+diff --git a/scripts/check.py b/scripts/check.py
+index f3a428ce4e2aaeae10b81e007479635333cafef8..5da64e1f5faf145312cd16f2f39295a5fbb22238 100644
+--- a/scripts/check.py
++++ b/scripts/check.py
+@@ -28,8 +28,8 @@ ROOT = Path(__file__).resolve().parent.parent
+ BUILD_DIRS = [ROOT / ".lake" / "build",
+               ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
+ PERMITTED = {"propext", "Quot.sound"}
+-PREVIOUS = "BusyLean.Comparison9"   # previous contender: definitions + proofs
+-CURRENT_DEF = "BusyLean.Contender10"  # current contender's definition module
++PREVIOUS = "BusyLean.Comparison10"  # previous contender: definitions + proofs
++CURRENT_DEF = "BusyLean.Contender11"  # current contender's definition module
+ DEFINITION_BUDGET = 15.0  # seconds
+ PROOF_BUDGET = 60.0
+ LAKE = shutil.which("lake") or "lake"
+@@ -62,11 +62,14 @@ def main():
+     total += timed_build("proofs", [], PROOF_BUDGET)
+     print(f"total clean build: {total:.1f} s")
+ 
+-    audit = run(["env", "lean", "test/Audit.lean"])
+-    out = audit.stdout + audit.stderr
+-    print(out)
+-    if audit.returncode != 0:
+-        sys.exit("FAIL: audit did not run cleanly")
++    out = ""
++    for audit_file in ["test/Audit.lean", "test/Contender11Audit.lean"]:
++        audit = run(["env", "lean", audit_file])
++        audit_out = audit.stdout + audit.stderr
++        print(audit_out)
++        out += audit_out
++        if audit.returncode != 0:
++            sys.exit(f"FAIL: {audit_file} did not run cleanly")
+     reports = re.findall(r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend)", out)
+     bad = [(name, axs) for name, axs in reports
+            if axs and set(a.strip() for a in axs.split(",")) - PERMITTED]
+diff --git a/test/Contender11Audit.lean b/test/Contender11Audit.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..7f7f4c57fd607717954d193200f6e7b407572ade
+--- /dev/null
++++ b/test/Contender11Audit.lean
+@@ -0,0 +1,59 @@
++import BusyLean.Comparison11
++import Lean
++
++/-!
++Standalone audit fragment for Contender 11.
++
++After integrating the two modules into BusyLean, run:
++
++    lake env lean test/Contender11Audit.lean
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through types and values. -/
++def constClosure11 (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++elab "#assert_not_in_closure11 " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := constClosure11 env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then
++      throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all forbidden names"
++
++#print axioms BusyLean.contender_11
++#print axioms BusyLean.contender_10_lt_contender_11
++#print axioms BusyLean.family10_lt_F11
++#print axioms BusyLean.fixed_rank_eventually_lt_F11
++#print axioms BusyLean.fvalue_lt_F11
++#print axioms BusyLean.RK.ramified_dominates
++#print axioms BusyLean.RK.ramified_lt_of_lt
++
++-- The construction may use the previous *family* `F10`, but not any previous
++-- contender constant.
++#assert_not_in_closure11 BusyLean.contender_11 :
++  BusyLean.contender_10 BusyLean.contender_9 BusyLean.contender_8
++  BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
++
++#check @BusyLean.contender_10_lt_contender_11
++#check @BusyLean.fixed_rank_eventually_lt_F11
++#check @BusyLean.fvalue_lt_F11
++#check @BusyLean.RK.ramified_level_lt

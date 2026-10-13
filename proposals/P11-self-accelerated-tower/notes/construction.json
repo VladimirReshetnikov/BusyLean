@@ -1,0 +1,33 @@
+{
+  "name": "BusyLean Contender 11",
+  "status": "proposed; LaTeX compiled; Lean not kernel-checked in preparation environment",
+  "toolchain_target": "leanprover/lean4:v4.34.0",
+  "base_family": "family10 n = F10 (F10 n)",
+  "round": "round11 f n = stage11 (fun _ => f) index n",
+  "tower": {
+    "zero": "tower11 0 = family10",
+    "successor": "tower11 (k+1) n = round11 (tower11 k) (tower11 k n)"
+  },
+  "diagonal": "F11 n = tower11 (family10 n + 1) (family10 n)",
+  "number": "contender_11 = F11 (F11 42)",
+  "required_comparison": "contender_10_lt_contender_11",
+  "structural_theorems": [
+    "seed_lt_round11",
+    "tower11_step_lt",
+    "family10_lt_F11",
+    "defined_tree_eventually_lt11",
+    "fvalue_lt_round11"
+  ],
+  "forbidden_features": [
+    "sorry",
+    "custom axioms",
+    "noncomputable",
+    "partial",
+    "unsafe",
+    "opaque stand-ins",
+    "implemented_by",
+    "extern",
+    "native_decide",
+    "Classical.choice"
+  ]
+}

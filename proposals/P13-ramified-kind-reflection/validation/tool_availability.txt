@@ -1,0 +1,9 @@
+Lean toolchain search in preparation environment:
+
+lean: not found
+lake: not found
+elan: not found
+docker: not found
+
+Target specified by repository: leanprover/lean4:v4.34.0
+Result: kernel build unavailable in this environment.

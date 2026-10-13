@@ -1,0 +1,6 @@
+PDF: /mnt/data/BusyLean_Contender11_DiagonalForest/article/contender11.pdf
+Pages: 20
+Encrypted: False
+Openable (PyMuPDF): True
+Likely scanned: False
+XFA present: False

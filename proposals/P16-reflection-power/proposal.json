@@ -1,0 +1,19 @@
+{
+  "name": "BusyLean Contender 7: Seeded Reflection Power",
+  "target_repository": "VladimirReshetnikov/BusyLean",
+  "target_commit": "86b360648163f0249eab79539438b6a83dfe8215",
+  "lean_toolchain": "leanprover/lean4:v4.34.0",
+  "definition": "stageOrder metaHeight p5Family index 42",
+  "metaHeight": "Nat.succ (42 + p5Family 0 42)",
+  "required_theorem": "BusyLean.contender_6_lt_contender_7",
+  "computability": "structural recursion on WTree plus primitive recursion on Nat",
+  "kernel_status": "not checked in the artifact-generation environment",
+  "completed_checks": [
+    "textual forbidden-construct audit",
+    "defining-module incumbent-token audit",
+    "finite executable reflection-power model",
+    "LaTeX compilation",
+    "20-page PDF render inspection",
+    "PDF preflight"
+  ]
+}

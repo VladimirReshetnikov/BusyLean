@@ -1,0 +1,13 @@
+{
+  "cache_family": 5363,
+  "cache_lift": 3091,
+  "cache_operator": 3094,
+  "cache_reflect": 2291,
+  "checks": 60,
+  "interned_families": 1024,
+  "max_n": 2,
+  "max_rank": 4,
+  "sample_f11_0": 10,
+  "sample_f11_1": 536870910,
+  "sample_f11_2": 14322625828472183109232052877488643
+}

@@ -1,0 +1,18 @@
+{
+  "package": "BusyLean_Contender11_Crowned_Forest",
+  "title": "Crowned Kind-Polymorphic Forest Reflection",
+  "date": "2026-10",
+  "upstream_repository": "VladimirReshetnikov/BusyLean",
+  "upstream_commit": "4c4b03d0e2003c479e3bee90a21c8bea13f66c40",
+  "toolchain_expected": "leanprover/lean4:v4.34.0",
+  "proposed_root": "BusyLean.contender_11",
+  "required_comparison": "BusyLean.contender_10_lt_contender_11",
+  "kernel_validation": "not_run_in_packaging_environment",
+  "completed_validation": [
+    "static_source_audit",
+    "finite_reference_model_670_assertions",
+    "latex_build",
+    "pdf_render_and_visual_inspection",
+    "sha256_manifest"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "assertions": 670,
+  "max_n": 5,
+  "pairing_box": {
+    "i": [
+      0,
+      11
+    ],
+    "m": [
+      0,
+      49
+    ]
+  },
+  "sample_rows": [
+    {
+      "crown_steps": 1,
+      "index_stage": 11,
+      "n": 0,
+      "seed": 8,
+      "toy_F11": 12
+    },
+    {
+      "crown_steps": 2,
+      "index_stage": 44,
+      "n": 1,
+      "seed": 28,
+      "toy_F11": 50
+    },
+    {
+      "crown_steps": 3,
+      "index_stage": 92,
+      "n": 2,
+      "seed": 66,
+      "toy_F11": 107
+    },
+    {
+      "crown_steps": 4,
+      "index_stage": 167,
+      "n": 3,
+      "seed": 128,
+      "toy_F11": 195
+    },
+    {
+      "crown_steps": 5,
+      "index_stage": 270,
+      "n": 4,
+      "seed": 220,
+      "toy_F11": 315
+    },
+    {
+      "crown_steps": 6,
+      "index_stage": 409,
+      "n": 5,
+      "seed": 348,
+      "toy_F11": 475
+    }
+  ],
+  "scope": "finite structural reference model; not Lean kernel validation",
+  "status": "passed",
+  "symbolic_crown_edges_at_42": 43
+}

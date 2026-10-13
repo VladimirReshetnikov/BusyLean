@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "baseline": "synthetic worktree generated from the exact recorded versions of BusyLean.lean and scripts/check.py",
+  "checks": [
+    "git apply --check",
+    "git apply",
+    "new definition module present",
+    "new comparison module present",
+    "standalone audit present",
+    "previous/current build targets updated",
+    "standalone audit invoked by scripts/check.py"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "status": "HEURISTIC_ONLY",
+  "symbol": "Lambda ~= psi(Omega_omega)",
+  "repository_calibration": {
+    "P5": "approximately f_{Lambda + omega^2}(42)",
+    "Contender6": "approximately f_{Lambda^2}(42)"
+  },
+  "proposed_recurrence": "one scheduler lift is modeled as alpha -> alpha * Lambda",
+  "finite_height_formula": "order h is approximately f_{Lambda^(h+2)}(42)",
+  "height": "H = succ(42 + p5Family(0,42))",
+  "proposed_contender": "approximately f_{Lambda^(H+2)}(42)",
+  "warning": "No ordinal semantics or fast-growing comparison is formalized in Lean; only strict Nat inequalities are claimed as theorems."
+}

@@ -1,0 +1,247 @@
+diff --git a/BusyLean.lean b/BusyLean.lean
+index fd9407a32ae5703cf633baf901fb419c93eb092f..2457d9215f583b575db8f11a3b0161da2470fda5 100644
+--- a/BusyLean.lean
++++ b/BusyLean.lean
+@@ -4,3 +4,5 @@ import BusyLean.Reflection
+ import BusyLean.ReflectionFacts
+ import BusyLean.Contender6
+ import BusyLean.Comparison
++import BusyLean.Contender7
++import BusyLean.Comparison7
+diff --git a/BusyLean/Comparison7.lean b/BusyLean/Comparison7.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..231c81b8712a370b7ea357a38b818bd53622672d
+--- /dev/null
++++ b/BusyLean/Comparison7.lean
+@@ -0,0 +1,111 @@
++import BusyLean.Contender7
++import BusyLean.Comparison
++
++/-!
++# Contender 7: comparison theorems
++
++The central invariant says that a scheduler, when run through the universal
++`index`, exceeds every visible entry of its seed family.  The existing `stage`
++satisfies the invariant.  One reflection-order lift preserves it and is
++strictly larger at `index`; induction therefore gives a strict hierarchy.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- `S` exceeds every visible seed entry when scheduled through `index`. -/
++def IndexDominates (S : StageOperator) : Prop :=
++  ∀ (seed : Family) {i n : Nat}, i ≤ n → seed i n < S seed index n
++
++/-- The existing forest scheduler dominates its seed at the universal index. -/
++theorem seed_lt_stage_index (seed : Family) {i n : Nat} (hi : i ≤ n) :
++    seed i n < stage seed index n := by
++  have h1 : seed i n < stage seed .leaf n :=
++    seed_lt_stage_leaf seed hi
++  have h2 :
++      stage seed (defTree (nthD (BigNumber.allTerms 0) 0 .zero)) n <
++        stage seed (treesOfDepth 0) n :=
++    stage_child_lt seed _ (Nat.zero_le n)
++  have h3 : stage seed (treesOfDepth 0) n < stage seed index n :=
++    stage_child_lt seed treesOfDepth (Nat.zero_le n)
++  rw [first_tree_leaf] at h2
++  exact Nat.lt_trans h1 (Nat.lt_trans h2 h3)
++
++/-- The base scheduler has the domination invariant. -/
++theorem stage_indexDominates : IndexDominates stage := by
++  intro seed i n hi
++  exact seed_lt_stage_index seed hi
++
++/-- A promoted child is visible to, and strictly below, its promoted parent. -/
++theorem liftStage_child_lt {S : StageOperator} (hS : IndexDominates S)
++    (seed : Family) (f : Nat → WTree Nat) {i n : Nat} (hi : i ≤ n) :
++    liftStage S seed (f i) n < liftStage S seed (.node f) n := by
++  change liftStage S seed (f i) n <
++    S (fun j => liftStage S seed (f j)) index n
++  exact hS (fun j => liftStage S seed (f j)) hi
++
++/-- For every invariant-preserving scheduler, its leaf lift is strictly below
++its lift through the universal index. -/
++theorem liftStage_leaf_lt_index {S : StageOperator} (hS : IndexDominates S)
++    (seed : Family) (n : Nat) :
++    liftStage S seed .leaf n < liftStage S seed index n := by
++  have h1 :
++      liftStage S seed (defTree (nthD (BigNumber.allTerms 0) 0 .zero)) n <
++        liftStage S seed (treesOfDepth 0) n :=
++    liftStage_child_lt hS seed _ (Nat.zero_le n)
++  have h2 :
++      liftStage S seed (treesOfDepth 0) n < liftStage S seed index n :=
++    liftStage_child_lt hS seed treesOfDepth (Nat.zero_le n)
++  rw [first_tree_leaf] at h1
++  exact Nat.lt_trans h1 h2
++
++/-- One order lift preserves the domination invariant. -/
++theorem liftStage_indexDominates {S : StageOperator} (hS : IndexDominates S) :
++    IndexDominates (liftStage S) := by
++  intro seed i n hi
++  have h0 : seed i n < S seed index n := hS seed hi
++  have h0' : seed i n < liftStage S seed .leaf n := by
++    change seed i n < S seed index n
++    exact h0
++  exact Nat.lt_trans h0' (liftStage_leaf_lt_index hS seed n)
++
++/-- Every finite scheduler order retains the domination invariant. -/
++theorem stageOrder_indexDominates : ∀ k, IndexDominates (stageOrder k)
++  | 0 => stage_indexDominates
++  | k + 1 => liftStage_indexDominates (stageOrder_indexDominates k)
++
++/-- Every successor scheduler order is strictly larger at the universal index. -/
++theorem stageOrder_step (seed : Family) (k n : Nat) :
++    stageOrder k seed index n < stageOrder (k + 1) seed index n := by
++  change liftStage (stageOrder k) seed .leaf n <
++    liftStage (stageOrder k) seed index n
++  exact liftStage_leaf_lt_index (stageOrder_indexDominates k) seed n
++
++/-- Order zero is strictly below every positive order. -/
++theorem stageOrder_zero_lt_succ (seed : Family) (n : Nat) :
++    ∀ k, stageOrder 0 seed index n < stageOrder (Nat.succ k) seed index n
++  | 0 => by
++      simpa using stageOrder_step seed 0 n
++  | k + 1 => by
++      exact Nat.lt_trans (stageOrder_zero_lt_succ seed n k)
++        (by simpa using stageOrder_step seed (k + 1) n)
++
++/-- **Required comparison:** the current repository contender is strictly below
++Contender 7.  The proof unfolds only the successor guard, not the huge P5
++height. -/
++theorem contender_6_lt_contender_7 : contender_6 < contender_7 := by
++  change stageOrder 0 p5Family index 42 <
++    stageOrder (Nat.succ (42 + p5Family 0 42)) p5Family index 42
++  exact stageOrder_zero_lt_succ p5Family 42 (42 + p5Family 0 42)
++
++/-- The exact Contender 5 port is also strictly below Contender 7. -/
++theorem contender_5_lt_contender_7 : contender_5 < contender_7 :=
++  Nat.lt_trans contender_5_lt_contender_6 contender_6_lt_contender_7
++
++/-- Proposal P5's number is strictly below Contender 7. -/
++theorem p5_lt_contender_7 : BigNumber.contender_6 < contender_7 :=
++  Nat.lt_trans p5_lt_contender_6 contender_6_lt_contender_7
++
++end BusyLean
+diff --git a/BusyLean/Contender7.lean b/BusyLean/Contender7.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..8f5ae6298f977dba373cd9894991a09619121d31
+--- /dev/null
++++ b/BusyLean/Contender7.lean
+@@ -0,0 +1,50 @@
++import BusyLean.Contender6
++
++/-!
++# Contender 7: seeded reflection power
++
++The current `stage` scheduler performs forest reflection through a `WTree Nat`.
++`liftStage` promotes an arbitrary scheduler `S` by using a second W-tree as an
++operator-level control object.  A leaf runs `S` through the universal `index`;
++a node feeds the promoted values of all children back to `S` as its oracle
++family, again at `index`.
++
++`stageOrder k` iterates this promotion `k` times.  The final height is the P5
++seed value at 42, plus a fixed positive guard.  The definition does not use the
++value `BusyLean.contender_6` as an iteration counter.
++
++Do not evaluate `contender_7`.
++-/
++
++namespace BusyLean
++
++open BigNumber (WTree)
++open BusyLean.W
++
++/-- A forest-reflection scheduler: oracle family, control tree, input. -/
++abbrev StageOperator := Family → WTree Nat → Nat → Nat
++
++/-- Raise a scheduler by one reflection order.
++
++At a leaf, run `S` with the supplied seed through the universal index.  At a
++node, recursively promote every child and expose the resulting family to `S`.
++All recursion is structural recursion on the W-tree. -/
++def liftStage (S : StageOperator) (seed : Family) : WTree Nat → Nat → Nat
++  | .leaf => S seed index
++  | .node f => S (fun i => liftStage S seed (f i)) index
++
++/-- The finite hierarchy of scheduler orders. -/
++def stageOrder : Nat → StageOperator
++  | 0 => stage
++  | k + 1 => liftStage (stageOrder k)
++
++/-- A large, closed, computable promotion height.
++
++The successor guard makes positivity definitional, so the comparison proof
++never needs to normalize the P5 value. -/
++def metaHeight : Nat := Nat.succ (42 + p5Family 0 42)
++
++/-- **Contender 7.**  Never evaluate it. -/
++def contender_7 : Nat := stageOrder metaHeight p5Family index 42
++
++end BusyLean
+diff --git a/test/Contender7Audit.lean b/test/Contender7Audit.lean
+new file mode 100644
+index 0000000000000000000000000000000000000000..5f23a5367c6cb95a49944996c1838dca981af97c
+--- /dev/null
++++ b/test/Contender7Audit.lean
+@@ -0,0 +1,58 @@
++import BusyLean
++import Lean
++
++/-!
++# Contender 7 kernel audit
++
++Run with `lake env lean test/Contender7Audit.lean` after installing the overlay.
++It prints axioms, proves that the new number's defining closure does not contain
++any incumbent contender value, and records the comparison theorem signatures.
++-/
++
++open Lean Elab Command
++
++/-- All constants reachable from `root` through declaration types and values. -/
++def contender7ConstClosure (env : Environment) (root : Name) : NameSet := Id.run do
++  let mut seen : NameSet := {}
++  let mut stack := #[root]
++  while stack.size > 0 do
++    let c := stack.back!
++    stack := stack.pop
++    if seen.contains c then continue
++    seen := seen.insert c
++    let some ci := env.find? c | continue
++    let body : Array Name := match ci with
++      | .defnInfo v => v.value.getUsedConstants
++      | .thmInfo v => v.value.getUsedConstants
++      | .opaqueInfo v => v.value.getUsedConstants
++      | _ => #[]
++    stack := stack ++ ci.type.getUsedConstants ++ body
++  return seen
++
++/-- Fail if any listed constant occurs in the closure of the first one. -/
++elab "#assert_not_in_contender7_closure " root:ident " : " bad:ident* : command => do
++  let env ← getEnv
++  let r ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo root
++  let cl := contender7ConstClosure env r
++  for b in bad do
++    let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b
++    if cl.contains n then throwError m!"{r} depends on forbidden constant {n}"
++  logInfo m!"{r}: closure of {cl.size} constants avoids all {bad.size} forbidden names"
++
++#print axioms BusyLean.contender_7
++#print axioms BusyLean.contender_6_lt_contender_7
++#print axioms BusyLean.contender_5_lt_contender_7
++#print axioms BusyLean.p5_lt_contender_7
++#print axioms BusyLean.stageOrder_indexDominates
++
++-- The construction reuses the incumbent language and seed, but not any named
++-- incumbent value as an iteration counter or hidden subterm.
++#assert_not_in_contender7_closure BusyLean.contender_7 :
++  BusyLean.contender_6 BusyLean.contender_5
++  BigNumber.contender_6 BigNumber.contender_5
++
++#check @BusyLean.contender_6_lt_contender_7
++#check @BusyLean.contender_5_lt_contender_7
++#check @BusyLean.p5_lt_contender_7
++#check @BusyLean.stageOrder_step
++#check @BusyLean.stageOrder_indexDominates

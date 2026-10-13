@@ -1,0 +1,60 @@
+PASS: present: lean/BusyLean/Contender11.lean
+PASS: present: lean/BusyLean/Comparison11.lean
+PASS: present: lean/test/Audit11.lean
+PASS: present: lean/scripts/check_contender11.py
+PASS: present: patches/contender11.patch
+PASS: present: article/contender11.tex
+PASS: present: article/contender11.pdf
+PASS: definition code avoids forbidden token `noncomputable`
+PASS: definition code avoids forbidden token `partial`
+PASS: definition code avoids forbidden token `unsafe`
+PASS: definition code avoids forbidden token `opaque`
+PASS: definition code avoids forbidden token `implemented_by`
+PASS: definition code avoids forbidden token `extern`
+PASS: definition code avoids forbidden token `native_decide`
+PASS: definition code avoids forbidden token `sorry`
+PASS: definition code avoids forbidden token `admit`
+PASS: definition code avoids forbidden token `axiom`
+PASS: comparison code avoids proof placeholder `sorry`
+PASS: comparison code avoids proof placeholder `admit`
+PASS: comparison code avoids proof placeholder `axiom`
+PASS: definition code does not reference closed prior constant `contender_5`
+PASS: definition code does not reference closed prior constant `contender_6`
+PASS: definition code does not reference closed prior constant `contender_7`
+PASS: definition code does not reference closed prior constant `contender_8`
+PASS: definition code does not reference closed prior constant `contender_9`
+PASS: definition code does not reference closed prior constant `contender_10`
+PASS: definition `reflect11` exists
+PASS: definition `towerFk` exists
+PASS: definition `diagonal11` exists
+PASS: definition `stage11` exists
+PASS: definition `family10` exists
+PASS: definition `F11` exists
+PASS: definition `contender_11` exists
+PASS: theorem script `towerFk_strictMono` exists
+PASS: theorem script `fixedTower_lt_diagonal11` exists
+PASS: theorem script `family10_lt_F11` exists
+PASS: theorem script `contender_10_lt_contender_11` exists
+PASS: theorem script `defined_tree_eventually_lt11` exists
+PASS: Python checker syntax compiles
+PASS: temporary Git skeleton initialized
+PASS: integration patch passes `git apply --check`
+PASS: integration patch applies cleanly
+PASS: patched file matches archive source: lean/BusyLean/Contender11.lean
+PASS: patched file matches archive source: lean/BusyLean/Comparison11.lean
+PASS: patched file matches archive source: lean/test/Audit11.lean
+PASS: patched file matches archive source: lean/scripts/check_contender11.py
+PASS: root module imports Contender 11 modules
+PASS: PDF metadata is readable
+PASS: PDF has at least 15 pages
+PASS: PDF text extraction succeeds
+PASS: PDF contains expected phrase: Self-Height Diagonal Forest Closure
+PASS: PDF contains expected phrase: contender_10 < contender_11
+PASS: PDF contains expected phrase: Verification status
+PASS: PDF contains expected phrase: Further research questions
+PASS: final LaTeX log is present
+PASS: final LaTeX pass has no fatal error
+PASS: final LaTeX pass has no undefined references
+PASS: final LaTeX pass has no overfull boxes
+PASS: all artifact-level static checks completed
+NOTE: these checks do not replace `python3 scripts/check_contender11.py` under Lean 4.34.0
