@@ -9,7 +9,34 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 31
+## Current contender: Contender 32
+
+```lean
+def family31 (n : Nat) : Nat := F31 (F31 n)                  -- Contender 31 = family31 42
+def F32 (n : Nat) : Nat :=                                   -- BusyLean/Contender32.lean
+  wDiagonalLift (schedule32 n) (rank32 n) lgTransformer (fun _ => family31) n n
+def contender_32 : Nat := F32 (F32 42)
+
+theorem contender_31_lt_contender_32 : contender_31 < contender_32   -- BusyLean/Comparison32.lean
+```
+
+The tree-ordinal constructions become **programs**
+([`Ordinal/TreeLanguage.lean`](BusyLean/Ordinal/TreeLanguage.lean)). The
+language is System T with a base type of tree ordinals, a tree recursor (at any
+type), and Contender 31's construction as a primitive `boost`. It has a
+semantic interpreter by structural recursion, so no normalization proof and no
+axioms are needed. `languageTree n` is the limit of all closed tree programs of
+size `≤ n + 3` (and Contender 31's tree), so it includes transfinite and
+higher-type iterations of `boost`. Input `n` uses the ladder over its
+addresses.
+
+| Theorem | Statement |
+|---|---|
+| `contender_31_lt_contender_32` | Contender 31 < Contender 32 |
+| `family31_lt_F32` | Contender 31's family is beaten at every input |
+| `lgvalue_lt_F32` | every program of depth ≤ `n` over the addresses of `languageTree n` is below `F32 n` |
+
+## Contender 31
 
 ```lean
 def family30 (n : Nat) : Nat := F30 (F30 n)                  -- Contender 30 = family30 42
@@ -810,8 +837,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 31's definition modules take
-about 2 s and its proofs about 2.5 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 32's definition modules take
+about 2.7 s and its proofs about 2 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -862,6 +889,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender29.lean`](BusyLean/Contender29.lean), [`Comparison29.lean`](BusyLean/Comparison29.lean) | Contender 29 definitions and theorems |
 | [`BusyLean/Contender30.lean`](BusyLean/Contender30.lean), [`Comparison30.lean`](BusyLean/Comparison30.lean) | Contender 30 definitions and theorems |
 | [`BusyLean/Contender31.lean`](BusyLean/Contender31.lean), [`Comparison31.lean`](BusyLean/Comparison31.lean) | Contender 31 definitions and theorems |
+| [`BusyLean/Contender32.lean`](BusyLean/Contender32.lean), [`Comparison32.lean`](BusyLean/Comparison32.lean) | Contender 32 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -900,6 +928,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 29 | Lean | this repository | higher-order universe operators (closure points), indexed by tree ordinals |
 | 30 | Lean | this repository | closure functionals of all finite types over universes |
 | 31 | Lean | this repository | closure functionals of transfinite (tree-indexed) type |
+| 32 | Lean | this repository | System T over tree ordinals with Contender 31 as a primitive; all programs of bounded size |
 
 Proposals P1–P26 (four batches and six late arrivals) were reviewed, rebuilt and ranked; see
 [`proposals/REVIEW.md`](proposals/REVIEW.md). Upstream code is MIT-licensed

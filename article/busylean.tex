@@ -103,7 +103,9 @@ level, and Contender~28 stacks the universes along tree ordinals given by
 earlier collapses. Contender~29 iterates the universe-building operators
 themselves, indexed by tree ordinals, and Contender~30 lifts closure to all
 finite types over universes; Contender~31 to transfinite types indexed by
-collapsed trees.
+collapsed trees. Contender~32 turns the constructions into programs of a typed
+language over tree ordinals with a semantic interpreter, and takes all programs of
+bounded size.
 \end{abstract}
 
 \tableofcontents
@@ -1431,6 +1433,35 @@ stronger object language, for example dependent types with large elimination,
 which would require a new normalization proof.
 
 %======================================================================
+\section{Contender 32: a programming language for tree ordinals}
+
+Contenders 25--31 are each \emph{one} combination of tree-ordinal operations.
+The natural meta-step is to make the combinations programs
+(\lean{TreeLanguage.lean}). The language is Gödel's System~T with a second base
+type of countable tree ordinals:
+\begin{itemize}
+\item types \lean{nat}, \lean{tree}, and arrows, each denoting a Lean type;
+\item numerals with a recursor; \lean{tzero}, \lean{tsucc}, \lean{tlim}; a tree
+  recursor that iterates along any tree at any type; and a primitive
+  \lean{boost : tree => tree}, which is Contender~31's construction as a
+  function of its index tree.
+\end{itemize}
+Unlike the impredicative ladder language, this language needs no normalization
+proof. It is simply typed and predicative, so intrinsically typed terms have a
+direct \emph{semantic} interpreter. Types denote Lean types, and \lean{Tm.eval}
+maps terms to Lean values by structural recursion, using no axioms. A type
+checker turns raw terms into typed ones. \lean{languageTree n} is the limit of
+Contender~31's tree and of all closed \lean{tree} programs of size $\le n{+}3$,
+so it contains transfinite and higher-type iterations of \lean{boost}: Veblen-
+and Bachmann-style hierarchies over it, written as programs. The enumeration
+is hopeless to run beyond tiny sizes (3.5 million raw terms at size~3), but it
+is never run. The smoke test stays inside the first branch.
+
+Proved: \lean{contender\_31\_lt\_\allowbreak contender\_32}, \lean{family31\_lt\_F32}
+and \lean{lgvalue\_lt\_F32}. The definitions check in 2.7\,s and the proofs in
+2.2\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1490,6 +1521,7 @@ Contender & idea & informal size\\
 29 (Lean) & higher-order universe operators along trees & hierarchy of inaccessible-like closures\\
 30 (Lean) & closure functionals of all finite types & higher-type closure hierarchies\\
 31 (Lean) & closure functionals of transfinite (tree-indexed) type & type height = collapsed tree\\
+32 (Lean) & System T over trees with Contender 31 as a primitive & all programs of size $\le n{+}3$\\
 \bottomrule
 \end{tabular}
 \end{center}
