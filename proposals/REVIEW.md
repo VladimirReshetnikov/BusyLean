@@ -543,3 +543,20 @@ order, which is also structurally well-founded, over trees produced by
 Buchholz-style collapsing functions on tree ordinals. Those functions are
 defined by plain structural recursion, with no normal forms and no
 well-foundedness proofs.
+
+# Late arrival: P26
+
+`BusyLean_Contender20_SecondOrder_Hyperreflection.zip` proposes a "Contender
+20" over Contender 19 (base commit `64d31a0`).
+
+| | Definitions | Proofs | Axioms |
+|---|---|---|---|
+| P26 | compile, 1.6 s | **compile**, 1.7 s | `propext, Quot.sound`; the closure (4,192 constants) avoids `contender_5` … `contender_19` |
+
+Its `diagonalHyperLift` is P17's diagonal rank hierarchy one type level up: it
+acts on transformer *lifts* (`HyperLift := TransformerLift → TransformerLift`),
+with natural-number rank `family19 n + 1`. It starts from `liftLift`, a lift
+staged along the index. Like P23, this is a third-order amplifier with finite
+rank, in the class of P22's W-tree-ranked hierarchy that Contender 23 already
+uses. It keeps Contender 19's language, so it is informally below Contenders
+20–24. Nothing new is adopted.
