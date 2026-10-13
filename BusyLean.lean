@@ -32,3 +32,6 @@ import BusyLean.Ordinal.SortedLex
 import BusyLean.Ordinal.OmegaPow
 import BusyLean.Contender16
 import BusyLean.Comparison16
+import BusyLean.Ordinal.Epsilon0
+import BusyLean.Contender17
+import BusyLean.Comparison17
