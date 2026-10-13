@@ -82,7 +82,9 @@ well-foundedness lemma hereditarily, and Contender~18 to length $\Gamma_0$ with 
 Schütte-style proof for binary Veblen terms that follows only the comparison's
 case split. Contender~19 extends the same technique to Schütte's Klammersymbole,
 whose argument positions are themselves terms, giving a ladder of
-large-Veblen length.
+large-Veblen length. Contender~20 reaches the Bachmann--Howard ordinal with a
+Buchholz-style collapsing notation, whose well-foundedness proof is the
+classical impredicative argument carried by Lean's \lean{Acc}.
 \end{abstract}
 
 \tableofcontents
@@ -966,11 +968,65 @@ $\varphi(1@\omega)$ (value~7). The definitions check in 4.3\,s and the proofs
 in 1.8\,s.
 
 %======================================================================
+\section{Contender 20: a ladder of Bachmann--Howard length}
+
+\subsection{Collapsing, and why the case split no longer suffices}
+Buchholz-style terms with two levels are sums of principal terms $D_0a$
+($\psi_0(a)$, countable) and $D_1a$ ($\psi_1(a)$, at least $\Omega$). Principal
+terms are compared lexicographically (level, then argument), and sums
+lexicographically, so every $D_1$ term lies above every $D_0$ term. This raw
+order is not well-founded:
+\[D_1 0 \;>\; D_0D_1 0 \;>\; D_0D_0D_10 \;>\;\cdots\]
+Normal forms exclude this. $D_u a$ is normal only when every element of
+$G_u(a)$ is below~$a$, where $G_u(D_v b)=\emptyset$ for $v<u$ and
+$\{b\}\cup G_u(b)$ otherwise. In the chain, $D_0D_10$ is normal, but
+$D_0D_0D_10$ is not, because $D_10\in G_0(D_0D_10)$ is not below $D_0D_10$. The
+normal forms reach $\psi_0(\varepsilon_{\Omega+1})$, the Bachmann--Howard
+ordinal.
+
+\subsection{The impredicative argument in Lean}
+Let $M$ be the set of terms whose \emph{top-level $D_0$-components} (reached
+through sums and $D_1$ only) are accessible.
+\begin{enumerate}
+\item \lean{accM\_V} (Claim 1): the order restricted to $M$ is well-founded.
+  This part is predicative. $D_0$ components are accessible by assumption,
+  $D_1$ terms by induction on their argument, and sums by \lean{SortedLexQ}.
+\item \lean{accD0} (Claim 2): if $a$ is accessible within $M$, then $D_0a$ is
+  accessible. A predecessor $D_0c$ has $c<a$. Its components $D_0f$ satisfy
+  $f<c$ by normality, hence $f<a$ by \emph{transitivity}, and they are
+  smaller, so an inner size induction puts $c$ in $M$. The outer induction then
+  applies to $c$.
+\item Claim 3: every normal $D_0c$ is accessible (size induction plus Claims 1
+  and~2). $D_1b$ is accessible whenever $b$ is, because its predecessors are
+  $D_0$ terms or $D_1c$ with $c<b$. Hence every normal term is accessible
+  (\lean{bachmannHoward\_wf}).
+\end{enumerate}
+This is the point where the well-foundedness proof itself becomes
+impredicative. Claim~1 is an accessibility statement \emph{relative to} a set
+defined from accessibility, and Lean's inductive \lean{Acc} carries it without
+any extra axiom. Transitivity, avoided until now, is needed in Claim~2. The order
+is purely lexicographic and structurally recursive, so transitivity is a short
+mutual induction. \lean{SortedLexQ} gained \lean{accQ\_head\_of\_acc}, which
+starts from one accessible head rather than a global hypothesis. The module
+checks in about 2\,s.
+
+\subsection{The contender}
+\lean{F20 n := diagonalLift (schedule20 n) (family19 n + 1) bTransformer (fun \_ => family19) n n},
+with reflection over the ladder whose atoms are \lean{BachmannHoward}. Proved:
+\lean{contender\_19\_lt\_\allowbreak contender\_20}, \lean{family19\_lt\_F20}
+and \lean{bvalue\_lt\_F20}. The smoke test packs an operator over level
+$\psi_0(\Omega)$ into the universe at $\Omega$ (value~8). The definitions check
+in 2.9\,s and the proofs in 1.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
 prove well-founded; $\varepsilon_0$, $\Gamma_0$ and the large Veblen ordinal are
-done, the last by Klammersymbole. Collapsing functions need genuine normal forms: in Buchholz's raw order,
+done, the last by Klammersymbole, and so is the Bachmann--Howard ordinal by
+collapsing (Contender~20). Buchholz's full system with $\Omega_\nu$ for all
+$\nu<\omega$ needs the same argument once per level, by downward induction on
+levels. Collapsing functions need genuine normal forms: in Buchholz's raw order,
 $D_1 0 > D_0 D_1 0 > D_0 D_0 D_1 0 > \cdots$ descends forever. Beyond that, collapsing-function notations ($\psi(\Omega_\nu)$
 and further) are well-founded in Lean's type theory, and each one plugs into
 \lean{wfUniv} unchanged.
@@ -1005,6 +1061,7 @@ Contender & idea & informal size\\
 17 (Lean) & 15 over a ladder of length $\varepsilon_0$ & levels $<\omega_n$ (towers) at input $n$\\
 18 (Lean) & 15 over a ladder of length $\Gamma_0$ & $\varphi$-towers of height $n$ at input $n$\\
 19 (Lean) & 15 over a ladder of large-Veblen length & Klammersymbole of height $n$ at input $n$\\
+20 (Lean) & 15 over a ladder of Bachmann--Howard length & $\psi$-terms of height $n$ at input $n$\\
 \bottomrule
 \end{tabular}
 \end{center}
