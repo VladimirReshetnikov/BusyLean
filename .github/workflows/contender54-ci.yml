@@ -24,14 +24,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ci54
-          { /usr/bin/time -p lake env lean BusyLean/LargeElim.lean; } 2>&1 | tee ci54/definitions.log
-          { /usr/bin/time -p lake env lean BusyLean/Contender54.lean; } 2>&1 | tee -a ci54/definitions.log
+          { /usr/bin/time -p lake build BusyLean.LargeElim; } 2>&1 | tee ci54/definitions.log
+          { /usr/bin/time -p lake build BusyLean.Contender54; } 2>&1 | tee -a ci54/definitions.log
 
       - name: Check comparison proofs
         shell: bash
         run: |
           set -euo pipefail
-          { /usr/bin/time -p lake env lean BusyLean/Comparison54.lean; } 2>&1 | tee ci54/proofs.log
+          { /usr/bin/time -p lake build BusyLean.Comparison54; } 2>&1 | tee ci54/proofs.log
 
       - name: Run smoke checks and axiom audit
         shell: bash
@@ -60,8 +60,9 @@ jobs:
           sha256sum BusyLean/LargeElim.lean BusyLean/Contender54.lean BusyLean/Comparison54.lean test/LargeElimSmoke.lean > ci54/source-sha256.txt
 
       - name: Upload verification evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: contender54-verification
           path: ci54/
-          if-no-files-found: error
+          if-no-files-found: warn
