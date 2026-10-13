@@ -21,8 +21,17 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-            | sh -s -- -y
+          ok=0
+          for attempt in 1 2 3; do
+            if timeout 120 bash -c \
+              'curl --retry 3 --retry-delay 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y'; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" -eq 1
+          test -x "$HOME/.elan/bin/lean"
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Record tool versions
