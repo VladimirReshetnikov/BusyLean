@@ -14,7 +14,41 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           build-args: BusyLean.Comparison42
+
+      - name: Clean timed build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verification-ci
+          rm -rf .lake/build proposals/P5-w-reflection/lean/.lake/build
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/previous.time \
+              lake build BusyLean.Comparison41
+          } 2>&1 | tee verification-ci/previous-build.log
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/definitions.time \
+              lake build BusyLean.Contender42
+          } 2>&1 | tee verification-ci/definitions-build.log
+          {
+            /usr/bin/time -f 'elapsed_seconds=%e' -o verification-ci/proofs.time \
+              lake build BusyLean.Comparison42
+          } 2>&1 | tee verification-ci/proofs-build.log
+          cat verification-ci/*.time | tee verification-ci/timings.txt
+          printf 'baseline_commit=6afe0cdbd2005ea37500585d89f1dd8bab43b039\n' \
+            > verification-ci/context.txt
+          printf 'branch_head=%s\n' "$GITHUB_SHA" >> verification-ci/context.txt
+          printf 'lean_toolchain=' >> verification-ci/context.txt
+          cat lean-toolchain >> verification-ci/context.txt
+
       - name: Universal-language smoke tests
-        run: lake env lean test/UniversalLanguageSmoke.lean
+        run: lake env lean test/UniversalLanguageSmoke.lean 2>&1 | tee verification-ci/smoke.log
+
       - name: Axiom and dependency audit
-        run: lake env lean test/Contender42Audit.lean
+        run: lake env lean test/Contender42Audit.lean 2>&1 | tee verification-ci/audit.log
+
+      - name: Upload verification record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender42-verification
+          path: verification-ci
