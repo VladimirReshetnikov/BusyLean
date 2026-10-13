@@ -9,7 +9,38 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
-## Current contender: Contender 60
+## Current contender: Contender 61
+
+```lean
+def closTy : PTL2.Ty := .prod liftT2 liftN2                     -- BusyLean/Contender61.lean
+def famTy : PTL2.Ty := .arr .tree closTy
+def prims61 : List PTL2.Ty := [.tree, .arr .tree .tree, .arr .nat .nat,
+  .arr .tree (.arr (.arr .nat .nat) (.arr .nat .nat)), famTy, .arr famTy famTy]
+def primEnv61 (N : Nat) (g : Nat → Nat) : PTL2.Env prims61 :=
+  (upTree N, metaJump N, g, fun t h => ladderReflect h t,
+   towerT prims54 (primEnv54 N g), towerH prims54 (primEnv54 N g), ())
+def family60 (n : Nat) : Nat := F60 (F60 n)                  -- Contender 60 = family60 42
+def F61 (n : Nat) : Nat :=
+  hier (towerProgClosure (family60 n) family60) (towerProgTree (family60 n)) (family60 n)
+def contender_61 : Nat := F61 (F61 42)
+
+theorem contender_60_lt_contender_61 : contender_60 < contender_61   -- BusyLean/Comparison61.lean
+```
+
+[`Ordinal/PrimLanguage2.lean`](BusyLean/Ordinal/PrimLanguage2.lean) is System T
+over trees **with products** and an environment of primitives, so closure pairs
+are values. Contender 61's primitives include Contender 59's tower `towerT` and
+Contender 60's operator `towerH`. Contender 60's hierarchy is then a program, and
+programs apply `towerH` to families they build, at levels and heights they
+compute.
+
+| Theorem | Statement |
+|---|---|
+| `contender_60_lt_contender_61` | Contender 60 < Contender 61 |
+| `family60_lt_F61` | Contender 60's family is beaten at every input |
+| `Ordinal.program_lt_num2Lift` | every closed `nat` program of size ≤ `m` over the primitives is below the closure |
+
+## Contender 60
 
 ```lean
 def towerH (P : List TL.Ty) (σ : TL.Env P) (H : CTree → Closures) : CTree → Closures
@@ -1610,8 +1641,8 @@ python3 scripts/check.py
 This deletes the build directories, builds the previous contender, times the
 current contender's definition and proof phases against the budgets, reports
 the total, and runs [`test/Audit.lean`](test/Audit.lean).
-On an Intel i7-1355U (Windows 11), Contender 60's definition modules take
-about 1.0 s and its proofs about 1.9 s; the full clean build of all contenders
+On an Intel i7-1355U (Windows 11), Contender 61's definition modules take
+about 3.0 s and its proofs about 2.7 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
@@ -1695,6 +1726,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender58.lean`](BusyLean/Contender58.lean), [`Comparison58.lean`](BusyLean/Comparison58.lean) | Contender 58 definitions and theorems |
 | [`BusyLean/Contender59.lean`](BusyLean/Contender59.lean), [`Comparison59.lean`](BusyLean/Comparison59.lean) | Contender 59 definitions and theorems |
 | [`BusyLean/Contender60.lean`](BusyLean/Contender60.lean), [`Comparison60.lean`](BusyLean/Comparison60.lean) | Contender 60 definitions and theorems |
+| [`BusyLean/Contender61.lean`](BusyLean/Contender61.lean), [`Comparison61.lean`](BusyLean/Comparison61.lean) | Contender 61 definitions and theorems |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
@@ -1762,6 +1794,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | 58 | Lean | this repository | a tower of N languages, each with the joint stacks over the previous one as primitives |
 | 59 | Lean | this repository | the tower of stack-reflecting languages, indexed by a tree |
 | 60 | Lean | this repository | a hierarchy of tower operators, each level's towers primitives of the next |
+| 61 | Lean | this repository | System T with products over the tower operators (towerT, towerH as values) |
 
 Proposals P1–P27 (four batches and seven late arrivals) were reviewed, rebuilt and ranked, and six
 further archives were retired without import as offering no new idea; see

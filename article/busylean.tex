@@ -144,6 +144,7 @@ Contender~57 lets programs choose the stacking heights.
 Contender~58 repeats that step to a tower of $N$ stack-reflecting languages.
 Contender~59 indexes that tower by a tree.
 Contender~60 iterates the tower operator itself along a tree.
+Contender~61 makes the tower operators values of a language with products.
 \end{abstract}
 
 \tableofcontents
@@ -2219,6 +2220,32 @@ strictly dominates its oracle and argument. Proved: \lean{family59\_lt\_F60} and
 1.0\,s and the proofs in 1.9\,s.
 
 %======================================================================
+\section{Contender 61: programs over the tower operators}
+
+Contenders~57--60 each turn one construction into a primitive, or iterate it
+along a tree chosen from outside. Closure operators on tree operators and on
+number functions come in pairs, so a language that handles them as values needs
+products. \lean{PrimLanguage2.lean} adds them: \textsf{PTL2} is System~T over
+trees with products, pairing and projections, and an environment of
+primitives. Contender~61's primitives are the seed tree, the meta-jump, the
+number oracle, reflection $\mathsf{reflT}$, and the tower operators
+\[
+\mathsf{towerT}:\mathsf{tree}\to C,\qquad
+\mathsf{towerH}:(\mathsf{tree}\to C)\to\mathsf{tree}\to C,\qquad
+C=\bigl((\mathsf{tree}\to\mathsf{tree})\to\mathsf{tree}\to\mathsf{tree}\bigr)\times
+\bigl((\mathsf{nat}\to\mathsf{nat})\to\mathsf{nat}\to\mathsf{nat}\bigr).
+\]
+So Contender~60's $U_k=\mathsf{treeRec}\ \mathsf{towerT}\ \mathsf{towerH}\ (\text{limit})\ k$
+is a program, and programs can apply $\mathsf{towerH}$ to families they build
+themselves, at levels and heights they compute, at higher types. The tree joins
+Contender~60's tree with the meta-jump's closure under this language, and the
+language's number closure is the hierarchy's base:
+$F_{61}(n)=h^{\mathrm{num2Lift}(\mathrm{family}_{60})}_T(N)$ with
+$N=\mathrm{family}_{60}(n)$. Proved: \lean{program\_lt\_num2Lift},
+\lean{family60\_lt\_F61} and \lean{contender\_60\_lt\_\allowbreak contender\_61}.
+The definitions check in 3.0\,s and the proofs in 2.7\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2322,6 +2349,7 @@ Contender & idea & informal size\\
 58 (Lean) & a tower of $N$ stack-reflecting languages & $h_T$ over the top language's closure\\
 59 (Lean) & the tower of stack-reflecting languages along a tree & $h_T$ over the tree-indexed tower\\
 60 (Lean) & hierarchy of tower operators along a tree & $h_T$ over $U_T(T)$\\
+61 (Lean) & System T with products over the tower operators & $h_T$ over the tower language's closure\\
 \bottomrule
 \end{tabular}
 \end{center}
