@@ -1,0 +1,156 @@
+name: Validate universal-envelope Contender 15
+
+on:
+  push:
+    branches:
+      - ai/contender15-universal-envelope-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out BusyLean
+        uses: actions/checkout@v4
+
+      - name: Restore Lean toolchain cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: ${{ runner.os }}-elan-${{ hashFiles('lean-toolchain') }}
+
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            ok=0
+            for attempt in 1 2 3; do
+              if timeout 120 bash -c \
+                'curl --retry 3 --retry-delay 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none'; then
+                ok=1
+                break
+              fi
+              sleep 5
+            done
+            test "$ok" -eq 1
+          fi
+          export PATH="$HOME/.elan/bin:$PATH"
+          toolchain="$(tr -d '\r\n' < lean-toolchain)"
+          if ! elan toolchain list | grep -Fxq "$toolchain"; then
+            ok=0
+            for attempt in 1 2 3; do
+              if timeout 240 elan toolchain install "$toolchain"; then
+                ok=1
+                break
+              fi
+              sleep 5
+            done
+            test "$ok" -eq 1
+          fi
+          elan override set "$toolchain"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Record tool versions
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p validation15
+          {
+            echo "commit=$(git rev-parse HEAD)"
+            echo "target_main=b4c71bad189e34068951d00a4f6b0e6939ce57e7"
+            echo "runner=$(uname -a)"
+            lean --version
+            lake --version
+          } | tee validation15/tool-versions.txt
+
+      - name: Build accepted predecessor
+        shell: bash
+        run: |
+          set -euxo pipefail
+          /usr/bin/time -f $'elapsed_seconds=%e\nuser_seconds=%U\nsystem_seconds=%S\nmax_rss_kb=%M' \
+            lake build BusyLean.Comparison13 BusyLean.MetaReflectionFacts \
+              BusyLean.ReflectionFacts > validation15/prebuild-accepted.log 2>&1
+
+      - name: Rebuild all incoming Contender-14 definitions
+        shell: bash
+        run: |
+          set -euxo pipefail
+          /usr/bin/time -f $'elapsed_seconds=%e\nuser_seconds=%U\nsystem_seconds=%S\nmax_rss_kb=%M' \
+            lake build \
+              BusyLean.HyperReflection BusyLean.HyperReflectionFacts \
+              BusyLean.Contender14 BusyLean.Comparison14 \
+              BusyLean.Incoming14.DiagonalOperatorTower \
+              BusyLean.Incoming14.RDOR \
+              BusyLean.Incoming14.RankDiagonal \
+              > validation15/prebuild-incoming14.log 2>&1
+
+      - name: Compile Contender 15 definitions, proofs, and audit
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          rc=0
+          run_one () {
+            local label="$1"
+            shift
+            echo "===== ${label}: $* =====" | tee "validation15/${label}.log"
+            /usr/bin/time -f $'elapsed_seconds=%e\nuser_seconds=%U\nsystem_seconds=%S\nmax_rss_kb=%M' \
+              "$@" >> "validation15/${label}.log" 2>&1
+            local status=$?
+            echo "exit_status=${status}" | tee -a "validation15/${label}.log"
+            if [ "$status" -ne 0 ]; then rc=1; fi
+          }
+          run_one definition lake build BusyLean.Contender15
+          run_one comparison lake build BusyLean.Comparison15
+          run_one audit lake env lean test/Contender15Audit.lean
+          exit "$rc"
+
+      - name: Source guard
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            BusyLean/HyperReflection.lean
+            BusyLean/HyperReflectionFacts.lean
+            BusyLean/Contender14.lean
+            BusyLean/Comparison14.lean
+            BusyLean/Incoming14/DiagonalOperatorTower.lean
+            BusyLean/Incoming14/RDOR.lean
+            BusyLean/Incoming14/RankDiagonal.lean
+            BusyLean/Contender15.lean
+            BusyLean/Comparison15.lean
+            test/Contender15Audit.lean
+          )
+          if grep -nE '^[[:space:]]*(noncomputable|partial|unsafe|opaque|extern|axiom|sorry|implemented_by)\b' "${files[@]}" \
+              > validation15/source-guard.log; then
+            cat validation15/source-guard.log
+            exit 1
+          fi
+          echo 'PASS: no forbidden declaration prefixes' \
+            > validation15/source-guard.log
+
+      - name: Upload validation bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender15-universal-validation
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            validation15/
+            BusyLean/HyperReflection.lean
+            BusyLean/HyperReflectionFacts.lean
+            BusyLean/Contender14.lean
+            BusyLean/Comparison14.lean
+            BusyLean/Incoming14/DiagonalOperatorTower.lean
+            BusyLean/Incoming14/RDOR.lean
+            BusyLean/Incoming14/RankDiagonal.lean
+            BusyLean/Contender15.lean
+            BusyLean/Comparison15.lean
+            test/Contender15Audit.lean
