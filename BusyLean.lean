@@ -10,3 +10,5 @@ import BusyLean.Contender8
 import BusyLean.Comparison8
 import BusyLean.Contender9
 import BusyLean.Comparison9
+import BusyLean.Contender10
+import BusyLean.Comparison10
