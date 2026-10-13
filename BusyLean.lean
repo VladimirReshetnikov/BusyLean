@@ -51,3 +51,7 @@ import BusyLean.Comparison21
 import BusyLean.Ordinal.BuchholzBase
 import BusyLean.Contender22
 import BusyLean.Comparison22
+import BusyLean.TreeHyperReflection
+import BusyLean.TreeHyperReflectionFacts
+import BusyLean.Contender23
+import BusyLean.Comparison23
