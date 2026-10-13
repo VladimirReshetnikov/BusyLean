@@ -121,6 +121,8 @@ gives the ladder language the same recursor over its input tree, and
 Contender~42 collapses relative to these jumps, and Contender~43 makes the
 collapse a first-class closure inside the metalanguages. Contender~44 gives
 that closure collapsing levels indexed by trees.
+Contender~45 makes each stage of the construction the base primitive of the
+next, iterated along a tree.
 \end{abstract}
 
 \tableofcontents
@@ -1863,6 +1865,25 @@ $N=\mathrm{family}_{43}(n)$. Proved: \lean{family43\_lt\_F44} and
 2.3\,s and the proofs in 3.0\,s.
 
 %======================================================================
+\section{Contender 45: the construction as its own jump}
+
+Contenders~40--44 build trees with operators over a \emph{fixed} base, the
+meta-jump. But each construction is itself an operator on trees, so it can
+serve as the base of the next one:
+\[
+\Theta_0=\mathrm{metaJump}_N,\qquad
+\Theta_{a+1}(t)=\mathrm{metaBoostC}(\mathrm{closeL}_N)\,(t)\,(\Theta_a)\,(t),\qquad
+\Theta_{\lim f}(t)=\lim_i\Theta_{f\,i}(t).
+\]
+At each successor stage, collapsing metalanguages are stacked to the height of
+the argument over the whole previous stage, and then applied to the argument.
+$\Theta$ is iterated along Contender~44's tree and applied to it:
+$F_{45}(n)=h^{\mathrm{family}_{44}}_{\mathrm{thetaTree}(N)}(N)$ with
+$N=\mathrm{family}_{44}(n)$. Proved: \lean{family44\_lt\_F45} and
+\lean{contender\_44\_lt\_\allowbreak contender\_45}. The definitions check in
+1.3\,s and the proofs in 1.9\,s.
+
+%======================================================================
 \section{Roadmap}
 
 \paragraph{Longer ladders.} The ladder now has whatever length Lean can
@@ -1941,6 +1962,7 @@ Contender & idea & informal size\\
 42 (Lean) & Buchholz collapse relative to the meta-jump & $h_{\mathrm{collapseTree}}$ over $F_{41}$\\
 43 (Lean) & metalanguages whose closure collapses & $h_{\mathrm{collapseTree43}}$ over $F_{42}$\\
 44 (Lean) & closures with tree-indexed relative collapse & $h_{\mathrm{levelTree44}}$ over $F_{43}$\\
+45 (Lean) & the construction as its own base, iterated along a tree & $h_{\mathrm{thetaTree}}$ over $F_{44}$\\
 \bottomrule
 \end{tabular}
 \end{center}
