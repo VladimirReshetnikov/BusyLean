@@ -1,0 +1,77 @@
+name: Contender 37 operator-meta-language validation
+
+on:
+  push:
+    branches:
+      - research/contender37-operator-meta-language-20261013
+    paths:
+      - 'BusyLean/Ordinal/TreeLanguage4.lean'
+      - 'BusyLean/Contender37.lean'
+      - 'BusyLean/Comparison37.lean'
+      - 'test/Contender37Audit.lean'
+      - '.github/workflows/contender37-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: 'false'
+          build: 'false'
+          test: 'false'
+          lint: 'false'
+          use-github-cache: 'false'
+      - name: Record toolchain
+        run: |
+          set -o pipefail
+          {
+            echo "commit: $GITHUB_SHA"
+            echo "base: 725cf68a0da62dcd7103e68f5bed5a43b79f19c3"
+            lake env lean --version
+            lake --version
+          } 2>&1 | tee validation-ci.log
+      - name: Precompile accepted base
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "accepted base: %e s" lake build BusyLean.Comparison36; } \
+            2>&1 | tee -a validation-ci.log
+      - name: Check Contender 37 definitions
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "definition phase: %e s" lake build BusyLean.Contender37; } \
+            2>&1 | tee -a validation-ci.log
+      - name: Check Contender 37 proofs
+        run: |
+          set -o pipefail
+          { /usr/bin/time -f "proof phase: %e s" lake build BusyLean.Comparison37; } \
+            2>&1 | tee -a validation-ci.log
+      - name: Run focused audit
+        run: |
+          set -o pipefail
+          lake env lean test/Contender37Audit.lean 2>&1 | tee -a validation-ci.log
+      - name: Source guards
+        if: always()
+        run: |
+          {
+            echo
+            echo '--- source guards ---'
+            if grep -R -n -E '^[[:space:]]*(axiom|noncomputable|partial|unsafe|opaque|initialize|run_cmd|#eval)([[:space:]]|$)|(^|[^A-Za-z0-9_])(sorry|admit|native_decide|implemented_by|extern)([^A-Za-z0-9_]|$)' \
+              BusyLean/Ordinal/TreeLanguage4.lean BusyLean/Contender37.lean \
+              BusyLean/Comparison37.lean test/Contender37Audit.lean; then
+              echo 'forbidden source token found'
+              exit 1
+            else
+              echo 'no forbidden source tokens found'
+            fi
+          } 2>&1 | tee -a validation-ci.log
+      - name: Upload validation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contender37-validation
+          path: validation-ci.log
