@@ -48,3 +48,6 @@ import BusyLean.Comparison20
 import BusyLean.Ordinal.Buchholz
 import BusyLean.Contender21
 import BusyLean.Comparison21
+import BusyLean.Ordinal.BuchholzBase
+import BusyLean.Contender22
+import BusyLean.Comparison22

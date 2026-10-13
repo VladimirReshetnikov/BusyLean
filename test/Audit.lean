@@ -131,6 +131,11 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #print axioms BusyLean.zvalue_lt_F21
 #print axioms BusyLean.Ordinal.buchholz_wf
 #print axioms BusyLean.Ordinal.Buch.stepR
+#print axioms BusyLean.contender_22
+#print axioms BusyLean.contender_21_lt_contender_22
+#print axioms BusyLean.tvalue22_lt_F22
+#print axioms BusyLean.Ordinal.tower_wf
+#print axioms BusyLean.Ordinal.BuchB.stepR
 
 -- 2. The definition never mentions Contender 5, its winner selection, or the
 --    contender constants of P5.
@@ -220,6 +225,13 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
   BusyLean.contender_12 BusyLean.contender_11 BusyLean.contender_10 BusyLean.contender_9
   BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6 BusyLean.contender_5
 
+#assert_not_in_closure BusyLean.contender_22 :
+  BusyLean.contender_21 BusyLean.contender_20 BusyLean.contender_19 BusyLean.contender_18
+  BusyLean.contender_17 BusyLean.contender_16 BusyLean.contender_15 BusyLean.contender_14
+  BusyLean.contender_13 BusyLean.contender_12 BusyLean.contender_11 BusyLean.contender_10
+  BusyLean.contender_9 BusyLean.contender_8 BusyLean.contender_7 BusyLean.contender_6
+  BusyLean.contender_5
+
 -- The statements, for the record.
 #check @BusyLean.contender_5_lt_contender_6
 #check @BusyLean.p5_lt_contender_6
@@ -242,6 +254,8 @@ elab "#closure_members " root:ident " in " nss:ident* : command => do
 #check @BusyLean.contender_18_lt_contender_19
 #check @BusyLean.contender_19_lt_contender_20
 #check @BusyLean.contender_20_lt_contender_21
+#check @BusyLean.contender_21_lt_contender_22
+#check @BusyLean.Ordinal.tower_wf
 #check @BusyLean.Ordinal.buchholz_wf
 #check @BusyLean.Ordinal.bachmannHoward_wf
 #check @BusyLean.Ordinal.largeVeblen_wf
