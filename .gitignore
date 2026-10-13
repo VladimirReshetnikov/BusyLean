@@ -41,3 +41,4 @@ Thumbs.db
 
 # Lean / Lake build output
 .lake/
+/article/*.log

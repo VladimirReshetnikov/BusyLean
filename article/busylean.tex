@@ -1,0 +1,295 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black}
+
+\lstdefinelanguage{lean}{
+  keywords={def,theorem,inductive,structure,where,match,with,fun,let,in,namespace,end,open,abbrev,import,by,have,show,exact,termination_by},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]",
+}
+\lstset{language=lean,basicstyle=\ttfamily\small,keywordstyle=\bfseries,
+  commentstyle=\itshape\color{black!60},columns=fullflexible,keepspaces=true,
+  frame=single,framerule=0.3pt,rulecolor=\color{black!30},xleftmargin=1em,xrightmargin=1em,
+  literate={→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {ℕ}{{$\mathbb{N}$}}1 {∀}{{$\forall$}}1
+    {≤}{{$\le$}}1 {×}{{$\times$}}1 {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1 {λ}{{$\lambda$}}1
+    {Λ}{{$\Lambda$}}1 {·}{{$\cdot$}}1 {∃}{{$\exists$}}1 {≫}{{$\gg$}}1}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\N}{\mathbb{N}}
+\providecommand{\llbracket}{[\![}
+\providecommand{\rrbracket}{]\!]}
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\BH}{\ensuremath{\mathrm{BH}}}
+
+\title{BusyLean: Naming Ever Larger Numbers in Lean\\[0.3em]
+  \large Research notes on constructive large numbers with formal comparisons}
+\author{BusyLean contributors}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We port Cody Roux's \emph{name the biggest number} contest from Coq to Lean~4.
+In the contest every number must be a closed, computable definition, and every
+claim ``my number is bigger'' must be a kernel-checked theorem. We give an exact
+port of the incumbent Contender~5 (the largest numeral of a raw System~T term of
+depth~42). We review and rebuild five submitted proposals, and we construct
+Contender~6, which combines their best ideas: an object language with W-types
+over every finite type, relativized to oracle families, and reflected along
+every tree that the language itself can define. Along the way we prove formally
+that one proposal's re-implementation of the old language agrees with the exact
+port. The notes then explain the strategy for the next contenders, which climb
+the ladder System~F, System~F$_\omega$, Calculus of Constructions. Each rung is a
+qualitatively stronger total language whose normalization can be justified
+inside Lean.
+\end{abstract}
+
+\tableofcontents
+
+%======================================================================
+\section{The game}
+
+Scott Aaronson's \emph{Who can name the bigger number?} asks for the largest
+number one can describe concisely. Cody Roux's repository
+\href{https://github.com/codyroux/name-the-biggest-number}{name-the-biggest-number}
+adds two caveats that turn the game into one about \emph{proof}. First, numbers
+must be \emph{constructive}: computable in principle, with no Busy Beavers.
+Second, each new contender must come with a \emph{formal proof} that it beats
+the previous one. The original contest uses Coq. Its last entry, Contender~5 by
+Samuel Gruetter, is the largest value of a raw STLC+NatRec term (G\"odel's
+System~T) of syntax depth at most~42.
+
+\paragraph{The Lean edition.} This repository keeps the contest but switches to
+Lean~4 (version 4.34.0). The rules (\texttt{README.md}) are: closed computable
+\lean{Nat} definitions; a theorem \lean{contender\_(N-1)\_lt\_\allowbreak contender\_N};
+the axioms \lean{propext} and \lean{Quot.sound} allowed and
+\lean{Classical.choice} forbidden; at most 15\,s to check the definition and
+60\,s to check the proof, from a clean build; and no laziness or shenanigans.
+The axiom policy is deliberate. \lean{Classical.choice} is the only one of
+Lean's three axioms that conflicts with computability, so it is the one that
+must go.
+
+%======================================================================
+\section{How to compare unimaginably large numbers}
+
+All numbers here are far too large to evaluate. The formal theorems compare them
+directly, but informal \emph{size} is best discussed with the
+\emph{fast-growing hierarchy} $f_\alpha$ indexed by ordinals: $f_0(n)=n+1$,
+$f_{\alpha+1}(n)=f_\alpha^{n}(n)$, and $f_\lambda(n)=f_{\lambda[n]}(n)$ at
+limits. A total language $L$ whose programs are all provably terminating in a
+theory $T$ has its bounded-size maxima growing roughly like $f_{|T|}$, where
+$|T|$ is the proof-theoretic ordinal of $T$. Two heuristics organize everything
+below.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{The base language dominates.} System~T is calibrated by $\varepsilon_0$.
+  T plus one type of countably branching trees, with recursion into all finite
+  types, is calibrated by the Bachmann--Howard ordinal
+  $\BH=\psi(\varepsilon_{\Omega+1})$. With tree classes at every finite level
+  the calibration is $\psi(\Omega_\omega)$, the ordinal of $\Pi^1_1$-CA$_0$.
+\item \textbf{Reflection multiplies.} Relativizing a language $L$ to an oracle
+  that grows like $f_\beta$ yields growth like $f_{\beta+|L|}$. Iterating this
+  along an index of height $\gamma$ yields $f_{|L|\cdot\gamma}$. Explicit
+  ordinal notations without collapsing functions stay below \BH, so a stack of
+  reflections over a weak base cannot catch up with a stronger base.
+\end{enumerate}
+
+These are informal calibrations, not theorems; the formal content of every
+contender is a strict inequality checked by Lean's kernel.
+
+%======================================================================
+\section{Contender 5, exactly}
+
+\lean{BusyLean/Contender5.lean} ports \lean{Contender.v} one definition at a
+time. The port keeps every quirk that can affect the value: raw ill-typed terms
+are interpreted with \lean{error} defaults; variables use reversed de~Bruijn
+indices; lambdas carry both annotations and cast their body; arrow casts recurse
+only when \lean{type\_eqb} succeeds; the enumeration order is the original one,
+including right-nested \lean{++}; and the winner is chosen by \lean{maxBy}'s
+strict update, starting from \lean{tO}. A smoke test reproduces the reference
+table: $0,2,10,146,24976$ terms and maxima $0,0,1,2,3$ at depths $0$--$4$.
+
+\paragraph{Agreement of an independent port.} Proposal P5 re-implemented the old
+language \emph{inside} its larger W-language, with W-aware casts and a plain
+maximum instead of \lean{maxBy}, and asserted without proof that the result is
+Contender~5. We prove it:
+\begin{theorem}[\lean{PortAgreement.largest\_eq\_oldMaximum}]
+For every depth $n$,
+\[\texttt{C5.largestSTLCNatRecNatOfDepth}\ n \;=\; \texttt{BigNumber.oldMaximum}\ n.\]
+\end{theorem}
+The proof is a logical relation between the two interpreters: equality at
+$\N$, preservation at arrows. That avoids function extensionality. Casts in both
+directions preserve the relation, including the error branches. The fundamental
+lemma covers reversed lookup, binder casts and natural recursion. P5's
+enumeration is the translated image of the original, in the same order, and the
+\lean{maxBy} winner attains the maximum.
+
+%======================================================================
+\section{Five proposals}
+
+Five proposals arrived as archives; \lean{proposals/REVIEW.md} has the details.
+All were rebuilt on Lean~4.34.0, and the two that had never been compiled (P4,
+P5) needed small repairs, recorded in separate commits.
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+& base language & amplifier & informal size\\
+\midrule
+P1 & System T & FGH over explicit Veblen-style trees & $f_{\varepsilon_0+\alpha}$, $\alpha<\BH$\\
+P2 & T + Brouwer trees + oracles & forest reflection on explicit trees & $f_{\BH\cdot\alpha}$\\
+P3 & T + unary oracle & reflection on explicit trees & $f_{\varepsilon_0\cdot\alpha}$\\
+P4 & T + Brouwer trees + oracle & ramified reflection & $f_{\BH\cdot\alpha}$\\
+P5 & T + W-types at all finite types & two diagonals & $f_{\psi(\Omega_\omega)+\omega^2}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+P5 has by far the strongest base and the weakest amplifier, which suggests
+combining it with the others' amplifiers.
+
+%======================================================================
+\section{Contender 6}
+
+\subsection{The object language}
+The language is P5's. Types are generated by $A,B::=\N\mid A\to B\mid W\,A$,
+where $W\,A$ is the type of well-founded trees branching over~$A$. Terms are raw
+(ill-typed terms default), with natural recursion and a W-recursor into every
+type. Because $A$ ranges over all types, the language has tree classes of
+every finite level, $W\N$, $W(W\N)$, \dots, and its calibration is
+$|L|\approx\psi(\Omega_\omega)$.
+
+\subsection{Oracles for free}
+P5's interpreter resolves variables by oldest-first levels. Evaluating a program
+in the one-element environment $[\langle \N\to\N\to\N, fs\rangle]$ therefore makes
+\lean{var 0} denote the oracle family $fs$ everywhere, even under binders. No new
+syntax is needed, and the smoke test confirms it: \lean{var0 3 4} evaluates to
+$fs(3,4)$, and so does \lean{(fun y => var0 y y) 5} with the family applied at
+$(5,5)$.
+
+\subsection{Reflection along the language's own trees}
+\begin{lstlisting}
+def reflect (fs : Family) (n : ℕ) : ℕ :=
+  n + 1 + max (prefixMax (fun i => fs i n) n)
+              (maximum (evalWith fs) (allTerms n))
+def stage (seed : Family) : WTree ℕ → ℕ → ℕ
+  | .leaf   => reflect seed
+  | .node f => reflect (fun i => stage seed (f i))
+def treesOfDepth (k : ℕ) : WTree ℕ :=
+  .node fun i => defTree (nthD (allTerms k) i .zero)
+def index : WTree ℕ := .node treesOfDepth
+def contender_6 : ℕ := stage p5Family index 42
+\end{lstlisting}
+At a node the oracle family \emph{is} the family of child stages, so a program
+may call any child at a computed index (P2's forest reflection). The new
+ingredient is \lean{index}: its $k$-th child joins every $W\N$ tree denoted by a
+program of depth $\le k$. The hierarchy therefore runs along the language's own
+ordinals, all of $|L|$, instead of an explicit notation system below \BH. By the
+multiplication heuristic, Contender~6 is about $f_{|L|\cdot|L|}(42)$.
+
+\subsection{What is proved}
+\begin{itemize}[leftmargin=*]
+\item \lean{contender\_5\_lt\_contender\_6}: the exact port of Contender~5 is below Contender~6.
+\item \lean{p5\_lt\_contender\_6} and \lean{p5Family\_lt\_finalFamily}: P5 is beaten at every input.
+\item \lean{defined\_tree\_eventually\_lt}: every tree the language defines is eventually dominated.
+\item \lean{program\_lt\_finalFamily}: every program of depth $\le n$, run with the final oracles, is exceeded.
+\end{itemize}
+All of them depend only on \lean{propext}. The definitions check in about 5\,s
+and the proofs in about 6\,s. A machine-checked audit shows that the definition
+never mentions \lean{contender\_5} or its winner selection. It also reports,
+candidly, that P5's seed contains the old language's maximum as a function of
+depth.
+
+%======================================================================
+\section{Engineering lessons}
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Toolchain drift changes axiom lists.} In Lean~4.34 a wildcard match
+  arm compiles to a \lean{\_sparseCasesOn} helper built on \lean{Nat.land}.
+  \lean{Nat.bitwise}'s termination proof uses \lean{propext}, so ``axiom-free on
+  4.19'' did not survive the upgrade. The same happens to core \lean{xs[i]?}.
+  Exhaustive matches avoid it.
+\item \textbf{Tactics carry axioms.} \lean{omega}'s certificates use
+  \lean{funext}, and so \lean{Quot.sound}. Two calls were replaced by explicit
+  lemma chains.
+\item \textbf{Never let the unifier normalize a contender.} Writing
+  \lean{iterate f 41 (f 42)} against \lean{iterate f 42 42} made Lean try to
+  evaluate the number. Generalizing the statement first, so that only
+  $42=41+1$ is checked, fixes it.
+\item \textbf{Prove inequalities by inclusion, not monotonicity.} Reflection is
+  not monotone in its oracle, because a program may test oracle values. Every
+  comparison therefore exhibits an explicit occurrence: a visible oracle index
+  or an enumerated program.
+\end{itemize}
+
+%======================================================================
+\section{Roadmap: impredicativity}
+
+Contender~6 lives below the next collapsing level: everything it does is
+predicative. The next qualitative jump is \emph{impredicative polymorphism}.
+
+\paragraph{System F.} The numeric functions definable in Girard's System~F on
+Church numerals are exactly those provably total in second-order arithmetic
+$\mathsf{Z}_2$. $\psi(\Omega_\omega)$ is the ordinal of $\Pi^1_1$-CA$_0$, a
+small fragment of $\mathsf{Z}_2$. A System-F maximum therefore dwarfs
+everything above.
+
+\paragraph{Why Lean can host it.} System~F has no set-theoretic model in Lean's
+predicative \lean{Type}. Girard's \emph{reducibility candidates} proof of strong
+normalization quantifies only over \emph{predicates on terms}, and Lean's
+impredicative \lean{Prop} makes $\forall C:\mathrm{Term}\to\mathrm{Prop}$ a
+legitimate proposition. The plan:
+\begin{enumerate}[leftmargin=*]
+\item untyped de~Bruijn $\lambda$-terms with $\beta$-reduction (types erased);
+\item Curry-style System~F typing; saturated sets; the interpretation
+  $\llbracket\forall X.A\rrbracket_\rho=\bigcap_C\llbracket A\rrbracket_{C\cdot\rho}$;
+  and adequacy, which gives strong normalization;
+\item Church-style terms (decidable type checking) enumerated by depth, checked
+  against the Church numeral type, erased, normalized by a deterministic
+  strategy (a total function by well-founded recursion, using the SN proof),
+  and decoded;
+\item an \emph{oracle constant} $O$ with $\delta$-rule $O\,\overline{n}\to\overline{f(n)}$, so
+  System~F programs can amplify a previous contender's family. That makes the
+  formal comparison immediate, and it lets F's own strength act on top of it.
+\end{enumerate}
+
+\paragraph{Further rungs.} System~F$_\omega$ (higher-order arithmetic) needs
+candidates for type constructors, i.e.\ functions between candidate spaces. The
+Calculus of Constructions, the system behind Loader's number, adds
+dependent types. Each rung is a new contender.
+
+%======================================================================
+\section{Status}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Contender & idea & informal size\\
+\midrule
+5 (Coq) & System T, depth 42 & $f_{<\varepsilon_0}(42)$\\
+6 (Lean) & forest reflection over finite-type W-language, own trees & $f_{\psi(\Omega_\omega)^2}(42)$\\
+7 (planned) & System F with oracle & beyond $f_{|\mathsf{Z}_2|}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}
