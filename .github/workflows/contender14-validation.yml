@@ -17,21 +17,40 @@ jobs:
       - name: Check out BusyLean
         uses: actions/checkout@v4
 
-      - name: Install Lean toolchain manager
+      - name: Restore Lean toolchain cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: ${{ runner.os }}-elan-${{ hashFiles('lean-toolchain') }}
+
+      - name: Install Lean toolchain manager and pinned toolchain
         shell: bash
         run: |
           set -euxo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            ok=0
+            for attempt in 1 2 3; do
+              if timeout 120 bash -c \
+                'curl --retry 3 --retry-delay 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none'; then
+                ok=1
+                break
+              fi
+              sleep 5
+            done
+            test "$ok" -eq 1
+          fi
+          export PATH="$HOME/.elan/bin:$PATH"
+          toolchain="$(tr -d '\r\n' < lean-toolchain)"
           ok=0
           for attempt in 1 2 3; do
-            if timeout 120 bash -c \
-              'curl --retry 3 --retry-delay 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y'; then
+            if timeout 240 elan toolchain install "$toolchain"; then
               ok=1
               break
             fi
             sleep 5
           done
           test "$ok" -eq 1
-          test -x "$HOME/.elan/bin/lean"
+          elan override set "$toolchain"
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Record tool versions
@@ -42,15 +61,14 @@ jobs:
           {
             echo "commit=$(git rev-parse HEAD)"
             echo "runner=$(uname -a)"
-            "$HOME/.elan/bin/lean" --version
-            "$HOME/.elan/bin/lake" --version
+            lean --version
+            lake --version
           } | tee validation/tool-versions.txt
 
       - name: Prebuild accepted dependencies
         shell: bash
         run: |
           set -euxo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p validation
           /usr/bin/time -f $'elapsed_seconds=%e\nuser_seconds=%U\nsystem_seconds=%S\nmax_rss_kb=%M' \
             lake build BusyLean.Comparison13 BusyLean.MetaReflectionFacts \
@@ -61,7 +79,6 @@ jobs:
         run: |
           set +e
           set -uo pipefail
-          export PATH="$HOME/.elan/bin:$PATH"
           mkdir -p validation
           rc=0
           run_one () {
