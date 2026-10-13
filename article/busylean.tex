@@ -147,6 +147,7 @@ Contender~60 iterates the tower operator itself along a tree.
 Contender~61 makes the tower operators values of a language with products.
 Contender~62 stacks that language along a tree.
 Contender~63 makes its stacking operator a value of the language.
+Contender~64 towers that step along a tree.
 \end{abstract}
 
 \tableofcontents
@@ -2285,6 +2286,27 @@ $N=\mathrm{family}_{62}(n)$. Proved: \lean{family62\_lt\_F63} and
 2.7\,s and the proofs in 2.7\,s.
 
 %======================================================================
+\section{Contender 64: the stacking-operator step, towered along a tree}
+
+Contender~63 turns Contender~62's stack and its family-raising operator into
+values of a larger language. That step can be repeated, and with closure pairs
+the repetitions can be indexed by a tree. \lean{stack2From} is Contender~62's
+stack started from a given closure pair $c$. One step,
+\[
+\mathrm{step2}(c)=\text{closures of }P_{61}+\bigl[\mathsf{stack2}_c:\mathsf{tree}\to C,\ \
+\mathsf{up2}_c:(\mathsf{tree}\to C)\to\mathsf{tree}\to C\bigr],
+\]
+closes Contender~61's language plus the stack started from $c$ and the operator
+raising families to stacks started from $c$. \lean{tower2} iterates it along a
+tree, pointwise at limits. The tower runs along Contender~63's tree to build a
+tree $T$, then along $T$ for the number closure:
+$F_{64}(n)=h^{\mathrm{tower2}_T.2(\mathrm{family}_{63})}_T(N)$ with
+$N=\mathrm{family}_{63}(n)$. \lean{lt\_tower2} shows that every level strictly
+dominates its oracle and argument. Proved: \lean{family63\_lt\_F64} and
+\lean{contender\_63\_lt\_\allowbreak contender\_64}. The definitions check in
+1.3\,s and the proofs in 2.1\,s.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further
@@ -2391,6 +2413,7 @@ Contender & idea & informal size\\
 61 (Lean) & System T with products over the tower operators & $h_T$ over the tower language's closure\\
 62 (Lean) & the tower language stacked along a tree & $h_T$ over the stacked tower language\\
 63 (Lean) & programs over the stacking operator of the tower language & $h_T$ over the language's closure\\
+64 (Lean) & Contender 63's step towered along a tree & $h_T$ over the tree-indexed tower\\
 \bottomrule
 \end{tabular}
 \end{center}
