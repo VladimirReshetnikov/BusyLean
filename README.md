@@ -28,8 +28,8 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 |---|---|---|---|
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
-| 3 | ordinal notations | `H_{ε₀}(H_{ε₀}(42))`: the Hardy hierarchy along `ε₀`, written as Brouwer trees | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)` |
-| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | Church-encoded Brouwer trees in the ladder compute `H_{ε₀}(H_{ε₀}(42))` |
+| 3 | ordinal notations with a collapsing function | `H_θ(H_θ(42))`: the Hardy hierarchy along `θ = φ_{ε_{Ω+1}}(0)`, Bachmann's collapse of `ε_{Ω+1}` (the Bachmann–Howard ordinal), written as trees | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ε₀` sits inside `θ` |
+| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | Church-encoded Brouwer trees and `Ω`-trees in the ladder compute `H_θ(H_θ(42))` |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
@@ -38,8 +38,16 @@ def hardy : BTree → Nat → Nat                                  -- Independen
   | .zero, y => y
   | .succ a, y => hardy a (y + 1)
   | .lim f, y => maxUpTo (fun i => hardy (f i) y) y
-def Feps (n : Nat) : Nat := hardy BTree.epsilon0 n            -- ε₀ = lim ω_k, ω_{k+1} = ω^{ω_k}
-def contender_3 : Nat := Feps (Feps 42)
+inductive OTree where                                         -- Independent/Bachmann.lean
+  | zero | succ (a : OTree) | lim (f : Nat → OTree) | sup (f : BTree → OTree)
+def phi : OTree → BTree → BTree                                -- Bachmann's collapse
+  | .zero, b => BTree.opow b                                   -- ω^b
+  | .succ a, b => .lim fun m => iter (phi a) m (.succ b)       -- next fixed point of φ_a
+  | .lim f, b => .lim fun m => phi (f m) b
+  | .sup f, b => phi (f b) b                                   -- the argument picks the branch
+def theta : BTree := phi OTree.epsilon .zero                   -- ε_{Ω+1} = lim (Ω, Ω^Ω, …)
+def F3 (n : Nat) : Nat := hardy theta n
+def contender_3 : Nat := F3 (F3 42)
 def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
 def reflAlong : CTree → Nat → Nat                             -- reflection along a tree
@@ -92,15 +100,17 @@ as the oracle of the growing programs. This combines the ideas of Contenders
 trees) without seeding.
 
 **Rung 3 < rung 4: simulation.** A small language `TT` (System T plus Brouwer
-trees and their fold, [`TreeLang.lean`](BusyLean/Independent/TreeLang.lean))
-expresses `+`, `·n`, `ω^·`, the towers, `ε₀` and the Hardy hierarchy. The
-program `epsProgram` has value `H_{ε₀}(H_{ε₀}(42))`. Trees become their
-Church iterators `∀X. X → (X → X) → ((nat → X) → X) → X`. A logical relation
-defined by recursion on the tree value ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean))
-shows that the compiled program reduces to the right numeral. Confluence
+trees, `Ω`-trees and their folds, [`TreeLang.lean`](BusyLean/Independent/TreeLang.lean))
+expresses `+`, `·n`, `ω^·`, the `Ω`-tree arithmetic, `ε_{Ω+1}`, the collapse
+`φ` and the Hardy hierarchy. The program `bhProgram` has value
+`H_θ(H_θ(42))`. Trees become their Church iterators
+`∀X. X → (X → X) → ((nat → X) → X) → X`, and `Ω`-trees
+`∀X. X → (X → X) → ((nat → X) → X) → ((tree → X) → X) → X`. Logical relations
+defined by recursion on the tree values ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean))
+show that the compiled program reduces to the right numeral. Confluence
 ([`Confluence.lean`](BusyLean/Independent/Confluence.lean)) makes the
 normalizer find it, and the ladder's type checker accepts the program
-([`TreeTyped.lean`](BusyLean/Independent/TreeTyped.lean)), whose depth is 56.
+([`TreeTyped.lean`](BusyLean/Independent/TreeTyped.lean)), whose depth is 57.
 Since `F4 n = ladderMax (reflAlong (selfTree n n)) n`, and the simulation
 works under every oracle, the outer `F4` already sees the compiled program.
 
@@ -112,16 +122,16 @@ polymorphic pairs.
 Excluded, because a larger rung would have to incorporate them: System F,
 Fω and kind polymorphism (fragments of the ladder language), the W-language
 and tree languages (extensions of System T), larger ordinal notations
-(Contenders 16–31, the same approach as rung 3), and towers and closure
+(Contenders 16–31, the same approach as rung 3; rung 3 takes the collapse to the Bachmann–Howard ordinal), and towers and closure
 operators over a base language (amplifiers). Two amplifiers, ladders that
 build their own length and reflection along trees, are built into rung 4.
 
 [`test/IndependentAudit.lean`](test/IndependentAudit.lean) prints the modules
 each rung's definition depends on and fails if one reaches a lower rung or a
-main-tower contender. Rung 3 depends only on its own file, which imports
-nothing. `python3 scripts/check_independent.py` runs the budgets and the audit
-from a clean build. The four definition modules take about 12 s and the three
-comparisons, the ordinal analysis included, about 21 s.
+main-tower contender. Rung 3 depends only on its two files (Brouwer trees
+and the collapse), which import nothing else. `python3 scripts/check_independent.py` runs the budgets and the audit
+from a clean build. The five definition modules take about 3 s and the three
+comparisons, the ordinal analysis included, about 50 s.
 
 ## The closed cumulative tower
 

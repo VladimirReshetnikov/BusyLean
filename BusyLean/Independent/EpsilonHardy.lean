@@ -1,8 +1,7 @@
 /-!
-# Independent tower, rung 3: the Hardy hierarchy along `ε₀`
+# Brouwer trees and the Hardy hierarchy (rung 3's base)
 
-This rung is an **ordinal-notation hierarchy**. Ordinals below `ε₀`, and `ε₀`
-itself, are written as Brouwer trees (countably branching well-founded trees):
+Ordinals are written as Brouwer trees (countably branching well-founded trees):
 `zero`, `succ a`, and `lim f` for a fundamental sequence `f : ℕ → BTree`.
 Addition, multiplication by a number and `ω`-exponentiation are defined by
 recursion on the trees, `ω_{k+1} = ω^{ω_k}`, and `ε₀ = lim ω_k`.
@@ -13,7 +12,8 @@ maximum over the first `y + 1` terms of the fundamental sequence (instead of
 only the `y`-th term) makes every `H_a` monotone without any condition on the
 tree; it is a standard robust variant of the Hardy hierarchy.
 
-This file imports nothing. **Do not evaluate `contender_3`.**
+This file imports nothing. Rung 3 (`Bachmann.lean`) builds on it; `ε₀` and
+`Feps` serve as the bound in the ordinal analysis of System T.
 -/
 
 namespace BusyLean.Indep.Eps
@@ -74,8 +74,5 @@ namespace BusyLean.Indep
 
 /-- The Hardy hierarchy at `ε₀`. -/
 def Feps (n : Nat) : Nat := Eps.hardy Eps.BTree.epsilon0 n
-
-/-- **The ordinal rung**: `H_{ε₀}(H_{ε₀}(42))`. Never evaluate it. -/
-def contender_3 : Nat := Feps (Feps 42)
 
 end BusyLean.Indep

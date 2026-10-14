@@ -2468,7 +2468,7 @@ Rung & idea & definition\\
 \midrule
 1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
 2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
-3 & ordinal notations & $H_{\varepsilon_0}(H_{\varepsilon_0}(42))$, Brouwer trees\\
+3 & ordinal notations, collapsed & $H_\theta(H_\theta(42))$, $\theta=\varphi_{\varepsilon_{\Omega+1}}(0)$\\
 4 & impredicative universes building their own length & \lean{F4 (F4 42)} below\\
 \bottomrule
 \end{tabular}
@@ -2487,7 +2487,21 @@ defined by recursion on trees, $\omega_{k+1}=\omega^{\omega_k}$ and
 $\varepsilon_0=\lim_k\omega_k$. The hierarchy is Hardy's, with one robust
 choice: at a limit, $H_{\lim f}(y)=\max_{i\le y}H_{f(i)}(y)$. This makes every
 $H_a$ monotone for every tree, with no condition on the fundamental sequences.
-The file imports nothing.
+Above the Brouwer trees sit \emph{$\Omega$-trees}, with a fourth constructor
+\lean{sup f} for $f$ ranging over \emph{all} Brouwer trees, so that
+$\Omega=\mathtt{sup}$ (embedding) is the first uncountable. Addition,
+multiplication by a Brouwer tree and $\Omega^{\cdot}$ are defined on them by
+recursion, and $\varepsilon_{\Omega+1}=\lim(\Omega,\Omega^\Omega,\dots)$. The
+collapse is Bachmann's, written as a fold:
+\[
+\varphi_0(b)=\omega^b,\quad
+\varphi_{a+1}(b)=\lim_m\varphi_a^m(b+1),\quad
+\varphi_{\lim f}(b)=\lim_m\varphi_{f(m)}(b),\quad
+\varphi_{\mathtt{sup}\,f}(b)=\varphi_{f(b)}(b).
+\]
+At an $\Omega$-limit the current argument itself chooses the branch. The rung
+is $H_\theta(H_\theta(42))$ for $\theta=\varphi_{\varepsilon_{\Omega+1}}(0)$, a
+tree for the Bachmann--Howard ordinal. The two files import nothing else.
 
 \paragraph{Rung 2 $<$ rung 3: an ordinal analysis of System~T.} An upper
 bound for \emph{all} System~T values cannot come from simulation. It needs
@@ -2518,6 +2532,10 @@ proof theory. The proof follows Tait's infinitary terms.
   all trees, this gives
   $\mathtt{eval}\,w\le H_{\omega_{49}}(y)\le H_{\varepsilon_0}(y)$ for $y\ge200$
   (\lean{eval\_le\_hardy\_eps}).
+\item \textbf{$\varepsilon_0$ inside $\theta$.} Branch~1 of $\theta$ is
+  $\varphi_{\Omega^\Omega}(0)$, whose branch at $0$ is $\varphi_1(0)$, the limit
+  of $1,\omega,\omega^\omega,\dots$; these steps are definitional. So
+  $H_{\varepsilon_0}(y)\le H_\theta(y+1)$ (\lean{Feps\_le\_F3}).
 \end{enumerate}
 No step evaluates a number. The main engineering hazard is Lean's own
 reduction: a stray \lean{rfl}, a closing \lean{rw}, or a linter can try to
@@ -2561,12 +2579,14 @@ closure (the ladder libraries, the tree addresses and System~F's core) and
 rejects any contender module.
 
 \paragraph{Rung 3 $<$ rung 4: Church-encoded trees.} A small language
-\lean{TT} (System~T with Brouwer trees and their fold) writes the whole of
-rung~3 as a program of value $H_{\varepsilon_0}(H_{\varepsilon_0}(42))$. Trees
-compile to their iterators $\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to X)\to
-X)\to X$. The logical relation at the tree type is defined by recursion on the
-\emph{tree value}, which avoids quantifying over all result types. The program
-has depth 56, type checks in the ladder, and reduces to the right numeral
+\lean{TT} (System~T with Brouwer trees, $\Omega$-trees and their folds)
+writes the whole of rung~3 as a program of value $H_\theta(H_\theta(42))$.
+Trees compile to their iterators $\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to
+X)\to X)\to X$, and $\Omega$-trees to $\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to
+X)\to X)\to((\mathtt{tree}\to X)\to X)\to X$; the $\Omega$-branching is
+impredicative quantification over the type of trees. The logical relations
+at the two tree types are defined by recursion on the \emph{tree values},
+which avoids quantifying over all result types. The program has depth 57, type checks in the ladder, and reduces to the right numeral
 under every oracle. Confluence (below) lets the normalizer find it. Since
 \lean{F4 n} unfolds to \lean{ladderMax (reflAlong (selfTree n n)) n}, the outer
 \lean{F4} sees the compiled program.
@@ -2601,14 +2621,15 @@ That proof therefore compiles \emph{every} raw term.
   fits in depth 42, so \lean{F4 42} $\ge 1067$, and the outer \lean{F4} sees
   the compiled winner.
 \end{enumerate}
-The definitions of all four rungs check in about 12~s and the three comparisons,
-the ordinal analysis included, in about 21~s.
+The definitions of all four rungs check in about 3~s and the three comparisons,
+the ordinal analysis included, in about 50~s.
 
 \paragraph{What was left out, and why.} System~F, F$_\omega$, kind
 polymorphism and the dynamic-kind universe are fragments of the ladder
 language, and the W-language and the tree languages extend System~T, so each
 would be incorporated by a larger rung. Larger ordinal notations (Contenders
-16--31) are the same approach as rung~3. Towers, closure operators and reflective
+16--31) are the same approach as rung~3, which now reaches the
+Bachmann--Howard ordinal. Towers, closure operators and reflective
 towers (Contenders 6, 9--12, 15, 23 and 54--70) are amplifiers of a base
 language; two of them, ladders that build their own length and reflection
 along trees (Contenders 36--53), are built into rung~4.

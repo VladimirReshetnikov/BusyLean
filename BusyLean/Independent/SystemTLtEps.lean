@@ -1,8 +1,9 @@
 import BusyLean.Independent.TtoInfBounds
 import BusyLean.Independent.SystemT
+import BusyLean.Independent.Bachmann
 
 /-!
-# Rung 2 < rung 3: System T < the Hardy hierarchy at `ε₀` (an ordinal analysis)
+# Rung 2 < rung 3: System T < the Hardy hierarchy at `θ` (an ordinal analysis)
 
 Every raw System T term `w` of depth `≤ 42` with static type `nat` is
 translated into an infinitary term `P` (Tait's case trees for recursion) with
@@ -16,6 +17,10 @@ elimination remove the redexes. Each round costs one `ω`-exponential
 
 The comparisons between trees use the structural order `Le 200`, which is sound
 for the Hardy functions at arguments `≥ 200` (`Le.hardy_le`).
+
+Finally `ε₀` sits inside the collapsed tree `θ`: the branch `1` of
+`θ = φ_{ε_{Ω+1}}(0)` is `φ_{Ω^Ω}(0)`, whose branch at `0` is `φ_1(0)`, the
+limit of `1, ω, ω^ω, …`. So `H_{ε₀}(y) ≤ H_θ(y + 1)` (`Feps_le_F3`).
 -/
 
 namespace BusyLean.Indep
@@ -144,7 +149,44 @@ theorem eval_le_Feps {w : C5.Term} (hw : depth w ≤ 42) (hs : stype [] w = .nat
     C5.eval w ≤ Feps 200 :=
   eval_le_hardy_eps hw hs (Nat.le_refl 200)
 
-/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at `ε₀`. -/
+/-! ## `ε₀` inside `θ` -/
+
+theorem iter_opow_tower : ∀ i, iter (phi .zero) (i + 1) (.succ .zero) = tower i
+  | 0 => rfl
+  | i + 1 => congrArg BTree.opow (iter_opow_tower i)
+
+/-- The first steps into `θ` are definitional. -/
+theorem phi_tower_one :
+    phi (OTree.tower 1) .zero = .lim fun m => iter (phi .zero) m (.succ .zero) := rfl
+
+theorem hardy_tower_le_F3 {i y : Nat} (h : i + 1 ≤ y) : hardy (tower i) y ≤ F3 y := by
+  have h1 : hardy (tower i) y ≤ hardy (phi (OTree.tower 1) .zero) y := by
+    rw [phi_tower_one, ← iter_opow_tower i]
+    exact le_maxUpTo (fun m => hardy (iter (phi .zero) m (.succ .zero)) y) h
+  have h2 : hardy (phi (OTree.tower 1) .zero) y ≤ F3 y :=
+    le_maxUpTo (fun m => hardy (phi (OTree.tower m) .zero) y) (i := 1) (by omega)
+  exact Nat.le_trans h1 h2
+
+theorem Feps_le_F3 (y : Nat) : Feps y ≤ F3 (y + 1) :=
+  maxUpTo_le fun i hi =>
+    Nat.le_trans (hardy_mono (tower i) (Nat.le_succ y)) (hardy_tower_le_F3 (by omega))
+
+theorem le_tower_one : Le 3 (mulNat omega 3) (tower 1) :=
+  .limR 2 (by omega) (by
+    show Le 3 (mulNat omega 3) (opow (mulNat (.succ .zero) 2))
+    rw [mulNat_one]
+    exact .limR 3 (Nat.le_refl 3) (Le.refl 3 _))
+
+theorem F3_42_ge : 336 ≤ F3 42 := by
+  have h := le_tower_one.hardy_le (y := 42) (by decide)
+  rw [hardy_omega_three] at h
+  exact Nat.le_trans h (hardy_tower_le_F3 (by decide))
+
+theorem F3_mono {a b : Nat} (h : a ≤ b) : F3 a ≤ F3 b := hardy_mono theta h
+
+theorem F3_succ (a : Nat) : F3 a + 1 ≤ F3 (a + 1) := hardy_lt_succ theta a
+
+/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at `θ`. -/
 theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
   unfold contender_2 contender_3 C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
   have hw : depth (C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42)) ≤ 42 := by
@@ -152,21 +194,23 @@ theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
     | inl h => exact depth_of_mem h
     | inr h => rw [h]; decide
   generalize C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42) = w at hw ⊢
-  have hlt : Feps 200 < Feps (Feps 42) := by
-    have h1 := Feps_succ 200
-    have h2 : Feps 201 ≤ Feps (Feps 42) := Feps_mono (by
-      have hF := Feps_42_ge
-      generalize Feps 42 = M at hF ⊢
+  have hlt : Feps 200 < F3 (F3 42) := by
+    have h0 := Feps_le_F3 200
+    have h1 := F3_succ 201
+    have h2 : F3 202 ≤ F3 (F3 42) := F3_mono (by
+      have hF := F3_42_ge
+      generalize F3 42 = M at hF ⊢
       omega)
-    generalize Feps 200 = a at h1 ⊢
-    generalize Feps 201 = b at h1 h2
-    generalize Feps (Feps 42) = c at h2 ⊢
+    generalize Feps 200 = a at h0 ⊢
+    generalize F3 201 = b at h0 h1
+    generalize F3 202 = c at h1 h2
+    generalize F3 (F3 42) = d at h2 ⊢
     omega
   cases hs : stype [] w with
   | nat => exact Nat.lt_of_le_of_lt (eval_le_Feps hw hs) hlt
   | arr a b =>
       have h0 := eval_eq_zero_of_arr hs
-      -- (no `rw` here: its closing `rfl` would try to evaluate `Feps (Feps 42)`)
+      -- (no `rw` here: its closing `rfl` would try to evaluate `F3 (F3 42)`)
       exact Nat.lt_of_le_of_lt (Nat.le_of_eq h0) (Nat.lt_of_le_of_lt (Nat.zero_le (Feps 200)) hlt)
 
 end BusyLean.Indep

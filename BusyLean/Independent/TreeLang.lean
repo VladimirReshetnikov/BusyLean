@@ -1,18 +1,21 @@
-import BusyLean.Independent.EpsilonHardy
+import BusyLean.Independent.Bachmann
 
 /-!
-# System T over Brouwer trees (proof infrastructure)
+# System T over Brouwer trees and `Ω`-trees (proof infrastructure)
 
-`TT` is a simply typed λ-calculus with numbers, Brouwer trees and their
-recursors: `rec` (natural recursion) and `fold` (iteration over a tree, with
-`fold z s l (lim f) = l (fun n => fold z s l (f n))`). Its semantics is
-denotational (`eval`).
+`TT` is a simply typed λ-calculus with numbers, Brouwer trees, `Ω`-trees and
+their recursors: `rec` (natural recursion), `fold` (iteration over a tree, with
+`fold z s l (lim f) = l (fun n => fold z s l (f n))`) and `ofold` (iteration
+over an `Ω`-tree, with `ofold z s l p (sup f) = p (fun b => ofold z s l p (f b))`).
+Its semantics is denotational (`eval`).
 
-`epsProgram` is a closed `TT` program whose value is `Feps (Feps 42)`, the
-ordinal rung (`eval_epsProgram`). It writes `+`, `·n`, `ω^·`, the towers, `ε₀`
-and the Hardy hierarchy as folds and recursions, mirroring the definitions in
-`EpsilonHardy.lean`. This file is used only in proofs: the ladder rung runs
-the program after it is compiled to Church encodings (`TreeEmbedding.lean`).
+`epsProgram` is a closed `TT` program whose value is `Feps (Feps 42)`
+(`eval_epsProgram`), and `bhProgram` one whose value is `F3 (F3 42)`, the
+ordinal rung (`eval_bhProgram`). They write `+`, `·n`, `ω^·`, the towers, `ε₀`,
+the `Ω`-tree arithmetic, `ε_{Ω+1}`, the collapse `φ` and the Hardy hierarchy as
+folds and recursions, mirroring `EpsilonHardy.lean` and `Bachmann.lean`. This
+file is used only in proofs: the ladder rung runs the programs after they are
+compiled to Church encodings (`TreeEmbedding.lean`).
 -/
 
 namespace BusyLean.Indep.TT
@@ -22,11 +25,13 @@ open BusyLean.Indep.Eps
 inductive Ty where
   | nat : Ty
   | tree : Ty
+  | otree : Ty
   | arr : Ty → Ty → Ty
 
 @[reducible] def den : Ty → Type
   | .nat => Nat
   | .tree => BTree
+  | .otree => OTree
   | .arr a b => den a → den b
 
 /-- Natural recursion: `recursion a f (n+1) = f n (recursion a f n)`. -/
@@ -39,6 +44,13 @@ def fold {α : Type} (z : α) (s : α → α) (l : (Nat → α) → α) : BTree 
   | .zero => z
   | .succ t => s (fold z s l t)
   | .lim f => l fun n => fold z s l (f n)
+
+/-- Iteration over an `Ω`-tree. -/
+def ofold {α : Type} (z : α) (s : α → α) (l : (Nat → α) → α) (p : (BTree → α) → α) : OTree → α
+  | .zero => z
+  | .succ t => s (ofold z s l p t)
+  | .lim f => l fun n => ofold z s l p (f n)
+  | .sup f => p fun b => ofold z s l p (f b)
 
 inductive Var : List Ty → Ty → Type where
   | here {Γ : List Ty} {σ : Ty} : Var (σ :: Γ) σ
@@ -56,6 +68,13 @@ inductive Tm : List Ty → Ty → Type where
   | tlim {Γ : List Ty} : Tm Γ (.arr (.arr .nat .tree) .tree)
   | fold {Γ : List Ty} (r : Ty) :
       Tm Γ (.arr r (.arr (.arr r r) (.arr (.arr (.arr .nat r) r) (.arr .tree r))))
+  | ozero {Γ : List Ty} : Tm Γ .otree
+  | osucc {Γ : List Ty} : Tm Γ (.arr .otree .otree)
+  | olim {Γ : List Ty} : Tm Γ (.arr (.arr .nat .otree) .otree)
+  | osup {Γ : List Ty} : Tm Γ (.arr (.arr .tree .otree) .otree)
+  | ofold {Γ : List Ty} (r : Ty) :
+      Tm Γ (.arr r (.arr (.arr r r) (.arr (.arr (.arr .nat r) r)
+        (.arr (.arr (.arr .tree r) r) (.arr .otree r)))))
 
 abbrev Env (Γ : List Ty) : Type := (σ : Ty) → Var Γ σ → den σ
 
@@ -74,6 +93,11 @@ def eval : {Γ : List Ty} → {σ : Ty} → Tm Γ σ → Env Γ → den σ
   | _, _, .tsucc, _ => BTree.succ
   | _, _, .tlim, _ => BTree.lim
   | _, _, .fold _, _ => fold
+  | _, _, .ozero, _ => OTree.zero
+  | _, _, .osucc, _ => OTree.succ
+  | _, _, .olim, _ => OTree.lim
+  | _, _, .osup, _ => OTree.sup
+  | _, _, .ofold _, _ => ofold
 
 def env0 : Env [] := fun _ v => nomatch v
 
@@ -88,6 +112,7 @@ open Tm (var lam app zero succ nrec tzero tsucc tlim)
 abbrev v0 {σ : Ty} : Tm (σ :: Γ) σ := .var .here
 abbrev v1 {σ τ : Ty} : Tm (τ :: σ :: Γ) σ := .var (.there .here)
 abbrev v2 {σ τ υ : Ty} : Tm (υ :: τ :: σ :: Γ) σ := .var (.there (.there .here))
+abbrev v3 {σ τ υ χ : Ty} : Tm (χ :: υ :: τ :: σ :: Γ) σ := .var (.there (.there (.there .here)))
 
 /-- `a + b = fold a succ lim b`. -/
 def addT : Tm Γ (.arr .tree (.arr .tree .tree)) :=
@@ -141,6 +166,46 @@ def numT : Nat → Tm Γ .nat
 
 /-- `Feps (Feps 42)` as a `TT` program. -/
 def epsProgram : Tm [] .nat := app fepsT (app fepsT (numT 42))
+
+open Tm (ozero osucc olim osup)
+
+/-- Brouwer trees as `Ω`-trees. -/
+def liftT : Tm Γ (.arr .tree .otree) := app (app (app (Tm.fold .otree) ozero) osucc) olim
+
+def OmegaT : Tm Γ .otree := app osup liftT
+
+/-- `a + b` on `Ω`-trees. -/
+def oaddT : Tm Γ (.arr .otree (.arr .otree .otree)) :=
+  lam (lam (app (app (app (app (app (Tm.ofold .otree) v1) osucc) olim) osup) v0))
+
+/-- `a · b` for a Brouwer tree `b`. -/
+def omulBT : Tm Γ (.arr .otree (.arr .tree .otree)) :=
+  lam (app (app (app (Tm.fold .otree) ozero) (lam (app (app oaddT v0) v1))) olim)
+
+/-- `Ω^a`. -/
+def oopowT : Tm Γ (.arr .otree .otree) :=
+  app (app (app (app (Tm.ofold .otree) (app osucc ozero)) (lam (app osup (app omulBT v0)))) olim)
+    osup
+
+def otowerT : Tm Γ (.arr .nat .otree) :=
+  app (app (nrec .otree) OmegaT) (lam (lam (app oopowT v0)))
+
+/-- `ε_{Ω+1}`. -/
+def oepsT : Tm Γ .otree := app olim otowerT
+
+/-- The collapse `φ`, by a fold at type `tree → tree`. -/
+def phiT : Tm Γ (.arr .otree (.arr .tree .tree)) :=
+  app (app (app (app (Tm.ofold (.arr .tree .tree)) opowT)
+      (lam (lam (app tlim (app (app (nrec .tree) (app tsucc v0)) (lam (lam (app v3 v0))))))))
+      (lam (lam (app tlim (lam (app (app v2 v0) v1))))))
+    (lam (lam (app (app v1 v0) v0)))
+
+def thetaT : Tm Γ .tree := app (app phiT oepsT) tzero
+
+def f3T : Tm Γ (.arr .nat .nat) := app hardyT thetaT
+
+/-- `F3 (F3 42)` as a `TT` program. -/
+def bhProgram : Tm [] .nat := app f3T (app f3T (numT 42))
 
 end Program
 
@@ -258,5 +323,124 @@ theorem eval_app {Γ : List Ty} {σ τ : Ty} (s : Tm Γ (.arr σ τ)) (u : Tm Γ
 theorem eval_epsProgram : eval epsProgram env0 = Feps (Feps 42) := by
   unfold epsProgram
   rw [eval_app, eval_app, eval_numT, eval_fepsT, eval_fepsT]
+
+/-! ## The value of `bhProgram` -/
+
+theorem fold_lift : ∀ b, fold OTree.zero OTree.succ OTree.lim b = OTree.lift b
+  | .zero => rfl
+  | .succ b => congrArg OTree.succ (fold_lift b)
+  | .lim f => congrArg OTree.lim (funext fun n => fold_lift (f n))
+
+theorem eval_liftT {Γ : List Ty} (ρ : Env Γ) : eval (liftT : Tm Γ _) ρ = OTree.lift :=
+  funext fold_lift
+
+theorem eval_OmegaT {Γ : List Ty} (ρ : Env Γ) :
+    (eval (OmegaT : Tm Γ .otree) ρ : OTree) = OTree.Omega := by
+  show OTree.sup (eval (liftT : Tm Γ _) ρ) = _
+  rw [eval_liftT]; rfl
+
+theorem ofold_add (a : OTree) : ∀ b, ofold a OTree.succ OTree.lim OTree.sup b = OTree.add a b
+  | .zero => rfl
+  | .succ b => congrArg OTree.succ (ofold_add a b)
+  | .lim f => congrArg OTree.lim (funext fun n => ofold_add a (f n))
+  | .sup f => congrArg OTree.sup (funext fun x => ofold_add a (f x))
+
+theorem eval_oaddT {Γ : List Ty} (ρ : Env Γ) (a b : OTree) :
+    eval (oaddT : Tm Γ _) ρ a b = OTree.add a b := ofold_add a b
+
+theorem fold_mulB (a : OTree) : ∀ b, fold OTree.zero (fun x => OTree.add x a) OTree.lim b =
+    OTree.mulB a b
+  | .zero => rfl
+  | .succ b => congrArg (fun x => OTree.add x a) (fold_mulB a b)
+  | .lim f => congrArg OTree.lim (funext fun n => fold_mulB a (f n))
+
+theorem eval_omulBT {Γ : List Ty} (ρ : Env Γ) (a : OTree) :
+    eval (omulBT : Tm Γ _) ρ a = OTree.mulB a := by
+  funext b
+  have h : (fun x => eval (oaddT : Tm (.otree :: .otree :: Γ) _)
+      (Env.cons (σ := .otree) x (Env.cons (σ := .otree) a ρ)) x a) = fun x => OTree.add x a := by
+    funext x; exact eval_oaddT _ x a
+  show fold _ (fun x => eval (oaddT : Tm (.otree :: .otree :: Γ) _)
+      (Env.cons (σ := .otree) x (Env.cons (σ := .otree) a ρ)) x a) OTree.lim b = _
+  rw [h]
+  exact fold_mulB a b
+
+theorem ofold_opow : ∀ a, ofold (OTree.succ .zero) (fun x => OTree.sup (OTree.mulB x)) OTree.lim
+    OTree.sup a = OTree.opow a
+  | .zero => rfl
+  | .succ a => by
+      show OTree.sup (OTree.mulB (ofold _ _ _ _ a)) = _
+      rw [ofold_opow a]; rfl
+  | .lim f => congrArg OTree.lim (funext fun n => ofold_opow (f n))
+  | .sup f => congrArg OTree.sup (funext fun x => ofold_opow (f x))
+
+theorem eval_oopowT {Γ : List Ty} (ρ : Env Γ) (a : OTree) :
+    eval (oopowT : Tm Γ _) ρ a = OTree.opow a := by
+  have h : (fun x => OTree.sup (eval (omulBT : Tm (.otree :: Γ) _) (Env.cons (σ := .otree) x ρ) x)) =
+      fun x => OTree.sup (OTree.mulB x) := by
+    funext x; rw [eval_omulBT]
+  show ofold _ (fun x => OTree.sup (eval (omulBT : Tm (.otree :: Γ) _) (Env.cons (σ := .otree) x ρ) x))
+    OTree.lim OTree.sup a = _
+  rw [h]
+  exact ofold_opow a
+
+theorem eval_otowerT {Γ : List Ty} (ρ : Env Γ) : ∀ k, eval (otowerT : Tm Γ _) ρ k = OTree.tower k
+  | 0 => eval_OmegaT ρ
+  | k + 1 => by
+      show eval (oopowT : Tm _ _) _ (eval (otowerT : Tm Γ _) ρ k) = _
+      rw [eval_oopowT, eval_otowerT ρ k]
+      rfl
+
+theorem eval_oepsT {Γ : List Ty} (ρ : Env Γ) :
+    (eval (oepsT : Tm Γ .otree) ρ : OTree) = OTree.epsilon := by
+  show OTree.lim (eval (otowerT : Tm Γ _) ρ) = _
+  congr 1; funext k; exact eval_otowerT ρ k
+
+theorem recursion_iter (g : BTree → BTree) (b : BTree) :
+    ∀ m, recursion b (fun _ x => g x) m = iter g m b
+  | 0 => rfl
+  | m + 1 => congrArg g (recursion_iter g b m)
+
+theorem ofold_phi : ∀ a, ofold (fun b => BTree.opow b)
+    (fun r b => BTree.lim fun m => recursion (BTree.succ b) (fun _ x => r x) m)
+    (fun rs b => BTree.lim fun m => rs m b) (fun rs b => rs b b) a = phi a
+  | .zero => rfl
+  | .succ a => by
+      funext b
+      show BTree.lim (fun m => recursion (BTree.succ b) (fun _ x => ofold (α := BTree → BTree) _ _ _ _ a x) m) = _
+      rw [ofold_phi a]
+      show _ = BTree.lim fun m => iter (phi a) m (.succ b)
+      congr 1; funext m; exact recursion_iter (phi a) _ m
+  | .lim f => by
+      funext b
+      show BTree.lim (fun m => ofold (α := BTree → BTree) _ _ _ _ (f m) b) = BTree.lim fun m => phi (f m) b
+      congr 1; funext m; rw [ofold_phi (f m)]
+  | .sup f => by
+      funext b
+      show ofold (α := BTree → BTree) _ _ _ _ (f b) b = phi (f b) b
+      rw [ofold_phi (f b)]
+
+theorem eval_phiT {Γ : List Ty} (ρ : Env Γ) : eval (phiT : Tm Γ _) ρ = phi := by
+  funext a
+  rw [← ofold_phi a]
+  have h1 : eval (opowT : Tm Γ _) ρ = fun b => BTree.opow b := funext (eval_opowT ρ)
+  show ofold (eval (opowT : Tm Γ _) ρ) _ _ _ a = _
+  rw [h1]
+  rfl
+
+theorem eval_thetaT {Γ : List Ty} (ρ : Env Γ) :
+    (eval (thetaT : Tm Γ .tree) ρ : BTree) = theta := by
+  show eval (phiT : Tm Γ _) ρ (eval (oepsT : Tm Γ _) ρ) BTree.zero = _
+  rw [eval_phiT, eval_oepsT]
+  rfl
+
+theorem eval_f3T {Γ : List Ty} (ρ : Env Γ) (n : Nat) : eval (f3T : Tm Γ _) ρ n = F3 n := by
+  show eval (hardyT : Tm Γ _) ρ (eval (thetaT : Tm Γ _) ρ) n = F3 n
+  rw [eval_hardyT, eval_thetaT]
+  rfl
+
+theorem eval_bhProgram : eval bhProgram env0 = F3 (F3 42) := by
+  unfold bhProgram
+  rw [eval_app, eval_app, eval_numT, eval_f3T, eval_f3T]
 
 end BusyLean.Indep.TT

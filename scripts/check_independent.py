@@ -31,9 +31,11 @@ BUILD_DIRS = [ROOT / ".lake" / "build",
               ROOT / "proposals" / "P5-w-reflection" / "lean" / ".lake" / "build"]
 PERMITTED = {"propext", "Quot.sound"}
 LIBRARIES = ["BusyLean.Contender5", "BusyLean.SystemF.Normalize",
-             "BusyLean.SystemFL.Ladder", "BusyLean.SystemFL.Church"]
+             "BusyLean.SystemFL.Ladder", "BusyLean.SystemFL.Church",
+             "BusyLean.SystemFLT.Trees"]
 DEFINITIONS = ["BusyLean.Independent.Ackermann", "BusyLean.Independent.SystemT",
-               "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Ladder"]
+               "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Bachmann",
+               "BusyLean.Independent.Ladder"]
 PROOFS = ["BusyLean.Independent.AckermannLtSystemT", "BusyLean.Independent.SystemTLtEps",
           "BusyLean.Independent.Tower",
           "BusyLean.Independent.EpsLtLadder"]

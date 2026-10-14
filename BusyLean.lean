@@ -182,6 +182,7 @@ import BusyLean.Independent.Ladder
 import BusyLean.Independent.TTyped
 import BusyLean.Independent.SystemTLtLadder
 import BusyLean.Independent.EpsilonHardy
+import BusyLean.Independent.Bachmann
 import BusyLean.Independent.TreeOrder
 import BusyLean.Independent.InfTerms
 import BusyLean.Independent.CutElim
