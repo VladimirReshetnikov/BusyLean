@@ -35,6 +35,7 @@ LIBRARIES = ["BusyLean.Contender5", "BusyLean.SystemF.Normalize",
 DEFINITIONS = ["BusyLean.Independent.Ackermann", "BusyLean.Independent.SystemT",
                "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Ladder"]
 PROOFS = ["BusyLean.Independent.AckermannLtSystemT", "BusyLean.Independent.SystemTLtEps",
+          "BusyLean.Independent.Tower",
           "BusyLean.Independent.EpsLtLadder"]
 DEFINITION_BUDGET = 15.0  # seconds
 PROOF_BUDGET = 60.0

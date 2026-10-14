@@ -192,3 +192,4 @@ import BusyLean.Independent.TreeLang
 import BusyLean.Independent.TreeEmbedding
 import BusyLean.Independent.TreeTyped
 import BusyLean.Independent.EpsLtLadder
+import BusyLean.Independent.Tower

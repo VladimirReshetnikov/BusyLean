@@ -1,6 +1,7 @@
 import BusyLean.Independent.AckermannLtSystemT
 import BusyLean.Independent.SystemTLtEps
 import BusyLean.Independent.EpsLtLadder
+import BusyLean.Independent.Tower
 import Lean
 
 /-!
@@ -74,6 +75,7 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
 #print axioms BusyLean.Indep.contender_2_lt_contender_3
 #print axioms BusyLean.Indep.contender_3_lt_contender_4
 #print axioms BusyLean.Indep.contender_2_lt_contender_4
+#print axioms BusyLean.Indep.independent_tower
 #print axioms BusyLean.F.nf_eq_of_steps
 #print axioms BusyLean.Indep.Inf.value_le_hardy
 #print axioms BusyLean.Indep.Inf.elimAll_spec

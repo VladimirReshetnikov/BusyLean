@@ -51,6 +51,8 @@ def contender_4 : Nat := F4 (F4 42)
 theorem contender_1_lt_contender_2 : contender_1 < contender_2  -- Independent/AckermannLtSystemT.lean
 theorem contender_2_lt_contender_3 : contender_2 < contender_3  -- Independent/SystemTLtEps.lean
 theorem contender_3_lt_contender_4 : contender_3 < contender_4  -- Independent/EpsLtLadder.lean
+theorem independent_tower : contender_1 < contender_2 ∧ contender_2 < contender_3 ∧
+    contender_3 < contender_4                                   -- Independent/Tower.lean
 ```
 
 **Rung 2 < rung 3: an ordinal analysis of System T**, after Tait. Every raw
