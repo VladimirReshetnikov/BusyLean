@@ -193,5 +193,7 @@ import BusyLean.Independent.TreeLang
 import BusyLean.Independent.TreeEmbedding
 import BusyLean.Independent.TreeTyped
 import BusyLean.Independent.TreeDepth
+import BusyLean.Independent.SystemFCheck
+import BusyLean.Independent.OmegaPkg
 import BusyLean.Independent.EpsLtLadder
 import BusyLean.Independent.Tower

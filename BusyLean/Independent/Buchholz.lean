@@ -13,9 +13,10 @@ branches at (lifts of) trees of level `μ` matter. `T 0` has no meaningful
 `sup`. Lifting `T m → T (m + 1)` and projecting back are one structural map
 `cmap` (`lift`, `proj`).
 
-*Buchholz's collapse.* For a tree `α` of level `n + 1`, `psiAll n α ν` is
-`ψ_ν(α)` as a tree of level `n`, for every `ν` at once, by Buchholz's
-fundamental sequences:
+*Buchholz's collapse.* For a tree `α` one level above trees `Tr A`,
+`psiG dn α ν` is `ψ_ν(α)`, for every `ν` at once, by Buchholz's fundamental
+sequences (`dn` embeds the branches `A` into `Tr A`; the same functions serve
+every level):
 
 * `ψ_ν(0) = Ω_ν` (with `Ω_0 = 1`);
 * `ψ_ν(α + 1) = lim_k ψ_ν(α) · k`;
@@ -24,8 +25,9 @@ fundamental sequences:
 * `ψ_ν(sup μ f) = lim_k ψ_ν(f g_k)` if `μ ≥ ν`, where `g_0 = Ω_μ` and
   `g_{k+1} = ψ_μ(f g_k)`.
 
-*The rung.* With `K = 42` levels, `ε_{Ω_K+1} = lim (Ω_1, Ω_K^{Ω_1},
-Ω_K^{Ω_K^{Ω_1}}, …)`, `θ = ψ_0(ε_{Ω_K+1})`, and `F3 n = H_θ(n)`.
+*The rung.* `θ_n = ψ_0(ε_{Ω_{n+1}+1})`, where
+`ε_{Ω_{n+1}+1} = lim (Ω_1, Ω_{n+1}^{Ω_1}, Ω_{n+1}^{Ω_{n+1}^{Ω_1}}, …)`, and
+**Buchholz's ordinal** `ψ_0(Ω_ω) = lim_K θ_{K+1}`. `F3 n = H_{ψ_0(Ω_ω)}(n)`.
 
 **Do not evaluate `contender_3`.**
 -/
@@ -104,54 +106,67 @@ def down : (n : Nat) → P n → T n
   | 0 => fun _ => .zero
   | n + 1 => lift n
 
-/-- `Ω_ν` as a tree of level `n` (`Ω_0 = 1`). -/
-def omega (n : Nat) : Nat → T n
-  | 0 => .succ .zero
-  | ν + 1 => .sup ν fun y => down n y
-
 /-- `g` iterated `k` times. -/
 def iterate {α : Type} (g : α → α) : Nat → α → α
   | 0, x => x
   | k + 1, x => g (iterate g k x)
 
-/-- **Buchholz's collapse**: `psiAll n α ν = ψ_ν(α)` for `α` of level `n + 1`. -/
-def psiAll (n : Nat) : T (n + 1) → Nat → T n
-  | .zero => omega n
-  | .succ a => fun ν => .lim fun k => Tr.mulNat (psiAll n a ν) k
-  | .lim f => fun ν => .lim fun k => psiAll n (f k) ν
-  | .sup μ f => fun ν =>
-      if μ < ν then .sup μ fun y => psiAll n (f (down n y)) ν
-      else .lim fun k => psiAll n (f (iterate (fun g => psiAll n (f g) μ) k (omega n μ))) ν
+/-! ## Buchholz's collapse, uniformly in the level
 
-/-- `Ω_{n+1}` at the top level. -/
-def OmegaTop (n : Nat) : T (n + 1) := .sup n fun y => lift n y
+The collapse from trees `Tr (Tr A)` (one level up) to trees `Tr A` needs only
+how a branch `y : A` sits in `Tr A` (`dn`), and, at the top, how a tree of
+`Tr A` lifts to `Tr (Tr A)` (`lf`). Every level uses the same functions. -/
+
+section Collapse
+
+variable {A : Type}
+
+/-- `Ω_ν` (`Ω_0 = 1`). -/
+def omegaG (dn : A → Tr A) : Nat → Tr A
+  | 0 => .succ .zero
+  | ν + 1 => .sup ν fun y => dn y
+
+/-- **Buchholz's collapse**: `psiG dn α ν = ψ_ν(α)`, for all `ν` at once. -/
+def psiG (dn : A → Tr A) : Tr (Tr A) → Nat → Tr A
+  | .zero => omegaG dn
+  | .succ a => fun ν => .lim fun k => Tr.mulNat (psiG dn a ν) k
+  | .lim f => fun ν => .lim fun k => psiG dn (f k) ν
+  | .sup μ f => fun ν =>
+      if μ < ν then .sup μ fun y => psiG dn (f (dn y)) ν
+      else .lim fun k => psiG dn (f (iterate (fun g => psiG dn (f g) μ) k (omegaG dn μ))) ν
 
 /-- `Ω_{n+1}^a` at the top level. -/
-def opowTop (n : Nat) : T (n + 1) → T (n + 1)
+def opowG (n : Nat) (lf : Tr A → Tr (Tr A)) : Tr (Tr A) → Tr (Tr A)
   | .zero => .succ .zero
-  | .succ a => .sup n fun b => Tr.mul (opowTop n a) (lift n b)
-  | .lim f => .lim fun i => opowTop n (f i)
-  | .sup μ f => .sup μ fun x => opowTop n (f x)
+  | .succ a => .sup n fun b => Tr.mul (opowG n lf a) (lf b)
+  | .lim f => .lim fun i => opowG n lf (f i)
+  | .sup μ f => .sup μ fun x => opowG n lf (f x)
 
-/-- `Ω_1, Ω_{n+1}^{Ω_1}, Ω_{n+1}^{Ω_{n+1}^{Ω_1}}, …` -/
-def towerTop (n : Nat) : Nat → T (n + 1)
-  | 0 => lift n (omega n 1)
-  | k + 1 => opowTop n (towerTop n k)
-
-/-- `ε_{Ω_{n+1}+1}`. -/
-def epsTop (n : Nat) : T (n + 1) := .lim (towerTop n)
+/-- `Ω_1, Ω_{n+1}^{Ω_1}, Ω_{n+1}^{Ω_{n+1}^{Ω_1}}, …`, whose limit is `ε_{Ω_{n+1}+1}`. -/
+def towerG (n : Nat) (lf : Tr A → Tr (Tr A)) (dn : A → Tr A) : Nat → Tr (Tr A)
+  | 0 => lf (omegaG dn 1)
+  | k + 1 => opowG n lf (towerG n lf dn k)
 
 /-- `ψ_0(ε_{Ω_{n+1}+1})` as a Brouwer tree. -/
-def theta (n : Nat) : BTree := Tr.toB (psiAll n (epsTop n) 0)
+def thetaG (n : Nat) (lf : Tr A → Tr (Tr A)) (dn : A → Tr A) : BTree :=
+  Tr.toB (psiG dn (.lim (towerG n lf dn)) 0)
+
+end Collapse
+
+/-- `ψ_0(ε_{Ω_{n+1}+1})`, with trees of levels `n` and `n + 1`. -/
+def theta (n : Nat) : BTree := thetaG n (lift n) (down n)
+
+/-- **Buchholz's ordinal** `ψ_0(Ω_ω) = sup_K ψ_0(ε_{Ω_{K+2}+1})`, as a Brouwer tree. -/
+def thetaOmega : BTree := .lim fun K => theta (K + 1)
 
 end BusyLean.Indep.Buch
 
 namespace BusyLean.Indep
 
-/-- The Hardy hierarchy at Buchholz's `ψ_0(ε_{Ω_42+1})`. -/
-def F3 (n : Nat) : Nat := Eps.hardy (Buch.theta 41) n
+/-- The Hardy hierarchy at Buchholz's ordinal `ψ_0(Ω_ω)`. -/
+def F3 (n : Nat) : Nat := Eps.hardy Buch.thetaOmega n
 
-/-- **The ordinal rung**: `H_θ(H_θ(42))` for `θ = ψ_0(ε_{Ω_42+1})`. Never evaluate it. -/
+/-- **The ordinal rung**: `H_θ(H_θ(42))` for Buchholz's `θ = ψ_0(Ω_ω)`. Never evaluate it. -/
 def contender_3 : Nat := F3 (F3 42)
 
 end BusyLean.Indep

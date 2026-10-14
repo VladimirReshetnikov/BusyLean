@@ -6,7 +6,7 @@ import BusyLean.Independent.TreeLang
 `tdTT` and `cdTT` bound the depths of the Church-style ladder translations of
 `TT` types and terms (`tdepth_tyTT`, `cdepth_trTC_le` in `EpsLtLadder.lean`).
 They are computed on `TT` syntax alone, so the kernel checks the bound for
-`buchProgram` here, in parallel with the embedding proofs.
+`omegaProgram` here, in parallel with the embedding proofs.
 -/
 
 namespace BusyLean.Indep
@@ -39,6 +39,6 @@ def cdTT : {Γ : List TT.Ty} → {σ : TT.Ty} → TT.Tm Γ σ → Nat
   | _, _, .lfold0 r => tdTT r + 35
   | _, _, .lfoldS m r => tdTT r + 8 * m + 45
 
-theorem cdTT_buchProgram : cdTT buchProgram ≤ 1000 := by decide +kernel
+theorem cdTT_omegaProgram : cdTT omegaProgram ≤ 500 := by decide +kernel
 
 end BusyLean.Indep

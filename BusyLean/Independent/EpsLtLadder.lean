@@ -1,20 +1,23 @@
 import BusyLean.Independent.TreeTyped
 import BusyLean.Independent.TreeDepth
 import BusyLean.Independent.SystemTLtLadder
+import BusyLean.Independent.OmegaPkg
 
 /-!
-# Rung 3 < rung 4: the Hardy hierarchy at `θ` < the self-building transfinite ladder
+# Rung 3 < rung 4: the Hardy hierarchy at `ψ_0(Ω_ω)` < the self-building transfinite ladder
 
-The ordinal rung is the value of the `TT` program `buchProgram`
-(`eval_buchProgram`). Its Church-style translation is a ladder program of depth
-at most `1000` (`cdepth_buchProgramC`; it is `472`) that type checks at type `nat`
-and reduces to the Church numeral of `F3 (F3 42)` under any oracle. So every
-`ladderMax` with a budget of at least `1000` exceeds the ordinal rung, and
-`F4 42 ≥ 1067`.
+The ordinal rung is computed by one ladder program, `rungProgram`: the
+Church-style translation of the `TT` shell `omegaProgram = λθ. H_{lim θ}(H_{lim θ}(42))`
+applied to `Omega.thetaF`, which computes Buchholz's family `K ↦ ψ_0(ε_{Ω_{K+2}+1})`
+uniformly in the level with impredicative existential packages
+(`OmegaPkg.lean`). The program has depth at most `501`, type checks at type
+`nat` (`infer_rungProgram`), and reduces to the Church numeral of `F3 (F3 42)`
+under any oracle (`steps_rungProgram`). So every `ladderMax` with a budget of at
+least `1000` exceeds the ordinal rung, and `F4 42 ≥ 1067`.
 
 The comparison is a simulation: impredicative Church encodings of Brouwer trees
-and Buchholz's level trees carry out the transfinite recursion that defines
-the collapse and the hierarchy.
+and of Buchholz's trees of every level carry out the transfinite recursion
+that defines the collapse and the hierarchy.
 -/
 
 namespace BusyLean.Indep
@@ -208,22 +211,47 @@ theorem cdepth_trTC_le {α : Type} : ∀ {Γ : List TT.Ty} {σ : TT.Ty} (t : TT.
       show cdepth (lfoldC (levC m) (tyTT r) : CTm α) ≤ tdTT r + 8 * m + 45
       omega
 
-theorem cdepth_buchProgramC (m : Nat) : cdepth (trTC buchProgram : CTm (Atom m)) ≤ 1000 :=
-  Nat.le_trans (cdepth_trTC_le buchProgram) cdTT_buchProgram
+theorem cdepth_omegaProgramC (m : Nat) : cdepth (trTC omegaProgram : CTm (Atom m)) ≤ 500 :=
+  Nat.le_trans (cdepth_trTC_le omegaProgram) cdTT_omegaProgram
+
+/-- The rung as one ladder program: the tree-language shell `λθ. H_{lim θ}(H_{lim θ}(42))`
+applied to Buchholz's family, built uniformly in the level by `Omega.thetaF`. -/
+def rungProgram (m : Nat) : CTm (Atom m) := .app (trTC omegaProgram) (SF.embC Omega.thetaF)
+
+theorem cdepth_rungProgram (m : Nat) : cdepth (rungProgram m) ≤ 501 := by
+  show max (cdepth (trTC omegaProgram : CTm (Atom m))) (cdepth (SF.embC Omega.thetaF : CTm (Atom m)))
+    + 1 ≤ 501
+  rw [SF.cdepth_embC]
+  have h1 := cdepth_omegaProgramC m
+  have h2 := Omega.cdepth_thetaF
+  generalize cdepth (trTC omegaProgram : CTm (Atom m)) = a at h1 ⊢
+  generalize SF.cdepthF Omega.thetaF = b at h2 ⊢
+  omega
+
+theorem infer_rungProgram (m : Nat) : infer m [] [] (rungProgram m) = some FL.Ty.nat := by
+  have ht := infer_trTC (fuel := m) (α := Atom m) [] omegaProgram
+  have hu : infer m [] [] (SF.embC Omega.thetaF : CTm (Atom m)) =
+      some (tyTT (.arr .nat .tree)) := SF.infer_embC Omega.check_thetaF m [] []
+  exact Emb.infer_app ht hu ((good_tyTT (.arr .nat .tree)).arr (good_tyTT .nat)).nf
+
+/-- The rung program reduces to the numeral of the ordinal rung, under any oracle. -/
+theorem steps_rungProgram (g : Nat → Nat) (m : Nat) :
+    F.Steps g (erase (rungProgram m)) (F.Tm.num (F3 (F3 42))) := by
+  show F.Steps g (F.Tm.app (erase (trTC omegaProgram : CTm (Atom m)))
+    (erase (SF.embC Omega.thetaF : CTm (Atom m)))) _
+  rw [erase_trTC, SF.erase_embC]
+  have hP := Omega.rel_utrT0 (f := g) omegaProgram
+  have h := hP (SF.eraseF Omega.thetaF) (fun K => Buch.theta (K + 1)) Omega.rel_thetaF
+  rw [eval_omegaProgram_rung] at h
+  exact h
 
 /-- Every ladder maximum with budget `≥ 1000` exceeds the ordinal rung, whatever the oracle. -/
 theorem contender_3_lt_ladderMax (g : Nat → Nat) {m : Nat} (hm : 1000 ≤ m) :
     contender_3 < ladderMax g m := by
-  have hmem : (trTC buchProgram : CTm (Atom m)) ∈ ladderUpTo m :=
-    mem_ctmsUpTo _ _ (isFC_trTC buchProgram) (Nat.le_trans (cdepth_buchProgramC m) hm)
-  have hty : infer m [] [] (trTC buchProgram : CTm (Atom m)) = some FL.Ty.nat :=
-    infer_trTC (fuel := m) [] buchProgram
-  have hsteps : F.Steps g (erase (trTC buchProgram : CTm (Atom m))) (F.Tm.num (F3 (F3 42))) := by
-    rw [erase_trTC]
-    have h := utrT_steps (f := g) buchProgram
-    rw [eval_buchProgram] at h
-    exact h
-  have hv := fvalue_eq (ℓ := m) hty hsteps
+  have hmem : rungProgram m ∈ ladderUpTo m :=
+    mem_ctmsUpTo _ _ ⟨isFC_trTC omegaProgram, SF.isFC_embC Omega.thetaF⟩
+      (Nat.le_trans (cdepth_rungProgram m) (Nat.le_trans (by decide) hm))
+  have hv := fvalue_eq (ℓ := m) (infer_rungProgram m) (steps_rungProgram g m)
   have hle := le_listMax (fvalue m g m) hmem
   rw [hv] at hle
   unfold contender_3 ladderMax

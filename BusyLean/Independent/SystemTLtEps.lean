@@ -18,9 +18,10 @@ elimination remove the redexes. Each round costs one `ω`-exponential
 The comparisons between trees use the structural order `Le 200`, which is sound
 for the Hardy functions at arguments `≥ 200` (`Le.hardy_le`).
 
-Finally `ε₀` sits inside Buchholz's `θ = ψ_0(ε_{Ω_42+1})`: the branch `0` of
-`θ` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`, whose Brouwer tree is exactly
-`ε₀` (`toB_branch0`). So `H_{ε₀}(y) ≤ H_θ(y)` (`Feps_le_F3`).
+Finally `ε₀` sits inside Buchholz's `θ = ψ_0(Ω_ω)`: the branch `0` of `θ` is
+`ψ_0(ε_{Ω_2+1})`, whose branch `0` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`.
+Its Brouwer tree is exactly `ε₀` (`toB_branch0`). So `H_{ε₀}(y) ≤ H_θ(y)`
+(`Feps_le_F3`).
 -/
 
 namespace BusyLean.Indep
@@ -199,66 +200,73 @@ theorem mulNat_sf {A : Type} (a : Tr A) (ha : SF a) : ∀ k : Nat,
       rw [h.2, ih.2]
 
 /-- On trees without `sup`s, `ψ_0` is `ω^·`. -/
-theorem psi0_sf (n : Nat) : ∀ z : T (n + 1), SF z →
-    SF (psiAll n z 0) ∧ Tr.toB (psiAll n z 0) = BTree.opow (Tr.toB z)
+theorem psi0_sf {A : Type} (dn : A → Tr A) : ∀ z : Tr (Tr A), SF z →
+    SF (psiG dn z 0) ∧ Tr.toB (psiG dn z 0) = BTree.opow (Tr.toB z)
   | .zero, _ => ⟨trivial, rfl⟩
   | .succ a, hz => by
-      have ih := psi0_sf n a hz
+      have ih := psi0_sf dn a hz
       refine ⟨fun k => (mulNat_sf _ ih.1 k).1, ?_⟩
-      show BTree.lim (fun k => Tr.toB (Tr.mulNat (psiAll n a 0) k)) =
+      show BTree.lim (fun k => Tr.toB (Tr.mulNat (psiG dn a 0) k)) =
         BTree.lim fun k => BTree.mulNat (BTree.opow (Tr.toB a)) k
       congr 1; funext k; rw [(mulNat_sf _ ih.1 k).2, ih.2]
-  | .lim f, hz => ⟨fun k => (psi0_sf n (f k) (hz k)).1,
-      congrArg BTree.lim (funext fun k => (psi0_sf n (f k) (hz k)).2)⟩
+  | .lim f, hz => ⟨fun k => (psi0_sf dn (f k) (hz k)).1,
+      congrArg BTree.lim (funext fun k => (psi0_sf dn (f k) (hz k)).2)⟩
   | .sup _ _, hz => hz.elim
 
 theorem iterate_opow_tower : ∀ i, iterate BTree.opow (i + 1) (.succ .zero) = tower i
   | 0 => rfl
   | i + 1 => congrArg BTree.opow (iterate_opow_tower i)
 
-/-- The branch `0` of `θ` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`: its
-Brouwer tree is exactly `ε₀`. -/
+/-- The branch `0` of `ψ_0(ε_{Ω_{n+2}+1})` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`:
+its Brouwer tree is exactly `ε₀`. -/
 theorem toB_branch0 (n : Nat) :
-    Tr.toB (psiAll (n + 1) (towerTop (n + 1) 0) 0) = epsilon0 := by
+    Tr.toB (psiG (down (n + 1)) (towerG (n + 1) (lift (n + 1)) (down (n + 1)) 0) 0) =
+      epsilon0 := by
   let F : T (n + 1) → T (n + 2) := fun y => lift (n + 1) (lift n (proj n y))
   have hF : ∀ x, SF x → SF (F x) ∧ Tr.toB (F x) = Tr.toB x := fun x hx => by
     have h1 := proj_sf n x hx
     have h2 := lift_sf n _ h1.1
     have h3 := lift_sf (n + 1) _ h2.1
     exact ⟨h3.1, h3.2.trans (h2.2.trans h1.2)⟩
-  have e : towerTop (n + 1) 0 = .sup 0 F := by
+  have e : towerG (n + 1) (lift (n + 1)) (down (n + 1)) 0 = .sup 0 F := by
     show Tr.cmap (n + 1) (proj n) (.sup 0 fun y => lift n y) = _
     simp only [Tr.cmap, Nat.zero_lt_succ, ite_true]
     rfl
-  have hg : ∀ k, SF (iterate (fun g => psiAll (n + 1) (F g) 0) k (omega (n + 1) 0)) ∧
-      Tr.toB (iterate (fun g => psiAll (n + 1) (F g) 0) k (omega (n + 1) 0)) =
+  have hg : ∀ k, SF (iterate (fun g => psiG (down (n + 1)) (F g) 0) k (omegaG (down (n + 1)) 0)) ∧
+      Tr.toB (iterate (fun g => psiG (down (n + 1)) (F g) 0) k (omegaG (down (n + 1)) 0)) =
         iterate BTree.opow k (.succ .zero) := by
     intro k
     induction k with
     | zero => exact ⟨trivial, rfl⟩
     | succ k ih =>
         have h1 := hF _ ih.1
-        have h2 := psi0_sf (n + 1) _ h1.1
+        have h2 := psi0_sf (down (n + 1)) _ h1.1
         refine ⟨h2.1, ?_⟩
-        show Tr.toB (psiAll (n + 1) (F _) 0) = BTree.opow (iterate BTree.opow k (.succ .zero))
+        show Tr.toB (psiG (down (n + 1)) (F _) 0) = BTree.opow (iterate BTree.opow k (.succ .zero))
         rw [h2.2, h1.2, ih.2]
   rw [e]
-  show BTree.lim (fun k => Tr.toB (psiAll (n + 1)
-    (F (iterate (fun g => psiAll (n + 1) (F g) 0) k (omega (n + 1) 0))) 0)) = BTree.lim tower
+  show BTree.lim (fun k => Tr.toB (psiG (down (n + 1))
+    (F (iterate (fun g => psiG (down (n + 1)) (F g) 0) k (omegaG (down (n + 1)) 0))) 0)) =
+      BTree.lim tower
   congr 1
   funext k
   have h1 := hF _ (hg k).1
-  rw [(psi0_sf (n + 1) _ h1.1).2, h1.2, (hg k).2]
+  rw [(psi0_sf (down (n + 1)) _ h1.1).2, h1.2, (hg k).2]
   exact iterate_opow_tower k
 
 end Buch
 
+/-- `H_{ε₀} ≤ H_θ`: the branch `0` of `θ = ψ_0(Ω_ω)` is `ψ_0(ε_{Ω_2+1})`, whose branch `0`
+is `ε₀`. -/
 theorem Feps_le_F3 (y : Nat) : Feps y ≤ F3 y := by
-  have h : Feps y ≤ hardy (Buch.Tr.toB (Buch.psiAll 41 (Buch.towerTop 41 0) 0)) y := by
-    rw [Buch.toB_branch0 40]; exact Nat.le_refl _
-  exact Nat.le_trans h
-    (le_maxUpTo (fun k => hardy (Buch.Tr.toB (Buch.psiAll 41 (Buch.towerTop 41 k) 0)) y)
-      (Nat.zero_le y))
+  have h : Feps y ≤ hardy (Buch.theta 1) y := by
+    have e := Buch.toB_branch0 0
+    have h1 : Feps y ≤ hardy (Buch.Tr.toB (Buch.psiG (Buch.down 1)
+        (Buch.towerG 1 (Buch.lift 1) (Buch.down 1) 0) 0)) y := by
+      rw [e]; exact Nat.le_refl _
+    exact Nat.le_trans h1 (le_maxUpTo (fun k => hardy (Buch.Tr.toB (Buch.psiG (Buch.down 1)
+      (Buch.towerG 1 (Buch.lift 1) (Buch.down 1) k) 0)) y) (Nat.zero_le y))
+  exact Nat.le_trans h (le_maxUpTo (fun K => hardy (Buch.theta (K + 1)) y) (Nat.zero_le y))
 
 theorem F3_42_ge : 336 ≤ F3 42 := Nat.le_trans Feps_42_ge (Feps_le_F3 42)
 

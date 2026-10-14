@@ -80,7 +80,10 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
 #print axioms BusyLean.Indep.Inf.value_le_hardy
 #print axioms BusyLean.Indep.Inf.elimAll_spec
 #print axioms BusyLean.Indep.eval_le_hardy_eps
-#print axioms BusyLean.Indep.TT.eval_buchProgram
+#print axioms BusyLean.Indep.TT.eval_omegaProgram_rung
+#print axioms BusyLean.Indep.SF.checkF_sound
+#print axioms BusyLean.Indep.Omega.check_thetaF
+#print axioms BusyLean.Indep.Omega.rel_thetaF
 #print axioms BusyLean.Indep.Feps_le_F3
 #print axioms BusyLean.Indep.TT.utrT_steps
 
