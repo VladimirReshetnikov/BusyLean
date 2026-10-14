@@ -172,3 +172,12 @@ import BusyLean.Contender69
 import BusyLean.Comparison69
 import BusyLean.Contender70
 import BusyLean.Comparison70
+import BusyLean.Independent.Ackermann
+import BusyLean.Independent.SystemT
+import BusyLean.Independent.SystemTFacts
+import BusyLean.Independent.AckermannLtSystemT
+import BusyLean.Independent.Confluence
+import BusyLean.Independent.TEmbedding
+import BusyLean.Independent.Ladder
+import BusyLean.Independent.TTyped
+import BusyLean.Independent.SystemTLtLadder

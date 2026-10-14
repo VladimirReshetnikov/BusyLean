@@ -2442,6 +2442,100 @@ $N=\mathrm{family}_{69}(n)$. Proved: \lean{good\_cycleTower},
 The definitions check in 1.6\,s and the proofs in 4.9\,s.
 
 %======================================================================
+\section{An independent tower}\label{sec:independent}
+
+From Contender~7 on, almost every contender takes its predecessor's family as
+an oracle or seed. This makes each comparison short (the new family dominates
+its own seed), but it also makes the tower cumulative: the size of
+Contender~70 is the size of a long composition, and the article cannot say
+which ideas carry it. The \emph{independent tower} (\lean{BusyLean/Independent})
+is built under one extra rule: \textbf{no rung uses a smaller rung in its
+definition}. Each rung is a single idea, and its comparison with the rung
+below is a simulation: the larger construction runs the smaller one. When a
+construction would naturally be built on a smaller rung, the smaller rung is
+dropped. The tower has three rungs.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Rung & idea & definition\\
+\midrule
+1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
+2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
+3 & impredicative universes, self-reflected & \lean{F3 (F3 42)} below\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Rungs 1 and 2.} The two Coq contenders are already independent of
+each other. The Coq proof of \lean{contender\_4\_lt\_contender\_5} writes
+Ackermann's function as a System~T term; it is ported to Lean as
+\lean{contender\_1\_lt\_contender\_2}. The only subtlety is to keep Lean's
+kernel from evaluating \lean{ack 5 42 10002}: every equation is stated for
+symbolic arguments and instantiated afterwards.
+
+\paragraph{Rung 3.} The language is the ladder of universes of Contender~14,
+used as a library, with its oracle constant pointed at the construction
+itself:
+\begin{lstlisting}
+def ladderMax (g : ℕ → ℕ) (n : ℕ) : ℕ :=
+  n + 1 + listMax (fvalue n g n) (ladderUpTo n)
+def stage : ℕ → ℕ → ℕ
+  | 0 => Nat.succ
+  | k + 1 => ladderMax (stage k)
+def F3 (n : ℕ) : ℕ := stage (n + 1) n
+def contender_3 : ℕ := F3 (F3 42)
+\end{lstlisting}
+Stage $k+1$ maximizes level-$n$ programs of depth $\le n$ whose oracle is
+stage $k$. \lean{F3} diagonalizes over reflection stages, universe levels and
+program sizes at once. The enumeration and the value function are redefined in
+the rung's own module; the audit (\lean{test/IndependentAudit.lean}) lists the
+modules of the definition's closure (the ladder library and System~F's core)
+and rejects any contender module.
+
+\paragraph{Rung 2 $<$ rung 3: compiling System~T.} The winner of rung~2 is an
+arbitrary raw term of depth $\le 42$, possibly ill-typed, and Contender~5
+interprets such terms with casts and default values. The proof therefore
+compiles \emph{every} raw term.
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Static types.} The type tag of a term's value depends only on
+  the term and the types of its environment (\lean{interp\_fst}). The
+  translation uses it to resolve Contender~5's quirks statically: a cast
+  between different types becomes the default value, an application of a
+  number becomes $\overline{0}$.
+\item \textbf{Simulation.} Natural recursion becomes iteration over
+  polymorphic pairs. A logical relation (at \lean{nat}: ``reduces to the
+  Church numeral'') and its fundamental lemma \lean{rel\_utr} show that a
+  closed term of type \lean{nat} reduces to the numeral of its value, under any
+  oracle.
+\item \textbf{Confluence.} The normalizer follows normal order, while the
+  simulation uses arbitrary $\beta$-steps. Takahashi's complete development proves
+  Church--Rosser for $\beta$ plus the oracle rule (\lean{nf\_eq\_of\_steps}). The
+  oracle fires only on literal numerals, which are normal, so it does not
+  interfere.
+\item \textbf{Typing.} The Church-style translation lies in the System~F
+  fragment of the ladder language (no kinds but $\star$, no atoms). The
+  ladder's type checker accepts it at every fuel (\lean{infer\_trC}).
+\item \textbf{Size.} A depth-42 term compiles to depth at most $186$
+  (\lean{cdepth\_trC}). The compiled program
+  $\mathtt{natRec}\,\mathtt{succ}\,(\lambda\_\,g\,x.\,g\,(g\,x))\,10\,0 = 2^{10}$
+  fits in depth 42, so \lean{F3 42} $\ge 1067$, and the outer \lean{F3} sees
+  the compiled winner.
+\end{enumerate}
+The whole check takes about 11~s.
+
+\paragraph{What was left out, and why.} System~F, F$_\omega$, kind
+polymorphism and the dynamic-kind universe are fragments of the ladder
+language, and the W-language and the tree languages extend System~T, so each
+would be incorporated by a larger rung. Reflection along trees, towers,
+closure operators and reflective towers (Contenders 6, 9--12, 15, 23 and
+51--70) are amplifiers of a base language; one of them, self-reflection,
+appears inside rung~3. Ordinal-notation hierarchies (Contenders 16--31) are
+excluded for another reason. Placed above System~T they would need an upper
+bound on System~T's values, that is, an ordinal analysis. Placed below it they
+would merely generalize Ackermann.
+
+%======================================================================
 \section{Roadmap}
 
 The construction now has three layers. Their weak points mark where further

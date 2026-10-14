@@ -9,6 +9,66 @@ name a bigger number than the previous contender. The number must be
 **constructive**, and the claim must come with a **formal proof**. The only
 change is that the proof assistant is Lean instead of Coq.
 
+## The independent tower
+
+Most of the 70 contenders below are built from their predecessors: each one
+takes the previous contender's family as an oracle or seed, or extends its
+language. That makes every comparison easy, but it hides which *ideas* carry
+the size. The **independent tower** in [`BusyLean/Independent/`](BusyLean/Independent)
+keeps one rule: **no rung uses a smaller rung in its definition**. Each rung is
+an independent idea, and the proof that it is larger is a genuine comparison:
+the larger construction simulates the smaller one. Where a construction would
+naturally be built on a smaller rung, the smaller rung is dropped, so only
+genuinely different approaches remain.
+
+| Rung | Idea | Definition | Proof that it beats the rung below |
+|---|---|---|---|
+| 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
+| 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
+| 3 | impredicative universes, self-reflected | `F3 (F3 42)`, where `F3 n` maximizes level-`n` ladder-of-universes programs of depth `≤ n` whose oracle is the previous reflection stage, starting from `succ` | every raw System T term compiles to a ladder program with the same value |
+
+```lean
+def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
+def contender_2 : Nat := C5.largestSTLCNatRecNatOfDepth 42     -- Independent/SystemT.lean
+def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
+  n + 1 + listMax (fvalue n g n) (ladderUpTo n)
+def stage : Nat → Nat → Nat
+  | 0 => Nat.succ
+  | k + 1 => ladderMax (stage k)
+def F3 (n : Nat) : Nat := stage (n + 1) n
+def contender_3 : Nat := F3 (F3 42)
+
+theorem contender_1_lt_contender_2 : contender_1 < contender_2  -- Independent/AckermannLtSystemT.lean
+theorem contender_2_lt_contender_3 : contender_2 < contender_3  -- Independent/SystemTLtLadder.lean
+```
+
+The comparison of rungs 2 and 3 compiles every raw System T term, including
+ill-typed ones with Contender 5's cast and default quirks, into the System F
+fragment of the ladder language, with Church numerals and natural recursion
+by iteration over polymorphic pairs. The proof has four parts:
+
+| Part | File | Statement |
+|---|---|---|
+| simulation | [`TEmbedding.lean`](BusyLean/Independent/TEmbedding.lean) | `rel_utr`: a logical relation; a closed term of type `nat` reduces to the Church numeral of its value |
+| confluence | [`Confluence.lean`](BusyLean/Independent/Confluence.lean) | `nf_eq_of_steps`: Church–Rosser for β plus the oracle rule, so the normalizer finds that numeral |
+| typing | [`TTyped.lean`](BusyLean/Independent/TTyped.lean) | `infer_trC`: the ladder's type checker accepts the translation at every fuel |
+| size | [`SystemTLtLadder.lean`](BusyLean/Independent/SystemTLtLadder.lean) | `cdepth_trC`: the translation of a depth-42 term has depth `≤ 186`; `F3_42_ge`: `1067 ≤ F3 42` |
+
+Excluded, because the larger rungs would have to incorporate them: System F,
+Fω and kind polymorphism (fragments of the ladder language), the W-language
+and tree languages (extensions of System T), and reflection, towers and
+closure operators over a base language (amplifiers, used once, in rung 3).
+Ordinal-notation hierarchies (Contenders 16–31) are excluded too, for a
+different reason: placing one above System T would require an ordinal
+analysis of System T, an upper bound that no rung provides. Below System T
+they would only generalize Ackermann.
+
+[`test/IndependentAudit.lean`](test/IndependentAudit.lean) prints the modules
+each rung's definition depends on and fails if one reaches a lower rung or a
+main-tower contender. `python3 scripts/check_independent.py` runs the budgets
+and the audit from a clean build. The three definition modules take about
+1.9 s and the two comparisons about 11 s.
+
 ## Current contender: Contender 70
 
 ```lean
@@ -1890,6 +1950,8 @@ about 1.6 s and its proofs about 4.9 s; the full clean build of all contenders
 takes about 40–50 s. Plain `lake build` also works, and
 `lake env lean test/Contender5Smoke.lean` checks the port against the
 reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
+`python3 scripts/check_independent.py` does the same for the independent
+tower and runs [`test/IndependentAudit.lean`](test/IndependentAudit.lean).
 
 ## Repository layout
 
@@ -1980,6 +2042,7 @@ reference small-depth table (maxima 0, 0, 1, 2, 3 at depths 0–4).
 | [`BusyLean/Contender68.lean`](BusyLean/Contender68.lean), [`Comparison68.lean`](BusyLean/Comparison68.lean) | Contender 68 definitions and theorems |
 | [`BusyLean/Contender69.lean`](BusyLean/Contender69.lean), [`Comparison69.lean`](BusyLean/Comparison69.lean) | Contender 69 definitions and theorems |
 | [`BusyLean/Contender70.lean`](BusyLean/Contender70.lean), [`Comparison70.lean`](BusyLean/Comparison70.lean) | Contender 70 definitions and theorems |
+| [`BusyLean/Independent/`](BusyLean/Independent) | the independent tower: rungs, comparisons, confluence, the System T embedding |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |
