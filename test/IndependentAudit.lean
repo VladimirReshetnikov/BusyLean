@@ -1,5 +1,6 @@
 import BusyLean.Independent.AckermannLtSystemT
-import BusyLean.Independent.SystemTLtLadder
+import BusyLean.Independent.SystemTLtEps
+import BusyLean.Independent.EpsLtLadder
 import Lean
 
 /-!
@@ -68,22 +69,33 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
 #print axioms BusyLean.Indep.contender_1
 #print axioms BusyLean.Indep.contender_2
 #print axioms BusyLean.Indep.contender_3
+#print axioms BusyLean.Indep.contender_4
 #print axioms BusyLean.Indep.contender_1_lt_contender_2
 #print axioms BusyLean.Indep.contender_2_lt_contender_3
+#print axioms BusyLean.Indep.contender_3_lt_contender_4
+#print axioms BusyLean.Indep.contender_2_lt_contender_4
 #print axioms BusyLean.F.nf_eq_of_steps
-#print axioms BusyLean.Indep.Emb.rel_utr
-#print axioms BusyLean.Indep.Emb.infer_trC
-#print axioms BusyLean.Indep.F3_42_ge
+#print axioms BusyLean.Indep.Inf.value_le_hardy
+#print axioms BusyLean.Indep.Inf.elimAll_spec
+#print axioms BusyLean.Indep.eval_le_hardy_eps
+#print axioms BusyLean.Indep.TT.eval_epsProgram
+#print axioms BusyLean.Indep.TT.utrT_steps
 
 -- 2–3. Independence of the definitions.
 #assert_independent BusyLean.Indep.contender_1 allowing forbidding
-  BusyLean.Contender5 BusyLean.Independent.SystemT BusyLean.Independent.Ladder
+  BusyLean.Contender5 BusyLean.Independent.SystemT BusyLean.Independent.EpsilonHardy
+  BusyLean.Independent.Ladder
 #assert_independent BusyLean.Indep.contender_2 allowing BusyLean.Contender5 forbidding
-  BusyLean.Independent.Ackermann BusyLean.Independent.Ladder
+  BusyLean.Independent.Ackermann BusyLean.Independent.EpsilonHardy BusyLean.Independent.Ladder
 #assert_independent BusyLean.Indep.contender_3 allowing forbidding
   BusyLean.Contender5 BusyLean.Independent.Ackermann BusyLean.Independent.SystemT
+  BusyLean.Independent.Ladder
+#assert_independent BusyLean.Indep.contender_4 allowing forbidding
+  BusyLean.Contender5 BusyLean.Independent.Ackermann BusyLean.Independent.SystemT
   BusyLean.Independent.SystemTFacts BusyLean.Independent.TEmbedding BusyLean.Independent.TTyped
+  BusyLean.Independent.EpsilonHardy BusyLean.Independent.TreeLang
 
 -- 4. The statements.
 #check @BusyLean.Indep.contender_1_lt_contender_2
 #check @BusyLean.Indep.contender_2_lt_contender_3
+#check @BusyLean.Indep.contender_3_lt_contender_4

@@ -3,9 +3,9 @@ import BusyLean.SystemFL.Church
 import BusyLean.SystemF.Normalize
 
 /-!
-# Independent tower, rung 3: the self-reflected ladder of universes
+# Independent tower, rung 4: the self-reflected ladder of universes
 
-The third rung is an **impredicative** language: the ladder of predicative
+The fourth rung is an **impredicative** language: the ladder of predicative
 universes over dynamic-kind Fω (`BusyLean/SystemFL`, the language of
 Contender 14, used here as a library). Its level-`ℓ` programs are Church-style
 terms with kind polymorphism at two levels and `ℓ` universe atoms. One strong
@@ -20,11 +20,12 @@ construction:
 * stage `k + 1` maps `n` to `n + 1` plus the largest value of a level-`n` program
   of depth `≤ n` whose oracle is stage `k` (self-reflection).
 
-`F3 n` is stage `n + 1` at input `n`, a diagonal over reflection stages,
+`F4 n` is stage `n + 1` at input `n`, a diagonal over reflection stages,
 universe levels and program sizes at once. Nothing below this line mentions
-Contender 4, Contender 5, or any construction of the main tower.
+the lower rungs (Contender 4, Contender 5, the Hardy hierarchy at `ε₀`), or any
+construction of the main tower.
 
-**Do not evaluate `contender_3`.**
+**Do not evaluate `contender_4`.**
 -/
 
 namespace BusyLean.Indep.Ladder
@@ -129,9 +130,9 @@ end BusyLean.Indep.Ladder
 namespace BusyLean.Indep
 
 /-- Reflection stage `n + 1` at input `n`. -/
-def F3 (n : Nat) : Nat := Ladder.stage (n + 1) n
+def F4 (n : Nat) : Nat := Ladder.stage (n + 1) n
 
-/-- **Rung 3**: the self-reflected ladder of universes. Never evaluate it. -/
-def contender_3 : Nat := F3 (F3 42)
+/-- **Rung 4**: the self-reflected ladder of universes. Never evaluate it. -/
+def contender_4 : Nat := F4 (F4 42)
 
 end BusyLean.Indep

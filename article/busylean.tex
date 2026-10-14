@@ -2459,7 +2459,7 @@ below is a simulation: the larger construction runs the smaller one. When a
 construction would naturally be built on a smaller rung, the smaller rung is
 dropped. The rule now governs the whole contest: the cumulative tower of
 Contenders 5--70 is closed and kept as a record. The independent tower has
-three rungs.
+four rungs.
 
 \begin{center}
 \begin{tabular}{lll}
@@ -2468,7 +2468,8 @@ Rung & idea & definition\\
 \midrule
 1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
 2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
-3 & impredicative universes, self-reflected & \lean{F3 (F3 42)} below\\
+3 & ordinal notations & $H_{\varepsilon_0}(H_{\varepsilon_0}(42))$, Brouwer trees\\
+4 & impredicative universes, self-reflected & \lean{F4 (F4 42)} below\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2480,7 +2481,50 @@ Ackermann's function as a System~T term; it is ported to Lean as
 kernel from evaluating \lean{ack 5 42 10002}: every equation is stated for
 symbolic arguments and instantiated afterwards.
 
-\paragraph{Rung 3.} The language is the ladder of universes of Contender~14,
+\paragraph{Rung 3.} Ordinals are Brouwer trees (\lean{zero}, \lean{succ},
+\lean{lim f}); addition, multiplication by a number and $\omega^{\cdot}$ are
+defined by recursion on trees, $\omega_{k+1}=\omega^{\omega_k}$ and
+$\varepsilon_0=\lim_k\omega_k$. The hierarchy is Hardy's, with one robust
+choice: at a limit, $H_{\lim f}(y)=\max_{i\le y}H_{f(i)}(y)$. This makes every
+$H_a$ monotone for every tree, with no condition on the fundamental sequences.
+The file imports nothing.
+
+\paragraph{Rung 2 $<$ rung 3: an ordinal analysis of System~T.} An upper
+bound for \emph{all} System~T values cannot come from simulation. It needs
+proof theory. The proof follows Tait's infinitary terms.
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Infinitary terms.} Intrinsically typed $\lambda$-terms over
+  Contender~5's types, with \lean{zero}, \lean{succ} and an $\omega$-branching
+  \lean{case n br} of type \lean{nat}. Natural recursion compiles to
+  $\lambda a\,f\,n.\ \mathtt{case}\ n\ (a, f\,0\,a, f\,1\,(f\,0\,a),\dots)$,
+  $\eta$-expanded so that the case sits at type \lean{nat}. Every raw term
+  (casts included) compiles with the same value (\lean{value\_progOf}).
+\item \textbf{Heights and ranks.} A term's height is its tree height, a
+  Brouwer tree. A redex's level is the level of the $\lambda$'s type. Translated
+  depth-42 terms have rank $<47$ and height $\le\omega^3+94$.
+\item \textbf{Cut elimination.} One round contracts the redexes of the top
+  level, innermost first. It creates only redexes of smaller level, and it
+  raises the height to at most $\omega^{\text{height}}$ (\lean{ht\_cutElim}).
+  Forty-seven rounds give a redex-free term of the same value.
+\item \textbf{Bounding.} A closed redex-free term of type \lean{nat} is built
+  from \lean{zero}, \lean{succ} and \lean{case}, and its value is at most
+  $H_{\omega^{\text{height}}}(y)$ for $y\ge2$ (\lean{value\_le\_hardy}). Choosing
+  branch $k$ is paid for by the limit at index $k$, which $H$ reaches at
+  arguments $\ge k$.
+\item \textbf{Comparing trees.} Trees are compared by a structural order
+  $a\sqsubseteq_n b$ in which every step into one element of a fundamental
+  sequence uses an index $\le n$. It is sound for $H$ at arguments $\ge n$,
+  and $+$ and $\omega^{\cdot}$ preserve it. With $H_{a+b}=H_a\circ H_b$ for
+  all trees, this gives
+  $\mathtt{eval}\,w\le H_{\omega_{49}}(y)\le H_{\varepsilon_0}(y)$ for $y\ge200$
+  (\lean{eval\_le\_hardy\_eps}).
+\end{enumerate}
+No step evaluates a number. The main engineering hazard is Lean's own
+reduction: a stray \lean{rfl}, a closing \lean{rw}, or a linter can try to
+compute $H_{\varepsilon_0}(\dots)$, so the proofs generalize large terms and
+keep \lean{elimAll 47} irreducible.
+
+\paragraph{Rung 4.} The language is the ladder of universes of Contender~14,
 used as a library, with its oracle constant pointed at the construction
 itself:
 \begin{lstlisting}
@@ -2489,20 +2533,30 @@ def ladderMax (g : ℕ → ℕ) (n : ℕ) : ℕ :=
 def stage : ℕ → ℕ → ℕ
   | 0 => Nat.succ
   | k + 1 => ladderMax (stage k)
-def F3 (n : ℕ) : ℕ := stage (n + 1) n
-def contender_3 : ℕ := F3 (F3 42)
+def F4 (n : ℕ) : ℕ := stage (n + 1) n
+def contender_4 : ℕ := F4 (F4 42)
 \end{lstlisting}
 Stage $k+1$ maximizes level-$n$ programs of depth $\le n$ whose oracle is
-stage $k$. \lean{F3} diagonalizes over reflection stages, universe levels and
+stage $k$. \lean{F4} diagonalizes over reflection stages, universe levels and
 program sizes at once. The enumeration and the value function are redefined in
 the rung's own module; the audit (\lean{test/IndependentAudit.lean}) lists the
 modules of the definition's closure (the ladder library and System~F's core)
 and rejects any contender module.
 
-\paragraph{Rung 2 $<$ rung 3: compiling System~T.} The winner of rung~2 is an
-arbitrary raw term of depth $\le 42$, possibly ill-typed, and Contender~5
-interprets such terms with casts and default values. The proof therefore
-compiles \emph{every} raw term.
+\paragraph{Rung 3 $<$ rung 4: Church-encoded trees.} A small language
+\lean{TT} (System~T with Brouwer trees and their fold) writes the whole of
+rung~3 as a program of value $H_{\varepsilon_0}(H_{\varepsilon_0}(42))$. Trees
+compile to their iterators $\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to X)\to
+X)\to X$. The logical relation at the tree type is defined by recursion on the
+\emph{tree value}, which avoids quantifying over all result types. The program
+has depth 56, type checks in the ladder, and reduces to the right numeral.
+Confluence (below) lets the normalizer find it.
+
+\paragraph{Also: System~T directly into the ladder.} The first version of the
+tower compared rungs 2 and 4 directly (\lean{contender\_2\_lt\_contender\_4}).
+The winner of rung~2 is an arbitrary raw term of depth $\le 42$, possibly
+ill-typed, and Contender~5 interprets such terms with casts and default values.
+That proof therefore compiles \emph{every} raw term.
 \begin{enumerate}[leftmargin=*]
 \item \textbf{Static types.} The type tag of a term's value depends only on
   the term and the types of its environment (\lean{interp\_fst}). The
@@ -2525,21 +2579,20 @@ compiles \emph{every} raw term.
 \item \textbf{Size.} A depth-42 term compiles to depth at most $186$
   (\lean{cdepth\_trC}). The compiled program
   $\mathtt{natRec}\,\mathtt{succ}\,(\lambda\_\,g\,x.\,g\,(g\,x))\,10\,0 = 2^{10}$
-  fits in depth 42, so \lean{F3 42} $\ge 1067$, and the outer \lean{F3} sees
+  fits in depth 42, so \lean{F4 42} $\ge 1067$, and the outer \lean{F4} sees
   the compiled winner.
 \end{enumerate}
-The whole check takes about 11~s.
+The definitions of all four rungs check in about 2~s and the three comparisons,
+the ordinal analysis included, in about 33~s.
 
 \paragraph{What was left out, and why.} System~F, F$_\omega$, kind
 polymorphism and the dynamic-kind universe are fragments of the ladder
 language, and the W-language and the tree languages extend System~T, so each
-would be incorporated by a larger rung. Reflection along trees, towers,
+would be incorporated by a larger rung. Larger ordinal notations (Contenders
+16--31) are the same approach as rung~3. Reflection along trees, towers,
 closure operators and reflective towers (Contenders 6, 9--12, 15, 23 and
 51--70) are amplifiers of a base language; one of them, self-reflection,
-appears inside rung~3. Ordinal-notation hierarchies (Contenders 16--31) are
-excluded for another reason. Placed above System~T they would need an upper
-bound on System~T's values, that is, an ordinal analysis. Placed below it they
-would merely generalize Ackermann.
+appears inside rung~4.
 
 %======================================================================
 \section{Roadmap}

@@ -2,7 +2,7 @@ import BusyLean.Independent.TTyped
 import BusyLean.Independent.SystemT
 
 /-!
-# Rung 2 < rung 3: System T embeds into the ladder
+# System T embeds into the ladder (rung 2 < rung 4, directly)
 
 Every raw System T term `w` of depth `≤ 42` (in particular the winner that
 defines rung 2) is translated into a Church-style ladder program `trC [] w`.
@@ -16,10 +16,10 @@ The pieces proved elsewhere are:
 
 This file bounds the program's depth (`cdepth_trC`, at most `2·42 + 42 + 60`),
 shows that programs of small depth are enumerated (`mem_ctmsUpTo`), and checks
-that `F3 42` already exceeds that bound: a translated System T program of
+that `F4 42` already exceeds that bound: a translated System T program of
 depth `≤ 42` computes `2^10`.
 
-No step uses rung 2 in the definition of rung 3. The comparison is a
+No step uses rung 2 in the definition of rung 4. The comparison is a
 simulation: the stronger language runs the weaker one's programs.
 -/
 
@@ -374,9 +374,9 @@ theorem eval_lt_ladderMax (g : Nat → Nat) (m : Nat) {w : C5.Term} (hs : stype 
   generalize listMax (fvalue m g m) (ladderUpTo m) = L at h
   omega
 
-theorem F3_eq (n : Nat) : F3 n = ladderMax (stage n) n := rfl
+theorem F4_eq (n : Nat) : F4 n = ladderMax (stage n) n := rfl
 
-/-! ## `F3 42` is already large -/
+/-! ## `F4 42` is already large -/
 
 /-- `natRec (succ) (λ _ g x. g (g x)) 10 0 = 2^10`, in Contender 5's syntax. -/
 def pow2Program : C5.Term :=
@@ -420,18 +420,18 @@ theorem add_le_ladderMax (g : Nat → Nat) (m : Nat) {x : Nat}
     (h : x ≤ listMax (fvalue m g m) (ladderUpTo m)) : m + 1 + x ≤ ladderMax g m :=
   Nat.add_le_add_left h _
 
-theorem F3_42_ge : 1067 ≤ F3 42 := by
+theorem F4_42_ge : 1067 ≤ F4 42 := by
   have h := eval_le_listMax (stage 42) 42 stype_pow2Program cdepth_pow2Program
   rw [eval_pow2Program] at h
-  rw [F3_eq]
+  rw [F4_eq]
   exact add_le_ladderMax (stage 42) 42 h
 
 /-! ## The comparison -/
 
-/-- Every System T value of depth `≤ 42` is below `F3 m` once `m ≥ F3 42`. -/
-theorem eval_lt_F3 {w : C5.Term} (hw : depth w ≤ 42) {m : Nat} (hm : F3 42 ≤ m) :
-    C5.eval w < F3 m := by
-  rw [F3_eq]
+/-- Every System T value of depth `≤ 42` is below `F4 m` once `m ≥ F4 42`. -/
+theorem eval_lt_F4 {w : C5.Term} (hw : depth w ≤ 42) {m : Nat} (hm : F4 42 ≤ m) :
+    C5.eval w < F4 m := by
+  rw [F4_eq]
   cases hs : stype [] w with
   | arr a b =>
       have h0 : C5.eval w = 0 := by
@@ -451,19 +451,20 @@ theorem eval_lt_F3 {w : C5.Term} (hw : depth w ≤ 42) {m : Nat} (hm : F3 42 ≤
   | nat =>
       refine eval_lt_ladderMax _ _ hs ?_
       have h := cdepth_trC (α := Atom m) 42 [] w (fun _ h => nomatch h) hw
-      have h42 := F3_42_ge
+      have h42 := F4_42_ge
       simp only [List.length_nil] at h
-      generalize F3 42 = M at h42 hm
+      generalize F4 42 = M at h42 hm
       generalize cdepth (trC [] w : CTm (Atom m)) = D at h
       omega
 
-/-- **Rung 2 < rung 3.** -/
-theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
-  unfold contender_2 contender_3 C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
+/-- **Rung 2 < rung 4**, directly (the tower goes through rung 3,
+`SystemTLtEps.lean` and `EpsLtLadder.lean`). -/
+theorem contender_2_lt_contender_4 : contender_2 < contender_4 := by
+  unfold contender_2 contender_4 C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
   have hw : depth (C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42)) ≤ 42 := by
     cases maxBy_mem C5.eval (C5.termsUpTo 42) 0 .zero with
     | inl h => exact depth_of_mem h
     | inr h => rw [h]; decide
-  exact eval_lt_F3 hw (Nat.le_refl _)
+  exact eval_lt_F4 hw (Nat.le_refl _)
 
 end BusyLean.Indep

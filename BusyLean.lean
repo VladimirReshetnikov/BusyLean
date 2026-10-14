@@ -188,3 +188,7 @@ import BusyLean.Independent.CutElim
 import BusyLean.Independent.TtoInf
 import BusyLean.Independent.TtoInfBounds
 import BusyLean.Independent.SystemTLtEps
+import BusyLean.Independent.TreeLang
+import BusyLean.Independent.TreeEmbedding
+import BusyLean.Independent.TreeTyped
+import BusyLean.Independent.EpsLtLadder

@@ -11,8 +11,9 @@ precompiled, as the rules allow):
    ladder language with its strong normalization proof). They were accepted
    under their own budgets with the main tower, so this phase is reported but
    not budgeted.
-2. definitions: the three rungs; budget 15 s.
-3. proofs: the two comparisons and their lemmas; budget 60 s.
+2. definitions: the four rungs; budget 15 s.
+3. proofs: the three comparisons and their lemmas, including the ordinal
+   analysis of System T; budget 60 s.
 
 Then `test/IndependentAudit.lean` must run cleanly: every audited declaration
 uses only the permitted axioms, and no rung's definition depends on a lower
@@ -32,9 +33,9 @@ PERMITTED = {"propext", "Quot.sound"}
 LIBRARIES = ["BusyLean.Contender5", "BusyLean.SystemF.Normalize",
              "BusyLean.SystemFL.Ladder", "BusyLean.SystemFL.Church"]
 DEFINITIONS = ["BusyLean.Independent.Ackermann", "BusyLean.Independent.SystemT",
-               "BusyLean.Independent.Ladder"]
-PROOFS = ["BusyLean.Independent.AckermannLtSystemT",
-          "BusyLean.Independent.SystemTLtLadder"]
+               "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Ladder"]
+PROOFS = ["BusyLean.Independent.AckermannLtSystemT", "BusyLean.Independent.SystemTLtEps",
+          "BusyLean.Independent.EpsLtLadder"]
 DEFINITION_BUDGET = 15.0  # seconds
 PROOF_BUDGET = 60.0
 LAKE = shutil.which("lake") or "lake"

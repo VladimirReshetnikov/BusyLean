@@ -2,7 +2,7 @@ import BusyLean.Independent.TtoInfBounds
 import BusyLean.Independent.SystemT
 
 /-!
-# System T < the Hardy hierarchy at `ε₀`: an ordinal analysis
+# Rung 2 < rung 3: System T < the Hardy hierarchy at `ε₀` (an ordinal analysis)
 
 Every raw System T term `w` of depth `≤ 42` with static type `nat` is
 translated into an infinitary term `P` (Tait's case trees for recursion) with
@@ -144,9 +144,9 @@ theorem eval_le_Feps {w : C5.Term} (hw : depth w ≤ 42) (hs : stype [] w = .nat
     C5.eval w ≤ Feps 200 :=
   eval_le_hardy_eps hw hs (Nat.le_refl 200)
 
-/-- **System T < the Hardy hierarchy at `ε₀`.** -/
-theorem contender_2_lt_contenderEps : contender_2 < contenderEps := by
-  unfold contender_2 contenderEps C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
+/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at `ε₀`. -/
+theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
+  unfold contender_2 contender_3 C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
   have hw : depth (C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42)) ≤ 42 := by
     cases maxBy_mem C5.eval (C5.termsUpTo 42) 0 .zero with
     | inl h => exact depth_of_mem h

@@ -28,49 +28,73 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 |---|---|---|---|
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
-| 3 | impredicative universes, self-reflected | `F3 (F3 42)`, where `F3 n` maximizes level-`n` ladder-of-universes programs of depth `≤ n` whose oracle is the previous reflection stage, starting from `succ` | every raw System T term compiles to a ladder program with the same value |
+| 3 | ordinal notations | `H_{ε₀}(H_{ε₀}(42))`: the Hardy hierarchy along `ε₀`, written as Brouwer trees | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)` |
+| 4 | impredicative universes, self-reflected | `F4 (F4 42)`, where `F4 n` maximizes level-`n` ladder-of-universes programs of depth `≤ n` whose oracle is the previous reflection stage, starting from `succ` | Church-encoded Brouwer trees in the ladder compute `H_{ε₀}(H_{ε₀}(42))` |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
 def contender_2 : Nat := C5.largestSTLCNatRecNatOfDepth 42     -- Independent/SystemT.lean
+def hardy : BTree → Nat → Nat                                  -- Independent/EpsilonHardy.lean
+  | .zero, y => y
+  | .succ a, y => hardy a (y + 1)
+  | .lim f, y => maxUpTo (fun i => hardy (f i) y) y
+def Feps (n : Nat) : Nat := hardy BTree.epsilon0 n            -- ε₀ = lim ω_k, ω_{k+1} = ω^{ω_k}
+def contender_3 : Nat := Feps (Feps 42)
 def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
 def stage : Nat → Nat → Nat
   | 0 => Nat.succ
   | k + 1 => ladderMax (stage k)
-def F3 (n : Nat) : Nat := stage (n + 1) n
-def contender_3 : Nat := F3 (F3 42)
+def F4 (n : Nat) : Nat := stage (n + 1) n
+def contender_4 : Nat := F4 (F4 42)
 
 theorem contender_1_lt_contender_2 : contender_1 < contender_2  -- Independent/AckermannLtSystemT.lean
-theorem contender_2_lt_contender_3 : contender_2 < contender_3  -- Independent/SystemTLtLadder.lean
+theorem contender_2_lt_contender_3 : contender_2 < contender_3  -- Independent/SystemTLtEps.lean
+theorem contender_3_lt_contender_4 : contender_3 < contender_4  -- Independent/EpsLtLadder.lean
 ```
 
-The comparison of rungs 2 and 3 compiles every raw System T term, including
-ill-typed ones with Contender 5's cast and default quirks, into the System F
-fragment of the ladder language, with Church numerals and natural recursion
-by iteration over polymorphic pairs. The proof has four parts:
+**Rung 2 < rung 3: an ordinal analysis of System T**, after Tait. Every raw
+System T term of depth `≤ 42`, ill-typed ones included, is compiled into an
+*infinitary* typed λ-term in which natural recursion is an `ω`-branching case
+distinction. The proof never evaluates anything:
 
 | Part | File | Statement |
 |---|---|---|
-| simulation | [`TEmbedding.lean`](BusyLean/Independent/TEmbedding.lean) | `rel_utr`: a logical relation; a closed term of type `nat` reduces to the Church numeral of its value |
-| confluence | [`Confluence.lean`](BusyLean/Independent/Confluence.lean) | `nf_eq_of_steps`: Church–Rosser for β plus the oracle rule, so the normalizer finds that numeral |
-| typing | [`TTyped.lean`](BusyLean/Independent/TTyped.lean) | `infer_trC`: the ladder's type checker accepts the translation at every fuel |
-| size | [`SystemTLtLadder.lean`](BusyLean/Independent/SystemTLtLadder.lean) | `cdepth_trC`: the translation of a depth-42 term has depth `≤ 186`; `F3_42_ge`: `1067 ≤ F3 42` |
+| Hardy functions | [`TreeOrder.lean`](BusyLean/Independent/TreeOrder.lean) | `hardy_add`: `H_{a+b} = H_a ∘ H_b` for all trees; an index-bounded structural order `Le n`, sound for `H` above `n`, preserved by `+` and `ω^·` |
+| translation | [`TtoInf.lean`](BusyLean/Independent/TtoInf.lean) | `value_progOf`: the infinitary program has Contender 5's value |
+| ranks and heights | [`TtoInfBounds.lean`](BusyLean/Independent/TtoInfBounds.lean) | all redexes have level `< 47`; the height is at most `ω³ + 94` |
+| cut elimination | [`CutElim.lean`](BusyLean/Independent/CutElim.lean) | `elimAll_spec`: 47 rounds remove all redexes, one `ω`-exponential per round |
+| bounding lemma | [`CutElim.lean`](BusyLean/Independent/CutElim.lean) | `value_le_hardy`: a redex-free closed term has value `≤ H_{ω^{height}}(y)` |
+| assembly | [`SystemTLtEps.lean`](BusyLean/Independent/SystemTLtEps.lean) | `eval_le_hardy_eps`: `eval w ≤ H_{ω_{49}}(y) ≤ H_{ε₀}(y)` for `y ≥ 200` |
 
-Excluded, because the larger rungs would have to incorporate them: System F,
+**Rung 3 < rung 4: simulation.** A small language `TT` (System T plus Brouwer
+trees and their fold, [`TreeLang.lean`](BusyLean/Independent/TreeLang.lean))
+expresses `+`, `·n`, `ω^·`, the towers, `ε₀` and the Hardy hierarchy. The
+program `epsProgram` has value `H_{ε₀}(H_{ε₀}(42))`. Trees become their
+Church iterators `∀X. X → (X → X) → ((nat → X) → X) → X`. A logical relation
+defined by recursion on the tree value ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean))
+shows that the compiled program reduces to the right numeral. Confluence
+([`Confluence.lean`](BusyLean/Independent/Confluence.lean)) makes the
+normalizer find it, and the ladder's type checker accepts the program
+([`TreeTyped.lean`](BusyLean/Independent/TreeTyped.lean)), whose depth is 56.
+
+System T also embeds into the ladder directly
+([`SystemTLtLadder.lean`](BusyLean/Independent/SystemTLtLadder.lean),
+`contender_2_lt_contender_4`), via Church numerals and recursion over
+polymorphic pairs.
+
+Excluded, because a larger rung would have to incorporate them: System F,
 Fω and kind polymorphism (fragments of the ladder language), the W-language
-and tree languages (extensions of System T), and reflection, towers and
-closure operators over a base language (amplifiers, used once, in rung 3).
-Ordinal-notation hierarchies (Contenders 16–31) are excluded too, for a
-different reason: placing one above System T would require an ordinal
-analysis of System T, an upper bound that no rung provides. Below System T
-they would only generalize Ackermann.
+and tree languages (extensions of System T), larger ordinal notations
+(Contenders 16–31, the same approach as rung 3), and reflection, towers and
+closure operators over a base language (amplifiers, used once, in rung 4).
 
 [`test/IndependentAudit.lean`](test/IndependentAudit.lean) prints the modules
 each rung's definition depends on and fails if one reaches a lower rung or a
-main-tower contender. `python3 scripts/check_independent.py` runs the budgets
-and the audit from a clean build. The three definition modules take about
-1.9 s and the two comparisons about 11 s.
+main-tower contender. Rung 3 depends only on its own file, which imports
+nothing. `python3 scripts/check_independent.py` runs the budgets and the audit
+from a clean build. The four definition modules take about 2 s and the three
+comparisons, the ordinal analysis included, about 33 s.
 
 ## The closed cumulative tower
 
@@ -2060,7 +2084,7 @@ tower and runs [`test/IndependentAudit.lean`](test/IndependentAudit.lean).
 | [`BusyLean/Contender68.lean`](BusyLean/Contender68.lean), [`Comparison68.lean`](BusyLean/Comparison68.lean) | Contender 68 definitions and theorems |
 | [`BusyLean/Contender69.lean`](BusyLean/Contender69.lean), [`Comparison69.lean`](BusyLean/Comparison69.lean) | Contender 69 definitions and theorems |
 | [`BusyLean/Contender70.lean`](BusyLean/Contender70.lean), [`Comparison70.lean`](BusyLean/Comparison70.lean) | Contender 70 definitions and theorems |
-| [`BusyLean/Independent/`](BusyLean/Independent) | the independent tower: rungs, comparisons, confluence, the System T embedding |
+| [`BusyLean/Independent/`](BusyLean/Independent) | the independent tower: rungs, comparisons, the ordinal analysis of System T, confluence, the embeddings into the ladder |
 | [`article/`](article) | research notes, LaTeX source and PDF |
 | [`test/`](test) | axiom/dependency audit, smoke tests |
 | [`proposals/`](proposals) | the twenty-six reviewed proposals and [the review](proposals/REVIEW.md) |

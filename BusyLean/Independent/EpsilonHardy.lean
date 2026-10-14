@@ -1,5 +1,5 @@
 /-!
-# Independent tower: the Hardy hierarchy along `ε₀`
+# Independent tower, rung 3: the Hardy hierarchy along `ε₀`
 
 This rung is an **ordinal-notation hierarchy**. Ordinals below `ε₀`, and `ε₀`
 itself, are written as Brouwer trees (countably branching well-founded trees):
@@ -11,7 +11,7 @@ The hierarchy is Hardy's: `H_0(y) = y`, `H_{a+1}(y) = H_a(y + 1)`, and at a
 limit, `H_{lim f}(y)` is the largest of `H_{f 0}(y), …, H_{f y}(y)`. Taking the
 maximum over the first `y + 1` terms of the fundamental sequence (instead of
 only the `y`-th term) makes every `H_a` monotone without any condition on the
-tree. On the canonical trees of ordinals below `ε₀` the two variants agree.
+tree; it is a standard robust variant of the Hardy hierarchy.
 
 This file imports nothing. **Do not evaluate `contender_3`.**
 -/
@@ -76,6 +76,6 @@ namespace BusyLean.Indep
 def Feps (n : Nat) : Nat := Eps.hardy Eps.BTree.epsilon0 n
 
 /-- **The ordinal rung**: `H_{ε₀}(H_{ε₀}(42))`. Never evaluate it. -/
-def contenderEps : Nat := Feps (Feps 42)
+def contender_3 : Nat := Feps (Feps 42)
 
 end BusyLean.Indep
