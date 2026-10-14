@@ -179,7 +179,11 @@ Lean~4 (version 4.34.0). The rules (\texttt{README.md}) are: closed computable
 the axioms \lean{propext} and \lean{Quot.sound} allowed and
 \lean{Classical.choice} forbidden; at most 15\,s to check the definition and
 60\,s to check the proof, from a clean build; and no laziness or shenanigans.
-The axiom policy is deliberate. \lean{Classical.choice} is the only one of
+Contenders 6--70 were accepted under a rule that allowed the previous
+contender's construction as an oracle or seed. That rule has been withdrawn:
+a new contender may not use any smaller one in its definition, and the
+contest continues with the independent tower of
+Section~\ref{sec:independent}. The axiom policy is deliberate. \lean{Classical.choice} is the only one of
 Lean's three axioms that conflicts with computability, so it is the one that
 must go.
 
@@ -2453,7 +2457,9 @@ is built under one extra rule: \textbf{no rung uses a smaller rung in its
 definition}. Each rung is a single idea, and its comparison with the rung
 below is a simulation: the larger construction runs the smaller one. When a
 construction would naturally be built on a smaller rung, the smaller rung is
-dropped. The tower has three rungs.
+dropped. The rule now governs the whole contest: the cumulative tower of
+Contenders 5--70 is closed and kept as a record. The independent tower has
+three rungs.
 
 \begin{center}
 \begin{tabular}{lll}

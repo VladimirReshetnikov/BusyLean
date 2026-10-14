@@ -51,14 +51,18 @@ so far has been processed.
 
 A proposal is easiest to evaluate when it:
 
-* targets the **current** contender (see [`../README.md`](../README.md)) and
-  states the repository commit it was written against;
+* targets the top rung of the **independent tower** (see
+  [`../README.md`](../README.md#the-independent-tower)) and states the
+  repository commit it was written against; the cumulative tower of
+  Contenders 5–70 is closed;
 * builds with the pinned Lean version and depends only on `propext` and
   `Quot.sound` (no `Classical.choice`, `sorry`, `native_decide`,
   `noncomputable`, `partial`, `unsafe`, `implemented_by`, or `extern`);
-* proves `contender_(N-1)_lt_contender_N` without using the constant
-  `contender_(N-1)` in the definition (its *construction* may serve as a
-  seed or oracle; see rule 5 of the [rules](../README.md#rules-lean-edition));
+* defines the new number **without any smaller contender**: neither its
+  constant nor its construction may serve as a seed, oracle or building block
+  (rule 5 of the [rules](../README.md#rules-lean-edition)); the proof that it
+  is larger is a genuine comparison, such as a simulation, and passes
+  [`../test/IndependentAudit.lean`](../test/IndependentAudit.lean);
 * fits the time budgets: 15 s for the new definition and 60 s for its proof;
 * says plainly whether it was actually compiled, and with which toolchain;
 * never asks anyone to evaluate the number.

@@ -21,6 +21,9 @@ the larger construction simulates the smaller one. Where a construction would
 naturally be built on a smaller rung, the smaller rung is dropped, so only
 genuinely different approaches remain.
 
+**This is now the contest's tower.** Rule 5 forbids seeding from here on; the
+cumulative tower of Contenders 5–70 below is closed and kept as a record.
+
 | Rung | Idea | Definition | Proof that it beats the rung below |
 |---|---|---|---|
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
@@ -69,7 +72,13 @@ main-tower contender. `python3 scripts/check_independent.py` runs the budgets
 and the audit from a clean build. The three definition modules take about
 1.9 s and the two comparisons about 11 s.
 
-## Current contender: Contender 70
+## The closed cumulative tower
+
+The rest of this file documents the original, cumulative tower. Its
+contenders were seeded with their predecessors under the earlier rule 5 and
+are no longer extended.
+
+## Last cumulative contender: Contender 70
 
 ```lean
 def primsR : Nat → List PTL2.Ty                                -- BusyLean/Contender70.lean
@@ -1923,12 +1932,21 @@ These are adapted from the [original rules](docs/name-the-biggest-number-master/
    own budgets. (Contenders build on their predecessors, so a fixed budget for
    the whole stack would eventually be exhausted by history alone.) The check
    script also reports the full clean-build time.
-5. **No laziness.** Do not use the constant `contender_N` itself to define
-   `contender_(N+1)`, and beat it by a large margin. The previous contender's
-   *construction* (for example its family of functions) may appear as an
-   oracle or seed of a qualitatively stronger construction, which makes the
-   comparison formal. The audit checks that the constant itself is never
-   mentioned.
+5. **No laziness, no seeding.** A new contender's definition may not use any
+   smaller contender: neither the constant `contender_N` nor its
+   *construction* (its family of functions, its language, its trees) may
+   appear, as an oracle, a seed or a building block. Each new contender is an
+   independent idea, and the proof that it is larger must be a genuine
+   comparison, for example a simulation of the smaller construction inside the
+   larger one. If a new construction would naturally be built on a smaller
+   contender, that smaller contender is removed from the tower instead. Beat
+   the previous contender by a large margin. `test/IndependentAudit.lean`
+   checks that a contender's definition reaches no other contender's module.
+
+   Contenders 6–70 were accepted under an earlier version of this rule, which
+   allowed the previous contender's construction as an oracle or seed. That
+   tower is closed: it stays in the repository as a record, and new
+   contenders extend the [independent tower](#the-independent-tower).
 6. **No shenanigans.** No exploits of the kernel, the elaborator or the
    toolchain.
 7. **Toolchain.** Lean **4.34.0** (`lean-toolchain`). Libraries are allowed if
