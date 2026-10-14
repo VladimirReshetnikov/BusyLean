@@ -34,7 +34,7 @@ LIBRARIES = ["BusyLean.Contender5", "BusyLean.SystemF.Normalize",
              "BusyLean.SystemFL.Ladder", "BusyLean.SystemFL.Church",
              "BusyLean.SystemFLT.Trees"]
 DEFINITIONS = ["BusyLean.Independent.Ackermann", "BusyLean.Independent.SystemT",
-               "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Bachmann",
+               "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Buchholz",
                "BusyLean.Independent.Ladder"]
 PROOFS = ["BusyLean.Independent.AckermannLtSystemT", "BusyLean.Independent.SystemTLtEps",
           "BusyLean.Independent.Tower",

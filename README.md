@@ -28,8 +28,8 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 |---|---|---|---|
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
-| 3 | ordinal notations with a collapsing function | `H_θ(H_θ(42))`: the Hardy hierarchy along `θ = φ_{ε_{Ω+1}}(0)`, Bachmann's collapse of `ε_{Ω+1}` (the Bachmann–Howard ordinal), written as trees | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ε₀` sits inside `θ` |
-| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | Church-encoded Brouwer trees and `Ω`-trees in the ladder compute `H_θ(H_θ(42))` |
+| 3 | ordinal notations with Buchholz's collapsing functions | `H_θ(H_θ(42))`: the Hardy hierarchy along `θ = ψ_0(ε_{Ω_42+1})`, Buchholz's `ψ_ν` for all `ν < 42`, written as tree ordinals of 43 levels | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ψ_0(Ω_1) = ε₀` is a branch of `θ` |
+| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | Church-encoded trees of all 43 levels in the ladder compute `H_θ(H_θ(42))` |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
@@ -38,15 +38,19 @@ def hardy : BTree → Nat → Nat                                  -- Independen
   | .zero, y => y
   | .succ a, y => hardy a (y + 1)
   | .lim f, y => maxUpTo (fun i => hardy (f i) y) y
-inductive OTree where                                         -- Independent/Bachmann.lean
-  | zero | succ (a : OTree) | lim (f : Nat → OTree) | sup (f : BTree → OTree)
-def phi : OTree → BTree → BTree                                -- Bachmann's collapse
-  | .zero, b => BTree.opow b                                   -- ω^b
-  | .succ a, b => .lim fun m => iter (phi a) m (.succ b)       -- next fixed point of φ_a
-  | .lim f, b => .lim fun m => phi (f m) b
-  | .sup f, b => phi (f b) b                                   -- the argument picks the branch
-def theta : BTree := phi OTree.epsilon .zero                   -- ε_{Ω+1} = lim (Ω, Ω^Ω, …)
-def F3 (n : Nat) : Nat := hardy theta n
+inductive Tr (A : Type) where                                 -- Independent/Buchholz.lean
+  | zero | succ (a : Tr A) | lim (f : Nat → Tr A)
+  | sup (μ : Nat) (f : A → Tr A)                               -- cofinality Ω_{μ+1}
+def P : Nat → Type | 0 => Nat | m + 1 => Tr (P m)               -- T m = Tr (P m): level m
+def psiAll (n : Nat) : T (n + 1) → Nat → T n                   -- ψ_ν(α), for all ν at once
+  | .zero => omega n                                           -- Ω_ν
+  | .succ a => fun ν => .lim fun k => Tr.mulNat (psiAll n a ν) k
+  | .lim f => fun ν => .lim fun k => psiAll n (f k) ν
+  | .sup μ f => fun ν =>
+      if μ < ν then .sup μ fun y => psiAll n (f (down n y)) ν
+      else .lim fun k => psiAll n (f (iterate (fun g => psiAll n (f g) μ) k (omega n μ))) ν
+def theta (n : Nat) : BTree := Tr.toB (psiAll n (epsTop n) 0)  -- ε_{Ω_{n+1}+1} = lim (Ω_1, Ω_{n+1}^{Ω_1}, …)
+def F3 (n : Nat) : Nat := hardy (theta 41) n
 def contender_3 : Nat := F3 (F3 42)
 def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
@@ -99,18 +103,32 @@ as the oracle of the growing programs. This combines the ideas of Contenders
 36–53 (ladders that build their own length, reflection along ladder-built
 trees) without seeding.
 
+**Rung 3: Buchholz's functions** ([`Buchholz.lean`](BusyLean/Independent/Buchholz.lean)).
+Trees of level `m` have countable limits and limits `sup μ f` of cofinality
+`Ω_{μ+1}`; a `sup` of level `m + 1` branches over trees of level `m`, and one
+structural map lifts and projects between adjacent levels. `psiAll n α ν` is
+`ψ_ν(α)` for every `ν` at once, by Buchholz's fundamental sequences:
+`ψ_ν(0) = Ω_ν`, `ψ_ν(α+1) = lim_k ψ_ν(α)·k`, limits pointwise, a `sup` of level
+`μ < ν` is kept, and a `sup` of level `μ ≥ ν` is diagonalized with
+`g_0 = Ω_μ`, `g_{k+1} = ψ_μ(α[g_k])`. With 42 uncountable levels,
+`θ = ψ_0(ε_{Ω_42+1})`. A fixed program can mention only finitely many tree
+types, which is why the number of levels is fixed: Buchholz's ordinal
+`ψ_0(ε_{Ω_ω+1})` is the limit of this family.
+
 **Rung 3 < rung 4: simulation.** A small language `TT` (System T plus Brouwer
-trees, `Ω`-trees and their folds, [`TreeLang.lean`](BusyLean/Independent/TreeLang.lean))
-expresses `+`, `·n`, `ω^·`, the `Ω`-tree arithmetic, `ε_{Ω+1}`, the collapse
-`φ` and the Hardy hierarchy. The program `bhProgram` has value
-`H_θ(H_θ(42))`. Trees become their Church iterators
-`∀X. X → (X → X) → ((nat → X) → X) → X`, and `Ω`-trees
-`∀X. X → (X → X) → ((nat → X) → X) → ((tree → X) → X) → X`. Logical relations
-defined by recursion on the tree values ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean))
+trees, trees of every level and their folds, [`TreeLang.lean`](BusyLean/Independent/TreeLang.lean))
+expresses `+`, `·n`, `ω^·`, lifting and projecting between levels, `Ω_ν`,
+`ε_{Ω_42+1}`, Buchholz's collapse and the Hardy hierarchy. The program
+`buchProgram` has value `H_θ(H_θ(42))`. Brouwer trees become their Church
+iterators `∀X. X → (X → X) → ((nat → X) → X) → X`, and trees of level `m`
+`∀X. X → (X → X) → ((nat → X) → X) → (nat → (D_m → X) → X) → X`, with `D_m`
+the type of level `m - 1`. Logical relations defined by recursion on the level
+and the tree value ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean))
 show that the compiled program reduces to the right numeral. Confluence
 ([`Confluence.lean`](BusyLean/Independent/Confluence.lean)) makes the
 normalizer find it, and the ladder's type checker accepts the program
-([`TreeTyped.lean`](BusyLean/Independent/TreeTyped.lean)), whose depth is 57.
+([`TreeTyped.lean`](BusyLean/Independent/TreeTyped.lean)), whose depth is 472
+(the kernel checks the bound `≤ 1000` in [`TreeDepth.lean`](BusyLean/Independent/TreeDepth.lean)).
 Since `F4 n = ladderMax (reflAlong (selfTree n n)) n`, and the simulation
 works under every oracle, the outer `F4` already sees the compiled program.
 
@@ -122,16 +140,16 @@ polymorphic pairs.
 Excluded, because a larger rung would have to incorporate them: System F,
 Fω and kind polymorphism (fragments of the ladder language), the W-language
 and tree languages (extensions of System T), larger ordinal notations
-(Contenders 16–31, the same approach as rung 3; rung 3 takes the collapse to the Bachmann–Howard ordinal), and towers and closure
+(Contenders 16–31, the same approach as rung 3; rung 3 takes Buchholz's collapse to `ψ_0(ε_{Ω_42+1})`), and towers and closure
 operators over a base language (amplifiers). Two amplifiers, ladders that
 build their own length and reflection along trees, are built into rung 4.
 
 [`test/IndependentAudit.lean`](test/IndependentAudit.lean) prints the modules
 each rung's definition depends on and fails if one reaches a lower rung or a
 main-tower contender. Rung 3 depends only on its two files (Brouwer trees
-and the collapse), which import nothing else. `python3 scripts/check_independent.py` runs the budgets and the audit
+and Buchholz's collapse), which import nothing else. `python3 scripts/check_independent.py` runs the budgets and the audit
 from a clean build. The five definition modules take about 3 s and the three
-comparisons, the ordinal analysis included, about 50 s.
+comparisons, the ordinal analysis included, about 40 s.
 
 ## The closed cumulative tower
 

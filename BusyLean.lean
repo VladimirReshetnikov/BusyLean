@@ -182,7 +182,7 @@ import BusyLean.Independent.Ladder
 import BusyLean.Independent.TTyped
 import BusyLean.Independent.SystemTLtLadder
 import BusyLean.Independent.EpsilonHardy
-import BusyLean.Independent.Bachmann
+import BusyLean.Independent.Buchholz
 import BusyLean.Independent.TreeOrder
 import BusyLean.Independent.InfTerms
 import BusyLean.Independent.CutElim
@@ -192,5 +192,6 @@ import BusyLean.Independent.SystemTLtEps
 import BusyLean.Independent.TreeLang
 import BusyLean.Independent.TreeEmbedding
 import BusyLean.Independent.TreeTyped
+import BusyLean.Independent.TreeDepth
 import BusyLean.Independent.EpsLtLadder
 import BusyLean.Independent.Tower

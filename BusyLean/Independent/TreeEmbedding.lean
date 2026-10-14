@@ -109,7 +109,7 @@ theorem RelT.expand {u u' : F.Tm} (h : Steps f u u') : ∀ {τ : Eps.BTree}, Rel
   | .succ _, ⟨u'', hr, hs⟩ => ⟨u'', hr, fun z s l => (app3_steps h z s l).trans (hs z s l)⟩
   | .lim _, ⟨g, hg, hs⟩ => ⟨g, hg, fun z s l => (app3_steps h z s l).trans (hs z s l)⟩
 
-/-! ## `Ω`-trees: five-argument iterators -/
+/-! ## Level trees: five-argument iterators -/
 
 def app4 (u z s l p : F.Tm) : F.Tm := .app (app3 u z s l) p
 
@@ -122,9 +122,10 @@ def olimTm : F.Tm :=
   .lam (.lam (.lam (.lam (.lam (.app (.var 1)
     (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1))))))))
 
+/-- `sup = λμ g z s l p. p μ (λx. g x z s l p)`. -/
 def osupTm : F.Tm :=
-  .lam (.lam (.lam (.lam (.lam (.app (.var 0)
-    (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1))))))))
+  .lam (.lam (.lam (.lam (.lam (.lam (.app (.app (.var 0) (.var 5))
+    (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1)))))))))
 
 def ofoldTm : F.Tm :=
   .lam (.lam (.lam (.lam (.lam (app4 (.var 0) (.var 4) (.var 3) (.var 2) (.var 1))))))
@@ -160,6 +161,36 @@ theorem steps_beta5 (b x y z w v : F.Tm) :
   have h₂ := steps_beta4 (f := f) (subst (up (up (up (up (cons x var))))) b) y z w v
   rwa [subst_up4_beta] at h₂
 
+theorem subst_up5_beta (b x y z w v u : F.Tm) :
+    subst (cons u (cons v (cons w (cons z (cons y var)))))
+      (subst (up (up (up (up (up (cons x var)))))) b) =
+      subst (cons u (cons v (cons w (cons z (cons y (cons x var)))))) b := by
+  rw [subst_subst]
+  congr 1
+  funext n
+  match n with
+  | 0 => rfl
+  | 1 => rfl
+  | 2 => rfl
+  | 3 => rfl
+  | 4 => rfl
+  | 5 => show subst _ (ren Nat.succ (ren Nat.succ (ren Nat.succ (ren Nat.succ (ren Nat.succ x))))) = x
+         rw [ren_ren, ren_ren, ren_ren, ren_ren, subst_ren]; exact subst_var x
+  | n + 6 => rfl
+
+theorem steps_beta6 (b x y z w v u : F.Tm) :
+    Steps f (.app (.app (.app (.app (.app (.app (.lam (.lam (.lam (.lam (.lam (.lam b)))))) x) y) z)
+      w) v) u)
+      (subst (cons u (cons v (cons w (cons z (cons y (cons x var)))))) b) := by
+  have h₁ : Steps f (.app (.app (.app (.app (.app (.app (.lam (.lam (.lam (.lam (.lam (.lam b)))))) x)
+      y) z) w) v) u)
+      (.app (.app (.app (.app (.app (.lam (.lam (.lam (.lam (.lam
+        (subst (up (up (up (up (up (cons x var)))))) b)))))) y) z) w) v) u) :=
+    Steps.appL u (Steps.appL v (Steps.appL w (Steps.appL z (Steps.appL y (Steps.beta _ _)))))
+  refine h₁.trans ?_
+  have h₂ := steps_beta5 (f := f) (subst (up (up (up (up (up (cons x var)))))) b) y z w v u
+  rwa [subst_up5_beta] at h₂
+
 theorem steps_limArg4 (g z s l p n : F.Tm) :
     Steps f (.app (limArg4 g z s l p) n) (app4 (.app g n) z s l p) := by
   have h := Steps.beta (f := f)
@@ -176,35 +207,43 @@ theorem steps_limArg4 (g z s l p n : F.Tm) :
   rw [e] at h
   exact h
 
-/-- `RelO u a`: the term `u` represents the `Ω`-tree `a`. -/
-def RelO (f : Nat → Nat) (u : F.Tm) : Eps.OTree → Prop
+/-- `RelLS R u a`: the term `u` represents the level tree `a`, whose branches
+are represented according to `R`. -/
+def RelLS (f : Nat → Nat) {A : Type} (R : F.Tm → A → Prop) (u : F.Tm) : Buch.Tr A → Prop
   | .zero => ∀ z s l p, Steps f (app4 u z s l p) z
-  | .succ σ => ∃ u', RelO f u' σ ∧ ∀ z s l p, Steps f (app4 u z s l p) (.app s (app4 u' z s l p))
-  | .lim h => ∃ g, (∀ n m, Steps f n (num m) → RelO f (.app g n) (h m)) ∧
+  | .succ σ => ∃ u', RelLS f R u' σ ∧ ∀ z s l p, Steps f (app4 u z s l p) (.app s (app4 u' z s l p))
+  | .lim h => ∃ g, (∀ n m, Steps f n (num m) → RelLS f R (.app g n) (h m)) ∧
       ∀ z s l p, Steps f (app4 u z s l p) (.app l (limArg4 g z s l p))
-  | .sup h => ∃ g, (∀ w τ, RelT f w τ → RelO f (.app g w) (h τ)) ∧
-      ∀ z s l p, Steps f (app4 u z s l p) (.app p (limArg4 g z s l p))
+  | .sup μ h => ∃ t g, Steps f t (num μ) ∧ (∀ w x, R w x → RelLS f R (.app g w) (h x)) ∧
+      ∀ z s l p, Steps f (app4 u z s l p) (.app (.app p t) (limArg4 g z s l p))
+
+/-- The relation for the branches of level `m`. -/
+def RelP (f : Nat → Nat) : (m : Nat) → F.Tm → Buch.P m → Prop
+  | 0 => fun u n => Steps f u (num n)
+  | m + 1 => RelLS f (RelP f m)
 
 theorem app4_steps {u u' : F.Tm} (h : Steps f u u') (z s l p : F.Tm) :
     Steps f (app4 u z s l p) (app4 u' z s l p) :=
   Steps.appL p (app3_steps h z s l)
 
-theorem RelO.expand {u u' : F.Tm} (h : Steps f u u') : ∀ {a : Eps.OTree}, RelO f u' a → RelO f u a
+theorem RelLS.expand {A : Type} {R : F.Tm → A → Prop} {u u' : F.Tm} (h : Steps f u u') :
+    ∀ {a : Buch.Tr A}, RelLS f R u' a → RelLS f R u a
   | .zero, hr => fun z s l p => (app4_steps h z s l p).trans (hr z s l p)
   | .succ _, ⟨u'', hr, hs⟩ => ⟨u'', hr, fun z s l p => (app4_steps h z s l p).trans (hs z s l p)⟩
   | .lim _, ⟨g, hg, hs⟩ => ⟨g, hg, fun z s l p => (app4_steps h z s l p).trans (hs z s l p)⟩
-  | .sup _, ⟨g, hg, hs⟩ => ⟨g, hg, fun z s l p => (app4_steps h z s l p).trans (hs z s l p)⟩
+  | .sup _ _, ⟨t, g, ht, hg, hs⟩ =>
+      ⟨t, g, ht, hg, fun z s l p => (app4_steps h z s l p).trans (hs z s l p)⟩
 
 def Rel (f : Nat → Nat) : (σ : Ty) → F.Tm → den σ → Prop
   | .nat, u, n => Steps f u (num n)
   | .tree, u, τ => RelT f u τ
-  | .otree, u, a => RelO f u a
+  | .lev m, u, a => RelLS f (RelP f m) u a
   | .arr a b, u, g => ∀ w x, Rel f a w x → Rel f b (.app u w) (g x)
 
 theorem Rel.expand : ∀ {σ : Ty} {u u' : F.Tm} {x : den σ}, Steps f u u' → Rel f σ u' x → Rel f σ u x
   | .nat, _, _, _, h, hr => h.trans hr
   | .tree, _, _, _, h, hr => RelT.expand h hr
-  | .otree, _, _, _, h, hr => RelO.expand h hr
+  | .lev _, _, _, _, h, hr => RelLS.expand h hr
   | .arr _ _, _, _, _, h, hr => fun w y hw => Rel.expand (Steps.appL w h) (hr w y hw)
 
 /-! ## Trees -/
@@ -240,49 +279,63 @@ theorem rel_fold (r : Ty) :
 
 /-! ## `Ω`-trees -/
 
-theorem rel_ofoldO {r : Ty} {z s l p : F.Tm} {zv : den r} {sv : den r → den r}
-    {lv : (Nat → den r) → den r} {pv : (Eps.BTree → den r) → den r} (hz : Rel f r z zv)
-    (hs : Rel f (.arr r r) s sv) (hl : Rel f (.arr (.arr .nat r) r) l lv)
-    (hp : Rel f (.arr (.arr .tree r) r) p pv) :
-    ∀ (a : Eps.OTree) (u : F.Tm), RelO f u a → Rel f r (app4 u z s l p) (ofold zv sv lv pv a)
+theorem rel_lfoldL {r : Ty} {A : Type} {R : F.Tm → A → Prop} {z s l p : F.Tm} {zv : den r}
+    {sv : den r → den r} {lv : (Nat → den r) → den r} {pv : Nat → (A → den r) → den r}
+    (hz : Rel f r z zv) (hs : Rel f (.arr r r) s sv) (hl : Rel f (.arr (.arr .nat r) r) l lv)
+    (hp : ∀ t μ, Steps f t (num μ) → ∀ g gv, (∀ w x, R w x → Rel f r (.app g w) (gv x)) →
+      Rel f r (.app (.app p t) g) (pv μ gv)) :
+    ∀ (a : Buch.Tr A) (u : F.Tm), RelLS f R u a → Rel f r (app4 u z s l p) (lfold zv sv lv pv a)
   | .zero, _, hu => Rel.expand (hu z s l p) hz
   | .succ σ, _, ⟨u', hu', hsu⟩ =>
-      Rel.expand (hsu z s l p) (hs _ _ (rel_ofoldO hz hs hl hp σ u' hu'))
+      Rel.expand (hsu z s l p) (hs _ _ (rel_lfoldL hz hs hl hp σ u' hu'))
   | .lim h, _, ⟨g, hg, hsu⟩ =>
       Rel.expand (hsu z s l p) (hl _ _ fun n m hn =>
-        Rel.expand (steps_limArg4 g z s l p n) (rel_ofoldO hz hs hl hp (h m) _ (hg n m hn)))
-  | .sup h, _, ⟨g, hg, hsu⟩ =>
-      Rel.expand (hsu z s l p) (hp _ _ fun w τ hw =>
-        Rel.expand (steps_limArg4 g z s l p w) (rel_ofoldO hz hs hl hp (h τ) _ (hg w τ hw)))
+        Rel.expand (steps_limArg4 g z s l p n) (rel_lfoldL hz hs hl hp (h m) _ (hg n m hn)))
+  | .sup μ h, _, ⟨t, g, ht, hg, hsu⟩ =>
+      Rel.expand (hsu z s l p) (hp t μ ht _ _ fun w x hw =>
+        Rel.expand (steps_limArg4 g z s l p w) (rel_lfoldL hz hs hl hp (h x) _ (hg w x hw)))
 
-theorem rel_ozero : Rel f .otree ozeroTm Eps.OTree.zero := fun z s l p => steps_beta4 _ z s l p
+theorem rel_lzero (m : Nat) : Rel f (.lev m) ozeroTm Buch.Tr.zero :=
+  fun z s l p => steps_beta4 _ z s l p
 
-theorem rel_osucc : Rel f (.arr .otree .otree) osuccTm Eps.OTree.succ := fun w σ hw =>
+theorem rel_lsucc (m : Nat) : Rel f (.arr (.lev m) (.lev m)) osuccTm Buch.Tr.succ := fun w σ hw =>
   ⟨w, hw, fun z s l p => by
     have h := steps_beta5 (f := f)
       (.app (.var 2) (app4 (.var 4) (.var 3) (.var 2) (.var 1) (.var 0))) w z s l p
     exact h⟩
 
-theorem rel_olim : Rel f (.arr (.arr .nat .otree) .otree) olimTm Eps.OTree.lim := fun g h hg =>
+theorem rel_llim (m : Nat) : Rel f (.arr (.arr .nat (.lev m)) (.lev m)) olimTm Buch.Tr.lim :=
+  fun g h hg =>
   ⟨g, fun n m hn => hg n m hn, fun z s l p => by
     have h := steps_beta5 (f := f)
       (.app (.var 1) (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1))))
       g z s l p
     exact h⟩
 
-theorem rel_osup : Rel f (.arr (.arr .tree .otree) .otree) osupTm Eps.OTree.sup := fun g h hg =>
-  ⟨g, fun w τ hw => hg w τ hw, fun z s l p => by
-    have h := steps_beta5 (f := f)
-      (.app (.var 0) (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1))))
-      g z s l p
+theorem rel_lsup (m : Nat) :
+    Rel f (.arr .nat (.arr (.arr (.lev m) (.lev (m + 1))) (.lev (m + 1)))) osupTm Buch.Tr.sup :=
+  fun t μ ht g h hg =>
+  ⟨t, g, ht, fun w x hw => hg w x hw, fun z s l p => by
+    have h := steps_beta6 (f := f)
+      (.app (.app (.var 0) (.var 5))
+        (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1)))) t g z s l p
     exact h⟩
 
-theorem rel_ofold (r : Ty) :
+theorem rel_lfold0 (r : Ty) :
     Rel f (.arr r (.arr (.arr r r) (.arr (.arr (.arr .nat r) r)
-      (.arr (.arr (.arr .tree r) r) (.arr .otree r))))) ofoldTm ofold :=
+      (.arr (.arr .nat (.arr (.arr .nat r) r)) (.arr (.lev 0) r))))) ofoldTm lfold :=
   fun z zv hz s sv hs l lv hl p pv hp t a ht => by
     have h := steps_beta5 (f := f) (app4 (.var 0) (.var 4) (.var 3) (.var 2) (.var 1)) z s l p t
-    exact Rel.expand h (rel_ofoldO hz hs hl hp a t ht)
+    exact Rel.expand h (rel_lfoldL (R := RelP f 0) hz hs hl
+      (fun t μ ht g gv hg => hp t μ ht g gv hg) a t ht)
+
+theorem rel_lfoldS (m : Nat) (r : Ty) :
+    Rel f (.arr r (.arr (.arr r r) (.arr (.arr (.arr .nat r) r)
+      (.arr (.arr .nat (.arr (.arr (.lev m) r) r)) (.arr (.lev (m + 1)) r))))) ofoldTm lfold :=
+  fun z zv hz s sv hs l lv hl p pv hp t a ht => by
+    have h := steps_beta5 (f := f) (app4 (.var 0) (.var 4) (.var 3) (.var 2) (.var 1)) z s l p t
+    exact Rel.expand h (rel_lfoldL (R := RelP f (m + 1)) hz hs hl
+      (fun t μ ht g gv hg => hp t μ ht g gv hg) a t ht)
 
 /-! ## Numbers -/
 
@@ -324,10 +377,6 @@ theorem rel_rec (r : Ty) :
 
 /-! ## The translation and the fundamental lemma -/
 
-def Var.idx : {Γ : List Ty} → {σ : Ty} → Var Γ σ → Nat
-  | _, _, .here => 0
-  | _, _, .there v => v.idx + 1
-
 def utrT : {Γ : List Ty} → {σ : Ty} → Tm Γ σ → F.Tm
   | _, _, .var v => .var v.idx
   | _, _, .lam b => .lam (utrT b)
@@ -339,11 +388,12 @@ def utrT : {Γ : List Ty} → {σ : Ty} → Tm Γ σ → F.Tm
   | _, _, .tsucc => tsuccTm
   | _, _, .tlim => tlimTm
   | _, _, .fold _ => foldTm
-  | _, _, .ozero => ozeroTm
-  | _, _, .osucc => osuccTm
-  | _, _, .olim => olimTm
-  | _, _, .osup => osupTm
-  | _, _, .ofold _ => ofoldTm
+  | _, _, .lzero _ => ozeroTm
+  | _, _, .lsucc _ => osuccTm
+  | _, _, .llim _ => olimTm
+  | _, _, .lsup _ => osupTm
+  | _, _, .lfold0 _ => ofoldTm
+  | _, _, .lfoldS _ _ => ofoldTm
 
 def EnvRel (f : Nat → Nat) {Γ : List Ty} (σs : Nat → F.Tm) (ρ : Env Γ) : Prop :=
   ∀ τ (v : Var Γ τ), Rel f τ (σs v.idx) (ρ τ v)
@@ -371,11 +421,12 @@ theorem rel_utrT : ∀ {Γ : List Ty} {σ : Ty} (t : Tm Γ σ) {σs : Nat → F.
   | _, _, .tsucc, _, _, _ => rel_tsucc
   | _, _, .tlim, _, _, _ => rel_tlim
   | _, _, .fold r, _, _, _ => rel_fold r
-  | _, _, .ozero, _, _, _ => rel_ozero
-  | _, _, .osucc, _, _, _ => rel_osucc
-  | _, _, .olim, _, _, _ => rel_olim
-  | _, _, .osup, _, _, _ => rel_osup
-  | _, _, .ofold r, _, _, _ => rel_ofold r
+  | _, _, .lzero m, _, _, _ => rel_lzero m
+  | _, _, .lsucc m, _, _, _ => rel_lsucc m
+  | _, _, .llim m, _, _, _ => rel_llim m
+  | _, _, .lsup m, _, _, _ => rel_lsup m
+  | _, _, .lfold0 r, _, _, _ => rel_lfold0 r
+  | _, _, .lfoldS m r, _, _, _ => rel_lfoldS m r
 
 /-- A closed program of type `nat` reduces to the numeral of its value. -/
 theorem utrT_steps (t : Tm [] .nat) : Steps f (utrT t) (num (eval t env0)) := by

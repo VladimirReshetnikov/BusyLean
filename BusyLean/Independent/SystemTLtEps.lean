@@ -1,6 +1,6 @@
 import BusyLean.Independent.TtoInfBounds
 import BusyLean.Independent.SystemT
-import BusyLean.Independent.Bachmann
+import BusyLean.Independent.Buchholz
 
 /-!
 # Rung 2 < rung 3: System T < the Hardy hierarchy at `θ` (an ordinal analysis)
@@ -18,9 +18,9 @@ elimination remove the redexes. Each round costs one `ω`-exponential
 The comparisons between trees use the structural order `Le 200`, which is sound
 for the Hardy functions at arguments `≥ 200` (`Le.hardy_le`).
 
-Finally `ε₀` sits inside the collapsed tree `θ`: the branch `1` of
-`θ = φ_{ε_{Ω+1}}(0)` is `φ_{Ω^Ω}(0)`, whose branch at `0` is `φ_1(0)`, the
-limit of `1, ω, ω^ω, …`. So `H_{ε₀}(y) ≤ H_θ(y + 1)` (`Feps_le_F3`).
+Finally `ε₀` sits inside Buchholz's `θ = ψ_0(ε_{Ω_42+1})`: the branch `0` of
+`θ` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`, whose Brouwer tree is exactly
+`ε₀` (`toB_branch0`). So `H_{ε₀}(y) ≤ H_θ(y)` (`Feps_le_F3`).
 -/
 
 namespace BusyLean.Indep
@@ -151,42 +151,122 @@ theorem eval_le_Feps {w : C5.Term} (hw : depth w ≤ 42) (hs : stype [] w = .nat
 
 /-! ## `ε₀` inside `θ` -/
 
-theorem iter_opow_tower : ∀ i, iter (phi .zero) (i + 1) (.succ .zero) = tower i
+namespace Buch
+
+/-- A tree without `sup` nodes. -/
+def SF {A : Type} : Tr A → Prop
+  | .zero => True
+  | .succ a => SF a
+  | .lim f => ∀ i, SF (f i)
+  | .sup _ _ => False
+
+theorem cmap_sf {A B : Type} (thr : Nat) (h : B → A) : ∀ x : Tr A, SF x →
+    SF (Tr.cmap thr h x) ∧ Tr.toB (Tr.cmap thr h x) = Tr.toB x
+  | .zero, _ => ⟨trivial, rfl⟩
+  | .succ a, hx => ⟨(cmap_sf thr h a hx).1, congrArg BTree.succ (cmap_sf thr h a hx).2⟩
+  | .lim f, hx => ⟨fun i => (cmap_sf thr h (f i) (hx i)).1,
+      congrArg BTree.lim (funext fun i => (cmap_sf thr h (f i) (hx i)).2)⟩
+  | .sup _ _, hx => hx.elim
+
+theorem lift_sf (m : Nat) (x : T m) (hx : SF x) :
+    SF (lift m x) ∧ Tr.toB (lift m x) = Tr.toB x := by
+  cases m with
+  | zero => exact cmap_sf _ _ x hx
+  | succ m => exact cmap_sf _ _ x hx
+
+theorem proj_sf (m : Nat) (x : T (m + 1)) (hx : SF x) :
+    SF (proj m x) ∧ Tr.toB (proj m x) = Tr.toB x := by
+  cases m with
+  | zero => exact cmap_sf _ _ x hx
+  | succ m => exact cmap_sf _ _ x hx
+
+theorem add_sf {A : Type} (a : Tr A) (ha : SF a) : ∀ b : Tr A, SF b →
+    SF (Tr.add a b) ∧ Tr.toB (Tr.add a b) = BTree.add (Tr.toB a) (Tr.toB b)
+  | .zero, _ => ⟨ha, rfl⟩
+  | .succ b, hb => ⟨(add_sf a ha b hb).1, congrArg BTree.succ (add_sf a ha b hb).2⟩
+  | .lim f, hb => ⟨fun i => (add_sf a ha (f i) (hb i)).1,
+      congrArg BTree.lim (funext fun i => (add_sf a ha (f i) (hb i)).2)⟩
+  | .sup _ _, hb => hb.elim
+
+theorem mulNat_sf {A : Type} (a : Tr A) (ha : SF a) : ∀ k : Nat,
+    SF (Tr.mulNat a k) ∧ Tr.toB (Tr.mulNat a k) = BTree.mulNat (Tr.toB a) k
+  | 0 => ⟨trivial, rfl⟩
+  | k + 1 => by
+      have ih := mulNat_sf a ha k
+      have h := add_sf (Tr.mulNat a k) ih.1 a ha
+      refine ⟨h.1, ?_⟩
+      show Tr.toB (Tr.add (Tr.mulNat a k) a) = BTree.add (BTree.mulNat (Tr.toB a) k) (Tr.toB a)
+      rw [h.2, ih.2]
+
+/-- On trees without `sup`s, `ψ_0` is `ω^·`. -/
+theorem psi0_sf (n : Nat) : ∀ z : T (n + 1), SF z →
+    SF (psiAll n z 0) ∧ Tr.toB (psiAll n z 0) = BTree.opow (Tr.toB z)
+  | .zero, _ => ⟨trivial, rfl⟩
+  | .succ a, hz => by
+      have ih := psi0_sf n a hz
+      refine ⟨fun k => (mulNat_sf _ ih.1 k).1, ?_⟩
+      show BTree.lim (fun k => Tr.toB (Tr.mulNat (psiAll n a 0) k)) =
+        BTree.lim fun k => BTree.mulNat (BTree.opow (Tr.toB a)) k
+      congr 1; funext k; rw [(mulNat_sf _ ih.1 k).2, ih.2]
+  | .lim f, hz => ⟨fun k => (psi0_sf n (f k) (hz k)).1,
+      congrArg BTree.lim (funext fun k => (psi0_sf n (f k) (hz k)).2)⟩
+  | .sup _ _, hz => hz.elim
+
+theorem iterate_opow_tower : ∀ i, iterate BTree.opow (i + 1) (.succ .zero) = tower i
   | 0 => rfl
-  | i + 1 => congrArg BTree.opow (iter_opow_tower i)
+  | i + 1 => congrArg BTree.opow (iterate_opow_tower i)
 
-/-- The first steps into `θ` are definitional. -/
-theorem phi_tower_one :
-    phi (OTree.tower 1) .zero = .lim fun m => iter (phi .zero) m (.succ .zero) := rfl
+/-- The branch `0` of `θ` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`: its
+Brouwer tree is exactly `ε₀`. -/
+theorem toB_branch0 (n : Nat) :
+    Tr.toB (psiAll (n + 1) (towerTop (n + 1) 0) 0) = epsilon0 := by
+  let F : T (n + 1) → T (n + 2) := fun y => lift (n + 1) (lift n (proj n y))
+  have hF : ∀ x, SF x → SF (F x) ∧ Tr.toB (F x) = Tr.toB x := fun x hx => by
+    have h1 := proj_sf n x hx
+    have h2 := lift_sf n _ h1.1
+    have h3 := lift_sf (n + 1) _ h2.1
+    exact ⟨h3.1, h3.2.trans (h2.2.trans h1.2)⟩
+  have e : towerTop (n + 1) 0 = .sup 0 F := by
+    show Tr.cmap (n + 1) (proj n) (.sup 0 fun y => lift n y) = _
+    simp only [Tr.cmap, Nat.zero_lt_succ, ite_true]
+    rfl
+  have hg : ∀ k, SF (iterate (fun g => psiAll (n + 1) (F g) 0) k (omega (n + 1) 0)) ∧
+      Tr.toB (iterate (fun g => psiAll (n + 1) (F g) 0) k (omega (n + 1) 0)) =
+        iterate BTree.opow k (.succ .zero) := by
+    intro k
+    induction k with
+    | zero => exact ⟨trivial, rfl⟩
+    | succ k ih =>
+        have h1 := hF _ ih.1
+        have h2 := psi0_sf (n + 1) _ h1.1
+        refine ⟨h2.1, ?_⟩
+        show Tr.toB (psiAll (n + 1) (F _) 0) = BTree.opow (iterate BTree.opow k (.succ .zero))
+        rw [h2.2, h1.2, ih.2]
+  rw [e]
+  show BTree.lim (fun k => Tr.toB (psiAll (n + 1)
+    (F (iterate (fun g => psiAll (n + 1) (F g) 0) k (omega (n + 1) 0))) 0)) = BTree.lim tower
+  congr 1
+  funext k
+  have h1 := hF _ (hg k).1
+  rw [(psi0_sf (n + 1) _ h1.1).2, h1.2, (hg k).2]
+  exact iterate_opow_tower k
 
-theorem hardy_tower_le_F3 {i y : Nat} (h : i + 1 ≤ y) : hardy (tower i) y ≤ F3 y := by
-  have h1 : hardy (tower i) y ≤ hardy (phi (OTree.tower 1) .zero) y := by
-    rw [phi_tower_one, ← iter_opow_tower i]
-    exact le_maxUpTo (fun m => hardy (iter (phi .zero) m (.succ .zero)) y) h
-  have h2 : hardy (phi (OTree.tower 1) .zero) y ≤ F3 y :=
-    le_maxUpTo (fun m => hardy (phi (OTree.tower m) .zero) y) (i := 1) (by omega)
-  exact Nat.le_trans h1 h2
+end Buch
 
-theorem Feps_le_F3 (y : Nat) : Feps y ≤ F3 (y + 1) :=
-  maxUpTo_le fun i hi =>
-    Nat.le_trans (hardy_mono (tower i) (Nat.le_succ y)) (hardy_tower_le_F3 (by omega))
+theorem Feps_le_F3 (y : Nat) : Feps y ≤ F3 y := by
+  have h : Feps y ≤ hardy (Buch.Tr.toB (Buch.psiAll 41 (Buch.towerTop 41 0) 0)) y := by
+    rw [Buch.toB_branch0 40]; exact Nat.le_refl _
+  exact Nat.le_trans h
+    (le_maxUpTo (fun k => hardy (Buch.Tr.toB (Buch.psiAll 41 (Buch.towerTop 41 k) 0)) y)
+      (Nat.zero_le y))
 
-theorem le_tower_one : Le 3 (mulNat omega 3) (tower 1) :=
-  .limR 2 (by omega) (by
-    show Le 3 (mulNat omega 3) (opow (mulNat (.succ .zero) 2))
-    rw [mulNat_one]
-    exact .limR 3 (Nat.le_refl 3) (Le.refl 3 _))
+theorem F3_42_ge : 336 ≤ F3 42 := Nat.le_trans Feps_42_ge (Feps_le_F3 42)
 
-theorem F3_42_ge : 336 ≤ F3 42 := by
-  have h := le_tower_one.hardy_le (y := 42) (by decide)
-  rw [hardy_omega_three] at h
-  exact Nat.le_trans h (hardy_tower_le_F3 (by decide))
+theorem F3_mono {a b : Nat} (h : a ≤ b) : F3 a ≤ F3 b := hardy_mono _ h
 
-theorem F3_mono {a b : Nat} (h : a ≤ b) : F3 a ≤ F3 b := hardy_mono theta h
+theorem F3_succ (a : Nat) : F3 a + 1 ≤ F3 (a + 1) := hardy_lt_succ _ a
 
-theorem F3_succ (a : Nat) : F3 a + 1 ≤ F3 (a + 1) := hardy_lt_succ theta a
-
-/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at `θ`. -/
+/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at Buchholz's `θ`. -/
 theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
   unfold contender_2 contender_3 C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
   have hw : depth (C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42)) ≤ 42 := by
@@ -196,14 +276,14 @@ theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
   generalize C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42) = w at hw ⊢
   have hlt : Feps 200 < F3 (F3 42) := by
     have h0 := Feps_le_F3 200
-    have h1 := F3_succ 201
-    have h2 : F3 202 ≤ F3 (F3 42) := F3_mono (by
+    have h1 := F3_succ 200
+    have h2 : F3 201 ≤ F3 (F3 42) := F3_mono (by
       have hF := F3_42_ge
       generalize F3 42 = M at hF ⊢
       omega)
     generalize Feps 200 = a at h0 ⊢
-    generalize F3 201 = b at h0 h1
-    generalize F3 202 = c at h1 h2
+    generalize F3 200 = b at h0 h1
+    generalize F3 201 = c at h1 h2
     generalize F3 (F3 42) = d at h2 ⊢
     omega
   cases hs : stype [] w with

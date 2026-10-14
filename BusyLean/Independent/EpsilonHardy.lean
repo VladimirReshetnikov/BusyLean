@@ -12,7 +12,7 @@ maximum over the first `y + 1` terms of the fundamental sequence (instead of
 only the `y`-th term) makes every `H_a` monotone without any condition on the
 tree; it is a standard robust variant of the Hardy hierarchy.
 
-This file imports nothing. Rung 3 (`Bachmann.lean`) builds on it; `ε₀` and
+This file imports nothing. Rung 3 (`Buchholz.lean`) builds on it; `ε₀` and
 `Feps` serve as the bound in the ordinal analysis of System T.
 -/
 
