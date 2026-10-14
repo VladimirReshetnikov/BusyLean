@@ -372,6 +372,51 @@ theorem lookup_some {α : Type} {e : List α} {x : Nat} {v : α} (h : lookup e x
   | true => rw [hb] at h; cases h
   | false => rw [hb] at h; exact h
 
+/-! ## Depth of static types -/
+
+theorem mem_of_nthError {β : Type} {a : β} : ∀ {Γ : List β} {n : Nat},
+    C5.nthError Γ n = some a → a ∈ Γ
+  | _ :: _, 0, h => by cases h; exact List.mem_cons_self
+  | _ :: _, _ + 1, h => List.mem_cons_of_mem _ (mem_of_nthError h)
+
+theorem mem_of_lookup {β : Type} {Γ : List β} {x : Nat} {a : β} (h : C5.lookup Γ x = some a) :
+    a ∈ Γ := mem_of_nthError (lookup_some h)
+
+theorem tyDepth_stype (K : Nat) : ∀ (Γ : List C5.Ty) (t : C5.Term),
+    (∀ a ∈ Γ, tyDepth a ≤ K) → depth t ≤ K + 1 → tyDepth (stype Γ t) ≤ K + 4
+  | Γ, .var x, hΓ, _ => by
+      show tyDepth (match C5.lookup Γ x with
+        | some a => a
+        | none => .nat) ≤ _
+      cases hl : C5.lookup Γ x with
+      | none => show 1 ≤ _; omega
+      | some a => exact Nat.le_trans (hΓ a (mem_of_lookup hl)) (by omega)
+  | _, .lam a b t, _, h => by
+      simp only [depth] at h
+      show max (tyDepth a) (tyDepth b) + 1 ≤ _
+      omega
+  | Γ, .app t u, hΓ, h => by
+      simp only [depth] at h
+      have ih := tyDepth_stype K Γ t hΓ (by omega)
+      show tyDepth (match stype Γ t with
+        | .nat => .nat
+        | .arr _ b => b) ≤ _
+      revert ih
+      cases stype Γ t with
+      | nat => intro _; show 1 ≤ K + 4; omega
+      | arr a b =>
+          intro ih
+          show tyDepth b ≤ K + 4
+          simp only [tyDepth] at ih
+          omega
+  | _, .zero, _, _ => by show 1 ≤ K + 4; omega
+  | _, .succ, _, _ => by show 2 ≤ K + 4; omega
+  | _, .natRec r, _, h => by
+      simp only [depth] at h
+      show tyDepth (C5.Ty.arr r (.arr (.arr .nat (.arr r r)) (.arr .nat r))) ≤ K + 4
+      simp only [tyDepth]
+      omega
+
 /-- **Fundamental lemma.** -/
 theorem rel_utr : ∀ (t : Term) {e : List Value} {σ : Nat → Tm}, EnvRel f σ e →
     Rel f (interp e t).1 (subst σ (utr (tys e) t)) (interp e t).2

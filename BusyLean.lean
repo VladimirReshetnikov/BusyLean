@@ -181,3 +181,10 @@ import BusyLean.Independent.TEmbedding
 import BusyLean.Independent.Ladder
 import BusyLean.Independent.TTyped
 import BusyLean.Independent.SystemTLtLadder
+import BusyLean.Independent.EpsilonHardy
+import BusyLean.Independent.TreeOrder
+import BusyLean.Independent.InfTerms
+import BusyLean.Independent.CutElim
+import BusyLean.Independent.TtoInf
+import BusyLean.Independent.TtoInfBounds
+import BusyLean.Independent.SystemTLtEps
