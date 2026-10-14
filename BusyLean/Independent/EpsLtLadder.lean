@@ -2,7 +2,7 @@ import BusyLean.Independent.TreeTyped
 import BusyLean.Independent.SystemTLtLadder
 
 /-!
-# Rung 3 < rung 4: the Hardy hierarchy at `ε₀` < the self-reflected ladder
+# Rung 3 < rung 4: the Hardy hierarchy at `ε₀` < the self-building transfinite ladder
 
 The ordinal rung is the value of the `TT` program `epsProgram`
 (`eval_epsProgram`). Its Church-style translation is a ladder program of depth
@@ -19,7 +19,7 @@ namespace BusyLean.Indep
 open BusyLean.FL
 open BusyLean.Indep.TT
 open BusyLean.Indep.Emb (IsFC IsF cdepth isFC_errC isFC_recC isF_tyT mem_ctmsUpTo)
-open BusyLean.Indep.Ladder (fvalue ladderUpTo ladderMax stage listMax)
+open BusyLean.Indep.Ladder (fvalue ladderUpTo ladderMax listMax)
 
 theorem isF_tyTT {α : Type} : ∀ σ : TT.Ty, IsF (tyTT σ : FL.Ty α)
   | .nat => ⟨rfl, ⟨trivial, trivial⟩, ⟨trivial, trivial⟩⟩
@@ -134,12 +134,12 @@ theorem contender_3_lt_ladderMax (g : Nat → Nat) {m : Nat} (hm : 1000 ≤ m) :
   generalize Feps (Feps 42) = V at hle ⊢
   omega
 
-/-- **Rung 3 < rung 4**: the ordinal rung < the self-reflected ladder. -/
+/-- **Rung 3 < rung 4**: the ordinal rung < the self-building transfinite ladder. -/
 theorem contender_3_lt_contender_4 : contender_3 < contender_4 := by
   have h42 := F4_42_ge
-  have h := contender_3_lt_ladderMax (stage (F4 42)) (m := F4 42)
+  have h := contender_3_lt_ladderMax (orc4 (F4 42)) (m := F4 42)
     (by generalize F4 42 = M at h42; omega)
-  have e : contender_4 = ladderMax (stage (F4 42)) (F4 42) := F4_eq (F4 42)
+  have e : contender_4 = ladderMax (orc4 (F4 42)) (F4 42) := F4_eq (F4 42)
   rw [e]
   exact h
 

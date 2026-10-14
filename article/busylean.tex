@@ -24,7 +24,7 @@
   frame=single,framerule=0.3pt,rulecolor=\color{black!30},xleftmargin=1em,xrightmargin=1em,
   literate={→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {ℕ}{{$\mathbb{N}$}}1 {∀}{{$\forall$}}1
     {≤}{{$\le$}}1 {×}{{$\times$}}1 {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1 {λ}{{$\lambda$}}1
-    {Λ}{{$\Lambda$}}1 {·}{{$\cdot$}}1 {∃}{{$\exists$}}1 {≫}{{$\gg$}}1}
+    {Λ}{{$\Lambda$}}1 {·}{{$\cdot$}}1 {∃}{{$\exists$}}1 {≫}{{$\gg$}}1 {τ}{{$\tau$}}1}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
@@ -2469,7 +2469,7 @@ Rung & idea & definition\\
 1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
 2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
 3 & ordinal notations & $H_{\varepsilon_0}(H_{\varepsilon_0}(42))$, Brouwer trees\\
-4 & impredicative universes, self-reflected & \lean{F4 (F4 42)} below\\
+4 & impredicative universes building their own length & \lean{F4 (F4 42)} below\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2524,24 +2524,41 @@ reduction: a stray \lean{rfl}, a closing \lean{rw}, or a linter can try to
 compute $H_{\varepsilon_0}(\dots)$, so the proofs generalize large terms and
 keep \lean{elimAll 47} irreducible.
 
-\paragraph{Rung 4.} The language is the ladder of universes of Contender~14,
-used as a library, with its oracle constant pointed at the construction
-itself:
+\paragraph{Rung 4.} The values come from the ladder of universes of
+Contender~14, used as a library; its oracle constant is pointed only at the
+construction itself. The lengths come from the same ladder with
+\emph{transfinitely} many universes, indexed by the addresses of a tree, as
+in Contender~36: a program of the Church tree type denotes a well-founded
+tree.
 \begin{lstlisting}
 def ladderMax (g : ℕ → ℕ) (n : ℕ) : ℕ :=
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
-def stage : ℕ → ℕ → ℕ
-  | 0 => Nat.succ
-  | k + 1 => ladderMax (stage k)
-def F4 (n : ℕ) : ℕ := stage (n + 1) n
+def reflAlong : CTree → ℕ → ℕ
+  | .zero => Nat.succ
+  | .succ τ => ladderMax (reflAlong τ)
+  | .lim g => fun n => listMax (fun i => reflAlong (g i) n) (natsUpTo (n + 1))
+  | _ => Nat.succ
+def grow (f : ℕ → ℕ) (n : ℕ) (t : CTree) : CTree :=
+  .lim fun i => if i = 0 then t else
+    ((tctmsUpTo (addrUpTo t n) n).map (progTree f t n)).getD (i - 1) .zero
+def selfTree (n : ℕ) : ℕ → CTree
+  | 0 => grow Nat.succ n .zero
+  | k + 1 => growAlong (reflAlong (selfTree n k)) n (selfTree n k) (selfTree n k)
+def F4 (n : ℕ) : ℕ := reflAlong (.succ (selfTree n n)) n
 def contender_4 : ℕ := F4 (F4 42)
 \end{lstlisting}
-Stage $k+1$ maximizes level-$n$ programs of depth $\le n$ whose oracle is
-stage $k$. \lean{F4} diagonalizes over reflection stages, universe levels and
-program sizes at once. The enumeration and the value function are redefined in
-the rung's own module; the audit (\lean{test/IndependentAudit.lean}) lists the
-modules of the definition's closure (the ladder library and System~F's core)
-and rejects any contender module.
+\lean{reflAlong} iterates ladder reflection along a tree. \lean{grow} joins a
+tree $t$ with the trees of all programs of depth $\le n$ over the addresses of
+$t$, so the ladder over $t$ produces a longer tree; \lean{growAlong} iterates
+growth along an index tree. Nothing seeds the trees: the first one grows the
+empty tree, and each later one grows the previous tree along itself, with
+reflection along the previous tree as the oracle of the growing programs.
+This gathers the ideas of Contenders 36--53 (ladders that build their own
+length, reflection along ladder-built trees) into one construction. The
+enumerations are redefined in the rung's own module; the audit
+(\lean{test/IndependentAudit.lean}) lists the modules of the definition's
+closure (the ladder libraries, the tree addresses and System~F's core) and
+rejects any contender module.
 
 \paragraph{Rung 3 $<$ rung 4: Church-encoded trees.} A small language
 \lean{TT} (System~T with Brouwer trees and their fold) writes the whole of
@@ -2549,8 +2566,10 @@ rung~3 as a program of value $H_{\varepsilon_0}(H_{\varepsilon_0}(42))$. Trees
 compile to their iterators $\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to X)\to
 X)\to X$. The logical relation at the tree type is defined by recursion on the
 \emph{tree value}, which avoids quantifying over all result types. The program
-has depth 56, type checks in the ladder, and reduces to the right numeral.
-Confluence (below) lets the normalizer find it.
+has depth 56, type checks in the ladder, and reduces to the right numeral
+under every oracle. Confluence (below) lets the normalizer find it. Since
+\lean{F4 n} unfolds to \lean{ladderMax (reflAlong (selfTree n n)) n}, the outer
+\lean{F4} sees the compiled program.
 
 \paragraph{Also: System~T directly into the ladder.} The first version of the
 tower compared rungs 2 and 4 directly (\lean{contender\_2\_lt\_contender\_4}).
@@ -2582,17 +2601,17 @@ That proof therefore compiles \emph{every} raw term.
   fits in depth 42, so \lean{F4 42} $\ge 1067$, and the outer \lean{F4} sees
   the compiled winner.
 \end{enumerate}
-The definitions of all four rungs check in about 2~s and the three comparisons,
-the ordinal analysis included, in about 33~s.
+The definitions of all four rungs check in about 12~s and the three comparisons,
+the ordinal analysis included, in about 21~s.
 
 \paragraph{What was left out, and why.} System~F, F$_\omega$, kind
 polymorphism and the dynamic-kind universe are fragments of the ladder
 language, and the W-language and the tree languages extend System~T, so each
 would be incorporated by a larger rung. Larger ordinal notations (Contenders
-16--31) are the same approach as rung~3. Reflection along trees, towers,
-closure operators and reflective towers (Contenders 6, 9--12, 15, 23 and
-51--70) are amplifiers of a base language; one of them, self-reflection,
-appears inside rung~4.
+16--31) are the same approach as rung~3. Towers, closure operators and reflective
+towers (Contenders 6, 9--12, 15, 23 and 54--70) are amplifiers of a base
+language; two of them, ladders that build their own length and reflection
+along trees (Contenders 36--53), are built into rung~4.
 
 %======================================================================
 \section{Roadmap}

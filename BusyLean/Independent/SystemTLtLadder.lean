@@ -27,7 +27,7 @@ namespace BusyLean.Indep.Emb
 
 open BusyLean.FL
 open BusyLean.Indep.Ladder (kindsUpTo tysUpTo ctmsUpTo cross natsUpTo listMax fvalue
-  ladderUpTo ladderMax stage)
+  ladderUpTo ladderMax)
 
 variable {α : Type} [DecidableEq α] [AtomOrder α]
 
@@ -327,7 +327,7 @@ namespace BusyLean.Indep
 
 open BusyLean.FL
 open BusyLean.Indep.Emb
-open BusyLean.Indep.Ladder (fvalue ladderUpTo ladderMax stage listMax)
+open BusyLean.Indep.Ladder (fvalue ladderUpTo ladderMax listMax)
 
 /-! ## Values of translated programs -/
 
@@ -374,7 +374,11 @@ theorem eval_lt_ladderMax (g : Nat → Nat) (m : Nat) {w : C5.Term} (hs : stype 
   generalize listMax (fvalue m g m) (ladderUpTo m) = L at h
   omega
 
-theorem F4_eq (n : Nat) : F4 n = ladderMax (stage n) n := rfl
+/-- The oracle of the last reflection in `F4 n`: reflection along the
+self-built tree. -/
+def orc4 (n : Nat) : Nat → Nat := Ladder.reflAlong (Ladder.selfTree n n)
+
+theorem F4_eq (n : Nat) : F4 n = ladderMax (orc4 n) n := rfl
 
 /-! ## `F4 42` is already large -/
 
@@ -421,10 +425,10 @@ theorem add_le_ladderMax (g : Nat → Nat) (m : Nat) {x : Nat}
   Nat.add_le_add_left h _
 
 theorem F4_42_ge : 1067 ≤ F4 42 := by
-  have h := eval_le_listMax (stage 42) 42 stype_pow2Program cdepth_pow2Program
+  have h := eval_le_listMax (orc4 42) 42 stype_pow2Program cdepth_pow2Program
   rw [eval_pow2Program] at h
   rw [F4_eq]
-  exact add_le_ladderMax (stage 42) 42 h
+  exact add_le_ladderMax (orc4 42) 42 h
 
 /-! ## The comparison -/
 
@@ -446,7 +450,7 @@ theorem eval_lt_F4 {w : C5.Term} (hw : depth w ≤ 42) {m : Nat} (hm : F4 42 ≤
         rfl
       rw [h0]
       unfold ladderMax
-      generalize listMax (fvalue m (stage m) m) (ladderUpTo m) = L
+      generalize listMax (fvalue m (orc4 m) m) (ladderUpTo m) = L
       omega
   | nat =>
       refine eval_lt_ladderMax _ _ hs ?_

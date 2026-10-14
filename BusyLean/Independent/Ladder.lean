@@ -1,29 +1,42 @@
 import BusyLean.SystemFL.Ladder
 import BusyLean.SystemFL.Church
 import BusyLean.SystemF.Normalize
+import BusyLean.SystemFLT.Trees
 
 /-!
-# Independent tower, rung 4: the self-reflected ladder of universes
+# Independent tower, rung 4: the self-building transfinite ladder
 
-The fourth rung is an **impredicative** language: the ladder of predicative
-universes over dynamic-kind Fω (`BusyLean/SystemFL`, the language of
-Contender 14, used here as a library). Its level-`ℓ` programs are Church-style
-terms with kind polymorphism at two levels and `ℓ` universe atoms. One strong
-normalization proof covers every level (`FL.sn_of_typed`), so a program's value
-(the Church numeral it normalizes to) is computable.
+The fourth rung is an **impredicative** language that measures its own length.
 
-The language also has an oracle constant `orc : nat → nat`. Here the oracle is
-**never another contender**. It is the previous stage of the same
-construction:
+*Values.* The ladder of predicative universes over dynamic-kind Fω
+(`BusyLean/SystemFL`, the language of Contender 14, used here as a library).
+Its level-`ℓ` programs are Church-style terms with kind polymorphism at two
+levels and `ℓ` universe atoms. One strong normalization proof covers every
+level (`FL.sn_of_typed`), so a program's value (the Church numeral it
+normalizes to) is computable. The language has an oracle constant
+`orc : nat → nat`; `ladderMax g n` is `n + 1` plus the largest value of a
+level-`n` program of depth `≤ n` with oracle `g`.
 
-* stage `0` is the successor function;
-* stage `k + 1` maps `n` to `n + 1` plus the largest value of a level-`n` program
-  of depth `≤ n` whose oracle is stage `k` (self-reflection).
+*Lengths.* The same ladder, now with universes indexed by the **addresses of a
+tree** `t` (`SystemFLT` over `Addr t`, a transfinite ladder of the length of
+`t`), and with the Church tree type. A closed program of that type, applied to
+inert constructors, denotes a well-founded tree (`FLT.wt_of_treeTy`). One
+growth step joins `t` with the trees of all such programs of depth `≤ n`
+(`grow`); growth iterates along a tree index (`growAlong`).
 
-`F4 n` is stage `n + 1` at input `n`, a diagonal over reflection stages,
-universe levels and program sizes at once. Nothing below this line mentions
-the lower rungs (Contender 4, Contender 5, the Hardy hierarchy at `ε₀`), or any
-construction of the main tower.
+*Reflection along trees.* `reflAlong τ` iterates ladder reflection along the
+tree `τ`: the empty tree gives the successor function, `succ τ` gives
+`ladderMax (reflAlong τ)` (the ladder with reflection along `τ` as its
+oracle), and a limit takes the largest of its first `n + 1` branches.
+
+*Self-building.* The trees are built by the ladder itself, and nothing else
+seeds them: `selfTree n 0` grows the empty tree once, and `selfTree n (k + 1)`
+grows `selfTree n k` along itself, using ladder programs whose oracle is
+reflection along `selfTree n k`.
+
+`F4 n` is reflection along `succ (selfTree n n)` at input `n`. Nothing below
+this line mentions the lower rungs (Contender 4, Contender 5, the Hardy
+hierarchy at `ε₀`), or any construction of the main tower.
 
 **Do not evaluate `contender_4`.**
 -/
@@ -119,20 +132,82 @@ checked with fuel `n`) whose oracle is `g`. -/
 def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
 
-/-- Reflection stages: stage `k + 1` is the ladder maximum with stage `k` as
-its oracle. -/
-def stage : Nat → Nat → Nat
-  | 0 => Nat.succ
-  | k + 1 => ladderMax (stage k)
+/-! ## Trees built by the transfinite ladder -/
+
+open BusyLean.Ordinal (CTree Addr addr_wf addrUpTo)
+
+/-- Church-style programs of the tree ladder (`SystemFLT`) of enumeration depth
+`≤ n` over the atoms `as`. -/
+def tctmsUpTo (as : List α) : Nat → List (FLT.CTm α)
+  | 0 => []
+  | n + 1 =>
+      let ks := kindsUpTo as n
+      let ts := tysUpTo as n
+      let es := tctmsUpTo as n
+      (natsUpTo n).map FLT.CTm.var ++
+      ((cross ts es).map (fun p => FLT.CTm.lam p.1 p.2) ++
+      ((cross es es).map (fun p => FLT.CTm.app p.1 p.2) ++
+      ((cross ks es).map (fun p => FLT.CTm.tlam p.1 p.2) ++
+      ((cross es ts).map (fun p => FLT.CTm.tapp p.1 p.2) ++
+      (es.map FLT.CTm.klam0 ++
+      ((cross es ks).map (fun p => FLT.CTm.kapp0 p.1 p.2) ++
+      (es.map FLT.CTm.klam1 ++
+      ((cross es ks).map (fun p => FLT.CTm.kapp1 p.1 p.2) ++
+      [FLT.CTm.orc]))))))))
+
+/-- The tree of a program over the addresses of `t` (type checked with `fuel`),
+relative to the oracle `f`: defined when the program has the Church tree type,
+and the empty tree otherwise. -/
+def progTree (f : Nat → Nat) (t : CTree) (fuel : Nat) (p : FLT.CTm (Addr t)) : CTree :=
+  match h : FLT.infer fuel [] [] p with
+  | some A =>
+      if hA : A = FLT.treeTy then
+        FT.toTree f ⟨FLT.applyCons (FLT.erase p), FLT.wt_of_treeTy (FLT.wfUniv f (addr_wf t))
+          (FLT.infer_sound fuel p (FLT.goodCtx_nil []) (h.trans (congrArg some hA))).1⟩
+      else .zero
+  | none => .zero
+
+/-- One growth step: `t` joined with the trees of all programs of depth `≤ n`
+over the addresses of `t` (type checked with fuel `n`, oracle `f`). -/
+def grow (f : Nat → Nat) (n : Nat) (t : CTree) : CTree :=
+  .lim fun i =>
+    if i = 0 then t else ((tctmsUpTo (addrUpTo t n) n).map (progTree f t n)).getD (i - 1) .zero
+
+/-- Growth steps iterated along a tree index, starting from `base`. -/
+def growAlong (f : Nat → Nat) (n : Nat) (base : CTree) : CTree → CTree
+  | .zero => base
+  | .succ c => grow f n (growAlong f n base c)
+  | .lim g => .lim fun i => growAlong f n base (g i)
+  | .supL _ => base
+  | .supH _ => base
+
+/-! ## Reflection along trees -/
+
+/-- Ladder reflection iterated along a tree: `succ τ` is the ladder with
+reflection along `τ` as its oracle; a limit takes the largest of its first
+`n + 1` branches. -/
+def reflAlong : CTree → Nat → Nat
+  | .zero => Nat.succ
+  | .succ τ => ladderMax (reflAlong τ)
+  | .lim g => fun n => listMax (fun i => reflAlong (g i) n) (natsUpTo (n + 1))
+  | .supL _ => Nat.succ
+  | .supH _ => Nat.succ
+
+/-- The self-built trees: grow the empty tree once, then repeatedly grow the
+tree along itself, with reflection along it as the oracle of the growing
+programs. -/
+def selfTree (n : Nat) : Nat → CTree
+  | 0 => grow Nat.succ n .zero
+  | k + 1 => growAlong (reflAlong (selfTree n k)) n (selfTree n k) (selfTree n k)
 
 end BusyLean.Indep.Ladder
 
 namespace BusyLean.Indep
 
-/-- Reflection stage `n + 1` at input `n`. -/
-def F4 (n : Nat) : Nat := Ladder.stage (n + 1) n
+/-- Ladder reflection along `succ (selfTree n n)` at input `n`. -/
+def F4 (n : Nat) : Nat := Ladder.reflAlong (.succ (Ladder.selfTree n n)) n
 
-/-- **Rung 4**: the self-reflected ladder of universes. Never evaluate it. -/
+/-- **Rung 4**: the self-building transfinite ladder. Never evaluate it. -/
 def contender_4 : Nat := F4 (F4 42)
 
 end BusyLean.Indep

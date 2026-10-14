@@ -29,7 +29,7 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
 | 3 | ordinal notations | `H_{ε₀}(H_{ε₀}(42))`: the Hardy hierarchy along `ε₀`, written as Brouwer trees | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)` |
-| 4 | impredicative universes, self-reflected | `F4 (F4 42)`, where `F4 n` maximizes level-`n` ladder-of-universes programs of depth `≤ n` whose oracle is the previous reflection stage, starting from `succ` | Church-encoded Brouwer trees in the ladder compute `H_{ε₀}(H_{ε₀}(42))` |
+| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | Church-encoded Brouwer trees in the ladder compute `H_{ε₀}(H_{ε₀}(42))` |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
@@ -42,10 +42,18 @@ def Feps (n : Nat) : Nat := hardy BTree.epsilon0 n            -- ε₀ = lim ω_
 def contender_3 : Nat := Feps (Feps 42)
 def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
-def stage : Nat → Nat → Nat
-  | 0 => Nat.succ
-  | k + 1 => ladderMax (stage k)
-def F4 (n : Nat) : Nat := stage (n + 1) n
+def reflAlong : CTree → Nat → Nat                             -- reflection along a tree
+  | .zero => Nat.succ
+  | .succ τ => ladderMax (reflAlong τ)
+  | .lim g => fun n => listMax (fun i => reflAlong (g i) n) (natsUpTo (n + 1))
+  | _ => Nat.succ
+def grow (f : Nat → Nat) (n : Nat) (t : CTree) : CTree :=      -- t joined with the trees of all
+  .lim fun i => if i = 0 then t else                           -- programs of depth ≤ n over the
+    ((tctmsUpTo (addrUpTo t n) n).map (progTree f t n)).getD (i - 1) .zero  -- addresses of t
+def selfTree (n : Nat) : Nat → CTree                           -- growAlong: grow along an index tree
+  | 0 => grow Nat.succ n .zero
+  | k + 1 => growAlong (reflAlong (selfTree n k)) n (selfTree n k) (selfTree n k)
+def F4 (n : Nat) : Nat := reflAlong (.succ (selfTree n n)) n
 def contender_4 : Nat := F4 (F4 42)
 
 theorem contender_1_lt_contender_2 : contender_1 < contender_2  -- Independent/AckermannLtSystemT.lean
@@ -69,6 +77,20 @@ distinction. The proof never evaluates anything:
 | bounding lemma | [`CutElim.lean`](BusyLean/Independent/CutElim.lean) | `value_le_hardy`: a redex-free closed term has value `≤ H_{ω^{height}}(y)` |
 | assembly | [`SystemTLtEps.lean`](BusyLean/Independent/SystemTLtEps.lean) | `eval_le_hardy_eps`: `eval w ≤ H_{ω_{49}}(y) ≤ H_{ε₀}(y)` for `y ≥ 200` |
 
+**Rung 4: the self-building transfinite ladder**
+([`Ladder.lean`](BusyLean/Independent/Ladder.lean)). Values come from the
+ladder of universes (Contender 14's language, as a library): `ladderMax g n` is
+`n + 1` plus the largest value of a level-`n` program of depth `≤ n` with
+oracle `g`. Lengths come from the same ladder with universes indexed by the
+addresses of a tree `t` (`SystemFLT` over `Addr t`): a program of the Church
+tree type denotes a well-founded tree, and `grow` joins `t` with all such
+trees. `reflAlong τ` iterates ladder reflection along `τ`. The trees are built
+by the ladder alone: `selfTree n 0` grows the empty tree, and each later tree
+grows the previous one along itself, with reflection along the previous tree
+as the oracle of the growing programs. This combines the ideas of Contenders
+36–53 (ladders that build their own length, reflection along ladder-built
+trees) without seeding.
+
 **Rung 3 < rung 4: simulation.** A small language `TT` (System T plus Brouwer
 trees and their fold, [`TreeLang.lean`](BusyLean/Independent/TreeLang.lean))
 expresses `+`, `·n`, `ω^·`, the towers, `ε₀` and the Hardy hierarchy. The
@@ -79,6 +101,8 @@ shows that the compiled program reduces to the right numeral. Confluence
 ([`Confluence.lean`](BusyLean/Independent/Confluence.lean)) makes the
 normalizer find it, and the ladder's type checker accepts the program
 ([`TreeTyped.lean`](BusyLean/Independent/TreeTyped.lean)), whose depth is 56.
+Since `F4 n = ladderMax (reflAlong (selfTree n n)) n`, and the simulation
+works under every oracle, the outer `F4` already sees the compiled program.
 
 System T also embeds into the ladder directly
 ([`SystemTLtLadder.lean`](BusyLean/Independent/SystemTLtLadder.lean),
@@ -88,15 +112,16 @@ polymorphic pairs.
 Excluded, because a larger rung would have to incorporate them: System F,
 Fω and kind polymorphism (fragments of the ladder language), the W-language
 and tree languages (extensions of System T), larger ordinal notations
-(Contenders 16–31, the same approach as rung 3), and reflection, towers and
-closure operators over a base language (amplifiers, used once, in rung 4).
+(Contenders 16–31, the same approach as rung 3), and towers and closure
+operators over a base language (amplifiers). Two amplifiers, ladders that
+build their own length and reflection along trees, are built into rung 4.
 
 [`test/IndependentAudit.lean`](test/IndependentAudit.lean) prints the modules
 each rung's definition depends on and fails if one reaches a lower rung or a
 main-tower contender. Rung 3 depends only on its own file, which imports
 nothing. `python3 scripts/check_independent.py` runs the budgets and the audit
-from a clean build. The four definition modules take about 2 s and the three
-comparisons, the ordinal analysis included, about 33 s.
+from a clean build. The four definition modules take about 12 s and the three
+comparisons, the ordinal analysis included, about 21 s.
 
 ## The closed cumulative tower
 
