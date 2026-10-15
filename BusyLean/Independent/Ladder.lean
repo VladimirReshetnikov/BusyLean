@@ -1,36 +1,42 @@
-import BusyLean.SystemFL.Ladder
-import BusyLean.SystemFL.Church
-import BusyLean.SystemF.Normalize
-import BusyLean.SystemFLT2.Numbers
+import BusyLean.Independent.LadderBase
+import BusyLean.Independent.LadderOld
+import BusyLean.SystemFLV.Numbers
 
 /-!
-# Independent tower, rung 4: the self-building ladder that reads what it builds
+# Independent tower, rung 4: the self-building ladder with universe levels
 
 The fourth rung is an **impredicative** language that builds its own length
 and reads it.
 
 *Values.* The ladder of predicative universes over dynamic-kind Fω
-(`BusyLean/SystemFL`, the language of Contender 14, used here as a library).
-Its level-`ℓ` programs are Church-style terms with kind polymorphism at two
-levels and `ℓ` universe atoms. One strong normalization proof covers every
-level (`FL.sn_of_typed`), so a program's value (the Church numeral it
-normalizes to) is computable. The language has an oracle constant
-`orc : nat → nat`; `ladderMax g n` is `n + 1` plus the largest value of a
+(`LadderBase.lean`): `ladderMax g n` is `n + 1` plus the largest value of a
 level-`n` program of depth `≤ n` with oracle `g`.
 
-*Reading a tree.* The same ladder over System FT2's terms (`SystemFLT2`), with
-universes indexed by the **addresses of a tree** `T`, gets a recursor over `T`
-at every type. A program of the numeric reader type
-`∀X. (∀Y. Y → (Y → Y) → ((nat → Y) → Y) → X → Y) → X → nat` is applied to the
-recursor and to `T`, and normalizes (`FLT2.sn_of_natReaderTy`). A program of
-the reader type also receives the tree constructors and builds a well-founded
-tree from `T` (`FLT2.wt_of_readerTy`). Universes over unnamed atoms are out of
-reach of a program of bounded depth (the truncation of the atom order), but the
-tree itself is data: the same program computes more from a larger tree.
+*The ladder with universe levels.* The same ladder over System FT2's terms,
+extended with **level variables** (`BusyLean/SystemFLV`): bounded
+quantification `∀b ≤ l. A`, level-indexed operators `λb ≤ l. A` (of kind
+`lfam l k`) with their applications, atoms at level variables, and level
+abstraction and application in programs. Its universes are indexed by the
+**addresses of a tree** `T`, so a program can quantify over all universes
+below a given address. One normalization proof covers every universe over a
+transitive well-founded atom order (`FLV.sn_of_typed`), the addresses of every
+tree among them. A program has a recursor over `T` at every type: one of the
+numeric reader type `∀X. (∀Y. Y → (Y → Y) → ((nat → Y) → Y) → X → Y) → X → nat`
+is applied to the recursor and to `T`, and normalizes
+(`FLV.sn_of_natReaderTy`); one of the reader type also receives the tree
+constructors and builds a well-founded tree from `T` (`FLV.wt_of_readerTy`).
 
-*Values that read the tree.* `readMax g T n` is `n + 1` plus the largest value of
-a program of `ladderMax` and of a numeric reader program of depth `≤ n` over the
-addresses of `T`, reading `T`, with oracle `g`.
+*Incorporating the previous rung 4.* Every value includes the running maximum
+of the previous version of rung 4 (`LadderOld.F4`, the self-building
+transfinite ladder of `SystemFLT`): `oldMax n` is the largest `LadderOld.F4 k`
+for `k ≤ n`. So the current rung is larger than the previous one
+(`contender_4_old_lt_contender_4` in `LadderOldLtLadder.lean`), and the previous
+one is dropped from the hierarchy.
+
+*Values that read the tree.* `readMax g T n` is `n + 1` plus the largest of
+`oldMax n`, the values of the programs of `ladderMax g n`, and the values of
+the numeric reader programs of depth `≤ n` over the addresses of `T`, reading
+`T`, with oracle `g`.
 
 *Growth by reading.* One jump joins `T` with the trees that all reader programs
 of depth `≤ n` over the addresses of `T` build from `T` (`jump`); jumps iterate
@@ -57,152 +63,127 @@ of the main tower.
 namespace BusyLean.Indep.Ladder
 
 open BusyLean.FL
+open BusyLean.Ordinal (CTree Addr TreePath addr_wf addrUpTo)
 
 variable {α : Type}
 
-/-! ## List utilities -/
+/-! ## Enumeration of the ladder with levels -/
 
-def cross {A B : Type} (xs : List A) (ys : List B) : List (A × B) :=
-  xs.flatMap (fun x => ys.map (fun y => (x, y)))
+/-- Levels of enumeration depth `n` over the atoms `as`: the level variables
+below `n`, and the atoms. -/
+def lvlsUpTo (as : List α) (n : Nat) : List (FLV.Lvl α) :=
+  (natsUpTo n).map FLV.Lvl.var ++ as.map FLV.Lvl.const
 
-/-- `[n-1, …, 1, 0]`. -/
-def natsUpTo : Nat → List Nat
-  | 0 => []
-  | n + 1 => n :: natsUpTo n
-
-/-- The largest score in a list (`0` for the empty list). -/
-def listMax {A : Type} (score : A → Nat) : List A → Nat
-  | [] => 0
-  | a :: xs => max (score a) (listMax score xs)
-
-/-! ## Enumeration of kinds, types and programs by depth -/
-
-/-- Kinds of enumeration depth `≤ n` over the atoms `as`. -/
-def kindsUpTo (as : List α) : Nat → List (Kind α)
+/-- Kinds of the ladder with levels of enumeration depth `≤ n`. -/
+def vkindsUpTo (as : List α) : Nat → List (FLV.Kind α)
   | 0 => []
   | n + 1 =>
-      let ks := kindsUpTo as n
-      Kind.star :: (Kind.dyn :: ((cross ks ks).map (fun p => Kind.arr p.1 p.2) ++
-        ((natsUpTo n).map Kind.kvar ++ ((natsUpTo n).map Kind.dvar ++ as.map Kind.atom))))
+      let ks := vkindsUpTo as n
+      let ls := lvlsUpTo as n
+      FLV.Kind.star :: (FLV.Kind.dyn :: ((cross ks ks).map (fun p => FLV.Kind.arr p.1 p.2) ++
+        ((natsUpTo n).map FLV.Kind.kvar ++ ((natsUpTo n).map FLV.Kind.dvar ++
+        (ls.map FLV.Kind.atom ++ (cross ls ks).map (fun p => FLV.Kind.lfam p.1 p.2))))))
 
-/-- Type constructors of enumeration depth `≤ n` over the atoms `as`. -/
-def tysUpTo (as : List α) : Nat → List (Ty α)
+/-- Type constructors of the ladder with levels of enumeration depth `≤ n`. -/
+def vtysUpTo (as : List α) : Nat → List (FLV.Ty α)
   | 0 => []
   | n + 1 =>
-      let ks := kindsUpTo as n
-      let ts := tysUpTo as n
-      (natsUpTo n).map Ty.tvar ++
-      ((cross ts ts).map (fun p => Ty.arr p.1 p.2) ++
-      ((cross ks ts).map (fun p => Ty.all p.1 p.2) ++
-      ((cross ks ts).map (fun p => Ty.lam p.1 p.2) ++
-      ((cross ks (cross ts ts)).map (fun p => Ty.app p.1 p.2.1 p.2.2) ++
-      (ts.map Ty.kall0 ++ (ts.map Ty.kall1 ++
-      ((cross ks ts).map (fun p => Ty.pack p.1 p.2) ++
-      ((cross ks ts).map (fun p => Ty.unpack p.1 p.2) ++
-      ((cross as (cross ks ts)).map (fun p => Ty.apack p.1 p.2.1 p.2.2) ++
-      (cross as (cross ks ts)).map (fun p => Ty.aunpack p.1 p.2.1 p.2.2))))))))))
+      let ks := vkindsUpTo as n
+      let ts := vtysUpTo as n
+      let ls := lvlsUpTo as n
+      (natsUpTo n).map FLV.Ty.tvar ++
+      ((cross ts ts).map (fun p => FLV.Ty.arr p.1 p.2) ++
+      ((cross ks ts).map (fun p => FLV.Ty.all p.1 p.2) ++
+      ((cross ks ts).map (fun p => FLV.Ty.lam p.1 p.2) ++
+      ((cross ks (cross ts ts)).map (fun p => FLV.Ty.app p.1 p.2.1 p.2.2) ++
+      (ts.map FLV.Ty.kall0 ++ (ts.map FLV.Ty.kall1 ++
+      ((cross ks ts).map (fun p => FLV.Ty.pack p.1 p.2) ++
+      ((cross ks ts).map (fun p => FLV.Ty.unpack p.1 p.2) ++
+      ((cross ls (cross ks ts)).map (fun p => FLV.Ty.apack p.1 p.2.1 p.2.2) ++
+      ((cross ls (cross ks ts)).map (fun p => FLV.Ty.aunpack p.1 p.2.1 p.2.2) ++
+      ((cross ls ts).map (fun p => FLV.Ty.lall p.1 p.2) ++
+      ((cross ls ts).map (fun p => FLV.Ty.llam p.1 p.2) ++
+      (cross ls (cross ts ls)).map (fun p => FLV.Ty.lapp p.1 p.2.1 p.2.2)))))))))))))
 
-/-- Church-style programs of enumeration depth `≤ n` over the atoms `as`. -/
-def ctmsUpTo (as : List α) : Nat → List (CTm α)
+/-- Church-style programs of the ladder with levels of enumeration depth `≤ n`. -/
+def vctmsUpTo (as : List α) : Nat → List (FLV.CTm α)
   | 0 => []
   | n + 1 =>
-      let ks := kindsUpTo as n
-      let ts := tysUpTo as n
-      let es := ctmsUpTo as n
-      (natsUpTo n).map CTm.var ++
-      ((cross ts es).map (fun p => CTm.lam p.1 p.2) ++
-      ((cross es es).map (fun p => CTm.app p.1 p.2) ++
-      ((cross ks es).map (fun p => CTm.tlam p.1 p.2) ++
-      ((cross es ts).map (fun p => CTm.tapp p.1 p.2) ++
-      (es.map CTm.klam0 ++
-      ((cross es ks).map (fun p => CTm.kapp0 p.1 p.2) ++
-      (es.map CTm.klam1 ++
-      ((cross es ks).map (fun p => CTm.kapp1 p.1 p.2) ++
-      [CTm.orc]))))))))
+      let ks := vkindsUpTo as n
+      let ts := vtysUpTo as n
+      let ls := lvlsUpTo as n
+      let es := vctmsUpTo as n
+      (natsUpTo n).map FLV.CTm.var ++
+      ((cross ts es).map (fun p => FLV.CTm.lam p.1 p.2) ++
+      ((cross es es).map (fun p => FLV.CTm.app p.1 p.2) ++
+      ((cross ks es).map (fun p => FLV.CTm.tlam p.1 p.2) ++
+      ((cross es ts).map (fun p => FLV.CTm.tapp p.1 p.2) ++
+      (es.map FLV.CTm.klam0 ++
+      ((cross es ks).map (fun p => FLV.CTm.kapp0 p.1 p.2) ++
+      (es.map FLV.CTm.klam1 ++
+      ((cross es ks).map (fun p => FLV.CTm.kapp1 p.1 p.2) ++
+      ((cross ls es).map (fun p => FLV.CTm.llam p.1 p.2) ++
+      ((cross es ls).map (fun p => FLV.CTm.lapp p.1 p.2) ++
+      [FLV.CTm.orc]))))))))))
 
-/-! ## Values of programs -/
+/-! ## Reading a tree with the ladder with levels -/
 
-theorem sn_erase {f : Nat → Nat} (ℓ : Nat) {fuel : Nat} {t : CTm (Atom ℓ)}
-    (h : infer fuel [] [] t = some Ty.nat) : F.SN f (erase t) :=
-  sn_of_typed (Univ f ℓ) (infer_sound fuel t (goodCtx_nil []) h).1
-
-/-- The value of a level-`ℓ` program, type checked with `fuel`, relative to the
-oracle `f`: the Church numeral it normalizes to (`0` if it is not a closed
-program of type `nat`). -/
-def fvalue (ℓ : Nat) (f : Nat → Nat) (fuel : Nat) (t : CTm (Atom ℓ)) : Nat :=
-  match h : infer fuel [] [] t with
-  | some A =>
-      if hA : A = Ty.nat then
-        F.decode (F.nf f ⟨erase t, sn_erase ℓ (h.trans (congrArg some hA))⟩)
-      else 0
-  | none => 0
-
-/-- Level-`n` programs of depth `≤ n`. -/
-def ladderUpTo (n : Nat) : List (CTm (Atom n)) := ctmsUpTo (Atom.all n) n
-
-/-- `n + 1` plus the largest value of a level-`n` program of depth `≤ n` (type
-checked with fuel `n`) whose oracle is `g`. -/
-def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=
-  n + 1 + listMax (fvalue n g n) (ladderUpTo n)
-
-/-! ## Reading a tree with the ladder -/
-
-open BusyLean.Ordinal (CTree Addr addr_wf addrUpTo)
-
-/-- Church-style programs of the reading ladder (`SystemFLT2`) of enumeration
-depth `≤ n` over the atoms `as`. -/
-def rctmsUpTo (as : List α) : Nat → List (FLT2.CTm α)
-  | 0 => []
-  | n + 1 =>
-      let ks := kindsUpTo as n
-      let ts := tysUpTo as n
-      let es := rctmsUpTo as n
-      (natsUpTo n).map FLT2.CTm.var ++
-      ((cross ts es).map (fun p => FLT2.CTm.lam p.1 p.2) ++
-      ((cross es es).map (fun p => FLT2.CTm.app p.1 p.2) ++
-      ((cross ks es).map (fun p => FLT2.CTm.tlam p.1 p.2) ++
-      ((cross es ts).map (fun p => FLT2.CTm.tapp p.1 p.2) ++
-      (es.map FLT2.CTm.klam0 ++
-      ((cross es ks).map (fun p => FLT2.CTm.kapp0 p.1 p.2) ++
-      (es.map FLT2.CTm.klam1 ++
-      ((cross es ks).map (fun p => FLT2.CTm.kapp1 p.1 p.2) ++
-      [FLT2.CTm.orc]))))))))
+/-- The descendant order on the addresses of a tree is transitive. -/
+theorem addr_ltTrans (T : CTree) : FLV.LtTrans (Addr T) :=
+  fun _ _ _ h1 h2 => TreePath.lt_trans T h1 h2
 
 /-- The number a numeric reader program over the addresses of `T` computes from
 `T` (type checked with `fuel`), with oracle `g`: `0` unless it has the numeric
 reader type. -/
-def readNat (g : Nat → Nat) (T : CTree) (fuel : Nat) (p : FLT2.CTm (Addr T)) : Nat :=
-  match h : FLT2.infer fuel [] [] p with
+def readNat (g : Nat → Nat) (T : CTree) (fuel : Nat) (p : FLV.CTm (Addr T)) : Nat :=
+  match h : FLV.infer fuel [] [] [] p with
   | some A =>
-      if hA : A = FLT2.natReaderTy then
-        FT2.decode (FT2.nf ⟨g, T⟩ ⟨FLT2.applyNatReader (FLT2.erase p),
-          FLT2.sn_of_natReaderTy (FLT2.wfUniv ⟨g, T⟩ (addr_wf T))
-            (FLT2.infer_sound fuel p (FLT2.goodCtx_nil []) (h.trans (congrArg some hA))).1⟩)
+      if hA : A = FLV.natReaderTy then
+        FT2.decode (FT2.nf ⟨g, T⟩ ⟨FLT2.applyNatReader (FLV.erase p),
+          FLV.sn_of_natReaderTy (FLT2.wfUniv ⟨g, T⟩ (addr_wf T)) (addr_ltTrans T)
+            (TreePath.root : Addr T)
+            (FLV.infer_sound (addr_ltTrans T) fuel p (FLV.goodCtx_nil [] [])
+              (h.trans (congrArg some hA))).1⟩)
       else 0
   | none => 0
 
 /-- The tree a reader program over the addresses of `T` builds from `T` (type
 checked with `fuel`), with oracle `g`: `zero` unless it has the reader type. -/
-def readTree (g : Nat → Nat) (T : CTree) (fuel : Nat) (p : FLT2.CTm (Addr T)) : CTree :=
-  match h : FLT2.infer fuel [] [] p with
+def readTree (g : Nat → Nat) (T : CTree) (fuel : Nat) (p : FLV.CTm (Addr T)) : CTree :=
+  match h : FLV.infer fuel [] [] [] p with
   | some A =>
-      if hA : A = FLT2.readerTy then
-        FT2.toTree ⟨g, T⟩ ⟨FLT2.applyReader (FLT2.erase p),
-          FLT2.wt_of_readerTy (FLT2.wfUniv ⟨g, T⟩ (addr_wf T))
-            (FLT2.infer_sound fuel p (FLT2.goodCtx_nil []) (h.trans (congrArg some hA))).1⟩
+      if hA : A = FLV.readerTy then
+        FT2.toTree ⟨g, T⟩ ⟨FLT2.applyReader (FLV.erase p),
+          FLV.wt_of_readerTy (FLT2.wfUniv ⟨g, T⟩ (addr_wf T)) (addr_ltTrans T)
+            (TreePath.root : Addr T)
+            (FLV.infer_sound (addr_ltTrans T) fuel p (FLV.goodCtx_nil [] [])
+              (h.trans (congrArg some hA))).1⟩
       else .zero
   | none => .zero
 
-/-- `n + 1` plus the largest value of a program of `ladderMax g n` and of a
-numeric reader program of depth `≤ n` over the addresses of `T`, reading `T`,
-with oracle `g`. -/
+/-- The running maximum of the previous rung 4: the largest `LadderOld.F4 k`
+for `k ≤ n`. -/
+def oldMax (n : Nat) : Nat := listMax LadderOld.F4 (natsUpTo (n + 1))
+
+/-- `n + 1` plus the largest of `oldMax n`, the values of the programs of
+`ladderMax g n`, and the values of the numeric reader programs of depth `≤ n`
+over the addresses of `T`, reading `T`, with oracle `g`. -/
 def readMax (g : Nat → Nat) (T : CTree) (n : Nat) : Nat :=
-  n + 1 + max (listMax (fvalue n g n) (ladderUpTo n))
-    (listMax (readNat g T n) (rctmsUpTo (addrUpTo T n) n))
+  n + 1 + max (oldMax n) (max (listMax (fvalue n g n) (ladderUpTo n))
+    (listMax (readNat g T n) (vctmsUpTo (addrUpTo T n) n)))
 
 theorem ladderMax_le_readMax (g : Nat → Nat) (T : CTree) (n : Nat) :
     ladderMax g n ≤ readMax g T n :=
-  Nat.add_le_add_left (Nat.le_max_left _ _) _
+  Nat.add_le_add_left (Nat.le_trans (Nat.le_max_left _ _) (Nat.le_max_right _ _)) _
+
+theorem oldMax_lt_readMax (g : Nat → Nat) (T : CTree) (n : Nat) : oldMax n < readMax g T n := by
+  unfold readMax
+  have h := Nat.le_max_left (oldMax n) (max (listMax (fvalue n g n) (ladderUpTo n))
+    (listMax (readNat g T n) (vctmsUpTo (addrUpTo T n) n)))
+  generalize max (oldMax n) (max (listMax (fvalue n g n) (ladderUpTo n))
+    (listMax (readNat g T n) (vctmsUpTo (addrUpTo T n) n))) = M at h ⊢
+  generalize oldMax n = O at h ⊢
+  omega
 
 /-! ## Trees built by reading -/
 
@@ -211,7 +192,7 @@ depth `≤ n` over the addresses of `t` build from `t` (type checked with fuel
 `n`, oracle `f`). -/
 def jump (f : Nat → Nat) (n : Nat) (t : CTree) : CTree :=
   .lim fun i =>
-    if i = 0 then t else ((rctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero
+    if i = 0 then t else ((vctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero
 
 /-- Jumps iterated along a tree index, starting from `base`. -/
 def jumpAlong (f : Nat → Nat) (n : Nat) (base : CTree) : CTree → CTree
@@ -247,7 +228,8 @@ namespace BusyLean.Indep
 /-- The reading reflection along `succ (selfTree n n)`, reading `selfTree n n`, at input `n`. -/
 def F4 (n : Nat) : Nat := Ladder.reflAlong (Ladder.selfTree n n) (.succ (Ladder.selfTree n n)) n
 
-/-- **Rung 4**: the self-building ladder that reads what it builds. Never evaluate it. -/
+/-- **Rung 4**: the self-building ladder with universe levels, which reads what it
+builds. Never evaluate it. -/
 def contender_4 : Nat := F4 (F4 42)
 
 end BusyLean.Indep

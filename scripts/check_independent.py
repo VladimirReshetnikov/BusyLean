@@ -8,9 +8,11 @@ precompiled, as the rules allow):
 
 1. libraries: the generic modules the rungs are written in (the port of
    Contender 5's language, System F's untyped core and normalizer, the ladder
-   language with its strong normalization proof, and the ladder over System
-   FT2's terms that reads a tree). They were accepted under their own budgets
-   with the main tower, so this phase is reported but not budgeted.
+   language with its strong normalization proof, the ladder over System FT2's
+   terms that reads a tree, its extension with universe levels (`SystemFLV`,
+   with its own normalization proof), and the tree ladder `SystemFLT` of the
+   previous rung 4, which rung 4 incorporates). They are generic languages and
+   their metatheory, so this phase is reported but not budgeted.
 2. definitions: the four rungs; budget 15 s.
 3. proofs: the three comparisons and their lemmas, including the ordinal
    analysis of System T; budget 60 s.
@@ -32,13 +34,14 @@ BUILD_DIRS = [ROOT / ".lake" / "build",
 PERMITTED = {"propext", "Quot.sound"}
 LIBRARIES = ["BusyLean.Contender5", "BusyLean.SystemF.Normalize",
              "BusyLean.SystemFL.Ladder", "BusyLean.SystemFL.Church",
-             "BusyLean.SystemFLT2.Numbers"]
+             "BusyLean.SystemFLT2.Numbers", "BusyLean.SystemFLV.Numbers",
+             "BusyLean.SystemFLT.Trees"]
 DEFINITIONS = ["BusyLean.Independent.Ackermann", "BusyLean.Independent.SystemT",
                "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Buchholz",
                "BusyLean.Independent.Ladder"]
 PROOFS = ["BusyLean.Independent.AckermannLtSystemT", "BusyLean.Independent.SystemTLtEps",
           "BusyLean.Independent.Tower",
-          "BusyLean.Independent.EpsLtLadder"]
+          "BusyLean.Independent.EpsLtLadder", "BusyLean.Independent.LadderOldLtLadder"]
 DEFINITION_BUDGET = 15.0  # seconds
 PROOF_BUDGET = 60.0
 LAKE = shutil.which("lake") or "lake"

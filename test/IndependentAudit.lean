@@ -87,17 +87,25 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
 #print axioms BusyLean.Indep.TFB.rel_thetaW
 #print axioms BusyLean.Indep.Feps_le_F3
 #print axioms BusyLean.Indep.TT.utrT_steps
+#print axioms BusyLean.Indep.LadderOld.contender_4
+#print axioms BusyLean.Indep.contender_4_old_lt_contender_4
+#print axioms BusyLean.FLV.sn_of_typed
+#print axioms BusyLean.FLV.infer_sound
+#print axioms BusyLean.FLV.sn_of_natReaderTy
+#print axioms BusyLean.FLV.wt_of_readerTy
 
 -- 2–3. Independence of the definitions.
 #assert_independent BusyLean.Indep.contender_1 allowing forbidding
   BusyLean.Contender5 BusyLean.Independent.SystemT BusyLean.Independent.EpsilonHardy
-  BusyLean.Independent.Buchholz BusyLean.Independent.Ladder
+  BusyLean.Independent.Buchholz BusyLean.Independent.Ladder BusyLean.Independent.LadderBase
+  BusyLean.Independent.LadderOld
 #assert_independent BusyLean.Indep.contender_2 allowing BusyLean.Contender5 forbidding
   BusyLean.Independent.Ackermann BusyLean.Independent.EpsilonHardy BusyLean.Independent.Buchholz
-  BusyLean.Independent.Ladder
+  BusyLean.Independent.Ladder BusyLean.Independent.LadderBase BusyLean.Independent.LadderOld
 #assert_independent BusyLean.Indep.contender_3 allowing forbidding
   BusyLean.Contender5 BusyLean.Independent.Ackermann BusyLean.Independent.SystemT
-  BusyLean.Independent.Ladder BigNumber.Definitions
+  BusyLean.Independent.Ladder BusyLean.Independent.LadderBase BusyLean.Independent.LadderOld
+  BigNumber.Definitions
 #assert_independent BusyLean.Indep.contender_4 allowing forbidding
   BusyLean.Contender5 BusyLean.Independent.Ackermann BusyLean.Independent.SystemT
   BusyLean.Independent.SystemTFacts BusyLean.Independent.TEmbedding BusyLean.Independent.TTyped
@@ -108,3 +116,4 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
 #check @BusyLean.Indep.contender_1_lt_contender_2
 #check @BusyLean.Indep.contender_2_lt_contender_3
 #check @BusyLean.Indep.contender_3_lt_contender_4
+#check @BusyLean.Indep.contender_4_old_lt_contender_4

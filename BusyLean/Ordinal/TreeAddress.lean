@@ -133,6 +133,21 @@ theorem lt_wf (t : CTree) : WellFounded (fun b a => lt t b a = true) := by
       simp only [lt, Bool.and_eq_true, valid] at hb
       rw [follow_none_desc t ha hb.1] at hb; simp at hb
 
+theorem isDesc_trans : ∀ {c b a : TreePath}, isDesc c b = true → isDesc b a = true →
+    isDesc c a = true
+  | .root, _, _, h, _ => by simp [isDesc] at h
+  | .child p _, b, a, h1, h2 => by
+      simp only [isDesc, Bool.or_eq_true, decide_eq_true_eq] at h1 ⊢
+      rcases h1 with rfl | h1
+      · exact Or.inr h2
+      · exact Or.inr (isDesc_trans h1 h2)
+
+/-- The descendant order is transitive. -/
+theorem lt_trans (t : CTree) {c b a : TreePath} (h1 : lt t c b = true) (h2 : lt t b a = true) :
+    lt t c a = true := by
+  simp only [lt, Bool.and_eq_true] at h1 h2 ⊢
+  exact ⟨isDesc_trans h1.1 h2.1, h1.2⟩
+
 /-- Addresses with at most `n` steps and indices below `n`. -/
 def upTo : Nat → List TreePath
   | 0 => [.root]

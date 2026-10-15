@@ -29,7 +29,7 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
 | 3 | ordinal notations with Buchholz's collapsing functions | `H_θ(H_θ(42))`: the Hardy hierarchy along the **Takeuti–Feferman–Buchholz ordinal** `θ = ψ_0(ε_{Ω_ω+1})`, with Buchholz's `ψ_ν` written as tree ordinals of every finite level and of level `ω` | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ψ_0(Ω_1) = ε₀` sits inside `θ` |
-| 4 | impredicative universes that build their own length and read it | `F4 (F4 42)`, where `F4 n` is ladder reflection, reading a tree, iterated transfinitely along that tree; the tree is built from the empty tree by ladder programs that read the tree built so far | one Fω program of the ladder computes `H_θ(H_θ(42))`: type-level evidence gives induction over the tree types of all finite levels |
+| 4 | impredicative universes with universe levels that build their own length and read it | `F4 (F4 42)`, where `F4 n` is ladder reflection, reading a tree with level-polymorphic programs, iterated transfinitely along that tree; the tree is built from the empty tree by such programs reading the tree built so far; every value includes the previous rung 4 | one Fω program of the ladder computes `H_θ(H_θ(42))`: type-level evidence gives induction over the tree types of all finite levels |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
@@ -56,11 +56,12 @@ def epsW : TW := .lim towerW                                   -- ε_{Ω_ω+1}
 def thetaTFB : BTree := Tr.toB (psiW epsW 0 0)                 -- ψ_0(ε_{Ω_ω+1})
 def F3 (n : Nat) : Nat := hardy thetaTFB n
 def contender_3 : Nat := F3 (F3 42)
-def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
+def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/LadderBase.lean
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
-def readMax (g : Nat → Nat) (T : CTree) (n : Nat) : Nat :=     -- also programs that read T
-  n + 1 + max (listMax (fvalue n g n) (ladderUpTo n))
-    (listMax (readNat g T n) (rctmsUpTo (addrUpTo T n) n))
+def oldMax (n : Nat) : Nat := listMax LadderOld.F4 (natsUpTo (n + 1))  -- the previous rung 4
+def readMax (g : Nat → Nat) (T : CTree) (n : Nat) : Nat :=     -- Independent/Ladder.lean
+  n + 1 + max (oldMax n) (max (listMax (fvalue n g n) (ladderUpTo n))
+    (listMax (readNat g T n) (vctmsUpTo (addrUpTo T n) n)))   -- SystemFLV programs reading T
 def reflAlong (T : CTree) : CTree → Nat → Nat                 -- reflection along a tree
   | .zero => Nat.succ
   | .succ τ => readMax (reflAlong T τ) T
@@ -68,7 +69,7 @@ def reflAlong (T : CTree) : CTree → Nat → Nat                 -- reflection 
   | _ => Nat.succ
 def jump (f : Nat → Nat) (n : Nat) (t : CTree) : CTree :=      -- t joined with the trees that all
   .lim fun i => if i = 0 then t else                           -- reader programs of depth ≤ n over
-    ((rctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero  -- Addr t build from t
+    ((vctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero  -- Addr t build from t
 def selfTree (n : Nat) : Nat → CTree                           -- jumpAlong: jump along an index tree
   | 0 => jump Nat.succ n .zero
   | k + 1 => jumpAlong (reflAlong (selfTree n k) (selfTree n k)) n (selfTree n k) (selfTree n k)
@@ -80,6 +81,8 @@ theorem contender_2_lt_contender_3 : contender_2 < contender_3  -- Independent/S
 theorem contender_3_lt_contender_4 : contender_3 < contender_4  -- Independent/EpsLtLadder.lean
 theorem independent_tower : contender_1 < contender_2 ∧ contender_2 < contender_3 ∧
     contender_3 < contender_4                                   -- Independent/Tower.lean
+theorem contender_4_old_lt_contender_4 : LadderOld.contender_4 < contender_4
+                                                    -- Independent/LadderOldLtLadder.lean
 ```
 
 **Rung 2 < rung 3: an ordinal analysis of System T**, after Tait. Every raw
@@ -96,32 +99,57 @@ distinction. The proof never evaluates anything:
 | bounding lemma | [`CutElim.lean`](BusyLean/Independent/CutElim.lean) | `value_le_hardy`: a redex-free closed term has value `≤ H_{ω^{height}}(y)` |
 | assembly | [`SystemTLtEps.lean`](BusyLean/Independent/SystemTLtEps.lean) | `eval_le_hardy_eps`: `eval w ≤ H_{ω_{49}}(y) ≤ H_{ε₀}(y)` for `y ≥ 200` |
 
-**Rung 4: the self-building ladder that reads what it builds**
-([`Ladder.lean`](BusyLean/Independent/Ladder.lean)). Values come from the
-ladder of universes (Contender 14's language, as a library): `ladderMax g n` is
-`n + 1` plus the largest value of a level-`n` program of depth `≤ n` with
-oracle `g`. A program of bounded depth names only finitely many atoms, so a
-ladder over a long atom order sees only a short part of it, whatever its length
-(the truncation of the article's "what a ladder sees"). The trees therefore
-enter as **data**: the same ladder over System FT2's terms (`SystemFLT2` over
-the addresses of a tree `T`) has a recursor over `T` at every type, so one
-program computes more from a larger tree
-([`test/LadderReadsTree.lean`](test/LadderReadsTree.lean) runs the Hardy
-hierarchy along the input tree on trees of growing size). `readMax g T n` adds the numeric
-reader programs over `T`, and `jump` joins `t` with the trees that all reader
-programs build from `t`. `reflAlong T τ` iterates the reading reflection along
-`τ`. The trees are built by the ladder alone: `selfTree n 0` is one jump from
-the empty tree, and each later tree jumps from the previous one along itself,
-with reflection along the previous tree, reading it, as the oracle of the
-reading programs. This combines the ideas of Contenders 36–53 (ladders that
-build their own length, reflection along ladder-built trees, ladders that read
-their input) without seeding.
+**Rung 4: the self-building ladder with universe levels, which reads what it
+builds** ([`Ladder.lean`](BusyLean/Independent/Ladder.lean)). Values come from
+the ladder of universes (Contender 14's language, as a library): `ladderMax g n`
+is `n + 1` plus the largest value of a level-`n` program of depth `≤ n` with
+oracle `g`. The trees the rung builds enter twice:
 
-Rung 4 replaced an earlier version in which the ladder built its trees without
-reading them, over transfinitely many universe atoms. Making the ladder
-polymorphic in its universe levels would not have helped: a typing derivation
-uses only finitely many facts about the levels it mentions, so a program types
-over a long order exactly when it types over a short one.
+* **As universes, with levels.** The ladder with universe levels
+  ([`SystemFLV`](BusyLean/SystemFLV)) indexes its universes by the addresses of
+  a tree `T` and adds level variables: bounded quantification `∀b ≤ l. A`,
+  level-indexed operators `λb ≤ l. A` of kind `lfam l k` with their
+  applications, atoms at level variables, and level abstraction and application
+  in programs. The bounds are non-strict, so every quantifier has an instance;
+  packing into the atom `l` needs a kind whose atoms the bounds force strictly
+  below `l`. Its strong normalization proof (`FLV.sn_of_typed`) covers every
+  universe over a transitive well-founded atom order: valuations of the level
+  variables that respect their bounds make the forced order sound, and every
+  level context has one.
+* **As data.** The language runs over System FT2's terms, so it has a recursor
+  over `T` at every type: numeric reader programs compute a number from `T`, and
+  reader programs build a tree from it (`FLV.sn_of_natReaderTy`,
+  `FLV.wt_of_readerTy`).
+
+Levels give a richer language; reading gives growth. A program of bounded depth
+names only finitely many atoms, and its typing uses finitely many facts about
+its levels, so a program that does not read `T` computes the same number on
+every tree on which it types (the truncation of the article's "what a ladder
+sees"). [`test/LadderLevels.lean`](test/LadderLevels.lean) checks ten programs
+with the verified checker `FLV.infer` and runs them on short and long trees:
+the five that use level abstraction, nested bounds, a level-indexed operator
+and packing at level variables return the same number everywhere; the five
+readers grow with the tree (the Hardy hierarchy along it gives
+`3, 6, 6, 12, 24` on `0, 3, ω, ω·2, ω²`).
+
+`readMax g T n` adds the numeric reader programs over `T`, and `jump` joins `t`
+with the trees that all reader programs build from `t`. `reflAlong T τ`
+iterates the reading reflection along `τ`. The trees are built by the ladder
+alone: `selfTree n 0` is one jump from the empty tree, and each later tree
+jumps from the previous one along itself, with reflection along the previous
+tree, reading it, as the oracle of the reading programs. This combines the
+ideas of Contenders 36–53 (ladders that build their own length, reflection
+along ladder-built trees, ladders that read their input) without seeding.
+
+Rung 4 incorporates its previous version
+([`LadderOld.lean`](BusyLean/Independent/LadderOld.lean)), in which the ladder
+built its trees over transfinitely many universe atoms without reading them:
+every value includes `oldMax n`, the running maximum of the previous `F4`. So
+`contender_4_old_lt_contender_4`
+([`LadderOldLtLadder.lean`](BusyLean/Independent/LadderOldLtLadder.lean)), and
+the previous version is dropped from the hierarchy. (Ladder values are not
+monotone in the oracle, since programs can subtract, so the comparison comes
+from the incorporation, not from the shapes of the two constructions.)
 
 **Rung 3: Buchholz's functions** ([`Buchholz.lean`](BusyLean/Independent/Buchholz.lean)).
 Trees of level `m` have countable limits and limits `sup μ f` of cofinality
@@ -190,8 +218,8 @@ input, are built into rung 4.
 each rung's definition depends on and fails if one reaches a lower rung or a
 main-tower contender. Rung 3 depends only on its two files (Brouwer trees
 and Buchholz's collapse), which import nothing else. `python3 scripts/check_independent.py` runs the budgets and the audit
-from a clean build. The five definition modules take about 4 s and the three
-comparisons, the ordinal analysis included, about 40 s.
+from a clean build. The definitions of the four rungs take about 9 s and the
+comparisons, the ordinal analysis included, about 46 s.
 
 ## The closed cumulative tower
 
@@ -2105,6 +2133,7 @@ tower and runs [`test/IndependentAudit.lean`](test/IndependentAudit.lean).
 | [`BusyLean/SystemF/`](BusyLean/SystemF) | System F: syntax, reduction, types, candidates (SN), Church terms, normalizer |
 | [`BusyLean/SystemFLT/`](BusyLean/SystemFLT) | the ladder language over System FT terms; `wt_of_treeTy` (Church-tree programs are well-founded trees) |
 | [`BusyLean/SystemFLT2/`](BusyLean/SystemFLT2) | the ladder language over System FT2 terms; `wt_of_readerTy` (reader programs are well-founded trees) |
+| [`BusyLean/SystemFLV/`](BusyLean/SystemFLV) | the ladder over System FT2 terms with universe levels (bounded quantification, level-indexed operators); `sn_of_typed` for every transitive well-founded atom order, a sound checker, readers |
 | [`BusyLean/SystemFT2/`](BusyLean/SystemFT2) | System F with a tree recursor and an oracle tree: `trec_mem`, `wt_tsub`, `jumpF` |
 | [`BusyLean/SystemFT/`](BusyLean/SystemFT) | System F with tree constructors: the tree candidate `WT`, `wt_of_typed`, tree extraction `toTree` |
 | [`BusyLean/Contender7.lean`](BusyLean/Contender7.lean) | `fvalue`, `reflectF`, `contender_7` (definitions) |

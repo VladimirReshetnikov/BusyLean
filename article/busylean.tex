@@ -2469,7 +2469,7 @@ Rung & idea & definition\\
 1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
 2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
 3 & ordinal notations, Buchholz's $\psi_\nu$ & $H_\theta(H_\theta(42))$, $\theta=\psi_0(\varepsilon_{\Omega_\omega+1})$\\
-4 & impredicative universes building their own length and reading it & \lean{F4 (F4 42)} below\\
+4 & impredicative universes with universe levels, building their own length and reading it & \lean{F4 (F4 42)} below\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2558,19 +2558,51 @@ keep \lean{elimAll 47} irreducible.
 
 \paragraph{Rung 4.} The values come from the ladder of universes of
 Contender~14, used as a library; its oracle constant is pointed only at the
-construction itself. By the truncation of Section~\ref{sec:truncation}, a
-ladder program of bounded depth sees only a short part of a long atom order,
-so the trees the rung builds enter as \emph{data}: the ladder over System~FT2's
-terms (\lean{SystemFLT2}, as in Contenders~41 and~50) has a recursor over an
+construction itself. The trees the rung builds enter twice.
+
+\emph{As universes, with levels.} The ladder with universe levels
+(\lean{SystemFLV}) indexes its universes by the addresses of a tree $T$ and
+adds \emph{level variables}. An atom of a kind is a level: an address or a
+level variable. Three type formers bind level variables: bounded
+quantification $\forall b\le l.\,A$, level-indexed operators
+$\lambda b\le l.\,A$ of kind $\mathsf{lfam}\,l\,k$, and their applications
+$F\,c$; programs abstract over levels and apply to them. The bounds are
+non-strict, so every quantifier has an instance (its bound). Packing an
+operator into the atom $l$ needs its kind's atoms strictly below $l$; for a
+level variable this is read off its bound ($b\le l'<l$), which needs the atom
+order to be transitive. Strong normalization (\lean{FLV.sn\_of\_typed}) holds
+for every universe over a transitive well-founded atom order. The proof is the
+candidate model of the ladder (Contender~13), with a valuation of the level
+variables that respects their bounds: a level family denotes a function on the
+atoms below its bound, $\forall b\le l$ an intersection over them, and the
+order the bounds force is sound for such valuations. Every level context has
+one (each variable at its bound).
+
+\emph{As data.} The language runs over System~FT2's terms (as
+\lean{SystemFLT2} in Contenders~41 and~50), so it has a recursor over the
 input tree $T$ at every type. A program of the numeric reader type computes a
 number from $T$, and a program of the reader type builds a tree from $T$; both
-normalize. The same program computes more from a larger tree.
+normalize (\lean{FLV.sn\_of\_natReaderTy}, \lean{FLV.wt\_of\_readerTy}).
+
+Levels give a richer language; reading gives growth. A typing derivation is
+finite and uses finitely many facts about the levels it mentions, and erasure
+forgets levels, so a program that does not read $T$ computes the same number
+on every tree on which it types. A test (\lean{test/LadderLevels.lean}) runs
+ten programs, checked by the verified checker \lean{FLV.infer}: five use the
+level features (level abstraction, nested bounds, a level-indexed operator,
+packing at a level variable, and a kind $\mathsf{atom}\,b$ that fits the root
+because $b\le$ its first child, which type checks on every tree except the
+empty one) and return the same number on short and long trees; five read the
+tree, and the Hardy hierarchy along it returns $3,6,6,12,24$ on the trees
+$0,3,\omega,\omega\cdot2,\omega^2$, also under a level abstraction and with
+its recursor instantiated at a level-indexed family.
 \begin{lstlisting}
 def ladderMax (g : ℕ → ℕ) (n : ℕ) : ℕ :=
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
+def oldMax (n : ℕ) : ℕ := listMax LadderOld.F4 (natsUpTo (n + 1))
 def readMax (g : ℕ → ℕ) (T : CTree) (n : ℕ) : ℕ :=
-  n + 1 + max (listMax (fvalue n g n) (ladderUpTo n))
-    (listMax (readNat g T n) (rctmsUpTo (addrUpTo T n) n))
+  n + 1 + max (oldMax n) (max (listMax (fvalue n g n) (ladderUpTo n))
+    (listMax (readNat g T n) (vctmsUpTo (addrUpTo T n) n)))
 def reflAlong (T : CTree) : CTree → ℕ → ℕ
   | .zero => Nat.succ
   | .succ τ => readMax (reflAlong T τ) T
@@ -2578,7 +2610,7 @@ def reflAlong (T : CTree) : CTree → ℕ → ℕ
   | _ => Nat.succ
 def jump (f : ℕ → ℕ) (n : ℕ) (t : CTree) : CTree :=
   .lim fun i => if i = 0 then t else
-    ((rctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero
+    ((vctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero
 def selfTree (n : ℕ) : ℕ → CTree
   | 0 => jump Nat.succ n .zero
   | k + 1 => jumpAlong (reflAlong (selfTree n k) (selfTree n k)) n
@@ -2587,7 +2619,9 @@ def F4 (n : ℕ) : ℕ := reflAlong (selfTree n n) (.succ (selfTree n n)) n
 def contender_4 : ℕ := F4 (F4 42)
 \end{lstlisting}
 \lean{readMax} adds to the ladder maximum the values of all numeric reader
-programs of depth $\le n$ over the addresses of $T$, reading $T$.
+programs of depth $\le n$ of the ladder with levels over the addresses of $T$,
+reading $T$, and the running maximum \lean{oldMax} of the previous version of
+the rung (below).
 \lean{reflAlong}~$T$ iterates this reflection along a tree. \lean{jump} joins
 a tree $t$ with the trees that all reader programs of depth $\le n$ build from
 $t$; \lean{jumpAlong} iterates jumps along an index tree. Nothing seeds the
@@ -2597,17 +2631,21 @@ reading it, as the oracle of the reading programs. This gathers the ideas of
 Contenders 36--53 (ladders that build their own length, reflection along
 ladder-built trees, ladders that read their input) into one construction.
 
-An earlier version of the rung built its trees with the ladder over
-transfinitely many universe atoms, without reading them. Making that ladder
-polymorphic in its universe levels, with a quantifier $\forall b<a$ over the
-atoms below $a$, would not have helped. A typing derivation is finite and uses
-only finitely many facts about the levels it mentions, and erasure forgets the
-levels, so a program types over a long order exactly when it types over a
-short one. A test (\lean{test/LadderReadsTree.lean}) runs one reader program,
-the Hardy hierarchy along its input tree at~3, on the trees $0$, $3$,
-$\omega$, $\omega\cdot2$ and $\omega^2$: it type checks once and returns
-$3,6,6,12,24$. The
-enumerations are redefined in the rung's own module; the audit
+The previous version of the rung (\lean{LadderOld}) built its trees with the
+ladder over transfinitely many universe atoms (\lean{SystemFLT}), without
+reading them. The rung incorporates it: every value includes \lean{oldMax n},
+the largest \lean{LadderOld.F4 k} for $k\le n$. So \lean{F4 n} exceeds
+\lean{LadderOld.F4 k} for all $k\le n$, hence
+\lean{LadderOld.F4 42} $<$ \lean{F4 42} and
+\[
+\mathtt{LadderOld.contender\_4}=\mathtt{LadderOld.F4}(\mathtt{LadderOld.F4}\,42)
+\le\mathtt{oldMax}(\mathtt{F4}\,42)<\mathtt{F4}(\mathtt{F4}\,42)=\mathtt{contender\_4}
+\]
+(\lean{contender\_4\_old\_lt\_contender\_4}); the previous version is dropped
+from the hierarchy. The values of a ladder program are not monotone in its
+oracle (a program can subtract), so this comparison cannot come from the two
+constructions' shapes; it comes from the incorporation. The
+enumerations are redefined in the rung's own modules; the audit
 (\lean{test/IndependentAudit.lean}) lists the modules of the definition's
 closure (the ladder libraries, the tree addresses and System~F's core) and
 rejects any contender module.
@@ -2682,8 +2720,8 @@ That proof therefore compiles \emph{every} raw term.
   fits in depth 42, so \lean{F4 42} $\ge 1067$, and the outer \lean{F4} sees
   the compiled winner.
 \end{enumerate}
-The definitions of all four rungs check in about 4~s and the three comparisons,
-the ordinal analysis included, in about 40~s.
+The definitions of all four rungs check in about 9~s and the comparisons,
+the ordinal analysis included, in about 46~s.
 
 \paragraph{What was left out, and why.} System~F, F$_\omega$, kind
 polymorphism and the dynamic-kind universe are fragments of the ladder
@@ -2702,8 +2740,9 @@ are built into rung~4.
 The construction now has three layers. Their weak points mark where further
 growth must come from.
 
-\paragraph{Languages that read trees.} The impredicative languages (System~FT2
-and the ladder language FLT2) recurse over an input tree at every type. They
+\paragraph{Languages that read trees.} The impredicative languages (System~FT2,
+the ladder language FLT2 and its extension with universe levels FLV) recurse
+over an input tree at every type. They
 build trees from it (the jumps of Contenders~40--41) and compute numbers from
 it (the reflections of Contenders~49--50). Their strength is fixed by the
 language: System~F, or the ladder with a universe for each named atom. The
@@ -2713,14 +2752,17 @@ nodes and not just by named atoms. This is large elimination, the route to a
 CIC-like system, and it needs a new strong normalization proof.
 
 \paragraph{Using the atom order.} Section~\ref{sec:truncation} showed that a
-ladder sees only the atoms it names. Quantification over atoms, such as a type
-former $\forall b<a.\,A$ interpreted as an intersection over all atoms below
-$a$, does not change this: a derivation is finite and uses finitely many facts
-about its levels, so it types the same erased program over a short order.
-Recursion over the atoms that unfolds along the concrete tree below a named atom
-would let types reflect the tree, but a program still uses only as many levels
-as its own structure needs. The tree enters more effectively as data, which is
-how rung~4 of the independent tower now uses it.
+ladder sees only the atoms it names. Quantification over atoms does not change
+this. Rung~4 of the independent tower now has it: the ladder with universe
+levels (\lean{SystemFLV}) quantifies over all atoms below a bound,
+$\forall b\le l.\,A$, interpreted as an intersection, and has level-indexed
+operators. A derivation is finite and uses finitely many facts about its
+levels, so it types the same erased program over a short order, and the
+experiment of \lean{test/LadderLevels.lean} confirms that its level programs
+compute the same number on short and long trees. Recursion over the atoms that
+unfolds along the concrete tree below a named atom would let types reflect the
+tree, but a program still uses only as many levels as its own structure needs.
+The tree enters more effectively as data, which is how rung~4 uses it.
 
 \paragraph{Operators on trees.} Contenders~42--48 stack operators on trees:
 collapsing relative to a jump, collapse as a first-class closure, the
