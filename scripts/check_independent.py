@@ -35,7 +35,7 @@ PERMITTED = {"propext", "Quot.sound"}
 LIBRARIES = ["BusyLean.Contender5", "BusyLean.SystemF.Normalize",
              "BusyLean.SystemFL.Ladder", "BusyLean.SystemFL.Church",
              "BusyLean.SystemFLT2.Numbers", "BusyLean.SystemFLV.Numbers",
-             "BusyLean.SystemFLT.Trees"]
+             "BusyLean.SystemFT2.FromF", "BusyLean.SystemFLT.Trees"]
 DEFINITIONS = ["BusyLean.Independent.Ackermann", "BusyLean.Independent.SystemT",
                "BusyLean.Independent.EpsilonHardy", "BusyLean.Independent.Buchholz",
                "BusyLean.Independent.Ladder"]

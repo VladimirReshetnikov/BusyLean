@@ -5,12 +5,16 @@ import BusyLean.SystemFL.Types
 
 The ladder language of `SystemFL`, extended with **level variables**. A
 universe atom of a kind is a *level*: a constant atom or a level variable.
-Three type formers bind level variables:
+Two type formers bind level variables, and a third applies a family:
 
 * `lall l A`, **bounded quantification** `∀b ≤ l. A`;
-* `llam l A`, a **level-indexed operator** `λb ≤ l. A` of kind `lfam l`, a
-  family of types indexed by the levels `≤ l`;
+* `llam l A`, a **level-indexed operator** `λb ≤ l. A` of kind `lfam l k`, a
+  family of operators of kind `k` indexed by the levels `≤ l` (the kind `k`
+  does not depend on the level);
 * `lapp l F c`, the application of such a family to a level `c ≤ l`.
+
+Programs abstract over levels and apply to them (`CTm.llam`, `CTm.lapp` in
+`Church.lean`).
 
 The bounds are non-strict, as in bounded polymorphism, so every quantifier has
 an instance (the bound itself). Packing an operator into the universe `atom a`

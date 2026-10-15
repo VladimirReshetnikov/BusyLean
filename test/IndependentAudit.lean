@@ -93,6 +93,11 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
 #print axioms BusyLean.FLV.infer_sound
 #print axioms BusyLean.FLV.sn_of_natReaderTy
 #print axioms BusyLean.FLV.wt_of_readerTy
+#print axioms BusyLean.FLV.wt_of_treeTy
+#print axioms BusyLean.FT2.nf_embF
+#print axioms BusyLean.Indep.FW.checkW_soundV
+#print axioms BusyLean.Indep.readNat_readerProgram
+#print axioms BusyLean.Indep.contender_3_lt_readMax
 
 -- 2–3. Independence of the definitions.
 #assert_independent BusyLean.Indep.contender_1 allowing forbidding

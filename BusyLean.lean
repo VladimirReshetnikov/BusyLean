@@ -134,6 +134,7 @@ import BusyLean.SystemFLV.Candidates
 import BusyLean.SystemFLV.Church
 import BusyLean.SystemFLV.Trees
 import BusyLean.SystemFLV.Numbers
+import BusyLean.SystemFT2.FromF
 import BusyLean.Contender50
 import BusyLean.Comparison50
 import BusyLean.Ordinal.PrimLanguage
@@ -201,6 +202,7 @@ import BusyLean.Independent.SystemTLtEps
 import BusyLean.Independent.TreeLang
 import BusyLean.Independent.TreeEmbedding
 import BusyLean.Independent.FwCheck
+import BusyLean.Independent.FwCheckV
 import BusyLean.Independent.TFBProg
 import BusyLean.Independent.TFBSem
 import BusyLean.Independent.EpsLtLadder

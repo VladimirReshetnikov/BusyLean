@@ -2592,10 +2592,12 @@ ten programs, checked by the verified checker \lean{FLV.infer}: five use the
 level features (level abstraction, nested bounds, a level-indexed operator,
 packing at a level variable, and a kind $\mathsf{atom}\,b$ that fits the root
 because $b\le$ its first child, which type checks on every tree except the
-empty one) and return the same number on short and long trees; five read the
-tree, and the Hardy hierarchy along it returns $3,6,6,12,24$ on the trees
+empty one) and return the same number on short and long trees; five have the
+reader type. The one that ignores its input returns $7$ everywhere; the Hardy
+hierarchy along the tree returns $3,6,6,12,24$ on the trees
 $0,3,\omega,\omega\cdot2,\omega^2$, also under a level abstraction and with
-its recursor instantiated at a level-indexed family.
+its recursor instantiated at a level-indexed family, and its composition with
+itself returns $3,9,12,48$ on the first four.
 \begin{lstlisting}
 def ladderMax (g : ℕ → ℕ) (n : ℕ) : ℕ :=
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
@@ -2685,10 +2687,18 @@ represents $\psi_0(\varepsilon_{\Omega_\omega+1})$ (\lean{rel\_thetaW}). The
 rung is the \lean{TT} shell $\lambda\theta.\,H_\theta(H_\theta(42))$ applied to
 that tree: a program of depth 153 that type checks in the ladder and reduces to
 the right numeral under every oracle. Confluence (below) lets the normalizer find
-it. Since
-\lean{F4 n} unfolds to \lean{readMax}, which contains
-\lean{ladderMax (orc4 n) n} (\lean{ladderMax\_le\_F4}), the outer
-\lean{F4} sees the compiled program.
+it. Wrapped as $\Lambda X.\,\lambda\,\mathit{rec}\,x.\,p$, a numeric reader
+that ignores its input tree, the program $p$ is also a reader of the ladder
+with universe levels. The F$_\omega$ checker is sound for \lean{FLV.infer} as
+well (\lean{checkW\_soundV}), the wrapped program is enumerated by rung~4
+(\lean{mem\_vctmsUpTo}, depth $\le156$), and System~FT2's normal-order reduction
+of an included System~F term is System~F's (\lean{FT2.nf\_embF}: the tree rules
+never fire, and the oracle rule reads the numeric part of the FT2 oracle). So
+its reader value is $H_\theta(H_\theta(42))$ under every oracle and tree
+(\lean{readNat\_readerProgram}). Since \lean{F4 n} unfolds to \lean{readMax},
+the outer \lean{F4} sees the compiled program among its readers
+(\lean{contender\_3\_lt\_readMax}), and also among the programs of
+\lean{ladderMax (orc4 n) n} (\lean{contender\_3\_lt\_ladderMax}).
 
 \paragraph{Also: System~T directly into the ladder.} The first version of the
 tower compared rungs 2 and 4 directly (\lean{contender\_2\_lt\_contender\_4}).

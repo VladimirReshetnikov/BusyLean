@@ -29,7 +29,7 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
 | 3 | ordinal notations with Buchholz's collapsing functions | `H_θ(H_θ(42))`: the Hardy hierarchy along the **Takeuti–Feferman–Buchholz ordinal** `θ = ψ_0(ε_{Ω_ω+1})`, with Buchholz's `ψ_ν` written as tree ordinals of every finite level and of level `ω` | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ψ_0(Ω_1) = ε₀` sits inside `θ` |
-| 4 | impredicative universes with universe levels that build their own length and read it | `F4 (F4 42)`, where `F4 n` is ladder reflection, reading a tree with level-polymorphic programs, iterated transfinitely along that tree; the tree is built from the empty tree by such programs reading the tree built so far; every value includes the previous rung 4 | one Fω program of the ladder computes `H_θ(H_θ(42))`: type-level evidence gives induction over the tree types of all finite levels |
+| 4 | impredicative universes with universe levels that build their own length and read it | `F4 (F4 42)`, where `F4 n` is ladder reflection, reading a tree with level-polymorphic programs, iterated transfinitely along that tree; the tree is built from the empty tree by such programs reading the tree built so far; every value includes the previous rung 4 | one Fω program computes `H_θ(H_θ(42))`, and runs as a reader of the ladder with levels: type-level evidence gives induction over the tree types of all finite levels |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
@@ -128,9 +128,11 @@ every tree on which it types (the truncation of the article's "what a ladder
 sees"). [`test/LadderLevels.lean`](test/LadderLevels.lean) checks ten programs
 with the verified checker `FLV.infer` and runs them on short and long trees:
 the five that use level abstraction, nested bounds, a level-indexed operator
-and packing at level variables return the same number everywhere; the five
-readers grow with the tree (the Hardy hierarchy along it gives
-`3, 6, 6, 12, 24` on `0, 3, ω, ω·2, ω²`).
+and packing at level variables return the same number everywhere, and so does
+a reader that ignores its input; the readers that recurse over the tree grow
+with it (the Hardy hierarchy along it gives `3, 6, 6, 12, 24` on
+`0, 3, ω, ω·2, ω²`, also under a level abstraction and with its recursor at a
+level-indexed family).
 
 `readMax g T n` adds the numeric reader programs over `T`, and `jump` joins `t`
 with the trees that all reader programs build from `t`. `reflAlong T τ`
@@ -197,9 +199,20 @@ every level. The Fω fragment of the ladder does
   ([`EpsLtLadder.lean`](BusyLean/Independent/EpsLtLadder.lean)). Confluence
   ([`Confluence.lean`](BusyLean/Independent/Confluence.lean)) makes the
   normalizer find the value, and the whole program has depth `153`.
-Since `F4 n` unfolds to `readMax (orc4 n) (selfTree n n) n ≥ ladderMax (orc4 n) n`
-(`ladderMax_le_F4`), and the simulation works under every oracle, the outer
-`F4` already sees the compiled program.
+* **Through the ladder with levels.** Wrapped as `ΛX. λ rec x. program`, a
+  numeric reader that ignores its input tree, the program is a reader of the
+  ladder with universe levels
+  ([`FwCheckV.lean`](BusyLean/Independent/FwCheckV.lean)): the Fω checker is
+  sound for `FLV.infer` as well (`checkW_soundV`), the wrapped program is in
+  rung 4's enumeration (`mem_vctmsUpTo`, depth `≤ 156`), and System FT2's
+  normal-order reduction of an included System F term is System F's
+  ([`FT2.nf_embF`](BusyLean/SystemFT2/FromF.lean)), so its reader value is
+  `H_θ(H_θ(42))` under every oracle and tree (`readNat_readerProgram`).
+
+Since `F4 n` unfolds to `readMax (orc4 n) (selfTree n n) n`, and the simulation
+works under every oracle and tree, the outer `F4` already sees the compiled
+program among its readers (`contender_3_lt_readMax`); it also sees it among
+the programs of `ladderMax` (`contender_3_lt_ladderMax`).
 
 System T also embeds into the ladder directly
 ([`SystemTLtLadder.lean`](BusyLean/Independent/SystemTLtLadder.lean),
