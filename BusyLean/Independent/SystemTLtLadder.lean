@@ -375,10 +375,18 @@ theorem eval_lt_ladderMax (g : Nat → Nat) (m : Nat) {w : C5.Term} (hs : stype 
   omega
 
 /-- The oracle of the last reflection in `F4 n`: reflection along the
-self-built tree. -/
-def orc4 (n : Nat) : Nat → Nat := Ladder.reflAlong (Ladder.selfTree n n)
+self-built tree, reading it. -/
+def orc4 (n : Nat) : Nat → Nat := Ladder.reflAlong (Ladder.selfTree n n) (Ladder.selfTree n n)
 
-theorem F4_eq (n : Nat) : F4 n = ladderMax (orc4 n) n := rfl
+/-- The tree that the last reflection in `F4 n` reads. -/
+def tree4 (n : Nat) : Ordinal.CTree := Ladder.selfTree n n
+
+theorem F4_eq (n : Nat) : F4 n = Ladder.readMax (orc4 n) (tree4 n) n := rfl
+
+/-- `F4 n` is at least the ladder maximum with the oracle `orc4 n`. -/
+theorem ladderMax_le_F4 (n : Nat) : ladderMax (orc4 n) n ≤ F4 n := by
+  rw [F4_eq]
+  exact Ladder.ladderMax_le_readMax _ _ _
 
 /-! ## `F4 42` is already large -/
 
@@ -427,15 +435,14 @@ theorem add_le_ladderMax (g : Nat → Nat) (m : Nat) {x : Nat}
 theorem F4_42_ge : 1067 ≤ F4 42 := by
   have h := eval_le_listMax (orc4 42) 42 stype_pow2Program cdepth_pow2Program
   rw [eval_pow2Program] at h
-  rw [F4_eq]
-  exact add_le_ladderMax (orc4 42) 42 h
+  exact Nat.le_trans (add_le_ladderMax (orc4 42) 42 h) (ladderMax_le_F4 42)
 
 /-! ## The comparison -/
 
 /-- Every System T value of depth `≤ 42` is below `F4 m` once `m ≥ F4 42`. -/
 theorem eval_lt_F4 {w : C5.Term} (hw : depth w ≤ 42) {m : Nat} (hm : F4 42 ≤ m) :
     C5.eval w < F4 m := by
-  rw [F4_eq]
+  refine Nat.lt_of_lt_of_le ?_ (ladderMax_le_F4 m)
   cases hs : stype [] w with
   | arr a b =>
       have h0 : C5.eval w = 0 := by

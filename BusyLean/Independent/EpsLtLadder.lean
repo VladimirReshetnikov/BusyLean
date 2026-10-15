@@ -2,7 +2,7 @@ import BusyLean.Independent.TFBSem
 import BusyLean.Independent.SystemTLtLadder
 
 /-!
-# Rung 3 < rung 4: the Hardy hierarchy at `ψ_0(ε_{Ω_ω+1})` < the self-building transfinite ladder
+# Rung 3 < rung 4: the Hardy hierarchy at `ψ_0(ε_{Ω_ω+1})` < the self-building ladder that reads what it builds
 
 The ordinal rung is computed by one ladder program, `rungProgram`: the
 Fω translation of the `TT` shell `tfbShell = λθ. H_θ(H_θ(42))` applied to
@@ -11,7 +11,8 @@ Fω translation of the `TT` shell `tfbShell = λθ. H_θ(H_θ(42))` applied to
 `153`, the verified checker gives it type `nat` at fuel `5` (`check_tfbProgram`),
 and it reduces to the Church numeral of `F3 (F3 42)` under any oracle
 (`steps_rungProgram`, from `TFB.rel_thetaW`). So every `ladderMax` with a
-budget of at least `153` exceeds the ordinal rung, and `F4 42 ≥ 1067`.
+budget of at least `153` exceeds the ordinal rung. Every reflection step of
+rung 4 contains a `ladderMax` (`ladderMax_le_F4`), and `F4 42 ≥ 1067`.
 
 The comparison is a simulation: impredicative Church encodings of Brouwer trees,
 of Buchholz's trees of every level and of the trees of level `ω`, with
@@ -66,13 +67,11 @@ theorem contender_3_lt_ladderMax (g : Nat → Nat) {m : Nat} (hm : 153 ≤ m) :
   generalize F3 (F3 42) = V at hle ⊢
   omega
 
-/-- **Rung 3 < rung 4**: the ordinal rung < the self-building transfinite ladder. -/
+/-- **Rung 3 < rung 4**: the ordinal rung < the self-building ladder that reads what it builds. -/
 theorem contender_3_lt_contender_4 : contender_3 < contender_4 := by
   have h42 := F4_42_ge
   have h := contender_3_lt_ladderMax (orc4 (F4 42)) (m := F4 42)
     (by generalize F4 42 = M at h42; omega)
-  have e : contender_4 = ladderMax (orc4 (F4 42)) (F4 42) := F4_eq (F4 42)
-  rw [e]
-  exact h
+  exact Nat.lt_of_lt_of_le h (ladderMax_le_F4 (F4 42))
 
 end BusyLean.Indep

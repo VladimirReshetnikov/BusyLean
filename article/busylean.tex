@@ -2462,14 +2462,14 @@ Contenders 5--70 is closed and kept as a record. The independent tower has
 four rungs.
 
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabular}{l p{0.4\textwidth} p{0.45\textwidth}}
 \toprule
 Rung & idea & definition\\
 \midrule
 1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
 2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
 3 & ordinal notations, Buchholz's $\psi_\nu$ & $H_\theta(H_\theta(42))$, $\theta=\psi_0(\varepsilon_{\Omega_\omega+1})$\\
-4 & impredicative universes building their own length & \lean{F4 (F4 42)} below\\
+4 & impredicative universes building their own length and reading it & \lean{F4 (F4 42)} below\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2558,35 +2558,55 @@ keep \lean{elimAll 47} irreducible.
 
 \paragraph{Rung 4.} The values come from the ladder of universes of
 Contender~14, used as a library; its oracle constant is pointed only at the
-construction itself. The lengths come from the same ladder with
-\emph{transfinitely} many universes, indexed by the addresses of a tree, as
-in Contender~36: a program of the Church tree type denotes a well-founded
-tree.
+construction itself. By the truncation of Section~\ref{sec:truncation}, a
+ladder program of bounded depth sees only a short part of a long atom order,
+so the trees the rung builds enter as \emph{data}: the ladder over System~FT2's
+terms (\lean{SystemFLT2}, as in Contenders~41 and~50) has a recursor over an
+input tree $T$ at every type. A program of the numeric reader type computes a
+number from $T$, and a program of the reader type builds a tree from $T$; both
+normalize. The same program computes more from a larger tree.
 \begin{lstlisting}
 def ladderMax (g : ℕ → ℕ) (n : ℕ) : ℕ :=
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
-def reflAlong : CTree → ℕ → ℕ
+def readMax (g : ℕ → ℕ) (T : CTree) (n : ℕ) : ℕ :=
+  n + 1 + max (listMax (fvalue n g n) (ladderUpTo n))
+    (listMax (readNat g T n) (rctmsUpTo (addrUpTo T n) n))
+def reflAlong (T : CTree) : CTree → ℕ → ℕ
   | .zero => Nat.succ
-  | .succ τ => ladderMax (reflAlong τ)
-  | .lim g => fun n => listMax (fun i => reflAlong (g i) n) (natsUpTo (n + 1))
+  | .succ τ => readMax (reflAlong T τ) T
+  | .lim g => fun n => listMax (fun i => reflAlong T (g i) n) (natsUpTo (n + 1))
   | _ => Nat.succ
-def grow (f : ℕ → ℕ) (n : ℕ) (t : CTree) : CTree :=
+def jump (f : ℕ → ℕ) (n : ℕ) (t : CTree) : CTree :=
   .lim fun i => if i = 0 then t else
-    ((tctmsUpTo (addrUpTo t n) n).map (progTree f t n)).getD (i - 1) .zero
+    ((rctmsUpTo (addrUpTo t n) n).map (readTree f t n)).getD (i - 1) .zero
 def selfTree (n : ℕ) : ℕ → CTree
-  | 0 => grow Nat.succ n .zero
-  | k + 1 => growAlong (reflAlong (selfTree n k)) n (selfTree n k) (selfTree n k)
-def F4 (n : ℕ) : ℕ := reflAlong (.succ (selfTree n n)) n
+  | 0 => jump Nat.succ n .zero
+  | k + 1 => jumpAlong (reflAlong (selfTree n k) (selfTree n k)) n
+      (selfTree n k) (selfTree n k)
+def F4 (n : ℕ) : ℕ := reflAlong (selfTree n n) (.succ (selfTree n n)) n
 def contender_4 : ℕ := F4 (F4 42)
 \end{lstlisting}
-\lean{reflAlong} iterates ladder reflection along a tree. \lean{grow} joins a
-tree $t$ with the trees of all programs of depth $\le n$ over the addresses of
-$t$, so the ladder over $t$ produces a longer tree; \lean{growAlong} iterates
-growth along an index tree. Nothing seeds the trees: the first one grows the
-empty tree, and each later one grows the previous tree along itself, with
-reflection along the previous tree as the oracle of the growing programs.
-This gathers the ideas of Contenders 36--53 (ladders that build their own
-length, reflection along ladder-built trees) into one construction. The
+\lean{readMax} adds to the ladder maximum the values of all numeric reader
+programs of depth $\le n$ over the addresses of $T$, reading $T$.
+\lean{reflAlong}~$T$ iterates this reflection along a tree. \lean{jump} joins
+a tree $t$ with the trees that all reader programs of depth $\le n$ build from
+$t$; \lean{jumpAlong} iterates jumps along an index tree. Nothing seeds the
+trees: the first one is a jump from the empty tree, and each later one jumps
+from the previous tree along itself, with reflection along the previous tree,
+reading it, as the oracle of the reading programs. This gathers the ideas of
+Contenders 36--53 (ladders that build their own length, reflection along
+ladder-built trees, ladders that read their input) into one construction.
+
+An earlier version of the rung built its trees with the ladder over
+transfinitely many universe atoms, without reading them. Making that ladder
+polymorphic in its universe levels, with a quantifier $\forall b<a$ over the
+atoms below $a$, would not have helped. A typing derivation is finite and uses
+only finitely many facts about the levels it mentions, and erasure forgets the
+levels, so a program types over a long order exactly when it types over a
+short one. A test (\lean{test/LadderReadsTree.lean}) runs one reader program,
+the Hardy hierarchy along its input tree at~3, on the trees $0$, $3$,
+$\omega$, $\omega\cdot2$ and $\omega^2$: it type checks once and returns
+$3,6,6,12,24$. The
 enumerations are redefined in the rung's own module; the audit
 (\lean{test/IndependentAudit.lean}) lists the modules of the definition's
 closure (the ladder libraries, the tree addresses and System~F's core) and
@@ -2628,7 +2648,8 @@ rung is the \lean{TT} shell $\lambda\theta.\,H_\theta(H_\theta(42))$ applied to
 that tree: a program of depth 153 that type checks in the ladder and reduces to
 the right numeral under every oracle. Confluence (below) lets the normalizer find
 it. Since
-\lean{F4 n} unfolds to \lean{ladderMax (reflAlong (selfTree n n)) n}, the outer
+\lean{F4 n} unfolds to \lean{readMax}, which contains
+\lean{ladderMax (orc4 n) n} (\lean{ladderMax\_le\_F4}), the outer
 \lean{F4} sees the compiled program.
 
 \paragraph{Also: System~T directly into the ladder.} The first version of the
@@ -2661,8 +2682,8 @@ That proof therefore compiles \emph{every} raw term.
   fits in depth 42, so \lean{F4 42} $\ge 1067$, and the outer \lean{F4} sees
   the compiled winner.
 \end{enumerate}
-The definitions of all four rungs check in about 3~s and the three comparisons,
-the ordinal analysis included, in about 28~s.
+The definitions of all four rungs check in about 4~s and the three comparisons,
+the ordinal analysis included, in about 40~s.
 
 \paragraph{What was left out, and why.} System~F, F$_\omega$, kind
 polymorphism and the dynamic-kind universe are fragments of the ladder
@@ -2671,8 +2692,9 @@ would be incorporated by a larger rung. Larger ordinal notations (Contenders
 16--31) are the same approach as rung~3, which now reaches the
 Takeuti--Feferman--Buchholz ordinal $\psi_0(\varepsilon_{\Omega_\omega+1})$. Towers, closure operators and reflective
 towers (Contenders 6, 9--12, 15, 23 and 54--70) are amplifiers of a base
-language; two of them, ladders that build their own length and reflection
-along trees (Contenders 36--53), are built into rung~4.
+language; three ideas of that kind, ladders that build their own length,
+reflection along trees and ladders that read their input (Contenders 36--53),
+are built into rung~4.
 
 %======================================================================
 \section{Roadmap}
@@ -2692,9 +2714,13 @@ CIC-like system, and it needs a new strong normalization proof.
 
 \paragraph{Using the atom order.} Section~\ref{sec:truncation} showed that a
 ladder sees only the atoms it names. Quantification over atoms, such as a type
-former $\forall b<a.\,A$ interpreted as an intersection over all atoms below $a$,
-would let programs act uniformly across the transfinite order. Whether that
-adds strength without recursion over atoms is open. Atom recursion would.
+former $\forall b<a.\,A$ interpreted as an intersection over all atoms below
+$a$, does not change this: a derivation is finite and uses finitely many facts
+about its levels, so it types the same erased program over a short order.
+Recursion over the atoms that unfolds along the concrete tree below a named atom
+would let types reflect the tree, but a program still uses only as many levels
+as its own structure needs. The tree enters more effectively as data, which is
+how rung~4 of the independent tower now uses it.
 
 \paragraph{Operators on trees.} Contenders~42--48 stack operators on trees:
 collapsing relative to a jump, collapse as a first-class closure, the

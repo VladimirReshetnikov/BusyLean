@@ -13,8 +13,9 @@ Run with `lake env lean test/IndependentAudit.lean`. It:
    `Quot.sound` are allowed);
 2. lists, for every rung, the modules its definition depends on;
 3. fails if a rung's definition reaches a lower rung's module, or any module
-   of the main tower's contenders (`BusyLean.Contender*`, `BusyLean.Comparison*`),
-   except that rung 2 *is* the ported Contender 5.
+   of the main tower's contenders (`BusyLean.Contender*`, `BusyLean.Comparison*`,
+   and `BigNumber.Definitions`, which holds Contender 6's language), except that
+   rung 2 *is* the ported Contender 5.
 -/
 
 open Lean Elab Command
@@ -96,11 +97,12 @@ elab "#assert_independent " root:ident " allowing " ok:ident* " forbidding " bad
   BusyLean.Independent.Ladder
 #assert_independent BusyLean.Indep.contender_3 allowing forbidding
   BusyLean.Contender5 BusyLean.Independent.Ackermann BusyLean.Independent.SystemT
-  BusyLean.Independent.Ladder
+  BusyLean.Independent.Ladder BigNumber.Definitions
 #assert_independent BusyLean.Indep.contender_4 allowing forbidding
   BusyLean.Contender5 BusyLean.Independent.Ackermann BusyLean.Independent.SystemT
   BusyLean.Independent.SystemTFacts BusyLean.Independent.TEmbedding BusyLean.Independent.TTyped
   BusyLean.Independent.EpsilonHardy BusyLean.Independent.Buchholz BusyLean.Independent.TreeLang
+  BigNumber.Definitions
 
 -- 4. The statements.
 #check @BusyLean.Indep.contender_1_lt_contender_2
