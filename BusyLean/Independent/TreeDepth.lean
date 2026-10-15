@@ -36,6 +36,7 @@ def cdTT : {Γ : List TT.Ty} → {σ : TT.Ty} → TT.Tm Γ σ → Nat
   | _, _, .lsucc m => 8 * m + 35
   | _, _, .llim m => 8 * m + 45
   | _, _, .lsup m => 8 * m + 55
+  | _, _, .lsup0 => 60
   | _, _, .lfold0 r => tdTT r + 35
   | _, _, .lfoldS m r => tdTT r + 8 * m + 45
 

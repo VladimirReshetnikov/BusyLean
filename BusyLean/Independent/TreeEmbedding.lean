@@ -312,6 +312,15 @@ theorem rel_llim (m : Nat) : Rel f (.arr (.arr .nat (.lev m)) (.lev m)) olimTm B
       g z s l p
     exact h⟩
 
+theorem rel_lsup0 :
+    Rel f (.arr .nat (.arr (.arr .nat (.lev 0)) (.lev 0))) osupTm Buch.Tr.sup :=
+  fun t μ ht g h hg =>
+  ⟨t, g, ht, fun w x hw => hg w x hw, fun z s l p => by
+    have h := steps_beta6 (f := f)
+      (.app (.app (.var 0) (.var 5))
+        (.lam (app4 (.app (.var 5) (.var 0)) (.var 4) (.var 3) (.var 2) (.var 1)))) t g z s l p
+    exact h⟩
+
 theorem rel_lsup (m : Nat) :
     Rel f (.arr .nat (.arr (.arr (.lev m) (.lev (m + 1))) (.lev (m + 1)))) osupTm Buch.Tr.sup :=
   fun t μ ht g h hg =>
@@ -392,6 +401,7 @@ def utrT : {Γ : List Ty} → {σ : Ty} → Tm Γ σ → F.Tm
   | _, _, .lsucc _ => osuccTm
   | _, _, .llim _ => olimTm
   | _, _, .lsup _ => osupTm
+  | _, _, .lsup0 => osupTm
   | _, _, .lfold0 _ => ofoldTm
   | _, _, .lfoldS _ _ => ofoldTm
 
@@ -425,6 +435,7 @@ theorem rel_utrT : ∀ {Γ : List Ty} {σ : Ty} (t : Tm Γ σ) {σs : Nat → F.
   | _, _, .lsucc m, _, _, _ => rel_lsucc m
   | _, _, .llim m, _, _, _ => rel_llim m
   | _, _, .lsup m, _, _, _ => rel_lsup m
+  | _, _, .lsup0, _, _, _ => rel_lsup0
   | _, _, .lfold0 r, _, _, _ => rel_lfold0 r
   | _, _, .lfoldS m r, _, _, _ => rel_lfoldS m r
 

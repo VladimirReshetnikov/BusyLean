@@ -89,6 +89,10 @@ theorem isFC_trTC {α : Type} : ∀ {Γ : List TT.Ty} {σ : TT.Ty} (t : TT.Tm Γ
       have h' := isF_levC (α := α) (m + 1)
       show IsFC (lsupC m : CTm α)
       simp only [IsFC, lsupC, app4C, app3C, tPD, tL, tXX, tX, IsF, FL.Ty.nat, h, h', and_self]
+  | _, _, .lsup0 => by
+      have h := isF_levC (α := α) 0
+      show IsFC (lsup0C : CTm α)
+      simp only [IsFC, lsup0C, app4C, app3C, tPD, tL, tXX, tX, IsF, FL.Ty.nat, h, and_self]
   | _, _, .lfold0 r => isFC_lfoldC (isF_domC 0) (isF_tyTT r)
   | _, _, .lfoldS m r => isFC_lfoldC (isF_levC m) (isF_tyTT r)
 
@@ -161,6 +165,12 @@ theorem cdepth_llimC {α : Type} (m : Nat) : cdepth (llimC m : CTm α) ≤ 8 * m
   repeat' apply And.intro
   all_goals omega
 
+theorem cdepth_lsup0C {α : Type} : cdepth (lsup0C : CTm α) ≤ 60 := by
+  have h := tdepth_levC (α := α) 0
+  simp only [cdepth, lsup0C, app4C, app3C, Emb.tdepth, Emb.tdepth_nat, h, Nat.add_assoc, max_add_le_iff]
+  repeat' apply And.intro
+  all_goals omega
+
 theorem cdepth_lsupC {α : Type} (m : Nat) : cdepth (lsupC m : CTm α) ≤ 8 * m + 55 := by
   have h := tdepth_levC (α := α) m
   have h' := tdepth_levC (α := α) (m + 1)
@@ -200,6 +210,7 @@ theorem cdepth_trTC_le {α : Type} : ∀ {Γ : List TT.Ty} {σ : TT.Ty} (t : TT.
   | _, _, .lsucc m => cdepth_lsuccC m
   | _, _, .llim m => cdepth_llimC m
   | _, _, .lsup m => cdepth_lsupC m
+  | _, _, .lsup0 => cdepth_lsup0C
   | _, _, .lfold0 r => by
       have := cdepth_lfoldC (FL.Ty.nat : FL.Ty α) (tyTT r) (by rw [Emb.tdepth_nat]; exact Nat.le_refl 5)
       rw [tdepth_tyTT, Emb.tdepth_nat] at this

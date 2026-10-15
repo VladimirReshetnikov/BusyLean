@@ -145,6 +145,7 @@ def trTF (b bd : FTy) : {Γ : List TT.Ty} → {σ : TT.Ty} → TT.Tm Γ σ → F
   | _, _, .lsucc m => lsuccF (domF b bd m)
   | _, _, .llim m => llimF (domF b bd m)
   | _, _, .lsup m => lsupF (levF b m)
+  | _, _, .lsup0 => lsupF bd
   | _, _, .lfold0 r => lfoldF bd (tyTF b r)
   | _, _, .lfoldS m r => lfoldF (levF b m) (tyTF b r)
 
@@ -166,6 +167,7 @@ theorem eraseF_trTF (b bd : FTy) : ∀ {Γ : List TT.Ty} {σ : TT.Ty} (t : TT.Tm
   | _, _, .lsucc _ => rfl
   | _, _, .llim _ => rfl
   | _, _, .lsup _ => rfl
+  | _, _, .lsup0 => rfl
   | _, _, .lfold0 _ => rfl
   | _, _, .lfoldS _ _ => rfl
 

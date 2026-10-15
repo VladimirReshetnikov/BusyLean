@@ -159,6 +159,113 @@ def theta (n : Nat) : BTree := thetaG n (lift n) (down n)
 /-- **Buchholz's ordinal** `ψ_0(Ω_ω) = sup_K ψ_0(ε_{Ω_{K+2}+1})`, as a Brouwer tree. -/
 def thetaOmega : BTree := .lim fun K => theta (K + 1)
 
+/-! ## The Takeuti–Feferman–Buchholz ordinal `ψ_0(ε_{Ω_ω+1})`
+
+Above all finite levels sit the trees `TW` of level `ω`: a `sup μ m f` node has
+cofinality `Ω_{μ+1}` and branches over the trees of level `m` (only the lifts
+of trees of level `μ` matter). The collapse `psiW α ν e = ψ_ν(α)` lands in any
+level `e ≥ ν`. Its `sup` case keeps the node when `μ < ν`, converting the
+branches from level `e - 1` to level `m` (`supVia`), and otherwise
+diagonalizes with `g_0 = Ω_μ`, `g_{k+1} = ψ_μ(α[g_k])`, computed at level `m`.
+Conversions between any two levels (`convFrom`, `convInto`) are one
+structural map each. -/
+
+mutual
+
+/-- From level `m` to level `j`: keep the `sup`s valid at level `j`. -/
+def convFrom : (m j : Nat) → T m → T j
+  | 0, 0 => Tr.cmap 0 (fun (n : Nat) => n)
+  | 0, j + 1 => Tr.cmap 0 (fun (_ : T j) => (0 : Nat))
+  | m + 1, 0 => Tr.cmap 0 (fun (_ : Nat) => (Tr.zero : T m))
+  | m + 1, j + 1 => Tr.cmap (j + 1) (convInto m j)
+
+/-- Into level `m` from level `j`. -/
+def convInto : (m j : Nat) → T j → T m
+  | 0, 0 => Tr.cmap 0 (fun (n : Nat) => n)
+  | 0, j + 1 => Tr.cmap 0 (fun (_ : Nat) => (Tr.zero : T j))
+  | m + 1, 0 => Tr.cmap 0 (fun (_ : T m) => (0 : Nat))
+  | m + 1, j + 1 => Tr.cmap (m + 1) (convFrom m j)
+
+end
+
+/-- A `sup` with tag `μ` at level `e`, with branches given on level `j`. -/
+def supVia : (e : Nat) → Nat → (j : Nat) → (T j → T e) → T e
+  | 0, μ, _, _ => Tr.sup μ (fun _ => Tr.zero)
+  | e + 1, μ, j, h => Tr.sup μ (fun y => h (convFrom e j y))
+
+/-- `Ω_ν` at level `e`. -/
+def omegaIn (e : Nat) : Nat → T e
+  | 0 => .succ .zero
+  | ν + 1 => supVia e ν e (fun x => x)
+
+/-- Trees of level `ω`. -/
+inductive TW where
+  | zero : TW
+  | succ : TW → TW
+  | lim : (Nat → TW) → TW
+  | sup : Nat → (m : Nat) → (T m → TW) → TW
+
+/-- **Buchholz's collapse at level `ω`**: `psiW α ν e = ψ_ν(α)`, at level `e`. -/
+def psiW : TW → Nat → (e : Nat) → T e
+  | .zero => fun ν e => omegaIn e ν
+  | .succ a => fun ν e => .lim fun k => Tr.mulNat (psiW a ν e) k
+  | .lim f => fun ν e => .lim fun k => psiW (f k) ν e
+  | .sup μ m f => fun ν e =>
+      if μ < ν then supVia e μ m (fun x => psiW (f x) ν e)
+      else .lim fun k => psiW (f (iterate (fun g => psiW (f g) μ m) k (omegaIn m μ))) ν e
+
+/-- A `sup` of level `ω` whose branches are the branches of a tree of level `m`. -/
+def supOfLevel : (m : Nat) → Nat → (P m → TW) → TW
+  | 0, _, _ => .zero
+  | m + 1, μ, h => .sup μ m h
+
+/-- Trees of level `m` as trees of level `ω`. -/
+def embW (m : Nat) : T m → TW
+  | .zero => .zero
+  | .succ a => .succ (embW m a)
+  | .lim f => .lim fun i => embW m (f i)
+  | .sup μ g => supOfLevel m μ fun z => embW m (g z)
+
+namespace TW
+
+def add (a : TW) : TW → TW
+  | zero => a
+  | succ b => succ (add a b)
+  | lim f => lim fun i => add a (f i)
+  | sup μ m f => sup μ m fun x => add a (f x)
+
+def mul (a : TW) : TW → TW
+  | zero => zero
+  | succ b => add (mul a b) a
+  | lim f => lim fun i => mul a (f i)
+  | sup μ m f => sup μ m fun x => mul a (f x)
+
+end TW
+
+/-- `Ω_{n+1}`, the limit of all trees of level `n`. -/
+def OmegaW (n : Nat) : TW := .sup n n (embW n)
+
+/-- `Ω_ω = lim_n Ω_{n+1}`. -/
+def OmegaOmega : TW := .lim OmegaW
+
+/-- `Ω_ω^a`. -/
+def opowW : TW → TW
+  | .zero => .succ .zero
+  | .succ a => TW.mul (opowW a) OmegaOmega
+  | .lim f => .lim fun i => opowW (f i)
+  | .sup μ m f => .sup μ m fun x => opowW (f x)
+
+/-- `Ω_1, Ω_ω^{Ω_1}, Ω_ω^{Ω_ω^{Ω_1}}, …` -/
+def towerW : Nat → TW
+  | 0 => OmegaW 0
+  | k + 1 => opowW (towerW k)
+
+/-- `ε_{Ω_ω+1}`. -/
+def epsW : TW := .lim towerW
+
+/-- **The Takeuti–Feferman–Buchholz ordinal** `ψ_0(ε_{Ω_ω+1})`, as a Brouwer tree. -/
+def thetaTFB : BTree := Tr.toB (psiW epsW 0 0)
+
 end BusyLean.Indep.Buch
 
 namespace BusyLean.Indep

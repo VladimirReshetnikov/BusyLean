@@ -145,6 +145,11 @@ def lsupC (m : Nat) : CTm α :=
     (.lam (tPD (levC m)) (.app (.app (.var 0) (.var 5)) (.lam (levC m)
       (app4C (.tapp (.app (.var 5) (.var 0)) tX) (.var 4) (.var 3) (.var 2) (.var 1))))))))))
 
+def lsup0C : CTm α :=
+  .lam FL.Ty.nat (.lam (.arr FL.Ty.nat (levC 0)) (.tlam .star (.lam tX (.lam tXX (.lam tL
+    (.lam (tPD FL.Ty.nat) (.app (.app (.var 0) (.var 5)) (.lam FL.Ty.nat
+      (app4C (.tapp (.app (.var 5) (.var 0)) tX) (.var 4) (.var 3) (.var 2) (.var 1))))))))))
+
 def lfoldC (D R : FL.Ty α) : CTm α :=
   .lam R (.lam (.arr R R) (.lam (.arr (.arr FL.Ty.nat R) R)
     (.lam (.arr FL.Ty.nat (.arr (.arr D R) R)) (.lam (levShape D)
@@ -165,6 +170,7 @@ def trTC : {Γ : List Ty} → {σ : Ty} → Tm Γ σ → CTm α
   | _, _, .lsucc m => lsuccC m
   | _, _, .llim m => llimC m
   | _, _, .lsup m => lsupC m
+  | _, _, .lsup0 => lsup0C
   | _, _, .lfold0 r => lfoldC FL.Ty.nat (tyTT r)
   | _, _, .lfoldS m r => lfoldC (levC m) (tyTT r)
 
@@ -186,6 +192,7 @@ theorem erase_trTC : ∀ {Γ : List Ty} {σ : Ty} (t : Tm Γ σ), erase (trTC t 
   | _, _, .lsucc _ => rfl
   | _, _, .llim _ => rfl
   | _, _, .lsup _ => rfl
+  | _, _, .lsup0 => rfl
   | _, _, .lfold0 _ => rfl
   | _, _, .lfoldS _ _ => rfl
 
@@ -354,6 +361,29 @@ theorem infer_lsupC (m : Nat) (Δ : List (Kind α)) (Γ : List (FL.Ty α)) :
     lookup_ren (Γ := FL.Ty.arr (levC m) (levC (m + 1)) :: FL.Ty.nat :: Γ) (n := 0) hg rfl
   exact infer_app4_lev (good_levC m) rfl (infer_app h6 rfl hg.nf) rfl rfl rfl rfl rfl
 
+theorem infer_lsup0C (Δ : List (Kind α)) (Γ : List (FL.Ty α)) :
+    infer fuel Δ Γ lsup0C =
+      some (.arr FL.Ty.nat (.arr (.arr FL.Ty.nat (levC 0)) (levC 0))) := by
+  have hg := good_nat.arr (good_levC (α := α) 0)
+  refine infer_lam (good_nat.kind Δ) (infer_lam (hg.kind Δ) (infer_tlam (infer_lam rfl
+    (infer_lam rfl (infer_lam (kind_tL Δ) (infer_lam (kind_tPD good_nat Δ) ?_))))))
+  have hP : tstep (tPD FL.Ty.nat : FL.Ty α) = none :=
+    tstep_arr_none good_nat.nf (tstep_arr_none (tstep_arr_none good_nat.nf rfl) rfl)
+  have h05 : infer fuel (.star :: Δ)
+      (tPD FL.Ty.nat :: tL :: tXX :: tX ::
+        (FL.Ty.arr FL.Ty.nat (levC 0) :: FL.Ty.nat :: Γ).map (Ty.tren Nat.succ))
+      (.app (.var 0) (.var 5)) = some (.arr (.arr FL.Ty.nat tX) tX) :=
+    infer_app rfl (lookup_ren (Γ := FL.Ty.arr FL.Ty.nat (levC 0) :: FL.Ty.nat :: Γ) (n := 1)
+      good_nat rfl) hP
+  refine infer_app h05 (infer_lam (good_nat.kind _) ?_)
+    (tstep_arr_none (tstep_arr_none good_nat.nf rfl) rfl)
+  have h6 : infer fuel (.star :: Δ)
+      (FL.Ty.nat :: tPD FL.Ty.nat :: tL :: tXX :: tX ::
+        (FL.Ty.arr FL.Ty.nat (levC 0) :: FL.Ty.nat :: Γ).map (Ty.tren Nat.succ))
+      (.var 5) = some (.arr FL.Ty.nat (levC 0)) :=
+    lookup_ren (Γ := FL.Ty.arr FL.Ty.nat (levC 0) :: FL.Ty.nat :: Γ) (n := 0) hg rfl
+  exact infer_app4_lev (good_domC 0) rfl (infer_app h6 rfl hg.nf) rfl rfl rfl rfl rfl
+
 theorem infer_lfoldC {D R : FL.Ty α} (hD : Good D) (hR : Good R) (Δ : List (Kind α))
     (Γ : List (FL.Ty α)) :
     infer fuel Δ Γ (lfoldC D R) =
@@ -390,6 +420,7 @@ theorem infer_trTC (Δ : List (Kind α)) : ∀ {Γ : List Ty} {σ : Ty} (t : Tm 
   | _, _, .lsucc m => infer_lsuccC m Δ _
   | _, _, .llim m => infer_llimC m Δ _
   | _, _, .lsup m => infer_lsupC m Δ _
+  | _, _, .lsup0 => infer_lsup0C Δ _
   | Γ, _, .lfold0 r => infer_lfoldC good_nat (good_tyTT r) Δ (Γ.map tyTT)
   | Γ, _, .lfoldS m r => infer_lfoldC (good_levC m) (good_tyTT r) Δ (Γ.map tyTT)
 

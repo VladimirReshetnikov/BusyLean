@@ -78,6 +78,7 @@ inductive Tm : List Ty → Ty → Type where
   | llim {Γ : List Ty} (m : Nat) : Tm Γ (.arr (.arr .nat (.lev m)) (.lev m))
   | lsup {Γ : List Ty} (m : Nat) :
       Tm Γ (.arr .nat (.arr (.arr (.lev m) (.lev (m + 1))) (.lev (m + 1))))
+  | lsup0 {Γ : List Ty} : Tm Γ (.arr .nat (.arr (.arr .nat (.lev 0)) (.lev 0)))
   | lfold0 {Γ : List Ty} (r : Ty) :
       Tm Γ (.arr r (.arr (.arr r r) (.arr (.arr (.arr .nat r) r)
         (.arr (.arr .nat (.arr (.arr .nat r) r)) (.arr (.lev 0) r)))))
@@ -111,6 +112,7 @@ def eval : {Γ : List Ty} → {σ : Ty} → Tm Γ σ → Env Γ → den σ
   | _, _, .lsucc _, _ => Buch.Tr.succ
   | _, _, .llim _, _ => Buch.Tr.lim
   | _, _, .lsup _, _ => Buch.Tr.sup
+  | _, _, .lsup0, _ => Buch.Tr.sup
   | _, _, .lfold0 _, _ => lfold
   | _, _, .lfoldS _ _, _ => lfold
 

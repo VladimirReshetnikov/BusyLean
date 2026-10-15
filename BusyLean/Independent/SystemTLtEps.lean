@@ -254,7 +254,48 @@ theorem toB_branch0 (n : Nat) :
   rw [(psi0_sf (down (n + 1)) _ h1.1).2, h1.2, (hg k).2]
   exact iterate_opow_tower k
 
+/-- On trees of level `0` without `sup`s, embedded at level `ω`, `ψ_0` is `ω^·`. -/
+theorem psiW_emb0 : ∀ x : T 0, SF x →
+    SF (psiW (embW 0 x) 0 0) ∧ Tr.toB (psiW (embW 0 x) 0 0) = BTree.opow (Tr.toB x)
+  | .zero, _ => ⟨trivial, rfl⟩
+  | .succ a, hx => by
+      have ih := psiW_emb0 a hx
+      refine ⟨fun k => (mulNat_sf _ ih.1 k).1, ?_⟩
+      show BTree.lim (fun k => Tr.toB (Tr.mulNat (psiW (embW 0 a) 0 0) k)) =
+        BTree.lim fun k => BTree.mulNat (BTree.opow (Tr.toB a)) k
+      congr 1; funext k; rw [(mulNat_sf _ ih.1 k).2, ih.2]
+  | .lim f, hx => ⟨fun k => (psiW_emb0 (f k) (hx k)).1,
+      congrArg BTree.lim (funext fun k => (psiW_emb0 (f k) (hx k)).2)⟩
+  | .sup _ _, hx => hx.elim
+
+/-- The branch `0` of `ψ_0(ε_{Ω_ω+1})` is `ψ_0(Ω_1)`: its Brouwer tree is exactly `ε₀`. -/
+theorem toB_branch0W : Tr.toB (psiW (towerW 0) 0 0) = epsilon0 := by
+  have hg : ∀ k, SF (iterate (fun g => psiW (embW 0 g) 0 0) k (omegaIn 0 0)) ∧
+      Tr.toB (iterate (fun g => psiW (embW 0 g) 0 0) k (omegaIn 0 0)) =
+        iterate BTree.opow k (.succ .zero) := by
+    intro k
+    induction k with
+    | zero => exact ⟨trivial, rfl⟩
+    | succ k ih =>
+        have h := psiW_emb0 _ ih.1
+        refine ⟨h.1, ?_⟩
+        show Tr.toB (psiW (embW 0 _) 0 0) = BTree.opow (iterate BTree.opow k (.succ .zero))
+        rw [h.2, ih.2]
+  show BTree.lim (fun k => Tr.toB (psiW (embW 0
+    (iterate (fun g => psiW (embW 0 g) 0 0) k (omegaIn 0 0))) 0 0)) = BTree.lim tower
+  congr 1
+  funext k
+  rw [(psiW_emb0 _ (hg k).1).2, (hg k).2]
+  exact iterate_opow_tower k
+
 end Buch
+
+/-- `H_{ε₀} ≤ H_θ` for the Takeuti–Feferman–Buchholz tree `θ`. -/
+theorem Feps_le_TFB (y : Nat) : Feps y ≤ hardy Buch.thetaTFB y := by
+  have h : Feps y ≤ hardy (Buch.Tr.toB (Buch.psiW (Buch.towerW 0) 0 0)) y := by
+    rw [Buch.toB_branch0W]; exact Nat.le_refl _
+  exact Nat.le_trans h (le_maxUpTo (fun k => hardy (Buch.Tr.toB (Buch.psiW (Buch.towerW k) 0 0)) y)
+    (Nat.zero_le y))
 
 /-- `H_{ε₀} ≤ H_θ`: the branch `0` of `θ = ψ_0(Ω_ω)` is `ψ_0(ε_{Ω_2+1})`, whose branch `0`
 is `ε₀`. -/
