@@ -298,6 +298,47 @@ def thetaBodyT (K : Nat) : Tm Γ (.arr .nat (.arr (.arr (.lev K) (.lev (K + 1)))
 def omegaProgram : Tm [] (.arr (.arr .nat .tree) .nat) :=
   lam (app (app hardyT (app tlim v0)) (app (app hardyT (app tlim v0)) (numT 42)))
 
+/-! ### Conversions between levels (for the Takeuti–Feferman–Buchholz rung) -/
+
+/-- `λ thr h. cmap thr h`: from level `a + 1` to level `b + 1`, converting the
+branches with `h` and keeping the `sup`s of level `< thr`. -/
+def cmapT (a b : Nat) :
+    Tm Γ (.arr .nat (.arr (.arr (.lev b) (.lev a)) (.arr (.lev (a + 1)) (.lev (b + 1))))) :=
+  lam (lam (foldS a (lzero (b + 1)) (lsucc (b + 1)) (llim (b + 1))
+    (lam (lam (ifLtT v1 v3 (app (app (lsup b) v1) (lam (app v1 (app v3 v0)))) (lzero (b + 1)))))))
+
+/-- From level `a + 1` to level `0`, dropping every `sup`. -/
+def dropT (a : Nat) : Tm Γ (.arr (.lev (a + 1)) (.lev 0)) :=
+  foldS a (lzero 0) (lsucc 0) (llim 0) (lam (lam (lzero 0)))
+
+/-- From level `0` to level `b`, dropping every `sup`. -/
+def raiseT (b : Nat) : Tm Γ (.arr (.lev 0) (.lev b)) :=
+  app (app (app (app (Tm.lfold0 (.lev b)) (lzero b)) (lsucc b)) (llim b)) (lam (lam (lzero b)))
+
+/-- `a + b` at level `0`. -/
+def add0T : Tm Γ (.arr (.lev 0) (.arr (.lev 0) (.lev 0))) :=
+  lam (lam (app (app (app (app (app (Tm.lfold0 (.lev 0)) v1) (lsucc 0)) (llim 0))
+    (lam (lam (app (app Tm.lsup0 v1) v0)))) v0))
+
+/-- `λ μ. sup μ (λ _. 0)` at level `0`. -/
+def supVia0T : Tm Γ (.arr .nat (.lev 0)) := lam (app (app Tm.lsup0 v0) (lam (lzero 0)))
+
+/-- `a · k` at level `0`. -/
+def mulNat0T : Tm Γ (.arr (.lev 0) (.arr .nat (.lev 0))) :=
+  lam (app (app (nrec (.lev 0)) (lzero 0)) (lam (lam (app (app add0T v0) v2))))
+
+/-- `λ μ c a b. if μ < c then a else b`. -/
+def ifLtC {r : Ty} : Tm Γ (.arr .nat (.arr .nat (.arr r (.arr r r)))) :=
+  lam (lam (lam (lam (ifLtT v3 v2 v1 v0))))
+
+/-- The Brouwer tree of a tree of level `0`. -/
+def toB0T : Tm Γ (.arr (.lev 0) .tree) :=
+  app (app (app (app (Tm.lfold0 .tree) tzero) tsucc) tlim) (lam (lam tzero))
+
+/-- `λ θ. H_θ(H_θ(42))`: the rung, given its ordinal as a tree. -/
+def tfbShell : Tm [] (.arr .tree .nat) :=
+  lam (app (app hardyT v0) (app (app hardyT v0) (numT 42)))
+
 end Program
 
 /-! ## Its value -/
@@ -647,6 +688,52 @@ theorem eval_omegaProgram (θ : Nat → BTree) :
 theorem eval_omegaProgram_rung :
     eval omegaProgram env0 (fun K => Buch.theta (K + 1)) = F3 (F3 42) :=
   eval_omegaProgram _
+
+theorem eval_cmapT (a b : Nat) {Γ : List Ty} (ρ : Env Γ) (thr : Nat) (h : Buch.T b → Buch.T a) :
+    eval (cmapT a b : Tm Γ _) ρ thr h = Tr.cmap thr h := by
+  funext x
+  refine (congrArg (fun (q : Nat → (Buch.T a → Buch.T (b + 1)) → Buch.T (b + 1)) =>
+    lfold Tr.zero Tr.succ Tr.lim q x) ?_).trans (lfold_cmap thr h x)
+  funext μ rs
+  exact eval_ifLtT _ _ _ _ _
+
+theorem eval_dropT (a : Nat) {Γ : List Ty} (ρ : Env Γ) (h : Nat → Buch.T a) :
+    eval (dropT a : Tm Γ _) ρ = Tr.cmap 0 h :=
+  funext fun x => by
+    show lfold Tr.zero Tr.succ Tr.lim (fun _ _ => Tr.zero) x = Tr.cmap 0 h x
+    exact lfold_cmap0 h x
+
+theorem eval_raiseT (b : Nat) {Γ : List Ty} (ρ : Env Γ) (h : Buch.P b → Nat) :
+    eval (raiseT b : Tm Γ _) ρ = Tr.cmap 0 h :=
+  funext fun x => by
+    show lfold Tr.zero Tr.succ Tr.lim (fun _ _ => Tr.zero) x = Tr.cmap 0 h x
+    exact lfold_cmap0 h x
+
+theorem eval_add0T {Γ : List Ty} (ρ : Env Γ) (a b : Buch.T 0) :
+    eval (add0T : Tm Γ _) ρ a b = Tr.add a b := lfold_add a b
+
+theorem eval_supVia0T {Γ : List Ty} (ρ : Env Γ) (μ : Nat) :
+    eval (supVia0T : Tm Γ _) ρ μ = Tr.sup μ (fun _ => Tr.zero) := rfl
+
+theorem eval_mulNat0T {Γ : List Ty} (ρ : Env Γ) (a : Buch.T 0) :
+    ∀ k, eval (mulNat0T : Tm Γ _) ρ a k = Tr.mulNat a k
+  | 0 => rfl
+  | k + 1 => by
+      show eval (add0T : Tm _ _) _ (eval (mulNat0T : Tm Γ _) ρ a k) a = _
+      rw [eval_add0T, eval_mulNat0T ρ a k]
+      rfl
+
+theorem eval_ifLtC {Γ : List Ty} {r : Ty} (ρ : Env Γ) (μ c : Nat) (a b : den r) :
+    eval (ifLtC : Tm Γ (.arr .nat (.arr .nat (.arr r (.arr r r))))) ρ μ c a b =
+      if μ < c then a else b :=
+  eval_ifLtT (Γ := r :: r :: .nat :: .nat :: Γ) v3 v2 v1 v0 _
+
+theorem eval_toB0T {Γ : List Ty} (ρ : Env Γ) : eval (toB0T : Tm Γ _) ρ = Tr.toB :=
+  funext lfold_toB
+
+theorem eval_tfbShell (θ : BTree) : eval tfbShell env0 θ = hardy θ (hardy θ 42) := by
+  show eval (hardyT : Tm _ _) _ θ (eval (hardyT : Tm _ _) _ θ (eval (numT 42 : Tm _ .nat) _)) = _
+  rw [eval_hardyT, eval_hardyT, eval_numT]
 
 end Buchholz
 
