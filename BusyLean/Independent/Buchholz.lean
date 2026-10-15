@@ -1,7 +1,7 @@
 import BusyLean.Independent.EpsilonHardy
 
 /-!
-# Independent tower, rung 3: the Hardy hierarchy along Buchholz's collapse
+# Independent tower, rung 3: the Hardy hierarchy at the Takeuti–Feferman–Buchholz ordinal
 
 This rung is an **ordinal-notation hierarchy** built on Buchholz's functions
 `ψ_ν`, written as tree ordinals.
@@ -10,24 +10,26 @@ This rung is an **ordinal-notation hierarchy** built on Buchholz's functions
 `lim f` and limits `sup μ f` of cofinality `Ω_{μ+1}`. In `T (m + 1)`, a `sup`
 branches over `T m`; the level `μ ≤ m` of the node is recorded, and only the
 branches at (lifts of) trees of level `μ` matter. `T 0` has no meaningful
-`sup`. Lifting `T m → T (m + 1)` and projecting back are one structural map
-`cmap` (`lift`, `proj`).
+`sup`. Conversions between any two levels are one structural map `cmap` each
+(`convFrom`, `convInto`).
 
-*Buchholz's collapse.* For a tree `α` one level above trees `Tr A`,
-`psiG dn α ν` is `ψ_ν(α)`, for every `ν` at once, by Buchholz's fundamental
-sequences (`dn` embeds the branches `A` into `Tr A`; the same functions serve
-every level):
+*Trees of level `ω`.* A `sup μ m f` node of `TW` has cofinality `Ω_{μ+1}` and
+branches over the trees of level `m`. `Ω_{n+1}` is the limit of all trees of
+level `n` (`OmegaW n`), and `Ω_ω = lim_n Ω_{n+1}`.
+
+*Buchholz's collapse.* `psiW α ν e = ψ_ν(α)`, computed at any level `e`, by
+Buchholz's fundamental sequences:
 
 * `ψ_ν(0) = Ω_ν` (with `Ω_0 = 1`);
 * `ψ_ν(α + 1) = lim_k ψ_ν(α) · k`;
 * `ψ_ν(lim f) = lim_k ψ_ν(f k)`;
 * `ψ_ν(sup μ f) = sup_ξ ψ_ν(f ξ)` if `μ < ν`;
 * `ψ_ν(sup μ f) = lim_k ψ_ν(f g_k)` if `μ ≥ ν`, where `g_0 = Ω_μ` and
-  `g_{k+1} = ψ_μ(f g_k)`.
+  `g_{k+1} = ψ_μ(f g_k)`, computed at the level of the branches.
 
-*The rung.* `θ_n = ψ_0(ε_{Ω_{n+1}+1})`, where
-`ε_{Ω_{n+1}+1} = lim (Ω_1, Ω_{n+1}^{Ω_1}, Ω_{n+1}^{Ω_{n+1}^{Ω_1}}, …)`, and
-**Buchholz's ordinal** `ψ_0(Ω_ω) = lim_K θ_{K+1}`. `F3 n = H_{ψ_0(Ω_ω)}(n)`.
+*The rung.* `ε_{Ω_ω+1} = lim (Ω_1, Ω_ω^{Ω_1}, Ω_ω^{Ω_ω^{Ω_1}}, …)`, and the
+**Takeuti–Feferman–Buchholz ordinal** `θ = ψ_0(ε_{Ω_ω+1})` is the
+proof-theoretic ordinal of `Π¹₁-CA + BI` and of `ID_ω`. `F3 n = H_θ(n)`.
 
 **Do not evaluate `contender_3`.**
 -/
@@ -71,13 +73,6 @@ def add (a : Tr A) : Tr A → Tr A
   | lim f => lim fun i => add a (f i)
   | sup μ f => sup μ fun x => add a (f x)
 
-/-- `a · b`, by recursion on `b`. -/
-def mul (a : Tr A) : Tr A → Tr A
-  | zero => zero
-  | succ b => add (mul a b) a
-  | lim f => lim fun i => mul a (f i)
-  | sup μ f => sup μ fun x => mul a (f x)
-
 /-- `a · k` for a number `k`. -/
 def mulNat (a : Tr A) : Nat → Tr A
   | 0 => zero
@@ -92,83 +87,17 @@ def toB : Tr A → BTree
 
 end Tr
 
-/-- Lifting `T m → T (m + 1)` and projecting `T (m + 1) → T m`. -/
-def lp : (m : Nat) → (T m → T (m + 1)) × (T (m + 1) → T m)
-  | 0 => (Tr.cmap 0 (fun _ => (0 : Nat)), Tr.cmap 0 (fun _ => .zero))
-  | m + 1 => (Tr.cmap (m + 1) (lp m).2, Tr.cmap (m + 1) (lp m).1)
-
-def lift (m : Nat) : T m → T (m + 1) := (lp m).1
-
-def proj (m : Nat) : T (m + 1) → T m := (lp m).2
-
-/-- Branches of a tree of level `n` as trees of level `n`. -/
-def down : (n : Nat) → P n → T n
-  | 0 => fun _ => .zero
-  | n + 1 => lift n
-
 /-- `g` iterated `k` times. -/
 def iterate {α : Type} (g : α → α) : Nat → α → α
   | 0, x => x
   | k + 1, x => g (iterate g k x)
 
-/-! ## Buchholz's collapse, uniformly in the level
-
-The collapse from trees `Tr (Tr A)` (one level up) to trees `Tr A` needs only
-how a branch `y : A` sits in `Tr A` (`dn`), and, at the top, how a tree of
-`Tr A` lifts to `Tr (Tr A)` (`lf`). Every level uses the same functions. -/
-
-section Collapse
-
-variable {A : Type}
-
-/-- `Ω_ν` (`Ω_0 = 1`). -/
-def omegaG (dn : A → Tr A) : Nat → Tr A
-  | 0 => .succ .zero
-  | ν + 1 => .sup ν fun y => dn y
-
-/-- **Buchholz's collapse**: `psiG dn α ν = ψ_ν(α)`, for all `ν` at once. -/
-def psiG (dn : A → Tr A) : Tr (Tr A) → Nat → Tr A
-  | .zero => omegaG dn
-  | .succ a => fun ν => .lim fun k => Tr.mulNat (psiG dn a ν) k
-  | .lim f => fun ν => .lim fun k => psiG dn (f k) ν
-  | .sup μ f => fun ν =>
-      if μ < ν then .sup μ fun y => psiG dn (f (dn y)) ν
-      else .lim fun k => psiG dn (f (iterate (fun g => psiG dn (f g) μ) k (omegaG dn μ))) ν
-
-/-- `Ω_{n+1}^a` at the top level. -/
-def opowG (n : Nat) (lf : Tr A → Tr (Tr A)) : Tr (Tr A) → Tr (Tr A)
-  | .zero => .succ .zero
-  | .succ a => .sup n fun b => Tr.mul (opowG n lf a) (lf b)
-  | .lim f => .lim fun i => opowG n lf (f i)
-  | .sup μ f => .sup μ fun x => opowG n lf (f x)
-
-/-- `Ω_1, Ω_{n+1}^{Ω_1}, Ω_{n+1}^{Ω_{n+1}^{Ω_1}}, …`, whose limit is `ε_{Ω_{n+1}+1}`. -/
-def towerG (n : Nat) (lf : Tr A → Tr (Tr A)) (dn : A → Tr A) : Nat → Tr (Tr A)
-  | 0 => lf (omegaG dn 1)
-  | k + 1 => opowG n lf (towerG n lf dn k)
-
-/-- `ψ_0(ε_{Ω_{n+1}+1})` as a Brouwer tree. -/
-def thetaG (n : Nat) (lf : Tr A → Tr (Tr A)) (dn : A → Tr A) : BTree :=
-  Tr.toB (psiG dn (.lim (towerG n lf dn)) 0)
-
-end Collapse
-
-/-- `ψ_0(ε_{Ω_{n+1}+1})`, with trees of levels `n` and `n + 1`. -/
-def theta (n : Nat) : BTree := thetaG n (lift n) (down n)
-
-/-- **Buchholz's ordinal** `ψ_0(Ω_ω) = sup_K ψ_0(ε_{Ω_{K+2}+1})`, as a Brouwer tree. -/
-def thetaOmega : BTree := .lim fun K => theta (K + 1)
-
 /-! ## The Takeuti–Feferman–Buchholz ordinal `ψ_0(ε_{Ω_ω+1})`
 
-Above all finite levels sit the trees `TW` of level `ω`: a `sup μ m f` node has
-cofinality `Ω_{μ+1}` and branches over the trees of level `m` (only the lifts
-of trees of level `μ` matter). The collapse `psiW α ν e = ψ_ν(α)` lands in any
-level `e ≥ ν`. Its `sup` case keeps the node when `μ < ν`, converting the
-branches from level `e - 1` to level `m` (`supVia`), and otherwise
-diagonalizes with `g_0 = Ω_μ`, `g_{k+1} = ψ_μ(α[g_k])`, computed at level `m`.
-Conversions between any two levels (`convFrom`, `convInto`) are one
-structural map each. -/
+The collapse `psiW α ν e = ψ_ν(α)` lands in any level `e ≥ ν`. Its `sup` case
+keeps the node when `μ < ν`, converting the branches from level `e - 1` to
+level `m` (`supVia`), and otherwise diagonalizes with `g_0 = Ω_μ`,
+`g_{k+1} = ψ_μ(α[g_k])`, computed at level `m`. -/
 
 mutual
 
@@ -270,10 +199,10 @@ end BusyLean.Indep.Buch
 
 namespace BusyLean.Indep
 
-/-- The Hardy hierarchy at Buchholz's ordinal `ψ_0(Ω_ω)`. -/
-def F3 (n : Nat) : Nat := Eps.hardy Buch.thetaOmega n
+/-- The Hardy hierarchy at the Takeuti–Feferman–Buchholz ordinal `ψ_0(ε_{Ω_ω+1})`. -/
+def F3 (n : Nat) : Nat := Eps.hardy Buch.thetaTFB n
 
-/-- **The ordinal rung**: `H_θ(H_θ(42))` for Buchholz's `θ = ψ_0(Ω_ω)`. Never evaluate it. -/
+/-- **The ordinal rung**: `H_θ(H_θ(42))` for `θ = ψ_0(ε_{Ω_ω+1})`. Never evaluate it. -/
 def contender_3 : Nat := F3 (F3 42)
 
 end BusyLean.Indep

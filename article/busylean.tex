@@ -2468,7 +2468,7 @@ Rung & idea & definition\\
 \midrule
 1 & nested recursion on numbers & \lean{ack 5 42 10002} (Contender~4 of the Coq contest)\\
 2 & busy beaver of System~T & largest numeral of depth 42 (Contender~5 of the Coq contest)\\
-3 & ordinal notations, Buchholz's $\psi_\nu$ & $H_\theta(H_\theta(42))$, $\theta=\psi_0(\Omega_\omega)$\\
+3 & ordinal notations, Buchholz's $\psi_\nu$ & $H_\theta(H_\theta(42))$, $\theta=\psi_0(\varepsilon_{\Omega_\omega+1})$\\
 4 & impredicative universes building their own length & \lean{F4 (F4 42)} below\\
 \bottomrule
 \end{tabular}
@@ -2490,10 +2490,13 @@ $H_a$ monotone for every tree, with no condition on the fundamental sequences.
 Above the Brouwer trees sit trees of every finite \emph{level}: a tree of
 level $m$ has countable limits and limits $\mathtt{sup}\,\mu\,f$ of cofinality
 $\Omega_{\mu+1}$, $\mu<m$, whose branches are trees of level $m-1$ (only the
-lifts of trees of level $\mu$ matter). Lifting a tree one level up and
-projecting it back are a single structural map. Buchholz's functions $\psi_\nu$
-collapse a tree one level up to trees of the level below, for all $\nu$ at
-once and with the same function at every level, by his fundamental sequences:
+lifts of trees of level $\mu$ matter). Converting a tree between any two
+levels is a single structural map. Above them sit the trees of level $\omega$,
+whose nodes $\mathtt{sup}\,\mu\,m\,f$ have cofinality $\Omega_{\mu+1}$ and
+branch over trees of level $m$; $\Omega_{n+1}$ is the limit of all trees of
+level $n$, and $\Omega_\omega=\lim_n\Omega_{n+1}$. Buchholz's functions
+$\psi_\nu$ collapse a tree of level $\omega$ into any level, by his
+fundamental sequences:
 \[
 \psi_\nu(0)=\Omega_\nu,\quad
 \psi_\nu(\alpha+1)=\lim_k\psi_\nu(\alpha)\cdot k,\quad
@@ -2506,11 +2509,12 @@ once and with the same function at every level, by his fundamental sequences:
 \lim_k\psi_\nu(f\,g_k),\ \ g_0=\Omega_\mu,\ g_{k+1}=\psi_\mu(f\,g_k) & \mu\ge\nu.
 \end{cases}
 \]
-With $\theta_n=\psi_0(\varepsilon_{\Omega_{n+1}+1})$, where
-$\varepsilon_{\Omega_{n+1}+1}=\lim(\Omega_1,\Omega_{n+1}^{\Omega_1},\dots)$, the
-rung is $H_\theta(H_\theta(42))$ for \textbf{Buchholz's ordinal}
-$\theta=\psi_0(\Omega_\omega)=\lim_K\theta_{K+1}$. Evaluating it needs trees of
-unboundedly many levels. The two files import nothing else.
+The diagonalization computes $\psi_\mu$ at the level of the branches. With
+$\varepsilon_{\Omega_\omega+1}=\lim(\Omega_1,\Omega_\omega^{\Omega_1},\dots)$, the
+rung is $H_\theta(H_\theta(42))$ for the \textbf{Takeuti--Feferman--Buchholz
+ordinal} $\theta=\psi_0(\varepsilon_{\Omega_\omega+1})$, the proof-theoretic
+ordinal of $\Pi^1_1$-CA$\,+\,$BI and of $\mathrm{ID}_\omega$. Evaluating it
+needs trees of unboundedly many levels. The two files import nothing else.
 
 \paragraph{Rung 2 $<$ rung 3: an ordinal analysis of System~T.} An upper
 bound for \emph{all} System~T values cannot come from simulation. It needs
@@ -2542,12 +2546,10 @@ proof theory. The proof follows Tait's infinitary terms.
   $\mathtt{eval}\,w\le H_{\omega_{49}}(y)\le H_{\varepsilon_0}(y)$ for $y\ge200$
   (\lean{eval\_le\_hardy\_eps}).
 \item \textbf{$\varepsilon_0$ inside $\theta$.} Branch~0 of $\theta$ is
-  $\theta_1$, and branch~0 of $\theta_1$ is
   $\psi_0(\Omega_1)$, the limit of $1,\omega,\omega^\omega,\dots$: on trees
-  without $\mathtt{sup}$s, $\psi_0$ is $\omega^{\cdot}$ and the level maps are
-  the identity, so its Brouwer tree is exactly $\varepsilon_0$
-  (\lean{toB\_branch0}). So $H_{\varepsilon_0}(y)\le H_\theta(y)$
-  (\lean{Feps\_le\_F3}).
+  without $\mathtt{sup}$s, $\psi_0$ is $\omega^{\cdot}$, so its Brouwer tree is
+  exactly $\varepsilon_0$ (\lean{toB\_branch0W}). So
+  $H_{\varepsilon_0}(y)\le H_\theta(y)$ (\lean{Feps\_le\_F3}).
 \end{enumerate}
 No step evaluates a number. The main engineering hazard is Lean's own
 reduction: a stray \lean{rfl}, a closing \lean{rw}, or a linter can try to
@@ -2595,32 +2597,36 @@ trees compile to their iterators $\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to
 X)\to X)\to X$, and trees over a branching type $D$ to
 $\mathrm{Tree}\,D=\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to X)\to X)\to
 (\mathtt{nat}\to(D\to X)\to X)\to X$: the $\Omega$-branching is impredicative
-quantification over the type of the previous level. The type of level-$K$
-trees is $\mathrm{Tree}^{K+1}(\mathtt{nat})$, which depends on $K$, so no simply
-typed program reaches every level. System~F does, with an impredicative
-existential \emph{package}
+quantification over the type of the previous level. The type of level-$m$
+trees is $\mathrm{Tree}\,P_m$ with $P_0=\mathtt{nat}$ and
+$P_{m+1}=\mathrm{Tree}\,P_m$, which depends on $m$, so no simply typed program
+reaches every level. F$_\omega$ does, with \emph{evidence}
 \[
-E=\forall R.\,(\forall P.\,\mathtt{nat}\to(P\to\mathrm{Tree}\,P)\to(\mathrm{Tree}\,P\to P)\to R)\to R
+\mathrm{Lvl}\,E=\forall C{:}\star\to\star.\,(\forall P.\,C\,P\to C\,(\mathrm{Tree}\,P))\to C\,\mathtt{nat}\to C\,E,
 \]
-that hides the type $P$ of level-$K$ trees with $K$, the lifting and the
-projection. One step builds the package of level $K+1$; the Church numeral $K$
-iterates it; a body polymorphic in $P$ computes $\theta_{K+1}$:
+a type-level Church numeral that gives induction over the levels. With it one
+program converts between any two levels, builds the $\mathtt{sup}$s of any
+level from branches given on another, and embeds every level into level
+$\omega$. Trees of level $\omega$ are Church trees whose $\mathtt{sup}$ nodes
+carry the branching type of their branches together with its evidence,
 \[
-\theta_F=\lambda K.\ K\,[E]\ \mathit{step}\ \mathit{pkg}_0\ [\mathtt{tree}]\ \mathit{body}
-\ :\ \mathtt{nat}\to\mathtt{tree}.
+\mathrm{TW}=\forall X.\,X\to(X\to X)\to((\mathtt{nat}\to X)\to X)\to
+(\mathtt{nat}\to\forall D.\,\mathrm{Lvl}\,D\to(\mathrm{Tree}\,D\to X)\to X)\to X,
 \]
-Its typing is a kernel computation with a small verified type checker for
-System~F (\lean{checkF\_sound}). Its semantics reuses the tree language
-\lean{TT} (System~T with Brouwer trees, trees of every level and their folds):
-the step and the body are translations of closed \lean{TT} terms that take the
-level's operations as arguments, so their untyped form is the same at every
-level. The logical relations are defined by recursion on the level and the
-\emph{tree value}, which avoids quantifying over all result types. By
-induction on $K$, the iterated package represents level $K$, and $\theta_F\,K$
-represents $\theta_{K+1}$ (\lean{rel\_thetaF}). The rung is the \lean{TT} shell
-$\lambda\theta.\,H_{\lim\theta}(H_{\lim\theta}(42))$ applied to $\theta_F$: a
-program of depth at most 501 that type checks in the ladder and reduces to the
-right numeral under every oracle. Confluence (below) lets the normalizer find
+and the collapse folds them into $\forall E.\,\mathrm{Lvl}\,E\to\mathtt{nat}\to
+\mathrm{Tree}\,E$, so the diagonalization computes $\psi_\mu$ at the level of
+the branches. Every combinator is closed and $\lambda$-lifted. The typing is a
+kernel computation with a small verified type checker for F$_\omega$
+(\lean{checkW\_sound}). The semantics reuses the tree language \lean{TT}
+(System~T with Brouwer trees, trees of every finite level and their folds): the
+pieces that live at one level are translations of closed \lean{TT} terms whose
+untyped form is the same at every level. Evidence behaves like a Church
+numeral, and logical relations defined by recursion on the \emph{tree values},
+which avoids quantifying over all result types, show that the program
+represents $\psi_0(\varepsilon_{\Omega_\omega+1})$ (\lean{rel\_thetaW}). The
+rung is the \lean{TT} shell $\lambda\theta.\,H_\theta(H_\theta(42))$ applied to
+that tree: a program of depth 153 that type checks in the ladder and reduces to
+the right numeral under every oracle. Confluence (below) lets the normalizer find
 it. Since
 \lean{F4 n} unfolds to \lean{ladderMax (reflAlong (selfTree n n)) n}, the outer
 \lean{F4} sees the compiled program.
@@ -2656,14 +2662,14 @@ That proof therefore compiles \emph{every} raw term.
   the compiled winner.
 \end{enumerate}
 The definitions of all four rungs check in about 3~s and the three comparisons,
-the ordinal analysis included, in about 30~s.
+the ordinal analysis included, in about 28~s.
 
 \paragraph{What was left out, and why.} System~F, F$_\omega$, kind
 polymorphism and the dynamic-kind universe are fragments of the ladder
 language, and the W-language and the tree languages extend System~T, so each
 would be incorporated by a larger rung. Larger ordinal notations (Contenders
-16--31) are the same approach as rung~3, which now reaches Buchholz's
-ordinal $\psi_0(\Omega_\omega)$. Towers, closure operators and reflective
+16--31) are the same approach as rung~3, which now reaches the
+Takeuti--Feferman--Buchholz ordinal $\psi_0(\varepsilon_{\Omega_\omega+1})$. Towers, closure operators and reflective
 towers (Contenders 6, 9--12, 15, 23 and 54--70) are amplifiers of a base
 language; two of them, ladders that build their own length and reflection
 along trees (Contenders 36--53), are built into rung~4.

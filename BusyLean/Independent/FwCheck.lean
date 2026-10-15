@@ -1,17 +1,17 @@
-import BusyLean.Independent.SystemFCheck
+import BusyLean.Independent.SystemTLtLadder
 
 /-!
 # A verified type checker for the Fω fragment (proof infrastructure)
 
-Like `SystemFCheck.lean`, for the **Fω** fragment of the ladder language:
-kinds `★` and `κ → κ`, type-level λ and application, `∀` over any kind. The
-syntax `FTy`/`FTm` has no atoms, so the typing of a concrete program is a
-kernel computation (`checkW`) that does not depend on the atom type.
+The **Fω** fragment of the ladder language: kinds `★` and `κ → κ`, type-level
+λ and application, `∀` over any kind. The syntax `FTy`/`FTm` has no atoms, so
+the typing of a concrete program is a kernel computation (`checkW`) that does
+not depend on the atom type.
 
 `checkW F₀` normalizes types with the ladder's own reduction strategy
 (`tstepF` mirrors `FL.tstep`) for `F₀` steps and demands normal forms, so its
 verdict holds for the ladder's checker at every fuel `≥ F₀` (`checkW_sound`).
-`mem_embC` shows that embedded programs of small depth are enumerated.
+`mem_ctmsUpTo` shows that embedded programs of small depth are enumerated.
 -/
 
 namespace BusyLean.Indep.FW
@@ -19,6 +19,18 @@ namespace BusyLean.Indep.FW
 open BusyLean.FL
 open BusyLean.Fw (nth?)
 open BusyLean.F.Tm (upRen)
+
+theorem nth?_append_left {β : Type} {G : List β} :
+    ∀ {Γ : List β} {n : Nat} {x : β}, nth? Γ n = some x → nth? (Γ ++ G) n = some x
+  | [], _, _, h => nomatch h
+  | _ :: _, 0, _, h => h
+  | _ :: Γ, n + 1, _, h => nth?_append_left (Γ := Γ) (n := n) h
+
+theorem nth?_map_some {β γ : Type} (g : β → γ) :
+    ∀ {Γ : List β} {n : Nat} {x : β}, nth? Γ n = some x → nth? (Γ.map g) n = some (g x)
+  | [], _, _, h => nomatch h
+  | _ :: _, 0, _, h => by cases h; rfl
+  | _ :: Γ, n + 1, _, h => nth?_map_some g (Γ := Γ) (n := n) h
 
 /-- Kinds without atoms. -/
 inductive FK where
@@ -400,7 +412,7 @@ theorem kind_embT : ∀ (A : FTy) {Δ : List FK} {k : FK} (D : List (Kind α)),
     inferKindF Δ A = some k → inferKind (Δ.map embK ++ D) (embT A) = some (embK k)
   | .tvar n, Δ, k, D, h => by
       show nth? (Δ.map embK ++ D) n = _
-      exact SF.nth?_append_left (SF.nth?_map_some embK h)
+      exact nth?_append_left (nth?_map_some embK h)
   | .arr A B, Δ, k, D, h => by
       cases hA : inferKindF Δ A with
       | none => simp [inferKindF, hA, arrKF, starKF] at h
@@ -531,7 +543,7 @@ theorem checkW_sound (F₀ : Nat) : ∀ (t : FTm) {Δ : List FK} {Γ : List FTy}
     infer fuel (Δ.map embK ++ D) (Γ.map embT ++ G) (embC t) = some (embT T)
   | .var n, Δ, Γ, T, h, fuel, _, D, G => by
       show nth? (Γ.map embT ++ G) n = _
-      exact SF.nth?_append_left (SF.nth?_map_some embT h)
+      exact nth?_append_left (nth?_map_some embT h)
   | .lam A b, Δ, Γ, T, h, fuel, hF, D, G => by
       simp only [checkW] at h
       split at h

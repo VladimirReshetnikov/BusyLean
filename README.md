@@ -28,8 +28,8 @@ cumulative tower of Contenders 5–70 below is closed and kept as a record.
 |---|---|---|---|
 | 1 | nested recursion on numbers | `ack 5 42 10002` (Contender 4 of the Coq contest) | — |
 | 2 | busy beaver of a predicative higher-type language | largest System T numeral of depth 42 (Contender 5 of the Coq contest) | Ackermann is a System T program of depth `≤ 42` (port of the Coq proof) |
-| 3 | ordinal notations with Buchholz's collapsing functions | `H_θ(H_θ(42))`: the Hardy hierarchy along **Buchholz's ordinal** `θ = ψ_0(Ω_ω) = lim_K ψ_0(ε_{Ω_{K+2}+1})`, with Buchholz's `ψ_ν` for all `ν < ω` written as tree ordinals of every finite level | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ψ_0(Ω_1) = ε₀` sits inside `θ` |
-| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | one ladder program computes `H_θ(H_θ(42))`: impredicative existential packages build the tree type of level `K` at run time |
+| 3 | ordinal notations with Buchholz's collapsing functions | `H_θ(H_θ(42))`: the Hardy hierarchy along the **Takeuti–Feferman–Buchholz ordinal** `θ = ψ_0(ε_{Ω_ω+1})`, with Buchholz's `ψ_ν` written as tree ordinals of every finite level and of level `ω` | an **ordinal analysis of System T**: every System T value of depth 42 is below `H_{ε₀}(200)`, and `ψ_0(Ω_1) = ε₀` sits inside `θ` |
+| 4 | impredicative universes that build their own length | `F4 (F4 42)`, where `F4 n` is ladder reflection iterated transfinitely along a tree that ladder programs over transfinitely many universes build, starting from the empty tree | one Fω program of the ladder computes `H_θ(H_θ(42))`: type-level evidence gives induction over the tree types of all finite levels |
 
 ```lean
 def contender_1 : Nat := ack 5 42 10002                       -- Independent/Ackermann.lean
@@ -42,16 +42,19 @@ inductive Tr (A : Type) where                                 -- Independent/Buc
   | zero | succ (a : Tr A) | lim (f : Nat → Tr A)
   | sup (μ : Nat) (f : A → Tr A)                               -- cofinality Ω_{μ+1}
 def P : Nat → Type | 0 => Nat | m + 1 => Tr (P m)               -- T m = Tr (P m): level m
-def psiG (dn : A → Tr A) : Tr (Tr A) → Nat → Tr A              -- ψ_ν(α), for all ν at once,
-  | .zero => omegaG dn                                         -- at every level
-  | .succ a => fun ν => .lim fun k => Tr.mulNat (psiG dn a ν) k
-  | .lim f => fun ν => .lim fun k => psiG dn (f k) ν
-  | .sup μ f => fun ν =>
-      if μ < ν then .sup μ fun y => psiG dn (f (dn y)) ν
-      else .lim fun k => psiG dn (f (iterate (fun g => psiG dn (f g) μ) k (omegaG dn μ))) ν
-def theta (n : Nat) : BTree := thetaG n (lift n) (down n)     -- ψ_0(ε_{Ω_{n+1}+1})
-def thetaOmega : BTree := .lim fun K => theta (K + 1)          -- Buchholz's ordinal ψ_0(Ω_ω)
-def F3 (n : Nat) : Nat := hardy thetaOmega n
+inductive TW where                                             -- level ω
+  | zero | succ (a : TW) | lim (f : Nat → TW)
+  | sup (μ m : Nat) (f : T m → TW)                             -- branches of level m
+def psiW : TW → Nat → (e : Nat) → T e                          -- ψ_ν(α), at any level e
+  | .zero => fun ν e => omegaIn e ν
+  | .succ a => fun ν e => .lim fun k => Tr.mulNat (psiW a ν e) k
+  | .lim f => fun ν e => .lim fun k => psiW (f k) ν e
+  | .sup μ m f => fun ν e =>
+      if μ < ν then supVia e μ m (fun x => psiW (f x) ν e)
+      else .lim fun k => psiW (f (iterate (fun g => psiW (f g) μ m) k (omegaIn m μ))) ν e
+def epsW : TW := .lim towerW                                   -- ε_{Ω_ω+1}
+def thetaTFB : BTree := Tr.toB (psiW epsW 0 0)                 -- ψ_0(ε_{Ω_ω+1})
+def F3 (n : Nat) : Nat := hardy thetaTFB n
 def contender_3 : Nat := F3 (F3 42)
 def ladderMax (g : Nat → Nat) (n : Nat) : Nat :=               -- Independent/Ladder.lean
   n + 1 + listMax (fvalue n g n) (ladderUpTo n)
@@ -107,43 +110,49 @@ trees) without seeding.
 **Rung 3: Buchholz's functions** ([`Buchholz.lean`](BusyLean/Independent/Buchholz.lean)).
 Trees of level `m` have countable limits and limits `sup μ f` of cofinality
 `Ω_{μ+1}`; a `sup` of level `m + 1` branches over trees of level `m`, and one
-structural map lifts and projects between adjacent levels. `psiAll n α ν` is
-`ψ_ν(α)` for every `ν` at once (`psiG`, the same function at every level), by
-Buchholz's fundamental sequences: `ψ_ν(0) = Ω_ν`, `ψ_ν(α+1) = lim_k ψ_ν(α)·k`,
-limits pointwise, a `sup` of level `μ < ν` is kept, and a `sup` of level `μ ≥ ν`
-is diagonalized with `g_0 = Ω_μ`, `g_{k+1} = ψ_μ(α[g_k])`. `θ_n = ψ_0(ε_{Ω_{n+1}+1})`
-uses `n + 2` levels, and **Buchholz's ordinal** is their limit,
-`ψ_0(Ω_ω) = lim_K θ_{K+1}`.
+structural map converts between any two levels. Trees of level `ω` have
+`sup μ m f` nodes of cofinality `Ω_{μ+1}` that branch over trees of level `m`;
+`Ω_{n+1}` is the limit of all trees of level `n`, and `Ω_ω = lim_n Ω_{n+1}`.
+`psiW α ν e` is `ψ_ν(α)` computed at level `e`, by Buchholz's fundamental
+sequences: `ψ_ν(0) = Ω_ν`, `ψ_ν(α+1) = lim_k ψ_ν(α)·k`, limits pointwise, a
+`sup` of level `μ < ν` is kept, and a `sup` of level `μ ≥ ν` is diagonalized
+with `g_0 = Ω_μ`, `g_{k+1} = ψ_μ(α[g_k])`, computed at the level of the
+branches. With `ε_{Ω_ω+1} = lim (Ω_1, Ω_ω^{Ω_1}, Ω_ω^{Ω_ω^{Ω_1}}, …)`, the rung
+is the Hardy hierarchy at the **Takeuti–Feferman–Buchholz ordinal**
+`ψ_0(ε_{Ω_ω+1})`, the proof-theoretic ordinal of `Π¹₁-CA + BI` and of `ID_ω`.
 
-**Rung 3 < rung 4: simulation, uniformly in the level.** Computing
-`H_{ψ_0(Ω_ω)}(y)` needs trees of every level up to `y`, and the Church type of
-level-`K` trees depends on `K`, so no simply typed program reaches them all.
-The ladder's impredicative polymorphism does: a **package**
+**Rung 3 < rung 4: simulation, uniformly in the level.** Computing `H_θ(y)`
+needs trees of every finite level, and trees of level `ω` that branch over all
+of them. The Church type of level-`m` trees is `Tree (P m)` with `P 0 = nat` and
+`P (m + 1) = Tree (P m)`; it depends on `m`, so no simply typed program reaches
+every level. The Fω fragment of the ladder does
+([`TFBProg.lean`](BusyLean/Independent/TFBProg.lean)):
 
-  `E = ∀R. (∀P. nat → (P → Tree P) → (Tree P → P) → R) → R`
-
-hides the type `P` of level-`K` trees with `K`, the lifting `P → Tree P` and
-the projection `Tree P → P`. One step builds the package of level `K + 1`, the
-Church numeral `K` iterates it, and a body polymorphic in `P` computes
-`ψ_0(ε_{Ω_{K+2}+1})` ([`OmegaPkg.lean`](BusyLean/Independent/OmegaPkg.lean)):
-
-  `thetaF = λK. K [E] step pkg₀ [tree] body : nat → tree`.
-
-* The **typing** of `thetaF` is a kernel computation with a small verified
-  checker for System F ([`SystemFCheck.lean`](BusyLean/Independent/SystemFCheck.lean),
-  `checkF_sound`).
-* Its **semantics** reuses the tree language `TT`
-  ([`TreeLang.lean`](BusyLean/Independent/TreeLang.lean)): the step and the body
-  are translations of closed `TT` terms that take the level's operations as
-  arguments and whose untyped form is the same at every level. Logical
-  relations defined by recursion on the level and the tree value
-  ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean)) then show,
-  by induction on `K`, that the iterated package represents level `K`, and
-  that `thetaF K` represents `ψ_0(ε_{Ω_{K+2}+1})` (`rel_thetaF`).
-* The rung is the `TT` shell `λθ. H_{lim θ}(H_{lim θ}(42))` applied to
-  `thetaF`. Confluence ([`Confluence.lean`](BusyLean/Independent/Confluence.lean))
-  makes the normalizer find the value, and the whole program has depth at most
-  `501`.
+* The **evidence** `Lvl E = ∀C:★→★. (∀P. C P → C (Tree P)) → C nat → C E` that `E`
+  is a branching type is a type-level Church numeral, and gives induction over
+  the levels. With it one program converts between any two levels, builds the
+  `sup`s of any level from branches given on another, and embeds every level
+  into level `ω`.
+* A tree of level `ω` is a Church tree whose `sup` nodes carry the branching
+  type of their branches and its evidence:
+  `TW = ∀X. X → (X → X) → ((nat → X) → X) → (nat → ∀D. Lvl D → (Tree D → X) → X) → X`.
+  The collapse folds it into `∀E. Lvl E → nat → Tree E`, so the
+  diagonalization computes `ψ_μ` at the level of the branches.
+* The **typing** is a kernel computation with a small verified checker for Fω
+  ([`FwCheck.lean`](BusyLean/Independent/FwCheck.lean), `checkW_sound`).
+* The **semantics** ([`TFBSem.lean`](BusyLean/Independent/TFBSem.lean)): every
+  combinator is closed and λ-lifted, so one β-lemma describes it. The pieces
+  that live at one level are translations of closed `TT` terms
+  ([`TreeLang.lean`](BusyLean/Independent/TreeLang.lean)) whose untyped form is
+  the same at every level, so the logical relation of `TT`
+  ([`TreeEmbedding.lean`](BusyLean/Independent/TreeEmbedding.lean)) applies at
+  each level. Evidence behaves like a Church numeral, and relations defined by
+  recursion on the tree values show that the program represents
+  `ψ_0(ε_{Ω_ω+1})` (`rel_thetaW`).
+* The rung is the `TT` shell `λθ. H_θ(H_θ(42))` applied to that tree
+  ([`EpsLtLadder.lean`](BusyLean/Independent/EpsLtLadder.lean)). Confluence
+  ([`Confluence.lean`](BusyLean/Independent/Confluence.lean)) makes the
+  normalizer find the value, and the whole program has depth `153`.
 Since `F4 n = ladderMax (reflAlong (selfTree n n)) n`, and the simulation
 works under every oracle, the outer `F4` already sees the compiled program.
 
@@ -155,7 +164,7 @@ polymorphic pairs.
 Excluded, because a larger rung would have to incorporate them: System F,
 Fω and kind polymorphism (fragments of the ladder language), the W-language
 and tree languages (extensions of System T), larger ordinal notations
-(Contenders 16–31, the same approach as rung 3; rung 3 takes Buchholz's collapse to `ψ_0(Ω_ω)`), and towers and closure
+(Contenders 16–31, the same approach as rung 3; rung 3 takes Buchholz's collapse to `ψ_0(ε_{Ω_ω+1})`), and towers and closure
 operators over a base language (amplifiers). Two amplifiers, ladders that
 build their own length and reflection along trees, are built into rung 4.
 
@@ -164,7 +173,7 @@ each rung's definition depends on and fails if one reaches a lower rung or a
 main-tower contender. Rung 3 depends only on its two files (Brouwer trees
 and Buchholz's collapse), which import nothing else. `python3 scripts/check_independent.py` runs the budgets and the audit
 from a clean build. The five definition modules take about 3 s and the three
-comparisons, the ordinal analysis included, about 30 s.
+comparisons, the ordinal analysis included, about 28 s.
 
 ## The closed cumulative tower
 

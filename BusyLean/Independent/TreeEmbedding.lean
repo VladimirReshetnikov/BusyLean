@@ -439,6 +439,11 @@ theorem rel_utrT : ∀ {Γ : List Ty} {σ : Ty} (t : Tm Γ σ) {σs : Nat → F.
   | _, _, .lfold0 r, _, _, _ => rel_lfold0 r
   | _, _, .lfoldS m r, _, _, _ => rel_lfoldS m r
 
+/-- The untyped translation of a closed `TT` term represents its value. -/
+theorem rel_utrT0 {σ : Ty} (t : Tm [] σ) : Rel f σ (utrT t) (eval t env0) := by
+  have h := rel_utrT (f := f) t (σs := var) (ρ := env0) (fun _ v => nomatch v)
+  rwa [subst_var] at h
+
 /-- A closed program of type `nat` reduces to the numeral of its value. -/
 theorem utrT_steps (t : Tm [] .nat) : Steps f (utrT t) (num (eval t env0)) := by
   have h := rel_utrT (f := f) t (σs := var) (ρ := env0) (fun _ v => nomatch v)

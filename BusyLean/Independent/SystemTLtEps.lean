@@ -18,10 +18,10 @@ elimination remove the redexes. Each round costs one `ω`-exponential
 The comparisons between trees use the structural order `Le 200`, which is sound
 for the Hardy functions at arguments `≥ 200` (`Le.hardy_le`).
 
-Finally `ε₀` sits inside Buchholz's `θ = ψ_0(Ω_ω)`: the branch `0` of `θ` is
-`ψ_0(ε_{Ω_2+1})`, whose branch `0` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`.
-Its Brouwer tree is exactly `ε₀` (`toB_branch0`). So `H_{ε₀}(y) ≤ H_θ(y)`
-(`Feps_le_F3`).
+Finally `ε₀` sits inside the Takeuti–Feferman–Buchholz ordinal
+`θ = ψ_0(ε_{Ω_ω+1})`: the branch `0` of `θ` is `ψ_0(Ω_1)`, the limit of
+`1, ω, ω^ω, …`. Its Brouwer tree is exactly `ε₀` (`toB_branch0W`). So
+`H_{ε₀}(y) ≤ H_θ(y)` (`Feps_le_F3`).
 -/
 
 namespace BusyLean.Indep
@@ -161,26 +161,6 @@ def SF {A : Type} : Tr A → Prop
   | .lim f => ∀ i, SF (f i)
   | .sup _ _ => False
 
-theorem cmap_sf {A B : Type} (thr : Nat) (h : B → A) : ∀ x : Tr A, SF x →
-    SF (Tr.cmap thr h x) ∧ Tr.toB (Tr.cmap thr h x) = Tr.toB x
-  | .zero, _ => ⟨trivial, rfl⟩
-  | .succ a, hx => ⟨(cmap_sf thr h a hx).1, congrArg BTree.succ (cmap_sf thr h a hx).2⟩
-  | .lim f, hx => ⟨fun i => (cmap_sf thr h (f i) (hx i)).1,
-      congrArg BTree.lim (funext fun i => (cmap_sf thr h (f i) (hx i)).2)⟩
-  | .sup _ _, hx => hx.elim
-
-theorem lift_sf (m : Nat) (x : T m) (hx : SF x) :
-    SF (lift m x) ∧ Tr.toB (lift m x) = Tr.toB x := by
-  cases m with
-  | zero => exact cmap_sf _ _ x hx
-  | succ m => exact cmap_sf _ _ x hx
-
-theorem proj_sf (m : Nat) (x : T (m + 1)) (hx : SF x) :
-    SF (proj m x) ∧ Tr.toB (proj m x) = Tr.toB x := by
-  cases m with
-  | zero => exact cmap_sf _ _ x hx
-  | succ m => exact cmap_sf _ _ x hx
-
 theorem add_sf {A : Type} (a : Tr A) (ha : SF a) : ∀ b : Tr A, SF b →
     SF (Tr.add a b) ∧ Tr.toB (Tr.add a b) = BTree.add (Tr.toB a) (Tr.toB b)
   | .zero, _ => ⟨ha, rfl⟩
@@ -199,60 +179,9 @@ theorem mulNat_sf {A : Type} (a : Tr A) (ha : SF a) : ∀ k : Nat,
       show Tr.toB (Tr.add (Tr.mulNat a k) a) = BTree.add (BTree.mulNat (Tr.toB a) k) (Tr.toB a)
       rw [h.2, ih.2]
 
-/-- On trees without `sup`s, `ψ_0` is `ω^·`. -/
-theorem psi0_sf {A : Type} (dn : A → Tr A) : ∀ z : Tr (Tr A), SF z →
-    SF (psiG dn z 0) ∧ Tr.toB (psiG dn z 0) = BTree.opow (Tr.toB z)
-  | .zero, _ => ⟨trivial, rfl⟩
-  | .succ a, hz => by
-      have ih := psi0_sf dn a hz
-      refine ⟨fun k => (mulNat_sf _ ih.1 k).1, ?_⟩
-      show BTree.lim (fun k => Tr.toB (Tr.mulNat (psiG dn a 0) k)) =
-        BTree.lim fun k => BTree.mulNat (BTree.opow (Tr.toB a)) k
-      congr 1; funext k; rw [(mulNat_sf _ ih.1 k).2, ih.2]
-  | .lim f, hz => ⟨fun k => (psi0_sf dn (f k) (hz k)).1,
-      congrArg BTree.lim (funext fun k => (psi0_sf dn (f k) (hz k)).2)⟩
-  | .sup _ _, hz => hz.elim
-
 theorem iterate_opow_tower : ∀ i, iterate BTree.opow (i + 1) (.succ .zero) = tower i
   | 0 => rfl
   | i + 1 => congrArg BTree.opow (iterate_opow_tower i)
-
-/-- The branch `0` of `ψ_0(ε_{Ω_{n+2}+1})` is `ψ_0(Ω_1)`, the limit of `1, ω, ω^ω, …`:
-its Brouwer tree is exactly `ε₀`. -/
-theorem toB_branch0 (n : Nat) :
-    Tr.toB (psiG (down (n + 1)) (towerG (n + 1) (lift (n + 1)) (down (n + 1)) 0) 0) =
-      epsilon0 := by
-  let F : T (n + 1) → T (n + 2) := fun y => lift (n + 1) (lift n (proj n y))
-  have hF : ∀ x, SF x → SF (F x) ∧ Tr.toB (F x) = Tr.toB x := fun x hx => by
-    have h1 := proj_sf n x hx
-    have h2 := lift_sf n _ h1.1
-    have h3 := lift_sf (n + 1) _ h2.1
-    exact ⟨h3.1, h3.2.trans (h2.2.trans h1.2)⟩
-  have e : towerG (n + 1) (lift (n + 1)) (down (n + 1)) 0 = .sup 0 F := by
-    show Tr.cmap (n + 1) (proj n) (.sup 0 fun y => lift n y) = _
-    simp only [Tr.cmap, Nat.zero_lt_succ, ite_true]
-    rfl
-  have hg : ∀ k, SF (iterate (fun g => psiG (down (n + 1)) (F g) 0) k (omegaG (down (n + 1)) 0)) ∧
-      Tr.toB (iterate (fun g => psiG (down (n + 1)) (F g) 0) k (omegaG (down (n + 1)) 0)) =
-        iterate BTree.opow k (.succ .zero) := by
-    intro k
-    induction k with
-    | zero => exact ⟨trivial, rfl⟩
-    | succ k ih =>
-        have h1 := hF _ ih.1
-        have h2 := psi0_sf (down (n + 1)) _ h1.1
-        refine ⟨h2.1, ?_⟩
-        show Tr.toB (psiG (down (n + 1)) (F _) 0) = BTree.opow (iterate BTree.opow k (.succ .zero))
-        rw [h2.2, h1.2, ih.2]
-  rw [e]
-  show BTree.lim (fun k => Tr.toB (psiG (down (n + 1))
-    (F (iterate (fun g => psiG (down (n + 1)) (F g) 0) k (omegaG (down (n + 1)) 0))) 0)) =
-      BTree.lim tower
-  congr 1
-  funext k
-  have h1 := hF _ (hg k).1
-  rw [(psi0_sf (down (n + 1)) _ h1.1).2, h1.2, (hg k).2]
-  exact iterate_opow_tower k
 
 /-- On trees of level `0` without `sup`s, embedded at level `ω`, `ψ_0` is `ω^·`. -/
 theorem psiW_emb0 : ∀ x : T 0, SF x →
@@ -297,17 +226,8 @@ theorem Feps_le_TFB (y : Nat) : Feps y ≤ hardy Buch.thetaTFB y := by
   exact Nat.le_trans h (le_maxUpTo (fun k => hardy (Buch.Tr.toB (Buch.psiW (Buch.towerW k) 0 0)) y)
     (Nat.zero_le y))
 
-/-- `H_{ε₀} ≤ H_θ`: the branch `0` of `θ = ψ_0(Ω_ω)` is `ψ_0(ε_{Ω_2+1})`, whose branch `0`
-is `ε₀`. -/
-theorem Feps_le_F3 (y : Nat) : Feps y ≤ F3 y := by
-  have h : Feps y ≤ hardy (Buch.theta 1) y := by
-    have e := Buch.toB_branch0 0
-    have h1 : Feps y ≤ hardy (Buch.Tr.toB (Buch.psiG (Buch.down 1)
-        (Buch.towerG 1 (Buch.lift 1) (Buch.down 1) 0) 0)) y := by
-      rw [e]; exact Nat.le_refl _
-    exact Nat.le_trans h1 (le_maxUpTo (fun k => hardy (Buch.Tr.toB (Buch.psiG (Buch.down 1)
-      (Buch.towerG 1 (Buch.lift 1) (Buch.down 1) k) 0)) y) (Nat.zero_le y))
-  exact Nat.le_trans h (le_maxUpTo (fun K => hardy (Buch.theta (K + 1)) y) (Nat.zero_le y))
+/-- `H_{ε₀} ≤ H_θ`: the branch `0` of `θ = ψ_0(ε_{Ω_ω+1})` is `ψ_0(Ω_1)`, whose tree is `ε₀`. -/
+theorem Feps_le_F3 (y : Nat) : Feps y ≤ F3 y := Feps_le_TFB y
 
 theorem F3_42_ge : 336 ≤ F3 42 := Nat.le_trans Feps_42_ge (Feps_le_F3 42)
 
@@ -315,7 +235,7 @@ theorem F3_mono {a b : Nat} (h : a ≤ b) : F3 a ≤ F3 b := hardy_mono _ h
 
 theorem F3_succ (a : Nat) : F3 a + 1 ≤ F3 (a + 1) := hardy_lt_succ _ a
 
-/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at Buchholz's `θ`. -/
+/-- **Rung 2 < rung 3**: System T < the Hardy hierarchy at `θ = ψ_0(ε_{Ω_ω+1})`. -/
 theorem contender_2_lt_contender_3 : contender_2 < contender_3 := by
   unfold contender_2 contender_3 C5.largestSTLCNatRecNatOfDepth C5.largestOfDepth
   have hw : depth (C5.maxBy C5.eval 0 .zero (C5.termsUpTo 42)) ≤ 42 := by
